@@ -40,6 +40,19 @@ def freeze_json(path: Path, value: Any) -> str:
     return sha256_bytes(data)
 
 
+def freeze_jsonl(path: Path, records: list[dict[str, Any]]) -> str:
+    """Write canonical JSON Lines once and return the complete file digest."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    data = b"".join(canonical_json_bytes(record) for record in records)
+    try:
+        with path.open("xb") as handle:
+            handle.write(data)
+    except FileExistsError:
+        raise FileExistsError(f"refusing to overwrite frozen artifact: {path}") from None
+    return sha256_bytes(data)
+
+
 def _record_hash(record: dict[str, Any]) -> str:
     return sha256_bytes(canonical_json_bytes(record))
 

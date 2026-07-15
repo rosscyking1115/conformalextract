@@ -64,25 +64,76 @@ def inventory_data(
 
 @app.command("validate-data")
 def validate_data(
-    inventory: Annotated[Path, typer.Option()] = Path("evidence/gate0/data_inventory.json"),
+    rams_root: Annotated[Path, typer.Option()] = Path("data/raw/rams/RAMS_1.0c"),
+    wikievents_root: Annotated[Path, typer.Option()] = Path("data/raw/wikievents"),
+    private_manifest: Annotated[Path, typer.Option()] = Path(
+        "data/private/splits/rams_roles.jsonl"
+    ),
+    output: Annotated[Path, typer.Option()] = Path("evidence/gate0/split_validation.json"),
 ) -> None:
-    """Check that aggregate inventory and sample-feasibility evidence are complete."""
+    """Freeze deterministic grouped RAMS roles and validate shift overlap."""
 
-    record = json.loads(inventory.read_text(encoding="utf-8"))
-    required = {
-        "document_count",
-        "independent_group_count",
-        "by_dataset",
-        "preferred_method_feasibility",
+    from collections import Counter
+
+    from conformalextract.artifacts import freeze_json, freeze_jsonl, sha256_file
+    from conformalextract.certification import scorc_minimum_n
+    from conformalextract.data import (
+        build_duplicate_groups,
+        grouped_split,
+        load_rams,
+        load_wikievents,
+    )
+
+    rams = load_rams(rams_root)
+    wikievents = load_wikievents(wikievents_root)
+    documents = [*rams, *wikievents]
+    groups = build_duplicate_groups(documents, threshold=0.9, permutations=128)
+    roles = grouped_split(
+        {document.document_id: groups[document.document_id] for document in rams},
+        seed=42,
+        proportions={"train": 0.45, "development": 0.10, "certification": 0.35, "final": 0.10},
+    )
+    records = [
+        {
+            "schema_version": "1",
+            "document_id": document.document_id,
+            "group_id": groups[document.document_id],
+            "role": roles[document.document_id],
+        }
+        for document in sorted(rams, key=lambda item: item.document_id)
+    ]
+    manifest_hash = freeze_jsonl(private_manifest, records)
+    role_groups: dict[str, set[str]] = {
+        role: {str(record["group_id"]) for record in records if record["role"] == role}
+        for role in ("train", "development", "certification", "final")
     }
-    missing = sorted(required - record.keys())
-    if missing:
-        typer.echo(json.dumps({"status": "invalid", "missing": missing}))
-        raise typer.Exit(code=2)
-    feasibility = record["preferred_method_feasibility"]
-    status = "pass" if feasibility["largest_grid_at_provisional_n"] >= 1 else "revise"
-    typer.echo(json.dumps({"status": status, "preferred_method": feasibility}, sort_keys=True))
-    if status != "pass":
+    all_role_groups = [group for values in role_groups.values() for group in values]
+    no_group_leakage = len(all_role_groups) == len(set(all_role_groups))
+    rams_groups = {groups[document.document_id] for document in rams}
+    wiki_groups = {groups[document.document_id] for document in wikievents}
+    cross_dataset_groups = rams_groups & wiki_groups
+    eligible_shift_documents = sum(
+        groups[document.document_id] not in cross_dataset_groups for document in wikievents
+    )
+    minimum_n = scorc_minimum_n(candidate_count=9, delta=0.05, acceptance_floor=0.2)
+    certification_n = len(role_groups["certification"])
+    report = {
+        "schema_version": "1",
+        "status": "pass" if no_group_leakage and certification_n >= minimum_n else "revise",
+        "private_manifest_sha256": manifest_hash,
+        "private_manifest_verified_sha256": sha256_file(private_manifest),
+        "role_group_counts": {role: len(values) for role, values in sorted(role_groups.items())},
+        "role_document_counts": dict(sorted(Counter(roles.values()).items())),
+        "duplicate_group_leakage": not no_group_leakage,
+        "preferred_global_candidates": 9,
+        "preferred_minimum_certification_groups": minimum_n,
+        "cross_dataset_group_count": len(cross_dataset_groups),
+        "wikievents_shift_documents_eligible": eligible_shift_documents,
+        "wikievents_shift_documents_excluded_overlap": len(wikievents) - eligible_shift_documents,
+    }
+    digest = freeze_json(output, report)
+    typer.echo(json.dumps({"output": str(output), "sha256": digest}, sort_keys=True))
+    if report["status"] != "pass":
         raise typer.Exit(code=3)
 
 
@@ -110,8 +161,20 @@ def validate_certificate(
 
 
 @app.command("gate0-smoke")
-def gate0_smoke() -> None:
-    _not_ready("gate0-smoke")
+def gate0_smoke(
+    metadata_root: Annotated[Path, typer.Option()] = Path("data/private/qwen-metadata"),
+    output: Annotated[Path, typer.Option()] = Path("evidence/gate0/model_score_smoke.v2.json"),
+) -> None:
+    """Validate pinned tokenizer/runtime metadata and the completion-only score path."""
+
+    from conformalextract.artifacts import freeze_json
+    from conformalextract.model_smoke import validate_local_model_metadata
+
+    report = validate_local_model_metadata(metadata_root)
+    digest = freeze_json(output, report)
+    typer.echo(json.dumps({"output": str(output), "sha256": digest}, sort_keys=True))
+    if not report["gate0e_pass"]:
+        raise typer.Exit(code=3)
 
 
 for command_name in (

@@ -1,0 +1,34 @@
+{
+  "schema_version": "1",
+  "decision": "revise",
+  "gates": {
+    "0A_licences": {
+      "status": "pass_for_private_research",
+      "public_redistribution": "blocked"
+    },
+    "0B_grouping_and_sample_feasibility": {
+      "status": "pass",
+      "evidence": "split_validation.json"
+    },
+    "0C_evaluator": {
+      "status": "pass",
+      "independent_real_examples": 25,
+      "evidence": "evaluator_adjudication.json"
+    },
+    "0D_statistics": {
+      "status": "pass",
+      "grouped_simulation_replicates": 2000,
+      "evidence": "certificate_simulations.json"
+    },
+    "0E_model_and_score": {
+      "status": "pass",
+      "evidence": "model_score_smoke.v2.json"
+    },
+    "0F_qlora_save_reload_cost_smoke": {
+      "status": "blocked",
+      "reason": "Hugging Face CLI is not authenticated"
+    }
+  },
+  "plans_2_to_4": "blocked"
+}
+

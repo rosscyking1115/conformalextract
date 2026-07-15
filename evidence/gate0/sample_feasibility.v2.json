@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "supersedes": "sample_feasibility.json",
+  "split_validation_sha256": "2f15a4019a125b6504aef541e254a259ca46ac1425902c6501ab4bd27d932bbf",
+  "rams_independent_groups": 3988,
+  "actual_role_group_counts": {
+    "train": 1795,
+    "development": 398,
+    "certification": 1396,
+    "final": 399
+  },
+  "preferred_joint_grid": {
+    "global_candidate_count": 9,
+    "minimum_required_certification_groups": 1386,
+    "actual_certification_groups": 1396,
+    "eligible": true,
+    "margin_groups": 10
+  },
+  "cross_dataset_duplicate_groups": 0,
+  "wikievents_shift_documents_eligible": 246,
+  "conclusion": "the frozen deterministic grouped split is theorem-eligible for exactly nine global candidates"
+}
+
