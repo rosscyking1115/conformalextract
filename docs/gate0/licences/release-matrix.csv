@@ -1,0 +1,8 @@
+artifact,planned_visibility,licence,status,reason
+original source code,public,Apache-2.0,allowed,original work
+RAMS raw text,private/untracked,,blocked,JHU does not own source text
+WikiEvents raw text,private/untracked,,blocked,no separate dataset redistribution terms recorded
+adapter,private,,conditional,requires data-output and attribution review
+predictions,private,,conditional,may reproduce restricted text
+aggregate evidence,private draft,,review,release only after non-reconstructive privacy review
+
