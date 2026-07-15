@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "source_inventory_sha256": "9b22e069d03a6418c9881d3fd2493eb6954ecf0bc554eb17b61e0c24203a893b",
+  "rams_independent_groups": 3988,
+  "allocation": {
+    "train": 0.45,
+    "development": 0.1,
+    "certification": 0.35,
+    "final": 0.1,
+    "shift": "WikiEvents external transfer"
+  },
+  "provisional_certification_groups_floor": 1395,
+  "preferred_joint_grid": {
+    "global_candidate_count": 9,
+    "minimum_required_groups": 1386,
+    "candidate_cap": 101,
+    "eligible": true,
+    "margin_groups": 9,
+    "warning": "tight margin; exact weighted split generation must preserve at least 1386 groups"
+  },
+  "conclusion": "revised allocation is theorem-eligible for nine global candidates; ten-percent certification allocation is ineligible even for one candidate"
+}
+

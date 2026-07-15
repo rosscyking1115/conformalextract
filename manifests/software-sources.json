@@ -1,0 +1,8 @@
+{
+  "schema_version": "1",
+  "rams_release": "1.0c",
+  "rams_scorer": "bundled corrected 1.0c scorer",
+  "gen_arg_commit": "253e0889b2377e0f7084cb406cf5d4142ee8a365",
+  "qwen_hub_revision": "cdbee75f17c01a7cc42f958dc650907174af0554"
+}
+

@@ -1,0 +1,12 @@
+{
+  "schema_version": "1",
+  "model_id": "Qwen/Qwen3-4B-Instruct-2507",
+  "canonical_page": "https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507",
+  "hub_revision": "cdbee75f17c01a7cc42f958dc650907174af0554",
+  "observed_utc_date": "2026-07-15",
+  "licence": "Apache-2.0",
+  "model_size_bytes_displayed": "8.06 GB",
+  "runtime_constraint": "Transformers >=4.51.0",
+  "mode": "non-thinking instruction model; greedy decoding is locally frozen"
+}
+

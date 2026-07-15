@@ -1,0 +1,13 @@
+{
+  "schema_version": "1",
+  "name": "RAMS 1.0c",
+  "canonical_page": "https://nlp.jhu.edu/rams/",
+  "download_url": "https://nlp.jhu.edu/rams/RAMS_1.0c.tar.gz",
+  "retrieved_utc_date": "2026-07-15",
+  "archive_sha256": "cbcbec6759d520afe565d065c8086925120a42609bd0ad8ed79f49f0ccd68b54",
+  "annotation_licence": "CC-BY-SA-4.0",
+  "text_ownership": "JHU explicitly does not own the underlying news text",
+  "redistribution": "raw text and text-bearing artifacts blocked by default",
+  "citation": "Ebner et al., Multi-Sentence Argument Linking, ACL 2020"
+}
+

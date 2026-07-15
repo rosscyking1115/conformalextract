@@ -82,6 +82,7 @@ class AnalysisLock(StrictRecord):
 
 class CertificationResult(StrictRecord):
     method: NonEmpty
+    status: Literal["certified", "infeasible", "insufficient_n", "invalid_input"] = "infeasible"
     feasible: bool
     n_total: int = Field(ge=0)
     n_accepted: int = Field(ge=0)
@@ -92,6 +93,9 @@ class CertificationResult(StrictRecord):
     acceptance_floor: float = Field(ge=0, le=1)
     delta: float = Field(gt=0, lt=1)
     reasons: list[str] = Field(default_factory=list)
+    selected_candidate: str | None = None
+    candidate_count: int = Field(default=1, ge=1)
+    theorem_minimum_n: int | None = Field(default=None, ge=1)
 
 
 class ClaimLedger(StrictRecord):

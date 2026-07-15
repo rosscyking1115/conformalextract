@@ -1,0 +1,52 @@
+{
+  "schema_version": "1",
+  "adjudicator": "independent Reviewer agent",
+  "selection": "13 dev and 12 test records with lexicographically smallest SHA-256(doc_key)",
+  "source_text_in_artifact": false,
+  "records": [
+    ["dev", "000b4478e6b848593df6c803dab0e0ac2758fb2d24f8b704141c38494916f0d5", 4],
+    ["dev", "0062b383ee42b9466331ef8d79f16069a2175cba46c0a2ee8b5f963124c5903c", 3],
+    ["dev", "011734075ee74cf1d4cd7f5eeed21c7e0e63ff2df6ec2d9841544b3127d4b96e", 4],
+    ["dev", "0134526e3dff86fadf1646cb5ec499cb040ce77b721009292df2563429f33fa5", 4],
+    ["dev", "0135da9b0022150503bd28bb500624e55d3eff1deaa65be88a23fe4ca22461b6", 3],
+    ["dev", "014c9105684b7d0a66ff9ff10e43b05194bd954890fdbf9800a93c70023ef33c", 2],
+    ["dev", "016be0fade06a14ae8f0298c632bd41fd28cfa7e09cebdaf2f057e1057d577aa", 4],
+    ["dev", "01949172894b8ba4c080d2bb3d0302fb36a05b3877371f7c7925b27ca77b96c5", 2],
+    ["dev", "021322be3e59adb6b052329ca2c44e7bcb55a7bddf751d3bd27d753eda47bcd8", 2],
+    ["dev", "02529ac6f733a6a3b0c7e6b56d4c3e617910edeb97ab151758d82001130222d5", 2],
+    ["dev", "02686a6a836a29a88291371cef1674c48208da187febe466aac3ee8b5e5332ac", 2],
+    ["dev", "02d268e6c63fc764b556985e00b64a158b06368d7c29c0e983c0204e445eecd1", 3],
+    ["dev", "032c4b9ea4a84d6dea31e155f9d9a9e20992a622cb391989155329b5bbbd7c9a", 3],
+    ["test", "0005baaefc6f52a17daad40b68c8784037dcfcd2389a449682e4a20fa102219b", 1],
+    ["test", "001bbd8a89357ccfbef22d565059e4bd6db9d7fa5a399b205a460d9fd2742b9", 2],
+    ["test", "003b3dda4e0770a59abb2d879039cb265aca5822638b085e54a05b0be87e8138", 3],
+    ["test", "008f48eed1db1884daeb5ec1280c47d652ad0e33852d4da65e37debdb6fdada5", 1],
+    ["test", "00dc1e7be6212310148ad5741aef609bceff0f3da65e13f527d21b3c7c888f55", 2],
+    ["test", "00ebe18c86eb4f908daf0da7a51fca420b7b63b6ffed3ca11693c0dbe74a2f8f", 2],
+    ["test", "01deb499975be73921a57d518e13eb6f8a5bd16f5d73667512d431f48156ec19", 2],
+    ["test", "01ebfbd3d1a8ca579c4684b374014ca77ec842c393bd45531eb4e8b6ff1a5306", 1],
+    ["test", "02059b093ae3f21328e05ad3fa9336a11a2d56633cb853dcac0ac4717b7730c9", 0],
+    ["test", "029602231a247c46bcd1504153ca0bfc12228de7d2b34143a8a8918f9dbfc03c", 1],
+    ["test", "02a859a4cfaee52c33e543fad0d65d9360722c1b8b922727f2fe1e6a1409404f", 2],
+    ["test", "02bfd33915de09805263a7fbcdc583cd92e123f54d40062f939b2212c820e465", 3]
+  ],
+  "record_fields": ["split", "sha256_doc_key", "gold_and_converted_argument_count"],
+  "all_valid": true,
+  "all_offset_round_trips_pass": true,
+  "all_grounding_checks_pass": true,
+  "all_ontology_roles_pass": true,
+  "official_scorer_gold_replay": {
+    "dev_precision": 1.0,
+    "dev_recall": 1.0,
+    "dev_f1": 1.0,
+    "test_precision": 1.0,
+    "test_recall": 1.0,
+    "test_f1": 1.0
+  },
+  "known_semantic_differences": [
+    "RAMS uses inclusive spans; the frozen contract uses half-open spans",
+    "the official scorer strips the evt/arg role prefix",
+    "the official scorer does not validate generated JSON, grounding, or document-level bounded loss"
+  ]
+}
+

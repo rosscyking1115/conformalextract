@@ -1,0 +1,25 @@
+{
+  "schema_version": "1",
+  "alpha": 0.2,
+  "delta": 0.05,
+  "acceptance_floor": 0.2,
+  "material_acceptance_gain": 0.05,
+  "bootstrap_seed": 42,
+  "bootstrap_grouped_replicates": 2000,
+  "duplicate_threshold": 0.9,
+  "duplicate_word_ngram": 5,
+  "minhash_permutations": 128,
+  "preferred_method": "scorc-joint-finite-grid",
+  "conservative_audit": "hoeffding-clopper-pearson-bonferroni",
+  "rams_group_split": {
+    "train": 0.45,
+    "development": 0.1,
+    "certification": 0.35,
+    "final": 0.1
+  },
+  "shift_source": "WikiEvents",
+  "candidate_grid_cap_global": 9,
+  "system_families": ["ZS", "FS", "QA"],
+  "confidence_candidates": ["mean", "tenth_percentile", "minimum"]
+}
+

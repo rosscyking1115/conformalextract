@@ -1,0 +1,25 @@
+{
+  "schema_version": "1",
+  "name": "WikiEvents",
+  "reference_repository": "https://github.com/raspberryice/gen-arg",
+  "repository_commit": "253e0889b2377e0f7084cb406cf5d4142ee8a365",
+  "retrieved_utc_date": "2026-07-15",
+  "objects": {
+    "train": {
+      "url": "https://gen-arg-data.s3.us-east-2.amazonaws.com/wikievents/data/train.jsonl",
+      "sha256": "c422502da583b1c9294077644c78a647d41ff133fb8c522cbdcc085e9dc081e4"
+    },
+    "dev": {
+      "url": "https://gen-arg-data.s3.us-east-2.amazonaws.com/wikievents/data/dev.jsonl",
+      "sha256": "74a6cbef44c44f1add6882e54f0a966f0f1a35cc260f3079de1fe4312eabe285"
+    },
+    "test": {
+      "url": "https://gen-arg-data.s3.us-east-2.amazonaws.com/wikievents/data/test.jsonl",
+      "sha256": "9885c0d94e4099d202a9f568c98c353055d600041f48f5fa96bcd569cc496c02"
+    }
+  },
+  "code_licence": "MIT",
+  "dataset_licence": "not separately established in the first-party repository",
+  "redistribution": "raw and text-bearing artifacts blocked by default"
+}
+

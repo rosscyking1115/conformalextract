@@ -1,0 +1,16 @@
+{
+  "schema_version": "1",
+  "model_id": "Qwen/Qwen3-4B-Instruct-2507",
+  "model_revision": "cdbee75f17c01a7cc42f958dc650907174af0554",
+  "licence": "Apache-2.0",
+  "minimum_transformers_version": "4.51.0",
+  "decoding": {
+    "do_sample": false,
+    "num_beams": 1,
+    "max_new_tokens": 512
+  },
+  "initial_context_tokens": 2048,
+  "context_ladder": [2048, 2560, 3072, 3584, 4096],
+  "primary_confidence_selection": "development-only grouped risk-coverage AUC"
+}
+

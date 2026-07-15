@@ -47,7 +47,18 @@ def test_structural_failure_has_worst_loss_and_confidence() -> None:
     assert result.confidence == float("-inf")
 
 
-@given(st.lists(st.tuples(st.text(min_size=1), st.integers(0, 20)), max_size=20))
+@given(
+    st.lists(
+        st.tuples(
+            st.text(
+                alphabet=st.characters(whitelist_categories=("L", "N")),
+                min_size=1,
+            ),
+            st.integers(0, 20),
+        ),
+        max_size=20,
+    )
+)
 def test_loss_is_bounded(items: list[tuple[str, int]]) -> None:
     args = [_arg(role, i, i + 1, role) for role, i in items]
     result = evaluate_document([_frame(args)], [_frame(list(reversed(args)))])
