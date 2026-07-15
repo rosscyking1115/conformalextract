@@ -1,0 +1,31 @@
+{
+  "schema_version": "2",
+  "supersedes": "gate_status.json",
+  "decision": "revise",
+  "independent_preflight_verdict": "BLOCK",
+  "gates": {
+    "0A_licences": "pass_for_private_research",
+    "0B_grouping_and_sample_feasibility": "pass",
+    "0C_evaluator": "pass",
+    "0D_statistics": {
+      "status": "pass",
+      "evidence": "certificate_simulations.v2.json",
+      "replicates": 2000,
+      "global_candidates": 9,
+      "regimes": ["easy_nonmonotone", "boundary", "unsafe", "low_acceptance"]
+    },
+    "0E_model_and_score": {
+      "status": "blocked",
+      "metadata_and_synthetic_score_path": "pass",
+      "real_development_generation": "not completed",
+      "local_failure_evidence": "local_model_attempts.json",
+      "required_next_step": "authenticated remote Linux GPU smoke on 20 deterministic development examples"
+    },
+    "0F_qlora_save_reload_cost_smoke": {
+      "status": "blocked",
+      "reason": "0E is blocked and Hugging Face CLI is not authenticated"
+    }
+  },
+  "plans_2_to_4": "blocked"
+}
+

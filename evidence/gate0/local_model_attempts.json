@@ -1,0 +1,26 @@
+{
+  "schema_version": "1",
+  "model_id": "Qwen/Qwen3-4B-Instruct-2507",
+  "model_revision": "cdbee75f17c01a7cc42f958dc650907174af0554",
+  "weights_downloaded_and_cached": true,
+  "source_text_or_model_output_written": false,
+  "attempts": [
+    {
+      "load_mode": "NF4 all-GPU",
+      "result": "runtime_failure",
+      "detail": "native process exit at checkpoint shard loading on Windows bitsandbytes"
+    },
+    {
+      "load_mode": "NF4 automatic GPU/CPU placement",
+      "result": "runtime_failure",
+      "detail": "native process exit at checkpoint shard loading on Windows bitsandbytes"
+    },
+    {
+      "load_mode": "BF16 GPU/CPU offload",
+      "result": "infeasible_local_runtime",
+      "detail": "Windows error 1455: paging file too small before first shard completed"
+    }
+  ],
+  "conclusion": "real 20-example Gate 0E generation must run in an authenticated remote Linux GPU environment; local metadata/synthetic-score evidence is not a substitute"
+}
+

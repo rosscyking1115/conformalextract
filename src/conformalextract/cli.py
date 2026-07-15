@@ -145,15 +145,17 @@ def run_baseline() -> None:
 @app.command("validate-certificate")
 def validate_certificate(
     replicates: Annotated[int, typer.Option(min=1)] = 2000,
-    seed: Annotated[int, typer.Option()] = 42,
-    output: Annotated[Path, typer.Option()] = Path("evidence/gate0/certificate_simulations.json"),
+    seed: Annotated[int, typer.Option()] = 20260715,
+    output: Annotated[Path, typer.Option()] = Path(
+        "evidence/gate0/certificate_simulations.v2.json"
+    ),
 ) -> None:
     """Run deterministic grouped coverage simulations and freeze the report."""
 
     from conformalextract.artifacts import freeze_json
-    from conformalextract.simulation import run_gate0_simulations
+    from conformalextract.simulation import run_gate0_simulations_v2
 
-    report = run_gate0_simulations(replicates=replicates, seed=seed)
+    report = run_gate0_simulations_v2(replicates=replicates, seed=seed)
     digest = freeze_json(output, report)
     typer.echo(json.dumps({"output": str(output), "sha256": digest}, sort_keys=True))
     if not report["coverage_pass"]:
