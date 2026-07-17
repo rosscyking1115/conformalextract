@@ -216,6 +216,35 @@
       "independent_reviewer_verdict": "BLOCK",
       "running_jobs_after_attempt": 0,
       "credentials_or_secret_values_recorded": false
+    },
+    {
+      "attempt_id": "gate0f-hfjobs-2026-07-17-02",
+      "date_utc": "2026-07-17",
+      "account": "rosscyking",
+      "purpose": "Corrected Gate 0F synthetic one-step NF4 QLoRA save/reload/cost smoke",
+      "hardware": "l40sx1",
+      "live_price_usd_per_hour": 1.8,
+      "hard_timeout_minutes": 20,
+      "maximum_authorized_cost_usd": 0.6,
+      "job_id": "6a5aa15dd216bd6f3a1fc41f",
+      "terminal_stage": "COMPLETED",
+      "scheduling_seconds": 444,
+      "running_seconds": 95,
+      "total_seconds": 539,
+      "estimated_charge_usd": 0.05,
+      "result": "gate0f_pass",
+      "gate0f_pass": true,
+      "greedy_completion_equivalence": true,
+      "adapter_hash_replay_passed": true,
+      "report_persisted": true,
+      "repository": "rosscyking/conformalextract-evidence",
+      "repository_private": true,
+      "artifact_path": "gate0/qlora_smoke.v1.json",
+      "artifact_sha256": "adb61606692952b132e75dabcb8b089d4aa779d45931c8f9d05e91fd383e2205",
+      "hub_commit_oid": "840fb41e72077daa9299661b1e3ec1db2ea192f7",
+      "independent_reviewer_verdict": "PASS",
+      "running_jobs_after_attempt": 0,
+      "credentials_or_secret_values_recorded": false
     }
   ]
 }

@@ -48,3 +48,12 @@
   k-bit preparation, gradient-checkpointing, cache and generation state on both inference paths,
   retains exact equality as a hard gate, and emits a recoverable text-free diagnostic before it.
   Plan 2's parsed-output replay gate is unchanged. — Manager (Codex)
+
+- 2026-07-17 — Corrected Gate 0F L40S job `6a5aa15dd216bd6f3a1fc41f` completed after 444 seconds
+  scheduling and 95 seconds running (about $0.05). Exact adapter hashes, aligned dtype/cache/state,
+  and the four-token greedy hash reproduced in a fresh process. The private Hub artifact at revision
+  `840fb41e72077daa9299661b1e3ec1db2ea192f7` and the Git evidence copy share SHA-256
+  `adb61606692952b132e75dabcb8b089d4aa779d45931c8f9d05e91fd383e2205`. The independent Reviewer
+  issued `PASS`; no Job remains active. Gates 0A–0F pass and Gate 0 is `go`. The consolidated Plan 1
+  Reviewer also issued `PASS`, completing Plan 1 and authorizing Plan 2 while Plans 3–4 remain
+  sequentially blocked. — Manager (Codex)

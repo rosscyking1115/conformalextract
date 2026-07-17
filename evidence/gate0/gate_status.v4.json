@@ -1,0 +1,37 @@
+{
+  "schema_version": "4",
+  "supersedes": "gate_status.v3.json",
+  "decision": "go",
+  "independent_plan1_verdict": "PASS",
+  "gates": {
+    "0A_licences": "pass_for_private_research",
+    "0B_grouping_and_sample_feasibility": "pass",
+    "0C_evaluator": "pass",
+    "0D_statistics": {
+      "status": "pass",
+      "evidence": "certificate_simulations.v2.json",
+      "replicates": 2000,
+      "global_candidates": 9
+    },
+    "0E_model_and_score": {
+      "status": "pass",
+      "evidence": "model_score_smoke.v3.json",
+      "artifact_sha256": "ac228abf40723a76f5871f30c764efea10db21258440f9f39dfa970992f9ba13",
+      "hub_commit_oid": "3fb7d819398bc95ebdeb1a430523905476b77d9b",
+      "job_id": "6a5a74aabee6ee1cf4ecdbbd",
+      "independent_reviewer_verdict": "PASS"
+    },
+    "0F_qlora_save_reload_cost_smoke": {
+      "status": "pass",
+      "evidence": "qlora_smoke.v1.json",
+      "artifact_sha256": "adb61606692952b132e75dabcb8b089d4aa779d45931c8f9d05e91fd383e2205",
+      "hub_commit_oid": "840fb41e72077daa9299661b1e3ec1db2ea192f7",
+      "job_id": "6a5aa15dd216bd6f3a1fc41f",
+      "running_seconds": 95,
+      "estimated_cost_usd": 0.05,
+      "independent_reviewer_verdict": "PASS"
+    }
+  },
+  "plan2": "authorized",
+  "plans_3_to_4": "blocked_by_sequential_review_gates"
+}

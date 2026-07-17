@@ -1,14 +1,21 @@
 {
-  "schema_version": "1",
-  "active_gate_status": "evidence/gate0/gate_status.v3.json",
+  "schema_version": "2",
+  "active_gate_status": "evidence/gate0/gate_status.v4.json",
+  "gate0_decision": "go",
+  "plan1_status": "complete_independently_reviewed",
+  "independent_plan1_verdict": "PASS",
   "gate0e_status": "pass_independently_reviewed",
   "gate0e_active_evidence": "evidence/gate0/model_score_smoke.v3.json",
   "gate0e_artifact_sha256": "ac228abf40723a76f5871f30c764efea10db21258440f9f39dfa970992f9ba13",
   "gate0e_hub_commit_oid": "3fb7d819398bc95ebdeb1a430523905476b77d9b",
+  "gate0f_status": "pass_independently_reviewed",
+  "gate0f_active_evidence": "evidence/gate0/qlora_smoke.v1.json",
+  "gate0f_artifact_sha256": "adb61606692952b132e75dabcb8b089d4aa779d45931c8f9d05e91fd383e2205",
+  "gate0f_hub_commit_oid": "840fb41e72077daa9299661b1e3ec1db2ea192f7",
   "historical_local_failure_evidence": "evidence/gate0/local_model_attempts.json",
   "superseded_model_evidence": [
     "evidence/gate0/model_score_smoke.json",
     "evidence/gate0/model_score_smoke.v2.json"
   ],
-  "acceptance_rule": "Gate 0E cannot pass unless actual_model_generation_pass and gate0e_pass are both true in the active evidence."
+  "acceptance_rule": "Gate 0 requires independently reviewed passes for 0A-0F; Gate 0E requires actual_model_generation_pass and gate0e_pass; active 0E and 0F evidence must reproduce their private Hub artifact hashes."
 }

@@ -28,6 +28,23 @@ def test_gate0e_authority_requires_actual_reviewed_generation_evidence() -> None
     assert "actual_model_generation_pass" in authority["acceptance_rule"]
 
 
+def test_gate0f_authority_requires_exact_private_artifact_evidence() -> None:
+    authority = json.loads(
+        (ROOT / "evidence" / "gate0" / "evidence_authority.json").read_text(encoding="utf-8")
+    )
+    evidence_path = ROOT / authority["gate0f_active_evidence"]
+    evidence_bytes = evidence_path.read_bytes()
+    evidence = json.loads(evidence_bytes)
+
+    assert authority["gate0_decision"] == "go"
+    assert authority["gate0f_status"] == "pass_independently_reviewed"
+    assert evidence["gate0f_pass"] is True
+    assert evidence["greedy_completion_equivalence"] is True
+    assert evidence["synthetic_text_only"] is True
+    assert hashlib.sha256(evidence_bytes).hexdigest() == authority["gate0f_artifact_sha256"]
+    assert len(authority["gate0f_hub_commit_oid"]) == 40
+
+
 def test_gate0e_job_is_reproducible_private_and_text_free() -> None:
     script = (ROOT / "jobs" / "gate0_model_score_smoke.py").read_text(encoding="utf-8")
 

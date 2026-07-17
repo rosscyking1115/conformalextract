@@ -1,6 +1,6 @@
 # Gate 0F Hugging Face Jobs smoke
 
-Status: Gate 0E passed independently; Gate 0F revision pending focused review and rerun.
+Status: Gate 0E and corrected Gate 0F passed independently; Gate 0 decision is `go`.
 
 Authentication is confirmed as `rosscyking`. On 2026-07-17 the independently approved Gate 0E
 submission was attempted only after a live L40S price check ($1.80/hour), but the Hub returned HTTP
@@ -66,3 +66,11 @@ At the last documented L40S price of $1.80/hour, the hard 20-minute timeout proj
 That figure is not approval evidence and must be rechecked immediately before submission. The job ID,
 terminal status, logs, actual duration/cost, adapter hashes, and confirmation that no billable resource
 remains will be frozen into Gate 0 evidence.
+
+The independently approved retry, job `6a5aa15dd216bd6f3a1fc41f`, queued for 444 seconds and ran for
+95 seconds (estimated $0.0475). It passed the one-step update, completion mask, adapter-only finite
+gradients, safetensors save, fresh-process reload, identical state/dtype maps, identical adapter
+hashes, and identical four-token greedy hash. It persisted `gate0/qlora_smoke.v1.json` to the private
+Dataset at Hub revision `840fb41e72077daa9299661b1e3ec1db2ea192f7`. Independent exact-revision
+downloads reproduce SHA-256 `adb61606692952b132e75dabcb8b089d4aa779d45931c8f9d05e91fd383e2205`.
+The Reviewer issued `PASS`; all Jobs are terminal and no billable resource remains.

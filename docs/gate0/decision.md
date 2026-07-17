@@ -1,6 +1,6 @@
 # Gate 0 decision
 
-**Decision: revise**
+**Decision: go**
 
 Gates 0A–0D pass for private research. Independent preflight review blocked Gate 0F because Gate 0E
 had only metadata and synthetic-logit evidence. A real local run downloaded the pinned model, but
@@ -25,9 +25,16 @@ The inline L40S rerun, job `6a5a74aabee6ee1cf4ecdbbd`, subsequently completed an
 reviewed text-free report at private Hub revision `3fb7d819398bc95ebdeb1a430523905476b77d9b`.
 The exact artifact and Git evidence copy share SHA-256
 `ac228abf40723a76f5871f30c764efea10db21258440f9f39dfa970992f9ba13`; an independent Reviewer
-issued `PASS`. Gate 0E is now passed. Gate 0 remains `revise` only because Gate 0F has not yet passed.
+issued `PASS`. Gate 0E is passed. The first Gate 0F attempt then exposed an inference-state mismatch
+between the prepared training base and unprepared reload base; it was recorded as `BLOCK`, fixed, and
+re-reviewed before retry. Corrected L40S job `6a5aa15dd216bd6f3a1fc41f` completed in 95 running
+seconds, reproduced exact adapter and greedy-token hashes in a fresh process, and persisted its
+text-free report at private Hub revision `840fb41e72077daa9299661b1e3ec1db2ea192f7`. Both independent
+downloads reproduce SHA-256 `adb61606692952b132e75dabcb8b089d4aa779d45931c8f9d05e91fd383e2205`.
+The independent Gate 0F Reviewer issued `PASS`, and no billable Job remains.
 
-Plans 2–4 remain blocked. This is an evidence state, not a failure claim.
+The consolidated Plan 1 Reviewer issued `PASS`. Plan 2 is authorized. Plans 3–4 remain blocked by
+their sequential review gates.
 
 | Gate | Status | Required evidence |
 |---|---|---|
@@ -36,4 +43,4 @@ Plans 2–4 remain blocked. This is an evidence state, not a failure claim.
 | 0C evaluator | pass | 32 automated tests plus 25 independent real-example adjudications and official scorer replay |
 | 0D statistics | pass | nine-candidate adaptive/global suite; 2,000 replicates across non-monotone, boundary, unsafe and low-acceptance regimes |
 | 0E model/score | pass | independently reviewed 20-group L40S generation report; confidence winner remains provisional |
-| 0F paid QLoRA smoke | pending | focused contract review, live price check, then the capped synthetic save/reload smoke |
+| 0F paid QLoRA smoke | pass | reviewed 95-second L40S one-step NF4 save/reload; exact adapter and greedy hashes; private artifact verified |
