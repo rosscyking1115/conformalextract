@@ -1,8 +1,11 @@
 {
   "schema_version": "1",
-  "active_gate_status": "evidence/gate0/gate_status.v2.json",
-  "gate0e_status": "blocked_pending_real_remote_generation",
-  "gate0e_active_evidence": "evidence/gate0/local_model_attempts.json",
+  "active_gate_status": "evidence/gate0/gate_status.v3.json",
+  "gate0e_status": "pass_independently_reviewed",
+  "gate0e_active_evidence": "evidence/gate0/model_score_smoke.v3.json",
+  "gate0e_artifact_sha256": "ac228abf40723a76f5871f30c764efea10db21258440f9f39dfa970992f9ba13",
+  "gate0e_hub_commit_oid": "3fb7d819398bc95ebdeb1a430523905476b77d9b",
+  "historical_local_failure_evidence": "evidence/gate0/local_model_attempts.json",
   "superseded_model_evidence": [
     "evidence/gate0/model_score_smoke.json",
     "evidence/gate0/model_score_smoke.v2.json"

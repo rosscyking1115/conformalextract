@@ -31,3 +31,11 @@
   the private evidence Dataset. Exact-commit download reproduced SHA-256
   `feb4234ff8752370a9c45f43c1d11b1f39feb4360f12a01cf259858e90cca061`; no job remains running.
   Gate 0E persistence is unblocked and its hardened L40S rerun is next. — Manager (Codex)
+
+- 2026-07-17 — Gate 0E L40S job `6a5a74aabee6ee1cf4ecdbbd` completed in 97 seconds and persisted
+  the exact text-free report to private Hub revision `3fb7d819398bc95ebdeb1a430523905476b77d9b`.
+  The Hub artifact and Git evidence copy share SHA-256
+  `ac228abf40723a76f5871f30c764efea10db21258440f9f39dfa970992f9ba13`. All frozen pinning,
+  grouping, alignment, determinism, malformed-output, privacy and finite-AUC checks passed; the
+  independent Reviewer issued `PASS`. Twelve structural failures demonstrate weak zero-shot quality,
+  while the tested model/score path is valid. Gate 0E passes; Gate 0F is next. — Manager (Codex)

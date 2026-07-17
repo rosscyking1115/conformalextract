@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import json
 import runpy
 from pathlib import Path
@@ -9,13 +10,20 @@ from typing import Any
 ROOT = Path(__file__).parents[1]
 
 
-def test_gate0e_authority_rejects_metadata_only_false_pass() -> None:
+def test_gate0e_authority_requires_actual_reviewed_generation_evidence() -> None:
     authority = json.loads(
         (ROOT / "evidence" / "gate0" / "evidence_authority.json").read_text(encoding="utf-8")
     )
+    evidence_path = ROOT / authority["gate0e_active_evidence"]
+    evidence_bytes = evidence_path.read_bytes()
+    evidence = json.loads(evidence_bytes)
     superseded = set(authority["superseded_model_evidence"])
 
-    assert authority["gate0e_status"] == "blocked_pending_real_remote_generation"
+    assert authority["gate0e_status"] == "pass_independently_reviewed"
+    assert evidence["actual_model_generation_pass"] is True
+    assert evidence["gate0e_pass"] is True
+    assert hashlib.sha256(evidence_bytes).hexdigest() == authority["gate0e_artifact_sha256"]
+    assert len(authority["gate0e_hub_commit_oid"]) == 40
     assert "evidence/gate0/model_score_smoke.v2.json" in superseded
     assert "actual_model_generation_pass" in authority["acceptance_rule"]
 

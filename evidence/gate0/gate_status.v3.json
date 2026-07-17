@@ -1,0 +1,36 @@
+{
+  "schema_version": "3",
+  "supersedes": "gate_status.v2.json",
+  "decision": "revise",
+  "independent_gate0e_verdict": "PASS",
+  "gates": {
+    "0A_licences": "pass_for_private_research",
+    "0B_grouping_and_sample_feasibility": "pass",
+    "0C_evaluator": "pass",
+    "0D_statistics": {
+      "status": "pass",
+      "evidence": "certificate_simulations.v2.json",
+      "replicates": 2000,
+      "global_candidates": 9,
+      "regimes": ["easy_nonmonotone", "boundary", "unsafe", "low_acceptance"]
+    },
+    "0E_model_and_score": {
+      "status": "pass",
+      "evidence": "model_score_smoke.v3.json",
+      "artifact_sha256": "ac228abf40723a76f5871f30c764efea10db21258440f9f39dfa970992f9ba13",
+      "hub_commit_oid": "3fb7d819398bc95ebdeb1a430523905476b77d9b",
+      "job_id": "6a5a74aabee6ee1cf4ecdbbd",
+      "actual_model_generation": true,
+      "real_development_generations": 20,
+      "development_distinct_groups": 20,
+      "structural_failure_count": 12,
+      "quality_interpretation": "weak zero-shot extraction quality; model/score pathway valid",
+      "confidence_selection": "mean is provisional only; full grouped development predictions remain required"
+    },
+    "0F_qlora_save_reload_cost_smoke": {
+      "status": "pending",
+      "reason": "Gate 0E passed; prepared Gate 0F contract requires focused review before paid submission"
+    }
+  },
+  "plans_2_to_4": "blocked_pending_gate0f"
+}

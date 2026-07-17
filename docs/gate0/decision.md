@@ -21,6 +21,11 @@ established through that path. Ross subsequently activated the fine-grained toke
 CLI. CPU Basic job `6a5a72b9bee6ee1cf4ecdb93` directly committed a text-free probe to the private
 Dataset, and an exact-commit download reproduced its SHA-256. Evidence persistence is now unblocked;
 Gate 0E remains pending until the hardened L40S model-score rerun itself passes.
+The inline L40S rerun, job `6a5a74aabee6ee1cf4ecdbbd`, subsequently completed and persisted the
+reviewed text-free report at private Hub revision `3fb7d819398bc95ebdeb1a430523905476b77d9b`.
+The exact artifact and Git evidence copy share SHA-256
+`ac228abf40723a76f5871f30c764efea10db21258440f9f39dfa970992f9ba13`; an independent Reviewer
+issued `PASS`. Gate 0E is now passed. Gate 0 remains `revise` only because Gate 0F has not yet passed.
 
 Plans 2–4 remain blocked. This is an evidence state, not a failure claim.
 
@@ -30,5 +35,5 @@ Plans 2–4 remain blocked. This is an evidence state, not a failure claim.
 | 0B grouping/sample feasibility | pass | 3,988 RAMS groups; 1,396 certification groups; nine-candidate theorem precondition 1,386 |
 | 0C evaluator | pass | 32 automated tests plus 25 independent real-example adjudications and official scorer replay |
 | 0D statistics | pass | nine-candidate adaptive/global suite; 2,000 replicates across non-monotone, boundary, unsafe and low-acceptance regimes |
-| 0E model/score | pending | rerun the hardened L40S smoke through the authenticated local CLI and validate its persisted report |
-| 0F paid QLoRA smoke | blocked | 0E must pass; a new live price check and independent Gate 0F review remain required |
+| 0E model/score | pass | independently reviewed 20-group L40S generation report; confidence winner remains provisional |
+| 0F paid QLoRA smoke | pending | focused contract review, live price check, then the capped synthetic save/reload smoke |
