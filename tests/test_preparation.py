@@ -171,7 +171,10 @@ def test_preparation_freezes_seven_text_free_role_bound_manifests(tmp_path: Path
         "context_window",
         "lineage",
     }
-    records = [json.loads(path.read_text(encoding="utf-8")) for path in (tmp_path / "manifests").iterdir()]
+    records = [
+        json.loads(path.read_text(encoding="utf-8"))
+        for path in (tmp_path / "manifests").iterdir()
+    ]
     assert len({record["analysis_id"] for record in records}) == 1
     serialized = json.dumps(records)
     assert "PRIVATE PROMPT CONTENT" not in serialized

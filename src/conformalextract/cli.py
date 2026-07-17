@@ -181,9 +181,9 @@ def gate0_smoke(
 
 @app.command("prepare-data")
 def prepare_data(
-    profiles: Annotated[Path, typer.Option(help="Private text-free trigger-frame profiles.")] = Path(
-        "data/private/plan2/example_profiles.jsonl"
-    ),
+    profiles: Annotated[
+        Path, typer.Option(help="Private text-free trigger-frame profiles.")
+    ] = Path("data/private/plan2/example_profiles.jsonl"),
     split_assignment: Annotated[
         Path, typer.Option(help="Private metadata-only grouped role assignment.")
     ] = Path("data/private/splits/rams_roles.jsonl"),

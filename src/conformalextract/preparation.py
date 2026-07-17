@@ -84,7 +84,7 @@ class SplitManifest(PreparationManifest):
     )
     minhash_seed: Literal[42] = 42
     minhash_permutations: Literal[128] = 128
-    near_duplicate_jaccard: Literal[0.9] = 0.9
+    near_duplicate_jaccard: float = Field(default=0.9, ge=0.9, le=0.9)
     split_seed: Literal[42] = 42
     split_proportions: dict[str, float] = Field(
         default_factory=lambda: {
@@ -116,14 +116,14 @@ class TrainerManifest(PreparationManifest):
     quantization: Literal["nf4-4bit-double-quant-bf16"] = "nf4-4bit-double-quant-bf16"
     lora_rank: Literal[16] = 16
     lora_alpha: Literal[32] = 32
-    lora_dropout: Literal[0.05] = 0.05
+    lora_dropout: float = Field(default=0.05, ge=0.05, le=0.05)
     lora_targets: Literal["all-linear"] = "all-linear"
     completion_only: Literal[True] = True
     seed: Literal[42] = 42
     batch_size: Literal[1] = 1
     gradient_accumulation: Literal[16] = 16
     gradient_checkpointing: Literal[True] = True
-    initial_learning_rate: Literal[0.0002] = 0.0002
+    initial_learning_rate: float = Field(default=0.0002, ge=0.0002, le=0.0002)
     r1_learning_rate_choices: tuple[float, ...] = (0.0002, 0.0001, 0.00005)
     context_policy_phase: Literal["pre_training_and_r0"] = "pre_training_and_r0"
     r1_context_change_reason: Literal["demonstrated_compatibility_only"] = (
@@ -170,7 +170,9 @@ def load_training_profiles(path: Path) -> list[ExampleProfile]:
             try:
                 profile = ExampleProfile.model_validate_json(line)
             except ValueError as error:
-                raise ValueError(f"invalid metadata profile at {path.name}:{line_number}") from error
+                raise ValueError(
+                    f"invalid metadata profile at {path.name}:{line_number}"
+                ) from error
             if profile.data_role not in TRAINING_ROLES:
                 raise ValueError(
                     f"sealed role {profile.data_role!r} is forbidden in training profiles"
@@ -261,7 +263,9 @@ def _split_summary(path: Path) -> tuple[dict[str, int], dict[str, int]]:
             if not isinstance(value, dict):
                 raise ValueError(f"expected split object at {path.name}:{line_number}")
             if set(value) - {"schema_version", "document_id", "group_id", "role"}:
-                raise ValueError(f"split assignment contains forbidden fields at line {line_number}")
+                raise ValueError(
+                    f"split assignment contains forbidden fields at line {line_number}"
+                )
             role = str(value.get("role"))
             group = str(value.get("group_id"))
             if role not in {"train", "development", "certification", "final", "shift"}:

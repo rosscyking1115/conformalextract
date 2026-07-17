@@ -13,8 +13,8 @@ from conformalextract.training import (
     TrainingRoleManifest,
     TrainingRunLedger,
     TrainingRunRecord,
-    build_system_configs,
     aggregate_document_prediction,
+    build_system_configs,
     choose_pretraining_context,
     completion_only_labels,
     validate_stage_config,
@@ -152,7 +152,7 @@ def test_run_ledger_enforces_r0_r1_r2_order_and_predeclared_r3_recovery() -> Non
         estimated_cost_usd=3.00,
         predeclared_recoverable_failures=frozenset({"oom", "upload_failure"}),
     )
-    with pytest.raises(ValueError, match="aggregate.*cap"):
+    with pytest.raises(ValueError, match=r"aggregate.*cap"):
         ledger.authorize(
             RunStage.R3,
             estimated_cost_usd=20.00,

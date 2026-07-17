@@ -5,14 +5,27 @@ from __future__ import annotations
 import hashlib
 import json
 from enum import StrEnum
-from typing import Annotated, Literal
+from typing import Annotated, Final, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    HttpUrl,
+    StringConstraints,
+    field_validator,
+    model_validator,
+)
 
 from conformalextract.contracts import EventFrame, PredictionRecord
 
-MODEL_ID = "Qwen/Qwen3-4B-Instruct-2507"
-MODEL_REVISION = "cdbee75f17c01a7cc42f958dc650907174af0554"
+# PEP 586 forbids float and non-literal names inside ``Literal[...]``; the shared
+# model identity is pinned with explicit ``Literal`` aliases whose defaults are the
+# ``Final`` constants below, and single-value floats are pinned with equal bounds.
+MODEL_ID: Final = "Qwen/Qwen3-4B-Instruct-2507"
+MODEL_REVISION: Final = "cdbee75f17c01a7cc42f958dc650907174af0554"
+ModelId = Literal["Qwen/Qwen3-4B-Instruct-2507"]
+ModelRevision = Literal["cdbee75f17c01a7cc42f958dc650907174af0554"]
 APPROVED_LEARNING_RATES = frozenset({2e-4, 1e-4, 5e-5})
 CONTEXT_LADDER = (2048, 2560, 3072, 3584, 4096)
 
@@ -177,7 +190,7 @@ class TrainingRunRecord(FrozenModel):
 class TrainingRunLedger(FrozenModel):
     """Authoritative cost and stage-order guard for R0 through optional R3."""
 
-    aggregate_cap_usd: Literal[25.0] = 25.0
+    aggregate_cap_usd: float = Field(default=25.0, ge=25.0, le=25.0)
     prior_spend_usd: float = Field(default=0.0, ge=0)
     records: tuple[TrainingRunRecord, ...] = ()
 
@@ -229,15 +242,15 @@ class QuantizationConfig(FrozenModel):
 class LoraTrainingConfig(FrozenModel):
     rank: Literal[16] = 16
     alpha: Literal[32] = 32
-    dropout: Literal[0.05] = 0.05
+    dropout: float = Field(default=0.05, ge=0.05, le=0.05)
     target_modules: Literal["all-linear"] = "all-linear"
 
 
 class TrainingConfig(FrozenModel):
     """The locked shared Qwen/QLoRA training contract."""
 
-    model_id: Literal[MODEL_ID] = MODEL_ID
-    model_revision: Literal[MODEL_REVISION] = MODEL_REVISION
+    model_id: ModelId = MODEL_ID
+    model_revision: ModelRevision = MODEL_REVISION
     quantization: QuantizationConfig = QuantizationConfig()
     lora: LoraTrainingConfig = LoraTrainingConfig()
     seed: Literal[42] = 42
@@ -321,8 +334,8 @@ class DecodingConfig(FrozenModel):
 
 class TrainingSystemConfig(FrozenModel):
     family: Literal["ZS", "FS", "QA"]
-    model_id: Literal[MODEL_ID] = MODEL_ID
-    model_revision: Literal[MODEL_REVISION] = MODEL_REVISION
+    model_id: ModelId = MODEL_ID
+    model_revision: ModelRevision = MODEL_REVISION
     decoding: DecodingConfig = DecodingConfig()
     demonstration_ids: tuple[str, ...] = ()
     adapter_required: bool = False
