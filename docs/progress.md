@@ -18,3 +18,9 @@
   the Hub returned HTTP 403 and allowed only pull-request creation. The four-second job stopped and
   no billable resource remains. Gate 0E stays blocked pending direct Dataset-write permission.
   — Manager (Codex)
+
+- 2026-07-17 — After a fine-grained token was created and the Codex Hugging Face connector was
+  reconnected, CPU Basic probe `6a5a6cffbee6ee1cf4ecdb23` still received the same PR-only HTTP 403.
+  Reconnecting did not establish direct Dataset-write permission; whether the effective Job
+  authorization came from the wrong source or insufficient scope remains unresolved. The four-second
+  job stopped and no billable resource remains. — Manager (Codex)

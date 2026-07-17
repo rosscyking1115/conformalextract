@@ -66,6 +66,30 @@
       "probe_persisted": false,
       "running_jobs_after_attempt": 0,
       "credentials_or_secret_values_recorded": false
+    },
+    {
+      "attempt_id": "gate0-hub-write-preflight-2026-07-17-02",
+      "date_utc": "2026-07-17",
+      "account": "rosscyking",
+      "purpose": "Recheck direct text-free evidence writes after reconnecting the Hugging Face connector",
+      "hardware": "cpu-basic",
+      "live_price_usd_per_hour": 0.01,
+      "hard_timeout_minutes": 5,
+      "maximum_timeout_cost_usd": 0.0009,
+      "job_id": "6a5a6cffbee6ee1cf4ecdb23",
+      "terminal_stage": "ERROR",
+      "running_seconds": 4,
+      "total_seconds": 9,
+      "estimated_charge_upper_bound_usd": 0.0002,
+      "result": "direct_dataset_write_still_forbidden_after_connector_reconnect",
+      "http_status": 403,
+      "reason_category": "effective_job_authorization_remains_pull_request_only",
+      "repository_exists": true,
+      "repository_private": true,
+      "pull_request_only_hint_returned": true,
+      "probe_persisted": false,
+      "running_jobs_after_attempt": 0,
+      "credentials_or_secret_values_recorded": false
     }
   ]
 }

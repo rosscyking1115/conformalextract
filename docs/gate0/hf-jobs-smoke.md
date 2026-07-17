@@ -11,7 +11,11 @@ creation by default; it still requires write permission to a Dataset created by 
 the private `rosscyking/conformalextract-evidence` Dataset, and a CPU Basic write preflight confirmed
 that the Jobs token can read it. Direct upload still returned HTTP 403, with the Hub permitting only
 pull-request creation. The frozen Gate 0 evidence contract requires direct immutable persistence;
-the PR-only path is not treated as a passing substitute. See
+the PR-only path is not treated as a passing substitute. After the Codex Hugging Face connector was
+reconnected following fine-grained token creation, a second CPU Basic probe returned the same HTTP
+403. Reconnecting did not establish direct Dataset-write
+permission; the effective Job authorization remained PR-only, so its authentication source or scope
+still requires resolution. See
 `evidence/gate0/hf_jobs_submission_attempts.json`.
 
 The prepared job is `jobs/gate0_qlora_smoke.py`. It uses only synthetic text, pins the Qwen Hub

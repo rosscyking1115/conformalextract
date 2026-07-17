@@ -15,6 +15,9 @@ printed and was lost. Ross then created the private Dataset. CPU Basic job
 `6a5a6307bee6ee1cf4ecda9a` verified that the Jobs token can read the repository but cannot commit to
 its main branch: upload returned HTTP 403 and offered only a pull-request path. Gate 0E therefore
 remains blocked pending direct Dataset-write permission for the Job token, then one short rerun.
+After the Codex connector was reconnected following creation of a new fine-grained token, a second
+CPU Basic probe returned the same PR-only HTTP 403. Effective direct-write authorization was not
+established; whether the cause is the authentication source or its scope remains unresolved.
 
 Plans 2–4 remain blocked. This is an evidence state, not a failure claim.
 
