@@ -17,7 +17,10 @@ its main branch: upload returned HTTP 403 and offered only a pull-request path. 
 remains blocked pending direct Dataset-write permission for the Job token, then one short rerun.
 After the Codex connector was reconnected following creation of a new fine-grained token, a second
 CPU Basic probe returned the same PR-only HTTP 403. Effective direct-write authorization was not
-established; whether the cause is the authentication source or its scope remains unresolved.
+established through that path. Ross subsequently activated the fine-grained token in the local `hf`
+CLI. CPU Basic job `6a5a72b9bee6ee1cf4ecdb93` directly committed a text-free probe to the private
+Dataset, and an exact-commit download reproduced its SHA-256. Evidence persistence is now unblocked;
+Gate 0E remains pending until the hardened L40S model-score rerun itself passes.
 
 Plans 2–4 remain blocked. This is an evidence state, not a failure claim.
 
@@ -27,5 +30,5 @@ Plans 2–4 remain blocked. This is an evidence state, not a failure claim.
 | 0B grouping/sample feasibility | pass | 3,988 RAMS groups; 1,396 certification groups; nine-candidate theorem precondition 1,386 |
 | 0C evaluator | pass | 32 automated tests plus 25 independent real-example adjudications and official scorer replay |
 | 0D statistics | pass | nine-candidate adaptive/global suite; 2,000 replicates across non-monotone, boundary, unsafe and low-acceptance regimes |
-| 0E model/score | blocked | grant the Job token direct Dataset-write permission, then rerun the hardened L40S smoke |
+| 0E model/score | pending | rerun the hardened L40S smoke through the authenticated local CLI and validate its persisted report |
 | 0F paid QLoRA smoke | blocked | 0E must pass; a new live price check and independent Gate 0F review remain required |

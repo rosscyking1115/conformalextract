@@ -1,6 +1,6 @@
 # Gate 0F Hugging Face Jobs smoke
 
-Status: blocked pending direct Dataset-write permission for the Job token.
+Status: Gate 0E evidence persistence prerequisite passed; hardened Gate 0E rerun pending.
 
 Authentication is confirmed as `rosscyking`. On 2026-07-17 the independently approved Gate 0E
 submission was attempted only after a live L40S price check ($1.80/hour), but the Hub returned HTTP
@@ -15,7 +15,12 @@ the PR-only path is not treated as a passing substitute. After the Codex Hugging
 reconnected following fine-grained token creation, a second CPU Basic probe returned the same HTTP
 403. Reconnecting did not establish direct Dataset-write
 permission; the effective Job authorization remained PR-only, so its authentication source or scope
-still requires resolution. See
+still required resolution. Ross then activated the fine-grained token in the local `hf` CLI. After
+one command-transport failure that did not execute the probe, CPU Basic job
+`6a5a72b9bee6ee1cf4ecdb93` completed a direct write. The exact private Dataset commit
+`b42cefa8fefb9efcb5d1576312617aecea7d585c` was downloaded and its text-free artifact independently
+matched SHA-256 `feb4234ff8752370a9c45f43c1d11b1f39feb4360f12a01cf259858e90cca061`. The
+authenticated local CLI is therefore the approved submission path for the Gate 0E rerun. See
 `evidence/gate0/hf_jobs_submission_attempts.json`.
 
 The prepared job is `jobs/gate0_qlora_smoke.py`. It uses only synthetic text, pins the Qwen Hub

@@ -24,3 +24,10 @@
   Reconnecting did not establish direct Dataset-write permission; whether the effective Job
   authorization came from the wrong source or insufficient scope remains unresolved. The four-second
   job stopped and no billable resource remains. — Manager (Codex)
+
+- 2026-07-17 — Ross activated the fine-grained token in the local `hf` CLI. One CPU Basic submission
+  failed before the probe because the CLI consumed the remote shell option; the corrected job
+  `6a5a72b9bee6ee1cf4ecdb93` completed in eight seconds and directly committed the text-free probe to
+  the private evidence Dataset. Exact-commit download reproduced SHA-256
+  `feb4234ff8752370a9c45f43c1d11b1f39feb4360f12a01cf259858e90cca061`; no job remains running.
+  Gate 0E persistence is unblocked and its hardened L40S rerun is next. — Manager (Codex)
