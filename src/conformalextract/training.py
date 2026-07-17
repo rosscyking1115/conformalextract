@@ -6,7 +6,7 @@ import hashlib
 import json
 from collections.abc import Sequence
 from enum import StrEnum
-from typing import Annotated, Final, Literal
+from typing import Annotated, Final, Literal, cast, get_args
 
 from pydantic import (
     BaseModel,
@@ -219,6 +219,120 @@ class TrainingJobContract(FrozenModel):
     @property
     def maximum_cost_usd(self) -> float:
         return self.hourly_rate_usd * self.max_runtime_minutes / 60
+
+
+ALLOWED_UPLOAD_KINDS = frozenset(get_args(PersistedArtifactKind))
+
+
+class MaterializationStep(FrozenModel):
+    """One ordered action a remote job takes on ephemeral, official data."""
+
+    action: Literal[
+        "download",
+        "verify_checksum",
+        "extract",
+        "materialize_input",
+        "delete_raw",
+        "launch",
+    ]
+    target: str = Field(min_length=1)
+    detail: str = ""
+
+
+class EphemeralMaterializationPlan(FrozenModel):
+    """Ordered, allowlisted plan proving a job never uploads local raw data."""
+
+    source: FrozenTrainingSource
+    workspace: str = Field(min_length=1)
+    steps: tuple[MaterializationStep, ...]
+    upload_artifact_kinds: tuple[PersistedArtifactKind, ...]
+    raw_retained: bool = False
+    uploads_are_label_free: bool = True
+
+
+def plan_ephemeral_materialization(
+    source: FrozenTrainingSource,
+    *,
+    workspace: str,
+    raw_archive_name: str,
+    allowed_inputs: tuple[str, ...],
+    upload_artifact_kinds: tuple[str, ...],
+) -> EphemeralMaterializationPlan:
+    """Build the download → verify → delete-raw → launch plan for one ephemeral job.
+
+    The remote job downloads the official source into an ephemeral workspace, verifies
+    the frozen checksum, materialises only the allowlisted inputs, deletes every raw
+    archive and extraction, and launches with explicit allowlisted paths. Uploads are
+    restricted to label-free artifact kinds so raw text, sealed labels, and predictions
+    with recoverable text can never leave the container.
+    """
+
+    if not workspace.startswith("/"):
+        raise ValueError("ephemeral workspace must be an absolute in-container path")
+    if not raw_archive_name.strip():
+        raise ValueError("the official raw archive must be named")
+    if not allowed_inputs:
+        raise ValueError("at least one allowlisted input must be materialized")
+    forbidden = tuple(
+        kind for kind in upload_artifact_kinds if kind not in ALLOWED_UPLOAD_KINDS
+    )
+    if forbidden:
+        raise ValueError(
+            f"refusing to upload non-label-free artifacts: {', '.join(sorted(forbidden))}"
+        )
+
+    raw_dir = f"{workspace}/raw"
+    archive_path = f"{raw_dir}/{raw_archive_name}"
+    inputs_dir = f"{workspace}/inputs"
+    input_paths = tuple(f"{inputs_dir}/{name}" for name in allowed_inputs)
+
+    steps: list[MaterializationStep] = [
+        MaterializationStep(
+            action="download",
+            target=str(source.source_url),
+            detail=f"ephemeral official download to {archive_path}",
+        ),
+        MaterializationStep(
+            action="verify_checksum",
+            target=archive_path,
+            detail=f"require sha256 {source.source_sha256} before use",
+        ),
+        MaterializationStep(
+            action="extract",
+            target=raw_dir,
+            detail=f"extract {archive_path} under {raw_dir}",
+        ),
+    ]
+    steps.extend(
+        MaterializationStep(
+            action="materialize_input",
+            target=path,
+            detail=f"copy allowlisted {name} to {path}",
+        )
+        for name, path in zip(allowed_inputs, input_paths, strict=True)
+    )
+    steps.append(
+        MaterializationStep(
+            action="delete_raw",
+            target=raw_dir,
+            detail=f"delete raw archive {archive_path} and extraction {raw_dir}",
+        )
+    )
+    steps.append(
+        MaterializationStep(
+            action="launch",
+            target=workspace,
+            detail="launch with explicit allowlisted inputs: " + ", ".join(input_paths),
+        )
+    )
+    return EphemeralMaterializationPlan(
+        source=source,
+        workspace=workspace,
+        steps=tuple(steps),
+        upload_artifact_kinds=cast(
+            "tuple[PersistedArtifactKind, ...]", tuple(upload_artifact_kinds)
+        ),
+    )
 
 
 class FrameGeneration(FrozenModel):
