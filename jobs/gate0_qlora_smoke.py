@@ -64,22 +64,46 @@ def adapter_hashes(path: Path) -> dict[str, str]:
     return result
 
 
+def parameter_dtype_counts(model) -> dict[str, int]:  # type: ignore[no-untyped-def]
+    counts: dict[str, int] = {}
+    for parameter in model.parameters():
+        name = str(parameter.dtype)
+        counts[name] = counts.get(name, 0) + parameter.numel()
+    return counts
+
+
 def generation_evidence(model, tokenizer) -> dict[str, object]:  # type: ignore[no-untyped-def]
     model.eval()
+    model.config.use_cache = True
+    model.generation_config.temperature = None
+    model.generation_config.top_p = None
+    model.generation_config.top_k = None
     prompt = 'Return JSON only: {"arguments":[]}'
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
     with torch.no_grad():
-        generated = model.generate(**inputs, do_sample=False, max_new_tokens=4)
+        generated = model.generate(
+            **inputs,
+            do_sample=False,
+            num_beams=1,
+            max_new_tokens=4,
+        )
     completion = generated[0, inputs["input_ids"].shape[1] :].detach().cpu().numpy().tobytes()
     return {
         "generated_token_count": int(generated.shape[1] - inputs["input_ids"].shape[1]),
         "generated_token_sha256": hashlib.sha256(completion).hexdigest(),
+        "gradient_checkpointing": bool(model.is_gradient_checkpointing),
+        "parameter_dtype_counts": parameter_dtype_counts(model),
+        "use_cache": bool(model.config.use_cache),
     }
 
 
 def reload_smoke(adapter_dir: Path) -> None:
     tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, revision=REVISION)
-    model = PeftModel.from_pretrained(load_base(), adapter_dir)
+    prepared_base = prepare_model_for_kbit_training(
+        load_base(), use_gradient_checkpointing=False
+    )
+    model = PeftModel.from_pretrained(prepared_base, adapter_dir)
+    model.gradient_checkpointing_disable()
     generation = generation_evidence(model, tokenizer)
     print(
         "RELOAD_EVIDENCE="
@@ -130,7 +154,9 @@ def train_smoke(evidence_repo: str) -> None:
         raise RuntimeError(f"refusing to overwrite adapter directory: {ADAPTER_DIR}")
     tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, revision=REVISION)
     tokenizer.pad_token = tokenizer.eos_token
-    model = prepare_model_for_kbit_training(load_base())
+    model = prepare_model_for_kbit_training(
+        load_base(), use_gradient_checkpointing=True
+    )
     model = get_peft_model(
         model,
         LoraConfig(
@@ -176,6 +202,8 @@ def train_smoke(evidence_repo: str) -> None:
         raise RuntimeError("non-finite adapter gradients")
     optimizer.step()
     loss_value = float(output.loss.detach().cpu())
+    model.gradient_checkpointing_disable()
+    model.config.use_cache = True
     model.save_pretrained(ADAPTER_DIR, safe_serialization=True)
     saved_hashes = adapter_hashes(ADAPTER_DIR)
     if "adapter_model.safetensors" not in saved_hashes:
@@ -213,8 +241,29 @@ def train_smoke(evidence_repo: str) -> None:
     reload_evidence = json.loads(line.removeprefix("RELOAD_EVIDENCE="))
     if reload_evidence["adapter_hashes"] != saved_hashes:
         raise RuntimeError("fresh-process adapter hashes changed")
+    if int(reload_evidence["generated_token_count"]) <= 0:
+        raise RuntimeError("fresh-process reload did not generate tokens")
     greedy_completion_equivalence = (
         before_reload["generated_token_sha256"] == reload_evidence["generated_token_sha256"]
+    )
+    diagnostic: dict[str, object] = {
+        "schema_version": "1",
+        "status": "diagnostic",
+        "model_id": MODEL_ID,
+        "model_revision": REVISION,
+        "synthetic_text_only": True,
+        "adapter_hashes_equal": reload_evidence["adapter_hashes"] == saved_hashes,
+        "before_reload": before_reload,
+        "reload": reload_evidence,
+        "greedy_completion_equivalence": greedy_completion_equivalence,
+        "reload_base_prepared_for_kbit": True,
+    }
+    diagnostic_bytes = (
+        json.dumps(diagnostic, sort_keys=True, separators=(",", ":")) + "\n"
+    ).encode()
+    print(
+        "GATE0F_DIAGNOSTIC_B64=" + base64.b64encode(diagnostic_bytes).decode(),
+        flush=True,
     )
     if not greedy_completion_equivalence:
         raise RuntimeError("fresh-process adapter reload changed the greedy completion")

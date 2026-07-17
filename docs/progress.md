@@ -39,3 +39,12 @@
   grouping, alignment, determinism, malformed-output, privacy and finite-AUC checks passed; the
   independent Reviewer issued `PASS`. Twelve structural failures demonstrate weak zero-shot quality,
   while the tested model/score path is valid. Gate 0E passes; Gate 0F is next. — Manager (Codex)
+
+- 2026-07-17 — Gate 0F L40S job `6a5a7cfad216bd6f3a1fbf0b` queued for 8,069 seconds, then ran for
+  96 seconds (about $0.05). Its synthetic one-step NF4 QLoRA update, adapter-only finite gradients,
+  safetensors save, adapter-hash replay, and fresh-process generation succeeded. The job stopped on
+  a bit-exact generated-token mismatch across two independently quantized base-model loads, so the
+  independent Reviewer issued `BLOCK` and no success report was accepted. The correction aligns the
+  k-bit preparation, gradient-checkpointing, cache and generation state on both inference paths,
+  retains exact equality as a hard gate, and emits a recoverable text-free diagnostic before it.
+  Plan 2's parsed-output replay gate is unchanged. — Manager (Codex)

@@ -42,6 +42,28 @@ def test_gate0f_job_pins_training_runtime_and_qlora_contract() -> None:
     assert "completion_only_mask" in script
 
 
+def test_gate0f_aligns_reload_state_and_keeps_exact_equivalence_gate() -> None:
+    script = (ROOT / "jobs" / "gate0_qlora_smoke.py").read_text(encoding="utf-8")
+
+    assert (
+        "prepare_model_for_kbit_training(\n"
+        "        load_base(), use_gradient_checkpointing=False\n"
+        "    )"
+    ) in script
+    assert (
+        "prepare_model_for_kbit_training(\n"
+        "        load_base(), use_gradient_checkpointing=True\n"
+        "    )"
+    ) in script
+    assert "model.gradient_checkpointing_disable()" in script
+    assert '"GATE0F_DIAGNOSTIC_B64="' in script
+    diagnostic = script.index('"GATE0F_DIAGNOSTIC_B64="')
+    equality_error = script.index(
+        'raise RuntimeError("fresh-process adapter reload changed the greedy completion")'
+    )
+    assert diagnostic < equality_error
+
+
 def test_gate0f_job_refuses_repo_creation_and_evidence_overwrite() -> None:
     script = (ROOT / "jobs" / "gate0_qlora_smoke.py").read_text(encoding="utf-8")
 

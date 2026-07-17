@@ -1,6 +1,6 @@
 # Gate 0F Hugging Face Jobs smoke
 
-Status: Gate 0E passed independently; Gate 0F pending focused review and submission.
+Status: Gate 0E passed independently; Gate 0F revision pending focused review and rerun.
 
 Authentication is confirmed as `rosscyking`. On 2026-07-17 the independently approved Gate 0E
 submission was attempted only after a live L40S price check ($1.80/hour), but the Hub returned HTTP
@@ -49,6 +49,18 @@ The local-script transport cannot stage through this fine-grained token's privat
 bucket. Submission therefore uses the already-proven authenticated CLI path with the reviewed script
 decoded to a temporary file inside the official `uv` Docker image, an L40S flavor, a 20-minute hard
 timeout, and `HF_TOKEN` injected only through the Jobs secrets mechanism.
+
+The first Gate 0F submission, job `6a5a7cfad216bd6f3a1fbf0b`, waited 8,069 seconds for L40S
+capacity, ran for 96 seconds (about $0.05), and stopped after the fresh-process reload generated a
+different four-token hash from the in-memory model. All preceding checks passed, including the
+one-step update, adapter-only finite gradients, safetensors save, exact saved/reloaded adapter hashes,
+and fresh-process generation. The failed run did not print or persist a success report. Review
+identified an inference-state mismatch: the training base had passed through
+`prepare_model_for_kbit_training`, which changes non-quantized parameter dtypes, while the reload base
+had not. The corrected contract prepares both bases, explicitly disables gradient checkpointing and
+enables cache for both inference paths, retains exact greedy token-hash equality as a hard gate, and
+prints a text-free state/dtype/hash diagnostic before that gate so another mismatch remains
+recoverable. Plan 2's parsed-output replay gate is unchanged.
 
 At the last documented L40S price of $1.80/hour, the hard 20-minute timeout projects at most $0.60.
 That figure is not approval evidence and must be rechecked immediately before submission. The job ID,
