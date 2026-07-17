@@ -1,14 +1,17 @@
 # Gate 0F Hugging Face Jobs smoke
 
-Status: blocked pending a precreated private evidence Dataset and a Job token with Dataset-write
-permission.
+Status: blocked pending direct Dataset-write permission for the Job token.
 
 Authentication is confirmed as `rosscyking`. On 2026-07-17 the independently approved Gate 0E
 submission was attempted only after a live L40S price check ($1.80/hour), but the Hub returned HTTP
 402 before scheduling because the prepaid credit balance was insufficient. A later funded Gate 0E
 attempt completed model generation but could not create the evidence Dataset with its Jobs token.
 The hardened rerun prints text-free evidence to private job logs before upload and skips repository
-creation by default; it still requires write permission to a Dataset created by Ross. See
+creation by default; it still requires write permission to a Dataset created by Ross. Ross created
+the private `rosscyking/conformalextract-evidence` Dataset, and a CPU Basic write preflight confirmed
+that the Jobs token can read it. Direct upload still returned HTTP 403, with the Hub permitting only
+pull-request creation. The frozen Gate 0 evidence contract requires direct immutable persistence;
+the PR-only path is not treated as a passing substitute. See
 `evidence/gate0/hf_jobs_submission_attempts.json`.
 
 The prepared job is `jobs/gate0_qlora_smoke.py`. It uses only synthetic text, pins the Qwen Hub

@@ -12,3 +12,9 @@
   token lacks repository-create scope. Runtime was 90 seconds (about $0.05); no job remains running.
   The rerun contract now prints its text-free, hashed report to private logs before upload so this
   persistence failure cannot erase evidence again. Gate 0 remains `revise`. — Manager (Codex)
+
+- 2026-07-17 — Ross created the private evidence Dataset. CPU Basic write preflight
+  `6a5a6307bee6ee1cf4ecda9a` confirmed the Jobs token can read it but cannot commit to its main branch;
+  the Hub returned HTTP 403 and allowed only pull-request creation. The four-second job stopped and
+  no billable resource remains. Gate 0E stays blocked pending direct Dataset-write permission.
+  — Manager (Codex)

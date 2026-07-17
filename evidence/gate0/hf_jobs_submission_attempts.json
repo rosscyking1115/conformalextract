@@ -42,6 +42,30 @@
       "report_recoverable_from_logs": false,
       "running_jobs_after_attempt": 0,
       "credentials_or_secret_values_recorded": false
+    },
+    {
+      "attempt_id": "gate0-hub-write-preflight-2026-07-17-01",
+      "date_utc": "2026-07-17",
+      "account": "rosscyking",
+      "purpose": "Verify direct text-free evidence writes from the Jobs token to the precreated private Dataset",
+      "hardware": "cpu-basic",
+      "live_price_usd_per_hour": 0.01,
+      "hard_timeout_minutes": 5,
+      "maximum_timeout_cost_usd": 0.0009,
+      "job_id": "6a5a6307bee6ee1cf4ecda9a",
+      "terminal_stage": "ERROR",
+      "running_seconds": 4,
+      "total_seconds": 9,
+      "estimated_charge_upper_bound_usd": 0.0002,
+      "result": "direct_dataset_write_forbidden",
+      "http_status": 403,
+      "reason_category": "job_token_can_read_private_dataset_but_cannot_commit_to_main",
+      "repository_exists": true,
+      "repository_private": true,
+      "pull_request_only_hint_returned": true,
+      "probe_persisted": false,
+      "running_jobs_after_attempt": 0,
+      "credentials_or_secret_values_recorded": false
     }
   ]
 }

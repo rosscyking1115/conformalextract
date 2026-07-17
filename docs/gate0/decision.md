@@ -11,8 +11,10 @@ was initially not scheduled because the prepaid Jobs credit balance was insuffic
 was added, job `6a59943c85d9643ce16d7011` loaded the pinned model and reached evidence persistence,
 which proves the generation stage completed, but the job token lacked permission to create the
 private evidence Dataset. The 90-second job ended `ERROR` with HTTP 403; its report had not yet been
-printed and was lost. Gate 0E therefore remains blocked pending a write-capable Job token and an
-accessible precreated private Dataset (or repository-create scope), then one short rerun.
+printed and was lost. Ross then created the private Dataset. CPU Basic job
+`6a5a6307bee6ee1cf4ecda9a` verified that the Jobs token can read the repository but cannot commit to
+its main branch: upload returned HTTP 403 and offered only a pull-request path. Gate 0E therefore
+remains blocked pending direct Dataset-write permission for the Job token, then one short rerun.
 
 Plans 2–4 remain blocked. This is an evidence state, not a failure claim.
 
@@ -22,5 +24,5 @@ Plans 2–4 remain blocked. This is an evidence state, not a failure claim.
 | 0B grouping/sample feasibility | pass | 3,988 RAMS groups; 1,396 certification groups; nine-candidate theorem precondition 1,386 |
 | 0C evaluator | pass | 32 automated tests plus 25 independent real-example adjudications and official scorer replay |
 | 0D statistics | pass | nine-candidate adaptive/global suite; 2,000 replicates across non-monotone, boundary, unsafe and low-acceptance regimes |
-| 0E model/score | blocked | precreate an accessible private evidence Dataset and grant the Job token Dataset-write permission, then rerun the hardened L40S smoke |
+| 0E model/score | blocked | grant the Job token direct Dataset-write permission, then rerun the hardened L40S smoke |
 | 0F paid QLoRA smoke | blocked | 0E must pass; a new live price check and independent Gate 0F review remain required |
