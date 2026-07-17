@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import pytest
+from pydantic import ValidationError
 
 from conformalextract.training import (
+    EphemeralMaterializationPlan,
     FrozenTrainingSource,
+    MaterializationStep,
     plan_ephemeral_materialization,
 )
 
@@ -83,3 +86,47 @@ def test_plan_requires_an_ephemeral_absolute_workspace() -> None:
 def test_plan_requires_at_least_one_named_input() -> None:
     with pytest.raises(ValueError, match="input"):
         _plan(allowed_inputs=())
+
+
+def test_a_directly_built_plan_that_launches_without_deleting_raw_is_rejected() -> None:
+    with pytest.raises(ValidationError, match="delete_raw"):
+        EphemeralMaterializationPlan(
+            source=SOURCE,
+            workspace="/tmp/ce-r0",
+            steps=(
+                MaterializationStep(action="download", target="https://example.test/x.zip"),
+                MaterializationStep(action="launch", target="/tmp/ce-r0"),
+            ),
+            upload_artifact_kinds=("adapter_copy_a",),
+        )
+
+
+def test_a_directly_built_plan_that_launches_from_raw_is_rejected() -> None:
+    with pytest.raises(ValidationError, match="raw"):
+        EphemeralMaterializationPlan(
+            source=SOURCE,
+            workspace="/tmp/ce-r0",
+            steps=(
+                MaterializationStep(action="delete_raw", target="/tmp/ce-r0/raw"),
+                MaterializationStep(
+                    action="launch",
+                    target="/tmp/ce-r0",
+                    detail="read /tmp/ce-r0/raw/train.jsonl",
+                ),
+            ),
+            upload_artifact_kinds=("adapter_copy_a",),
+        )
+
+
+def test_a_directly_built_plan_cannot_claim_raw_is_retained() -> None:
+    with pytest.raises(ValidationError, match="raw_retained"):
+        EphemeralMaterializationPlan(
+            source=SOURCE,
+            workspace="/tmp/ce-r0",
+            steps=(
+                MaterializationStep(action="delete_raw", target="/tmp/ce-r0/raw"),
+                MaterializationStep(action="launch", target="/tmp/ce-r0"),
+            ),
+            upload_artifact_kinds=("adapter_copy_a",),
+            raw_retained=True,
+        )

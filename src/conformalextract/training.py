@@ -249,6 +249,24 @@ class EphemeralMaterializationPlan(FrozenModel):
     raw_retained: bool = False
     uploads_are_label_free: bool = True
 
+    @model_validator(mode="after")
+    def enforce_raw_is_deleted_before_launch(self) -> EphemeralMaterializationPlan:
+        """Prove, from the steps themselves, that raw data never reaches launch."""
+
+        actions = [step.action for step in self.steps]
+        raw_dir = f"{self.workspace}/raw"
+        if "launch" in actions:
+            if "delete_raw" not in actions:
+                raise ValueError("a launch step requires a prior delete_raw step")
+            if actions.index("delete_raw") > actions.index("launch"):
+                raise ValueError("delete_raw must precede launch")
+        for step in self.steps:
+            if step.action == "launch" and raw_dir in f"{step.target} {step.detail}":
+                raise ValueError("launch must not read from the raw extraction directory")
+        if self.raw_retained:
+            raise ValueError("raw_retained must be False once the raw source is deleted")
+        return self
+
 
 def plan_ephemeral_materialization(
     source: FrozenTrainingSource,
