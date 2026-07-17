@@ -1,11 +1,15 @@
 # Gate 0F Hugging Face Jobs smoke
 
-Status: blocked pending real remote Gate 0E and sufficient prepaid Hugging Face Jobs credit.
+Status: blocked pending a precreated private evidence Dataset and a Job token with Dataset-write
+permission.
 
 Authentication is confirmed as `rosscyking`. On 2026-07-17 the independently approved Gate 0E
 submission was attempted only after a live L40S price check ($1.80/hour), but the Hub returned HTTP
-402 before scheduling because the prepaid credit balance was insufficient. No job ID or billable
-resource was created. See `evidence/gate0/hf_jobs_submission_attempts.json`.
+402 before scheduling because the prepaid credit balance was insufficient. A later funded Gate 0E
+attempt completed model generation but could not create the evidence Dataset with its Jobs token.
+The hardened rerun prints text-free evidence to private job logs before upload and skips repository
+creation by default; it still requires write permission to a Dataset created by Ross. See
+`evidence/gate0/hf_jobs_submission_attempts.json`.
 
 The prepared job is `jobs/gate0_qlora_smoke.py`. It uses only synthetic text, pins the Qwen Hub
 revision and runtime versions, loads NF4 4-bit weights, attaches rank-16/alpha-32/dropout-0.05

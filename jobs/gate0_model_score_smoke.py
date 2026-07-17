@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import importlib.metadata
 import io
@@ -396,10 +397,16 @@ def run_smoke(root: Path) -> dict[str, Any]:
     return report
 
 
-def persist_report(report: dict[str, Any], repo_id: str) -> str:
-    data = (json.dumps(report, sort_keys=True, separators=(",", ":")) + "\n").encode()
+def serialize_report(report: dict[str, Any]) -> bytes:
+    return (json.dumps(report, sort_keys=True, separators=(",", ":")) + "\n").encode()
+
+
+def persist_report(data: bytes, repo_id: str, *, create_repo: bool) -> str:
     api = HfApi()
-    api.create_repo(repo_id, repo_type="dataset", private=True, exist_ok=True)
+    if create_repo:
+        api.create_repo(repo_id, repo_type="dataset", private=True, exist_ok=True)
+    else:
+        api.repo_info(repo_id, repo_type="dataset")
     api.upload_file(
         path_or_fileobj=io.BytesIO(data),
         path_in_repo=EVIDENCE_PATH,
@@ -417,11 +424,25 @@ def main() -> None:
         default="rosscyking/conformalextract-evidence",
         help="Private Hugging Face Dataset receiving text-free evidence.",
     )
+    parser.add_argument(
+        "--create-evidence-repo",
+        action="store_true",
+        help="Create the private evidence Dataset; requires repository-create scope.",
+    )
     args = parser.parse_args()
     with tempfile.TemporaryDirectory(prefix="conformalextract-gate0e-") as directory:
         root = download_rams(Path(directory))
         report = run_smoke(root)
-        report_sha256 = persist_report(report, args.evidence_repo)
+        report_data = serialize_report(report)
+        report_sha256 = hashlib.sha256(report_data).hexdigest()
+        print("GATE0E_REPORT_B64=" + base64.b64encode(report_data).decode(), flush=True)
+        persisted_sha256 = persist_report(
+            report_data,
+            args.evidence_repo,
+            create_repo=args.create_evidence_repo,
+        )
+        if persisted_sha256 != report_sha256:
+            raise RuntimeError("persisted Gate 0E evidence hash mismatch")
     print(
         json.dumps(
             {

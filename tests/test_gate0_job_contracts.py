@@ -4,6 +4,7 @@ import ast
 import json
 import runpy
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).parents[1]
 
@@ -35,6 +36,9 @@ def test_gate0e_job_is_reproducible_private_and_text_free() -> None:
     assert 'repo_type="dataset"' in script
     assert 'restricted_source_text_in_evidence": False' in script
     assert '"actual_model_generation_pass": gate0e_pass' in script
+    assert "GATE0E_REPORT_B64=" in script
+    assert script.index("GATE0E_REPORT_B64=") < script.index("persisted_sha256 = persist_report(")
+    assert "--create-evidence-repo" in script
     assert "raw_output" not in script.split("report =", maxsplit=1)[1]
 
 
@@ -72,3 +76,29 @@ def test_gate0e_malformed_output_gets_worst_outcome() -> None:
 
     assert loss == 1.0
     assert all(value == float("-inf") for value in scores.values())
+
+
+def test_gate0e_precreated_repository_mode_never_calls_create() -> None:
+    namespace = runpy.run_path(str(ROOT / "jobs" / "gate0_model_score_smoke.py"))
+    calls: list[tuple[str, dict[str, Any]]] = []
+
+    class FakeApi:
+        def create_repo(self, *args: object, **kwargs: Any) -> None:
+            calls.append(("create_repo", kwargs))
+
+        def repo_info(self, *args: object, **kwargs: Any) -> None:
+            calls.append(("repo_info", kwargs))
+
+        def upload_file(self, *args: object, **kwargs: Any) -> None:
+            calls.append(("upload_file", kwargs))
+
+    persist_report = namespace["persist_report"]
+    persist_report.__globals__["HfApi"] = FakeApi
+    digest = persist_report(
+        b'{"status":"pass"}\n',
+        "rosscyking/conformalextract-evidence",
+        create_repo=False,
+    )
+
+    assert len(digest) == 64
+    assert [name for name, _ in calls] == ["repo_info", "upload_file"]

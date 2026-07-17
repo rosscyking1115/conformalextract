@@ -19,6 +19,29 @@
       "running_jobs_after_attempt": 0,
       "charge_incurred_usd": 0.0,
       "credentials_or_secret_values_recorded": false
+    },
+    {
+      "attempt_id": "gate0e-hfjobs-2026-07-17-02",
+      "date_utc": "2026-07-17",
+      "account": "rosscyking",
+      "purpose": "Gate 0E real 20-group development model-score smoke",
+      "hardware": "l40sx1",
+      "live_price_usd_per_hour": 1.8,
+      "hard_timeout_minutes": 30,
+      "maximum_authorized_cost_usd": 0.9,
+      "job_id": "6a59943c85d9643ce16d7011",
+      "terminal_stage": "ERROR",
+      "running_seconds": 90,
+      "total_seconds": 95,
+      "estimated_charge_usd": 0.05,
+      "actual_model_generation_completed": true,
+      "result": "persistence_failure_after_generation",
+      "http_status": 403,
+      "reason_category": "job_token_cannot_create_dataset_repo",
+      "report_persisted": false,
+      "report_recoverable_from_logs": false,
+      "running_jobs_after_attempt": 0,
+      "credentials_or_secret_values_recorded": false
     }
   ]
 }
