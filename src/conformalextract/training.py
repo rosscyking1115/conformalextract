@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Sequence
 from enum import StrEnum
 from typing import Annotated, Final, Literal
 
@@ -79,6 +80,112 @@ class TrainingRoleManifest(FrozenModel):
         if train & development:
             raise ValueError("training and development document IDs must be disjoint")
         return self
+
+
+DataRole = Literal["train", "development", "certification", "final", "shift"]
+SEALED_LABEL_ROLES = frozenset({"certification", "final", "shift"})
+_LABEL_ACCESS_GENESIS = hashlib.sha256(b"conformalextract/label-access/v1").hexdigest()
+
+
+class LabelAccessPurpose(StrEnum):
+    SFT = "sft_training"
+    GENERATION = "prediction_generation"
+    DEVELOPMENT_SELECTION = "development_selection"
+
+
+class LabelAccessRequest(FrozenModel):
+    """A single request to read gold for one hashed, text-free document."""
+
+    data_role: DataRole
+    document_id_hash: Sha256
+    purpose: LabelAccessPurpose
+
+
+def _authorize_label_access(request: LabelAccessRequest) -> None:
+    """Raise unless a gold read is permitted before any model is loaded."""
+
+    if request.data_role in SEALED_LABEL_ROLES:
+        raise ValueError(
+            f"sealed gold role {request.data_role!r} is unreachable during training"
+        )
+    if (
+        request.data_role == "development"
+        and request.purpose is not LabelAccessPurpose.DEVELOPMENT_SELECTION
+    ):
+        raise ValueError(
+            "development gold is limited to development selection, not SFT or generation"
+        )
+
+
+def _chain_label_hash(previous: str, request: LabelAccessRequest) -> str:
+    material = json.dumps(
+        {
+            "previous": previous,
+            "data_role": request.data_role,
+            "document_id_hash": request.document_id_hash,
+            "purpose": request.purpose.value,
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode()
+    return hashlib.sha256(material).hexdigest()
+
+
+class LabelAccessEntry(FrozenModel):
+    """One tamper-evident record of a permitted gold read."""
+
+    data_role: DataRole
+    document_id_hash: Sha256
+    purpose: LabelAccessPurpose
+    entry_hash: Sha256
+
+
+class LabelAccessLog(FrozenModel):
+    """Hash-linked, text-free audit chain over every training gold read."""
+
+    genesis_hash: Sha256 = _LABEL_ACCESS_GENESIS
+    entries: tuple[LabelAccessEntry, ...] = ()
+    head_hash: Sha256 = _LABEL_ACCESS_GENESIS
+
+    def verify(self) -> bool:
+        """Recompute the chain and confirm every read was and remains authorized."""
+
+        previous = self.genesis_hash
+        for entry in self.entries:
+            request = LabelAccessRequest(
+                data_role=entry.data_role,
+                document_id_hash=entry.document_id_hash,
+                purpose=entry.purpose,
+            )
+            try:
+                _authorize_label_access(request)
+            except ValueError:
+                return False
+            expected = _chain_label_hash(previous, request)
+            if expected != entry.entry_hash:
+                return False
+            previous = expected
+        return previous == self.head_hash
+
+
+def build_label_access_log(requests: Sequence[LabelAccessRequest]) -> LabelAccessLog:
+    """Authorize each gold read and append it to a tamper-evident hash chain."""
+
+    previous = _LABEL_ACCESS_GENESIS
+    entries: list[LabelAccessEntry] = []
+    for request in requests:
+        _authorize_label_access(request)
+        entry_hash = _chain_label_hash(previous, request)
+        entries.append(
+            LabelAccessEntry(
+                data_role=request.data_role,
+                document_id_hash=request.document_id_hash,
+                purpose=request.purpose,
+                entry_hash=entry_hash,
+            )
+        )
+        previous = entry_hash
+    return LabelAccessLog(entries=tuple(entries), head_hash=previous)
 
 
 PersistedArtifactKind = Literal[
