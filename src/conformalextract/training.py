@@ -453,6 +453,107 @@ class TrainingRunLedger(FrozenModel):
             or failed_r2.failure_code not in predeclared_recoverable_failures
         ):
             raise ValueError("R3 requires an R2 predeclared recoverable failure")
+
+
+REMAINING_BUDGET_USD = 24.7992  # $25 aggregate cap minus $0.2008 recorded spend
+
+
+class InferenceBenchmark(FrozenModel):
+    """Throughput measured for one padded-batch schedule on the real prompt lengths."""
+
+    batch_size: int = Field(ge=1)
+    items_per_hour: float = Field(gt=0)
+    hourly_rate_usd: float = Field(gt=0)
+
+
+class StageDemand(FrozenModel):
+    """The generation workload of one paid programme stage."""
+
+    stage: Literal["R1", "R2", "predictions"]
+    items: int = Field(ge=0)
+    essential: bool = False
+
+
+class ProgrammeForecast(FrozenModel):
+    """A conservative whole-programme cost forecast and its launch decision."""
+
+    decision: Literal["go", "stop", "infeasible"]
+    remaining_budget_usd: float
+    r0_cost_usd: float
+    upload_cost_usd: float
+    reserve_usd: float
+    stage_costs_usd: dict[str, float]
+    essential_floor_usd: float
+    total_committed_usd: float
+    reasons: tuple[str, ...]
+
+
+def _stage_cost_usd(items: int, benchmark: InferenceBenchmark, safety_buffer: float) -> float:
+    hours = items / benchmark.items_per_hour
+    return hours * benchmark.hourly_rate_usd * (1.0 + safety_buffer)
+
+
+def forecast_whole_programme(
+    *,
+    benchmark: InferenceBenchmark,
+    stages: Sequence[StageDemand],
+    r0_cost_usd: float,
+    reserve_usd: float,
+    upload_cost_usd: float = 0.0,
+    safety_buffer: float = 0.20,
+    remaining_budget_usd: float = REMAINING_BUDGET_USD,
+) -> ProgrammeForecast:
+    """Roll every stage into a conservative whole-programme forecast and decide.
+
+    Costs are padded by ``safety_buffer`` and an explicit ``reserve_usd`` is held back.
+    The decision is honest about affordability: ``infeasible`` when even the essential
+    path plus reserve overflows the cap, ``stop`` when the full plan overflows but the
+    essential path fits, and ``go`` only when the buffered total fits inside the cap.
+    """
+
+    if r0_cost_usd < 0 or upload_cost_usd < 0 or reserve_usd < 0:
+        raise ValueError("costs and reserve must be non-negative")
+    if safety_buffer < 0:
+        raise ValueError("safety buffer must be non-negative")
+    if remaining_budget_usd <= 0:
+        raise ValueError("remaining budget must be positive")
+    seen = [stage.stage for stage in stages]
+    if len(seen) != len(set(seen)):
+        raise ValueError("each programme stage may appear at most once")
+
+    stage_costs: dict[str, float] = {
+        stage.stage: _stage_cost_usd(stage.items, benchmark, safety_buffer) for stage in stages
+    }
+    fixed = r0_cost_usd + upload_cost_usd + reserve_usd
+    total_committed = fixed + sum(stage_costs.values())
+    essential_floor = fixed + sum(
+        stage_costs[stage.stage] for stage in stages if stage.essential
+    )
+
+    cap = remaining_budget_usd
+    reasons: list[str] = []
+    if essential_floor > cap:
+        decision: Literal["go", "stop", "infeasible"] = "infeasible"
+        reasons.append(f"essential floor ${essential_floor:.4f} over cap ${cap:.4f}")
+    elif total_committed > cap:
+        decision = "stop"
+        reasons.append(f"planned total ${total_committed:.4f} over cap ${cap:.4f}; rescope")
+    else:
+        decision = "go"
+        reasons.append(f"buffered total ${total_committed:.4f} within cap ${cap:.4f}")
+    return ProgrammeForecast(
+        decision=decision,
+        remaining_budget_usd=remaining_budget_usd,
+        r0_cost_usd=r0_cost_usd,
+        upload_cost_usd=upload_cost_usd,
+        reserve_usd=reserve_usd,
+        stage_costs_usd=stage_costs,
+        essential_floor_usd=essential_floor,
+        total_committed_usd=total_committed,
+        reasons=tuple(reasons),
+    )
+
+
 class QuantizationConfig(FrozenModel):
     load_in_4bit: Literal[True] = True
     quant_type: Literal["nf4"] = "nf4"
