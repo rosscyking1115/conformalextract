@@ -2,10 +2,12 @@
 # requires-python = ">=3.12"
 # dependencies = [
 #   "accelerate==1.14.0",
-#   "bitsandbytes>=0.45,<1",
+#   "bitsandbytes==0.49.2",
+#   "huggingface-hub==0.36.2",
+#   "numpy==2.5.1",
 #   "peft==0.19.1",
-#   "safetensors>=0.8,<1",
-#   "torch>=2.6,<3",
+#   "safetensors==0.8.0",
+#   "torch==2.13.0",
 #   "transformers==4.57.6",
 # ]
 # ///
@@ -14,20 +16,26 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import gc
 import hashlib
+import importlib.metadata
+import io
 import json
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import torch
+from huggingface_hub import CommitOperationAdd, HfApi
 from peft import LoraConfig, PeftModel, get_peft_model, prepare_model_for_kbit_training
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 MODEL_ID = "Qwen/Qwen3-4B-Instruct-2507"
 REVISION = "cdbee75f17c01a7cc42f958dc650907174af0554"
 ADAPTER_DIR = Path("/tmp/conformalextract-gate0-adapter")
+EVIDENCE_PATH = "gate0/qlora_smoke.v1.json"
 
 
 def load_base():  # type: ignore[no-untyped-def]
@@ -41,7 +49,7 @@ def load_base():  # type: ignore[no-untyped-def]
         MODEL_ID,
         revision=REVISION,
         quantization_config=quantization,
-        torch_dtype=torch.bfloat16,
+        dtype=torch.bfloat16,
         device_map="auto",
     )
 
@@ -50,34 +58,76 @@ def adapter_hashes(path: Path) -> dict[str, str]:
     result: dict[str, str] = {}
     for item in sorted(path.rglob("*")):
         if item.is_file():
-            result[item.name] = hashlib.sha256(item.read_bytes()).hexdigest()
+            result[item.relative_to(path).as_posix()] = hashlib.sha256(
+                item.read_bytes()
+            ).hexdigest()
     return result
 
 
-def reload_smoke(adapter_dir: Path) -> None:
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, revision=REVISION)
-    model = PeftModel.from_pretrained(load_base(), adapter_dir)
+def generation_evidence(model, tokenizer) -> dict[str, object]:  # type: ignore[no-untyped-def]
+    model.eval()
     prompt = 'Return JSON only: {"arguments":[]}'
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
     with torch.no_grad():
         generated = model.generate(**inputs, do_sample=False, max_new_tokens=4)
     completion = generated[0, inputs["input_ids"].shape[1] :].detach().cpu().numpy().tobytes()
+    return {
+        "generated_token_count": int(generated.shape[1] - inputs["input_ids"].shape[1]),
+        "generated_token_sha256": hashlib.sha256(completion).hexdigest(),
+    }
+
+
+def reload_smoke(adapter_dir: Path) -> None:
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, revision=REVISION)
+    model = PeftModel.from_pretrained(load_base(), adapter_dir)
+    generation = generation_evidence(model, tokenizer)
     print(
         "RELOAD_EVIDENCE="
         + json.dumps(
             {
                 "revision": REVISION,
-                "generated_token_count": int(generated.shape[1] - inputs["input_ids"].shape[1]),
-                "generated_token_sha256": hashlib.sha256(completion).hexdigest(),
+                **generation,
                 "adapter_hashes": adapter_hashes(adapter_dir),
+                "fresh_process": True,
             },
             sort_keys=True,
         )
     )
 
 
-def train_smoke() -> None:
+def persist_report(report: dict[str, object], repo_id: str) -> dict[str, str]:
+    data = (json.dumps(report, sort_keys=True, separators=(",", ":")) + "\n").encode()
+    api = HfApi()
+    repo_info = api.dataset_info(repo_id)
+    if repo_info.private is not True:
+        raise RuntimeError("Gate 0F evidence repository must already exist and be private")
+    if api.file_exists(
+        repo_id=repo_id,
+        filename=EVIDENCE_PATH,
+        repo_type="dataset",
+        revision=repo_info.sha,
+    ):
+        raise RuntimeError(f"evidence path already exists: {EVIDENCE_PATH}")
+    commit = api.create_commit(
+        repo_id=repo_id,
+        repo_type="dataset",
+        operations=[
+            CommitOperationAdd(path_in_repo=EVIDENCE_PATH, path_or_fileobj=io.BytesIO(data))
+        ],
+        commit_message="evidence: persist Gate 0F QLoRA smoke",
+        parent_commit=repo_info.sha,
+    )
+    return {
+        "artifact_sha256": hashlib.sha256(data).hexdigest(),
+        "hub_commit_oid": commit.oid,
+    }
+
+
+def train_smoke(evidence_repo: str) -> None:
+    started = time.monotonic()
     torch.manual_seed(42)
+    if ADAPTER_DIR.exists():
+        raise RuntimeError(f"refusing to overwrite adapter directory: {ADAPTER_DIR}")
     tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, revision=REVISION)
     tokenizer.pad_token = tokenizer.eos_token
     model = prepare_model_for_kbit_training(load_base())
@@ -106,43 +156,130 @@ def train_smoke() -> None:
     if not torch.isfinite(output.loss):
         raise RuntimeError("non-finite smoke loss")
     output.loss.backward()
-    gradients = [parameter.grad for parameter in model.parameters() if parameter.requires_grad]
+    trainable_parameters = [
+        (name, parameter)
+        for name, parameter in model.named_parameters()
+        if parameter.requires_grad
+    ]
+    trainable_names = [name for name, _ in trainable_parameters]
+    if not trainable_names or any("lora_" not in name for name in trainable_names):
+        raise RuntimeError("non-adapter parameters are trainable")
+    gradients = [parameter.grad for _, parameter in trainable_parameters]
     if not gradients or any(gradient is None for gradient in gradients):
         raise RuntimeError("missing adapter gradients")
+    finite_gradients = all(
+        torch.isfinite(gradient).all().item()
+        for gradient in gradients
+        if gradient is not None
+    )
+    if not finite_gradients:
+        raise RuntimeError("non-finite adapter gradients")
     optimizer.step()
+    loss_value = float(output.loss.detach().cpu())
     model.save_pretrained(ADAPTER_DIR, safe_serialization=True)
+    saved_hashes = adapter_hashes(ADAPTER_DIR)
+    if "adapter_model.safetensors" not in saved_hashes:
+        raise RuntimeError("adapter was not saved as safetensors")
+    before_reload = generation_evidence(model, tokenizer)
     trainable = sum(
         parameter.numel() for parameter in model.parameters() if parameter.requires_grad
     )
-    print(
-        "TRAIN_EVIDENCE="
-        + json.dumps(
-            {
-                "revision": REVISION,
-                "loss": float(output.loss.detach().cpu()),
-                "trainable_parameters": trainable,
-                "adapter_hashes": adapter_hashes(ADAPTER_DIR),
-                "completion_only_mask": True,
-            },
-            sort_keys=True,
-        )
-    )
+    train_evidence = {
+        "revision": REVISION,
+        "loss": loss_value,
+        "trainable_parameters": trainable,
+        "only_adapter_parameters_trainable": True,
+        "all_trainable_gradients_present": True,
+        "all_trainable_gradients_finite": True,
+        "one_gradient_step": True,
+        "adapter_hashes": saved_hashes,
+        "completion_only_mask": True,
+        "prompt_token_count": len(prompt_ids),
+        "completion_token_count": len(completion_ids),
+        "before_reload": before_reload,
+    }
     del model, optimizer, output
     gc.collect()
     torch.cuda.empty_cache()
-    subprocess.run(
-        [sys.executable, str(Path(__file__).resolve()), "--reload", str(ADAPTER_DIR)], check=True
+    completed = subprocess.run(
+        [sys.executable, str(Path(__file__).resolve()), "--reload", str(ADAPTER_DIR)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    line = next(
+        value for value in completed.stdout.splitlines() if value.startswith("RELOAD_EVIDENCE=")
+    )
+    reload_evidence = json.loads(line.removeprefix("RELOAD_EVIDENCE="))
+    if reload_evidence["adapter_hashes"] != saved_hashes:
+        raise RuntimeError("fresh-process adapter hashes changed")
+    greedy_completion_equivalence = (
+        before_reload["generated_token_sha256"] == reload_evidence["generated_token_sha256"]
+    )
+    if not greedy_completion_equivalence:
+        raise RuntimeError("fresh-process adapter reload changed the greedy completion")
+    report: dict[str, object] = {
+        "schema_version": "1",
+        "status": "pass",
+        "gate0f_pass": True,
+        "synthetic_text_only": True,
+        "model_id": MODEL_ID,
+        "model_revision": REVISION,
+        "seed": 42,
+        "quantization": {
+            "load_in_4bit": True,
+            "quant_type": "nf4",
+            "compute_dtype": "bfloat16",
+            "double_quantization": True,
+        },
+        "lora": {
+            "rank": 16,
+            "alpha": 32,
+            "dropout": 0.05,
+            "target_modules": "all-linear",
+        },
+        "optimizer": {"name": "AdamW", "learning_rate": 2e-4},
+        "train": train_evidence,
+        "reload": reload_evidence,
+        "greedy_completion_equivalence": True,
+        "runtime": {
+            "python": sys.version.split()[0],
+            "torch": torch.__version__,
+            "cuda": torch.version.cuda,
+            "transformers": importlib.metadata.version("transformers"),
+            "accelerate": importlib.metadata.version("accelerate"),
+            "bitsandbytes": importlib.metadata.version("bitsandbytes"),
+            "peft": importlib.metadata.version("peft"),
+            "safetensors": importlib.metadata.version("safetensors"),
+            "gpu": torch.cuda.get_device_name(0),
+        },
+        "duration_seconds": time.monotonic() - started,
+    }
+    report_bytes = (json.dumps(report, sort_keys=True, separators=(",", ":")) + "\n").encode()
+    print("GATE0F_REPORT_B64=" + base64.b64encode(report_bytes).decode(), flush=True)
+    persistence = persist_report(report, evidence_repo)
+    print(
+        json.dumps(
+            {
+                "evidence_repo": evidence_repo,
+                "evidence_path": EVIDENCE_PATH,
+                **persistence,
+                "status": "pass",
+            },
+            sort_keys=True,
+        )
     )
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--reload", type=Path)
+    parser.add_argument("--evidence-repo", default="rosscyking/conformalextract-evidence")
     arguments = parser.parse_args()
     if arguments.reload:
         reload_smoke(arguments.reload)
     else:
-        train_smoke()
+        train_smoke(arguments.evidence_repo)
 
 
 if __name__ == "__main__":

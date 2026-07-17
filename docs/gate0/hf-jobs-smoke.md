@@ -36,14 +36,19 @@ loss 1/worst confidence; this is weak zero-shot quality, not a broken model/scor
 The prepared job is `jobs/gate0_qlora_smoke.py`. It uses only synthetic text, pins the Qwen Hub
 revision and runtime versions, loads NF4 4-bit weights, attaches rank-16/alpha-32/dropout-0.05
 `all-linear` LoRA, performs one completion-only gradient step, verifies all trainable parameters have
-gradients, saves safetensors, frees the first model, and launches a fresh process to reload and greedily
-generate. Logs contain only hashes, counts, loss and revision—not credentials or generated text.
+finite gradients, saves safetensors, frees the first model, and launches a fresh process to reload and
+greedily generate. It refuses repository creation, public evidence repositories, existing evidence
+paths, and concurrent branch changes. Logs contain only hashes, counts, loss, revision, and a
+base64-encoded text-free report—not credentials or generated text. Trackio is deliberately deferred
+to Plan 2's R0/R1/R2 training pipeline; Gate 0F is a single synthetic compatibility step rather than
+an experiment run.
 
 Planned Gate 0F submission after focused review and immediately refreshed pricing:
 
-```console
-hf jobs uv run jobs/gate0_qlora_smoke.py --flavor l40sx1 --timeout 20m --detach
-```
+The local-script transport cannot stage through this fine-grained token's private `jobs-artifacts`
+bucket. Submission therefore uses the already-proven authenticated CLI path with the reviewed script
+decoded to a temporary file inside the official `uv` Docker image, an L40S flavor, a 20-minute hard
+timeout, and `HF_TOKEN` injected only through the Jobs secrets mechanism.
 
 At the last documented L40S price of $1.80/hour, the hard 20-minute timeout projects at most $0.60.
 That figure is not approval evidence and must be rechecked immediately before submission. The job ID,
