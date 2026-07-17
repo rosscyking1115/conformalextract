@@ -1,0 +1,11 @@
+{
+  "schema_version": "1",
+  "active_gate_status": "evidence/gate0/gate_status.v2.json",
+  "gate0e_status": "blocked_pending_real_remote_generation",
+  "gate0e_active_evidence": "evidence/gate0/local_model_attempts.json",
+  "superseded_model_evidence": [
+    "evidence/gate0/model_score_smoke.json",
+    "evidence/gate0/model_score_smoke.v2.json"
+  ],
+  "acceptance_rule": "Gate 0E cannot pass unless actual_model_generation_pass and gate0e_pass are both true in the active evidence."
+}

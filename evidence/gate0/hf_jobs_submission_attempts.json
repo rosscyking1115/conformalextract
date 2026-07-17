@@ -1,0 +1,24 @@
+{
+  "schema_version": "1",
+  "aggregate_authorized_cap_usd": 25.0,
+  "attempts": [
+    {
+      "attempt_id": "gate0e-hfjobs-2026-07-17-01",
+      "date_utc": "2026-07-17",
+      "account": "rosscyking",
+      "purpose": "Gate 0E real 20-group development model-score smoke",
+      "hardware": "l40sx1",
+      "live_price_usd_per_hour": 1.8,
+      "hard_timeout_minutes": 30,
+      "maximum_authorized_cost_usd": 0.9,
+      "result": "not_scheduled",
+      "http_status": 402,
+      "reason_category": "insufficient_prepaid_jobs_credit",
+      "job_id": null,
+      "billable_resource_started": false,
+      "running_jobs_after_attempt": 0,
+      "charge_incurred_usd": 0.0,
+      "credentials_or_secret_values_recorded": false
+    }
+  ]
+}
