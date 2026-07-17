@@ -22,8 +22,10 @@ def risk_coverage_auc(scores: Sequence[float], losses: Sequence[float]) -> float
         raise ValueError("scores and losses must be non-empty and aligned")
     score_array = np.asarray(scores, dtype=np.float64)
     loss_array = np.asarray(losses, dtype=np.float64)
-    if not np.isfinite(score_array).all() or np.any((loss_array < 0) | (loss_array > 1)):
-        raise ValueError("scores must be finite and losses bounded")
+    if np.any(np.isnan(score_array) | np.isposinf(score_array)):
+        raise ValueError("scores cannot contain NaN or positive infinity")
+    if not np.isfinite(loss_array).all() or np.any((loss_array < 0) | (loss_array > 1)):
+        raise ValueError("losses must be finite and bounded")
     order = np.lexsort((np.arange(len(scores)), -score_array))
     ordered_losses = loss_array[order]
     risks = np.cumsum(ordered_losses) / np.arange(1, len(losses) + 1)

@@ -1,0 +1,41 @@
+{
+  "schema_version": "1",
+  "sources": [
+    {
+      "schema_version": "1",
+      "source_id": "RAMS-1.0c",
+      "url": "https://nlp.jhu.edu/rams/RAMS_1.0c.tar.gz",
+      "revision": "1.0c",
+      "sha256": "cbcbec6759d520afe565d065c8086925120a42609bd0ad8ed79f49f0ccd68b54",
+      "restricted_text": true,
+      "redistribution": "blocked"
+    },
+    {
+      "schema_version": "1",
+      "source_id": "WikiEvents-train",
+      "url": "https://gen-arg-data.s3.us-east-2.amazonaws.com/wikievents/data/train.jsonl",
+      "revision": "253e0889b2377e0f7084cb406cf5d4142ee8a365",
+      "sha256": "c422502da583b1c9294077644c78a647d41ff133fb8c522cbdcc085e9dc081e4",
+      "restricted_text": true,
+      "redistribution": "blocked"
+    },
+    {
+      "schema_version": "1",
+      "source_id": "WikiEvents-dev",
+      "url": "https://gen-arg-data.s3.us-east-2.amazonaws.com/wikievents/data/dev.jsonl",
+      "revision": "253e0889b2377e0f7084cb406cf5d4142ee8a365",
+      "sha256": "74a6cbef44c44f1add6882e54f0a966f0f1a35cc260f3079de1fe4312eabe285",
+      "restricted_text": true,
+      "redistribution": "blocked"
+    },
+    {
+      "schema_version": "1",
+      "source_id": "WikiEvents-test",
+      "url": "https://gen-arg-data.s3.us-east-2.amazonaws.com/wikievents/data/test.jsonl",
+      "revision": "253e0889b2377e0f7084cb406cf5d4142ee8a365",
+      "sha256": "9885c0d94e4099d202a9f568c98c353055d600041f48f5fa96bcd569cc496c02",
+      "restricted_text": true,
+      "redistribution": "blocked"
+    }
+  ]
+}

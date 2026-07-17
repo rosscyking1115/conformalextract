@@ -179,8 +179,41 @@ def gate0_smoke(
         raise typer.Exit(code=3)
 
 
+@app.command("prepare-data")
+def prepare_data(
+    profiles: Annotated[Path, typer.Option(help="Private text-free trigger-frame profiles.")] = Path(
+        "data/private/plan2/example_profiles.jsonl"
+    ),
+    split_assignment: Annotated[
+        Path, typer.Option(help="Private metadata-only grouped role assignment.")
+    ] = Path("data/private/splits/rams_roles.jsonl"),
+    source_contract: Annotated[
+        Path, typer.Option(help="Official ephemeral-download and checksum contract.")
+    ] = Path("configs/plan2_sources.json"),
+    prompt_template: Annotated[Path, typer.Option()] = Path("docs/gate0/prompt-template.md"),
+    demonstrations: Annotated[Path, typer.Option()] = Path(
+        "data/private/plan2/fs_demonstrations.jsonl"
+    ),
+    model_config: Annotated[Path, typer.Option()] = Path("configs/model.json"),
+    output_dir: Annotated[Path, typer.Option()] = Path("manifests/plan2"),
+) -> None:
+    """Freeze role-bound, text-free Plan 2 preparation manifests."""
+
+    from conformalextract.preparation import freeze_preparation_manifests
+
+    hashes = freeze_preparation_manifests(
+        profiles_path=profiles,
+        split_assignment_path=split_assignment,
+        source_contract_path=source_contract,
+        prompt_template_path=prompt_template,
+        demonstrations_path=demonstrations,
+        model_config_path=model_config,
+        output_dir=output_dir,
+    )
+    typer.echo(json.dumps({"output_dir": str(output_dir), "sha256": hashes}, sort_keys=True))
+
+
 for command_name in (
-    "prepare-data",
     "train",
     "generate-predictions",
     "freeze-systems",
