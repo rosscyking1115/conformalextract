@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from conformalextract.preparation import load_training_profiles
+from conformalextract.preparation import freeze_preparation_manifests, load_training_profiles
 from conformalextract.profiles import (
     ProfileBuildSummary,
     RamsArgument,
@@ -231,3 +231,51 @@ def test_write_then_reload_profiles_roundtrips(tmp_path: Path) -> None:
     assert len(reloaded) == 2
     with pytest.raises(FileExistsError):
         write_profiles(profiles, output)
+
+
+def test_generated_profiles_are_accepted_by_prepare_data(tmp_path: Path) -> None:
+    role_map = {"k_train": ("g1", "train"), "k_dev": ("g2", "development")}
+    from dataclasses import replace
+    base = parse_rams_instance(RAMS_RECORD)
+    instances = [replace(base, instance_key="k_train"), replace(base, instance_key="k_dev")]
+    profiles, _ = build_profiles(
+        instances=instances, role_map=role_map, ontology=ONTOLOGY, template=TEMPLATE,
+        count_tokens=lambda text: len(text.split()),
+    )
+    profiles_path = tmp_path / "example_profiles.jsonl"
+    write_profiles(profiles, profiles_path)
+
+    # minimal companion inputs (see tests/test_preparation.py for the fixture shapes)
+    split = tmp_path / "split.jsonl"
+    split.write_text(
+        '{"document_id":"k_train","group_id":"g1","role":"train"}\n'
+        '{"document_id":"k_dev","group_id":"g2","role":"development"}\n',
+        encoding="utf-8",
+    )
+    sources = tmp_path / "sources.json"
+    sources.write_text(
+        '{"schema_version":"1","sources":[{"schema_version":"1","source_id":"RAMS-1.0c",'
+        '"url":"https://example.test/rams.tar.gz","revision":"1.0c","sha256":"' + "a" * 64 + '",'
+        '"restricted_text":true,"redistribution":"blocked"}]}',
+        encoding="utf-8",
+    )
+    prompt = tmp_path / "prompt.txt"
+    prompt.write_text("PROMPT", encoding="utf-8")
+    demos = tmp_path / "demos.jsonl"
+    demos.write_text("DEMOS", encoding="utf-8")
+    model_config = tmp_path / "model.json"
+    model_config.write_text(
+        '{"model_id":"Qwen/Qwen3-4B-Instruct-2507","model_revision":"' + "c" * 40 + '",'
+        '"initial_context_tokens":2048,"context_ladder":[2048,2560,3072,3584,4096],'
+        '"decoding":{"max_new_tokens":512}}',
+        encoding="utf-8",
+    )
+
+    hashes = freeze_preparation_manifests(
+        profiles_path=profiles_path, split_assignment_path=split, source_contract_path=sources,
+        prompt_template_path=prompt, demonstrations_path=demos, model_config_path=model_config,
+        output_dir=tmp_path / "manifests",
+    )
+    assert set(hashes) == {
+        "source", "split", "trainer", "prompt", "mask", "context_window", "lineage",
+    }
