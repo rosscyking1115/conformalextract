@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import posixpath
 from collections.abc import Sequence
 from enum import StrEnum
 from typing import Annotated, Final, Literal, cast, get_args
@@ -239,30 +240,69 @@ class MaterializationStep(FrozenModel):
     detail: str = ""
 
 
+def _is_within(path: str, root: str) -> bool:
+    """True when normalized ``path`` equals ``root`` or is nested beneath it."""
+
+    root = root.rstrip("/")
+    return path == root or path.startswith(f"{root}/")
+
+
 class EphemeralMaterializationPlan(FrozenModel):
-    """Ordered, allowlisted plan proving a job never uploads local raw data."""
+    """Ordered, allowlisted plan proving a job never uploads or reads local raw data."""
 
     source: FrozenTrainingSource
     workspace: str = Field(min_length=1)
     steps: tuple[MaterializationStep, ...]
+    launch_input_paths: tuple[str, ...] = ()
     upload_artifact_kinds: tuple[PersistedArtifactKind, ...]
     raw_retained: bool = False
     uploads_are_label_free: bool = True
 
     @model_validator(mode="after")
-    def enforce_raw_is_deleted_before_launch(self) -> EphemeralMaterializationPlan:
-        """Prove, from the steps themselves, that raw data never reaches launch."""
+    def enforce_raw_isolation(self) -> EphemeralMaterializationPlan:
+        """Prove, structurally, that no raw location survives into launch.
+
+        Rather than string-sniffing a fixed ``{workspace}/raw`` convention, this derives
+        the raw locations from the ``extract`` steps themselves and requires (a) every
+        raw location to be deleted before launch and (b) every launched input to be an
+        explicit, materialized path under the sanctioned ``{workspace}/inputs`` tree.
+        Case variants and nested raw directories therefore cannot slip a surviving raw
+        directory past the guard.
+        """
 
         actions = [step.action for step in self.steps]
-        raw_dir = f"{self.workspace}/raw"
+        inputs_root = posixpath.normpath(f"{self.workspace}/inputs")
+        raw_locations = [
+            posixpath.normpath(step.target) for step in self.steps if step.action == "extract"
+        ]
+        delete_targets = [
+            posixpath.normpath(step.target)
+            for step in self.steps
+            if step.action == "delete_raw"
+        ]
+        materialized = {
+            posixpath.normpath(step.target)
+            for step in self.steps
+            if step.action == "materialize_input"
+        }
         if "launch" in actions:
             if "delete_raw" not in actions:
                 raise ValueError("a launch step requires a prior delete_raw step")
             if actions.index("delete_raw") > actions.index("launch"):
                 raise ValueError("delete_raw must precede launch")
-        for step in self.steps:
-            if step.action == "launch" and raw_dir in f"{step.target} {step.detail}":
-                raise ValueError("launch must not read from the raw extraction directory")
+            if not self.launch_input_paths:
+                raise ValueError("launch requires explicit allowlisted input paths")
+        for path in self.launch_input_paths:
+            norm = posixpath.normpath(path)
+            if norm not in materialized:
+                raise ValueError("launch inputs must come from a materialize_input step")
+            if not _is_within(norm, inputs_root):
+                raise ValueError("launch inputs must reside under the sanctioned inputs directory")
+            if any(_is_within(norm, raw) for raw in raw_locations):
+                raise ValueError("launch inputs must not reside in a raw location")
+        for raw in raw_locations:
+            if not any(_is_within(raw, target) for target in delete_targets):
+                raise ValueError("every raw extraction must be deleted before launch")
         if self.raw_retained:
             raise ValueError("raw_retained must be False once the raw source is deleted")
         return self
@@ -347,6 +387,7 @@ def plan_ephemeral_materialization(
         source=source,
         workspace=workspace,
         steps=tuple(steps),
+        launch_input_paths=input_paths,
         upload_artifact_kinds=cast(
             "tuple[PersistedArtifactKind, ...]", tuple(upload_artifact_kinds)
         ),

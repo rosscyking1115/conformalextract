@@ -47,6 +47,10 @@ def test_plan_downloads_verifies_deletes_raw_then_launches_allowlisted_inputs() 
     launch = next(step for step in plan.steps if step.action == "launch")
     assert "/tmp/ce-r0/inputs/train.jsonl" in launch.detail
     assert "/tmp/ce-r0/inputs/development.jsonl" in launch.detail
+    assert plan.launch_input_paths == (
+        "/tmp/ce-r0/inputs/train.jsonl",
+        "/tmp/ce-r0/inputs/development.jsonl",
+    )
     assert plan.raw_retained is False
     assert plan.uploads_are_label_free is True
 
@@ -88,45 +92,91 @@ def test_plan_requires_at_least_one_named_input() -> None:
         _plan(allowed_inputs=())
 
 
-def test_a_directly_built_plan_that_launches_without_deleting_raw_is_rejected() -> None:
+def _direct_plan(
+    steps: tuple[MaterializationStep, ...],
+    *,
+    launch_input_paths: tuple[str, ...] = ("/tmp/ce-r0/inputs/train.jsonl",),
+    raw_retained: bool = False,
+) -> EphemeralMaterializationPlan:
+    return EphemeralMaterializationPlan(
+        source=SOURCE,
+        workspace="/tmp/ce-r0",
+        steps=steps,
+        launch_input_paths=launch_input_paths,
+        upload_artifact_kinds=("adapter_copy_a",),
+        raw_retained=raw_retained,
+    )
+
+
+_EXTRACT = MaterializationStep(action="extract", target="/tmp/ce-r0/raw")
+_MATERIALIZE = MaterializationStep(
+    action="materialize_input", target="/tmp/ce-r0/inputs/train.jsonl"
+)
+_DELETE = MaterializationStep(action="delete_raw", target="/tmp/ce-r0/raw")
+_LAUNCH = MaterializationStep(action="launch", target="/tmp/ce-r0")
+
+
+def test_a_hand_built_plan_that_launches_without_deleting_raw_is_rejected() -> None:
     with pytest.raises(ValidationError, match="delete_raw"):
-        EphemeralMaterializationPlan(
-            source=SOURCE,
-            workspace="/tmp/ce-r0",
-            steps=(
-                MaterializationStep(action="download", target="https://example.test/x.zip"),
-                MaterializationStep(action="launch", target="/tmp/ce-r0"),
-            ),
-            upload_artifact_kinds=("adapter_copy_a",),
-        )
+        _direct_plan((_EXTRACT, _MATERIALIZE, _LAUNCH))
 
 
-def test_a_directly_built_plan_that_launches_from_raw_is_rejected() -> None:
-    with pytest.raises(ValidationError, match="raw"):
-        EphemeralMaterializationPlan(
-            source=SOURCE,
-            workspace="/tmp/ce-r0",
-            steps=(
-                MaterializationStep(action="delete_raw", target="/tmp/ce-r0/raw"),
-                MaterializationStep(
-                    action="launch",
-                    target="/tmp/ce-r0",
-                    detail="read /tmp/ce-r0/raw/train.jsonl",
-                ),
-            ),
-            upload_artifact_kinds=("adapter_copy_a",),
-        )
+def test_a_hand_built_plan_that_deletes_raw_after_launch_is_rejected() -> None:
+    with pytest.raises(ValidationError, match="precede"):
+        _direct_plan((_EXTRACT, _MATERIALIZE, _LAUNCH, _DELETE))
 
 
-def test_a_directly_built_plan_cannot_claim_raw_is_retained() -> None:
+def test_a_hand_built_plan_cannot_claim_raw_is_retained() -> None:
     with pytest.raises(ValidationError, match="raw_retained"):
-        EphemeralMaterializationPlan(
-            source=SOURCE,
-            workspace="/tmp/ce-r0",
-            steps=(
+        _direct_plan((_EXTRACT, _MATERIALIZE, _DELETE, _LAUNCH), raw_retained=True)
+
+
+def test_case_variant_raw_directory_that_survives_deletion_is_rejected() -> None:
+    # Reviewer B5: extract to /RAW but delete /raw; on a case-sensitive container the
+    # extraction survives, so the plan must be rejected even though launch reads a clean
+    # /inputs path.
+    with pytest.raises(ValidationError, match="raw extraction must be deleted"):
+        _direct_plan(
+            (
+                MaterializationStep(action="extract", target="/tmp/ce-r0/RAW"),
+                _MATERIALIZE,
                 MaterializationStep(action="delete_raw", target="/tmp/ce-r0/raw"),
-                MaterializationStep(action="launch", target="/tmp/ce-r0"),
+                _LAUNCH,
+            )
+        )
+
+
+def test_nested_raw_directory_that_survives_deletion_is_rejected() -> None:
+    # Reviewer B6: extract to a nested raw dir the fixed convention path never covers.
+    with pytest.raises(ValidationError, match="raw extraction must be deleted"):
+        _direct_plan(
+            (
+                MaterializationStep(action="extract", target="/tmp/ce-r0/sub/raw"),
+                _MATERIALIZE,
+                MaterializationStep(action="delete_raw", target="/tmp/ce-r0/raw"),
+                _LAUNCH,
+            )
+        )
+
+
+def test_launch_input_outside_the_sanctioned_inputs_directory_is_rejected() -> None:
+    with pytest.raises(ValidationError, match="sanctioned inputs"):
+        _direct_plan(
+            (
+                MaterializationStep(action="extract", target="/tmp/ce-r0/raw"),
+                MaterializationStep(
+                    action="materialize_input", target="/tmp/ce-r0/RAW/train.jsonl"
+                ),
+                _DELETE,
+                _LAUNCH,
             ),
-            upload_artifact_kinds=("adapter_copy_a",),
-            raw_retained=True,
+            launch_input_paths=("/tmp/ce-r0/RAW/train.jsonl",),
+        )
+
+
+def test_launch_input_not_produced_by_a_materialize_step_is_rejected() -> None:
+    with pytest.raises(ValidationError, match="materialize_input"):
+        _direct_plan(
+            (_EXTRACT, _DELETE, _LAUNCH),
+            launch_input_paths=("/tmp/ce-r0/inputs/train.jsonl",),
         )
