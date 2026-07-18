@@ -1,10 +1,14 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
+
+import pytest
 
 from conformalextract.profiles import (
     RamsArgument,
     load_event_ontology,
+    load_prompt_template,
     ordered_argument_roles,
     parse_rams_instance,
     render_completion,
@@ -85,3 +89,20 @@ def test_render_completion_is_deterministic_in_ontology_order() -> None:
 def test_render_completion_empty_gold() -> None:
     instance = parse_rams_instance({**RAMS_RECORD, "gold_evt_links": []})
     assert render_completion(instance, ("attacker",)) == '{"arguments":[]}'
+
+
+def test_load_prompt_template_extracts_the_frozen_fenced_body() -> None:
+    template = load_prompt_template(Path("docs/gate0/prompt-template.md"))
+    for placeholder in (
+        "{event_type}", "{trigger_start}", "{trigger_end}",
+        "{allowed_roles_json}", "{numbered_tokens_json}",
+    ):
+        assert placeholder in template
+    assert '{"arguments":[]}' in template  # literal JSON example survives extraction
+
+
+def test_load_prompt_template_fails_loud_without_a_fence(tmp_path: Path) -> None:
+    bare = tmp_path / "no-fence.md"
+    bare.write_text("just prose, no code fence\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="fenced"):
+        load_prompt_template(bare)

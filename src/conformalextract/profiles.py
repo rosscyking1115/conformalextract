@@ -101,9 +101,7 @@ def load_prompt_template(path: Path) -> str:
 def ordered_argument_roles(
     instance: RamsInstance, allowed_roles: tuple[str, ...]
 ) -> tuple[str, ...]:
-    rank = {role: index for index, role in enumerate(allowed_roles)}
-    ordered = sorted(instance.arguments, key=lambda arg: (rank.get(arg.role, len(rank)), arg.start))
-    return tuple(arg.role for arg in ordered)
+    return tuple(arg.role for arg in _ordered_arguments(instance, allowed_roles))
 
 
 def _ordered_arguments(
