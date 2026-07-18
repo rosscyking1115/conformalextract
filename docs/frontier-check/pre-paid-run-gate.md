@@ -58,15 +58,16 @@ band as a stand-in, not measured data.
 
 ## G2 — Cost/engine (design the paid run correctly)
 
-- [ ] **G2a Engine = vLLM** (continuous batching) for generation, on **1× L4 ($0.80/hr)**; A10G-small
-  fallback. Not padded transformers `.generate()` (pessimistic for the 2–4k-input / ≤512-output
-  skew).
-- [ ] **G2b R0 validates the QLoRA-under-vLLM path** — a bitsandbytes 4-bit adapter may run a slow
-  vLLM path or need merge/convert to AWQ/GPTQ. This is the main throughput risk; confirm in R0.
-- [ ] **G2c R0 benchmark** measures `vllm bench throughput` at the **real RAMS prompt-length
-  distribution**, sweeps `max-num-seqs`, records the KV-cache/OOM ceiling, and logs **actual**
-  generated-token counts (to replace the 512 upper bound). Feed measured items/hour into the existing
-  forecast (≥0.20 buffer + positive reserve unchanged). Expected total ~$6–15 → forecast should say GO.
+- [x] **G2a Engine = vLLM on 1× L4 ($0.80/hr)** — confirmed working (job `6a5bcee6`): vLLM 0.25.1,
+  Qwen3-4B bf16, FlashAttention 2, model load ~30s.
+- [x] **G2c R0 benchmark ran → forecast GO.** Measured **2,771 items/hr** (worst-case max-output);
+  `forecast_whole_programme` → **GO, $16.08 of $24.7992, $8.72 headroom** (conservative). See
+  `docs/plan2/r0-launch-plan.md`.
+- [ ] **G2b QLoRA-under-vLLM path** — R0 benchmarked the base bf16 (fair proxy for ZS/FS and ~QA).
+  The QA adapter served via vLLM LoRA is validated once R1 produces an adapter (bf16 base + LoRA,
+  not 4-bit, so the bitsandbytes-under-vLLM risk is largely sidestepped).
+- [ ] **G2c-real** re-run with the **real frozen prompt-length + true output lengths** once
+  `prepare-data` runs (only widens the margin).
 
 ## G3 — Training pre-flight (assert before the paid job; cheap, prevents wasted spend)
 
