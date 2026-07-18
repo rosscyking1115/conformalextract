@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, cast
 
 from conformalextract.data import rams_inclusive_to_half_open
-from conformalextract.preparation import DataRole, ExampleProfile
+from conformalextract.preparation import TRAINING_ROLES, DataRole, ExampleProfile
 
 _ROLE_RE = re.compile(r"^evt\d+arg\d+(.+)$")
 
@@ -197,3 +197,62 @@ def build_example_profile(
         prompt_masked_tokens=prompt_tokens,
         completion_supervised_tokens=completion_tokens,
     )
+
+
+SEALED_ROLES = frozenset({"certification", "final", "shift"})
+
+
+@dataclass(frozen=True)
+class ProfileBuildSummary:
+    emitted: int
+    sealed_dropped: int
+    total: int
+
+
+def assert_ontology_coverage(
+    instances: Sequence[RamsInstance], ontology: Mapping[str, tuple[str, ...]]
+) -> None:
+    for instance in instances:
+        allowed = ontology.get(instance.event_type)
+        if allowed is None:
+            raise ValueError(f"unknown_event {instance.event_type!r} (ontology preflight)")
+        for arg in instance.arguments:
+            if arg.role not in allowed:
+                raise ValueError(
+                    f"unknown_role {arg.role!r} for {instance.event_type} (ontology preflight)"
+                )
+
+
+def build_profiles(
+    *,
+    instances: Sequence[RamsInstance],
+    role_map: Mapping[str, tuple[str, str]],
+    ontology: Mapping[str, tuple[str, ...]],
+    template: str,
+    count_tokens: Callable[[str], int],
+) -> tuple[list[ExampleProfile], ProfileBuildSummary]:
+    assert_ontology_coverage(instances, ontology)
+    profiles: list[ExampleProfile] = []
+    sealed_dropped = 0
+    for instance in instances:
+        binding = role_map.get(instance.instance_key)
+        if binding is None:
+            raise ValueError(f"no role assignment for instance {instance.instance_key}")
+        group_id, data_role = binding
+        if data_role in SEALED_ROLES:
+            sealed_dropped += 1
+            continue
+        if data_role not in TRAINING_ROLES:
+            raise ValueError(f"unknown_data_role {data_role!r} for {instance.instance_key}")
+        profiles.append(
+            build_example_profile(
+                instance, data_role=cast(DataRole, data_role), group_id=group_id, ontology=ontology,
+                template=template, count_tokens=count_tokens,
+            )
+        )
+    summary = ProfileBuildSummary(
+        emitted=len(profiles), sealed_dropped=sealed_dropped, total=len(instances)
+    )
+    if summary.emitted + summary.sealed_dropped != summary.total:
+        raise ValueError("conservation failed: emitted + sealed_dropped != total")
+    return profiles, summary

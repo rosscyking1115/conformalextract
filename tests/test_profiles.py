@@ -7,8 +7,11 @@ from pathlib import Path
 import pytest
 
 from conformalextract.profiles import (
+    ProfileBuildSummary,
     RamsArgument,
+    assert_ontology_coverage,
     build_example_profile,
+    build_profiles,
     instance_hashes,
     load_event_ontology,
     load_prompt_template,
@@ -150,3 +153,45 @@ def test_build_example_profile_rejects_unknown_event() -> None:
             instance, data_role="train", group_id="g1", ontology={}, template=TEMPLATE,
             count_tokens=lambda text: len(text.split()),
         )
+
+
+def _instances():
+    base = parse_rams_instance(RAMS_RECORD)
+    from dataclasses import replace
+    return [
+        replace(base, instance_key="k_train"),
+        replace(base, instance_key="k_dev"),
+        replace(base, instance_key="k_cert"),
+    ]
+
+
+def test_build_profiles_emits_training_roles_and_drops_sealed() -> None:
+    role_map = {
+        "k_train": ("g1", "train"),
+        "k_dev": ("g1", "development"),
+        "k_cert": ("g2", "certification"),
+    }
+    profiles, summary = build_profiles(
+        instances=_instances(), role_map=role_map, ontology=ONTOLOGY, template=TEMPLATE,
+        count_tokens=lambda text: len(text.split()),
+    )
+    assert {p.data_role for p in profiles} == {"train", "development"}
+    assert summary == ProfileBuildSummary(emitted=2, sealed_dropped=1, total=3)
+
+
+def test_build_profiles_conservation_holds_on_join() -> None:
+    role_map = {
+        "k_train": ("g1", "train"),
+        "k_dev": ("g1", "development"),
+        "k_cert": ("g2", "final"),
+    }
+    _, summary = build_profiles(
+        instances=_instances(), role_map=role_map, ontology=ONTOLOGY, template=TEMPLATE,
+        count_tokens=lambda text: len(text.split()),
+    )
+    assert summary.emitted + summary.sealed_dropped == summary.total == 3
+
+
+def test_ontology_coverage_preflight_fails_on_missing_event() -> None:
+    with pytest.raises(ValueError, match="unknown_event"):
+        assert_ontology_coverage(_instances(), {})
