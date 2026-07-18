@@ -10,14 +10,18 @@ not authorize spend; it defines what must be true first. Nothing here has been e
   below): at `α=0.20` the RAMS band is answerable (ceiling ~0.56–0.65). **Still to do with real
   data:** feed measured per-system dev always-answer losses into `base_risk_feasibility` and confirm
   `α` before spend. Free/CPU.
-- [ ] **G1b Certifier theorem-to-code note** (blocks any "certified" claim). Verify against
-  arXiv 2606.08517 lemmas that `scorc_certificate`'s δ-ledger has **all** required per-pair tails.
-  Current code has EB risk (`log 64m/δ`) + Clopper–Pearson acceptance (`δ/16m`) + Maurer–Pontil
-  utility (`log 8m/δ`) but **no explicit Chernoff lower/upper bounds on the accepted count** — confirm
-  whether the paper requires them (each `δ/16`) and add if so; verify the `64m`/`8m` constants.
-- [ ] **G1c Selector reconciliation.** Code selects `argmax utility_LCB` (matches the paper);
-  plan §7.3/§8.1 says `argmax acceptance_LCB` and defines `CA_s` = max acceptance-LCB. Make
-  code ↔ plan ↔ reported-headline consistent; justify via the uniform-over-`Ĝ` argument.
+- [~] **G1b Certifier theorem-to-code note** — DONE and precise (`docs/plan3/theorem-to-code-scorc.md`).
+  Verified against 2606.08517 Table 2/Alg. 1: U1 EB `log(64m/δ)`, U2 Clopper–Pearson `δ/16m`, U6
+  utility `log(8m/δ)`, sample size `32log(32m/δ)/π_min`, and the selector **all match**. **GAP
+  confirmed:** the code omits **U3 + U4**, the two Chernoff accepted-count bounds (`δ/16m` each, over
+  the eligible set ℋ) the paper calls "required for correctness." **Still OPEN — blocks any
+  "certified" claim:** add U3/U4 (needs Alg. 1 lines 5–8) + Monte-Carlo re-validation, OR prove the
+  fixed-policy `eb≤0` specialization is self-sufficient and drop the denominator-based risk_upper.
+- [~] **G1c Selector reconciliation** — DIAGNOSED. Code == paper (`argmax U_LCB`); the **plan §7.3/§8.1
+  wording** (select by acceptance-LCB) is the mismatch. Deployed policy = `argmax U_LCB`; headline
+  `CA_s = max_{Ĝ} acceptance_LCB` is separately valid by uniform coverage but the code must then also
+  expose that max (it currently returns only the utility-selected pair's acceptance-LCB). Make
+  plan ↔ code ↔ reported-number consistent (documentation + a small certifier accessor).
 - [ ] **G1d Negative control** added to the certifier validation suite: naive max-raw-acceptance
   threshold selection violates `α`; the certified selector does not. Plus Monte Carlo over a valid
   (`μ<α`) and a deliberately-invalid (`μ>α`) regime, reporting violations vs the `δ` budget.
