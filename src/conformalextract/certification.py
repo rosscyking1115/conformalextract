@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Sequence
+from dataclasses import dataclass
 
 import numpy as np
 from scipy.stats import beta
@@ -19,6 +20,85 @@ def hoeffding_upper(losses: Sequence[float], failure_probability: float) -> floa
     mean = sum(losses) / len(losses)
     radius = math.sqrt(math.log(2.0 / failure_probability) / (2.0 * len(losses)))
     return min(1.0, mean + radius)
+
+
+def minimum_abstention(*, base_risk: float, alpha: float) -> float:
+    """Population lower bound on forced abstention when base risk exceeds the target.
+
+    From the always-answer decomposition (plan section 6.1; arXiv 2606.29054): when
+    ``base_risk > alpha`` any valid selective policy must abstain on at least
+    ``(base_risk - alpha) / (1 - alpha)`` of documents. Zero otherwise.
+    """
+
+    if not 0.0 <= base_risk <= 1.0:
+        raise ValueError("base_risk must lie in [0, 1]")
+    if not 0.0 < alpha < 1.0:
+        raise ValueError("alpha must lie in (0, 1)")
+    if base_risk <= alpha:
+        return 0.0
+    return (base_risk - alpha) / (1.0 - alpha)
+
+
+def max_feasible_acceptance(*, base_risk: float, alpha: float) -> float:
+    """Population upper bound on any valid policy's acceptance at this base risk."""
+
+    return 1.0 - minimum_abstention(base_risk=base_risk, alpha=alpha)
+
+
+@dataclass(frozen=True)
+class BaseRiskFeasibility:
+    """A pre-certification, GPU-free feasibility read on one system at one target."""
+
+    base_risk: float
+    base_risk_upper: float
+    alpha: float
+    acceptance_floor: float
+    minimum_abstention: float
+    max_feasible_acceptance: float
+    floor_reachable: bool
+    verdict: str
+
+
+def base_risk_feasibility(
+    losses: Sequence[float],
+    *,
+    alpha: float,
+    acceptance_floor: float,
+    failure_probability: float = 0.05,
+) -> BaseRiskFeasibility:
+    """Decide whether a target is even answerable before any paid run (plan section 6.1).
+
+    ``losses`` are the always-answer bounded document losses on development data. The
+    forced-abstention floor is computed from a conservative one-sided Hoeffding upper
+    bound on the base risk, so the verdict does not understate infeasibility.
+    """
+
+    if not losses:
+        raise ValueError("losses must be non-empty")
+    if any(loss < 0.0 or loss > 1.0 for loss in losses):
+        raise ValueError("losses must be bounded in [0, 1]")
+
+    point = sum(losses) / len(losses)
+    upper = hoeffding_upper(losses, failure_probability)
+    min_abstention = minimum_abstention(base_risk=upper, alpha=alpha)
+    max_acceptance = 1.0 - min_abstention
+    floor_reachable = max_acceptance >= acceptance_floor
+    if not floor_reachable:
+        verdict = "near_vacuous"
+    elif upper > alpha:
+        verdict = "marginal"
+    else:
+        verdict = "answerable"
+    return BaseRiskFeasibility(
+        base_risk=point,
+        base_risk_upper=upper,
+        alpha=alpha,
+        acceptance_floor=acceptance_floor,
+        minimum_abstention=min_abstention,
+        max_feasible_acceptance=max_acceptance,
+        floor_reachable=floor_reachable,
+        verdict=verdict,
+    )
 
 
 def scorc_minimum_n(*, candidate_count: int, delta: float, acceptance_floor: float) -> int:

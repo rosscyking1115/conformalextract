@@ -6,11 +6,10 @@ not authorize spend; it defines what must be true first. Nothing here has been e
 
 ## G1 — Validity (do first; free/CPU; could change the whole design)
 
-- [ ] **G1a Base-risk feasibility.** On development data, compute base risk `μ` per system and the
-  abstention floor `(μ−α)/(1−α)`. Frontier evidence (2606.29054) puts document-level extraction
-  `μ≈0.48–0.55`; at the plan default `α=0.20` the certificate is forced near-vacuous **regardless of
-  QLoRA**. **Choose `α` from the measured band before spend**, or explicitly declare a near-zero
-  acceptance floor. Decisive and free — run before committing GPU budget.
+- [~] **G1a Base-risk feasibility.** Diagnostic built + run over the evidence band (see status
+  below): at `α=0.20` the RAMS band is answerable (ceiling ~0.56–0.65). **Still to do with real
+  data:** feed measured per-system dev always-answer losses into `base_risk_feasibility` and confirm
+  `α` before spend. Free/CPU.
 - [ ] **G1b Certifier theorem-to-code note** (blocks any "certified" claim). Verify against
   arXiv 2606.08517 lemmas that `scorc_certificate`'s δ-ledger has **all** required per-pair tails.
   Current code has EB risk (`log 64m/δ`) + Clopper–Pearson acceptance (`δ/16m`) + Maurer–Pontil
@@ -22,6 +21,29 @@ not authorize spend; it defines what must be true first. Nothing here has been e
 - [ ] **G1d Negative control** added to the certifier validation suite: naive max-raw-acceptance
   threshold selection violates `α`; the certified selector does not. Plus Monte Carlo over a valid
   (`μ<α`) and a deliberately-invalid (`μ>α`) regime, reporting violations vs the `δ` budget.
+
+### G1a status — diagnostic built and run over the evidence band (2026-07-18)
+
+`certification.base_risk_feasibility` / `minimum_abstention` / `max_feasible_acceptance` are
+implemented + tested (`tests/test_base_risk_feasibility.py`). Population certified-acceptance
+ceiling `1 − (μ−α)/(1−α)` over the frontier base-risk band (floor 0.20; `X` = below floor):
+
+```
+  mu \ alpha |  a=0.10   a=0.20   a=0.30   a=0.40   a=0.50
+   mu=0.45   |   0.61     0.69     0.79     0.92     1.00
+   mu=0.48   |   0.58     0.65     0.74     0.87     1.00
+   mu=0.50   |   0.56     0.62     0.71     0.83     1.00
+   mu=0.55   |   0.50     0.56     0.64     0.75     0.90
+```
+
+**Read:** at **α=0.20** the RAMS band (μ≈0.48–0.55) caps certified acceptance at ~0.56–0.65 —
+this **clears the 0.20 floor, so α=0.20 is answerable for RAMS** (correcting the earlier
+"near-vacuous" caution, which bites at **α=0.10** or μ≥0.55). Two things still gate the answer:
+(i) the QA−ZS material gain (default 0.05) must fit under this ceiling, and (ii) **ZS's own base
+risk may push ZS infeasible** — which is a legitimate boundary-crossing result, not a failure.
+**Remaining G1a step needs real dev predictions:** feed measured per-system always-answer losses
+into `base_risk_feasibility` and confirm α before spend; the arithmetic above uses the frontier
+band as a stand-in, not measured data.
 
 ## G2 — Cost/engine (design the paid run correctly)
 
