@@ -843,7 +843,9 @@ from conformalextract.preparation import freeze_preparation_manifests
 
 
 def test_generated_profiles_are_accepted_by_prepare_data(tmp_path: Path) -> None:
-    role_map = {"k_train": ("g1", "train"), "k_dev": ("g1", "development")}
+    # NOTE (fixed during execution): k_dev must be in its own group — one group may
+    # not span two roles (the leakage control _split_summary enforces).
+    role_map = {"k_train": ("g1", "train"), "k_dev": ("g2", "development")}
     from dataclasses import replace
     base = parse_rams_instance(RAMS_RECORD)
     instances = [replace(base, instance_key="k_train"), replace(base, instance_key="k_dev")]
@@ -858,7 +860,7 @@ def test_generated_profiles_are_accepted_by_prepare_data(tmp_path: Path) -> None
     split = tmp_path / "split.jsonl"
     split.write_text(
         '{"document_id":"k_train","group_id":"g1","role":"train"}\n'
-        '{"document_id":"k_dev","group_id":"g1","role":"development"}\n',
+        '{"document_id":"k_dev","group_id":"g2","role":"development"}\n',
         encoding="utf-8",
     )
     sources = tmp_path / "sources.json"
