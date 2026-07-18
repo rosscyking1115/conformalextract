@@ -292,7 +292,7 @@ def read_rams_instances(archive: Path) -> list[RamsInstance]:
 def qwen_token_counter(tokenizer_dir: Path) -> Callable[[str], int]:
     from transformers import AutoTokenizer
 
-    tokenizer = AutoTokenizer.from_pretrained(str(tokenizer_dir))  # type: ignore[no-untyped-call]
+    tokenizer = AutoTokenizer.from_pretrained(str(tokenizer_dir), local_files_only=True)  # type: ignore[no-untyped-call]
     return lambda text: len(tokenizer(text, add_special_tokens=False)["input_ids"])
 
 
