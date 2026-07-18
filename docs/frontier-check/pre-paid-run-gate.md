@@ -10,18 +10,23 @@ not authorize spend; it defines what must be true first. Nothing here has been e
   below): at `α=0.20` the RAMS band is answerable (ceiling ~0.56–0.65). **Still to do with real
   data:** feed measured per-system dev always-answer losses into `base_risk_feasibility` and confirm
   `α` before spend. Free/CPU.
-- [~] **G1b Certifier theorem-to-code note** — DONE and precise (`docs/plan3/theorem-to-code-scorc.md`).
-  Verified against 2606.08517 Table 2/Alg. 1: U1 EB `log(64m/δ)`, U2 Clopper–Pearson `δ/16m`, U6
-  utility `log(8m/δ)`, sample size `32log(32m/δ)/π_min`, and the selector **all match**. **GAP
-  confirmed:** the code omits **U3 + U4**, the two Chernoff accepted-count bounds (`δ/16m` each, over
-  the eligible set ℋ) the paper calls "required for correctness." **Still OPEN — blocks any
-  "certified" claim:** add U3/U4 (needs Alg. 1 lines 5–8) + Monte-Carlo re-validation, OR prove the
-  fixed-policy `eb≤0` specialization is self-sufficient and drop the denominator-based risk_upper.
-- [~] **G1c Selector reconciliation** — DIAGNOSED. Code == paper (`argmax U_LCB`); the **plan §7.3/§8.1
-  wording** (select by acceptance-LCB) is the mismatch. Deployed policy = `argmax U_LCB`; headline
-  `CA_s = max_{Ĝ} acceptance_LCB` is separately valid by uniform coverage but the code must then also
-  expose that max (it currently returns only the utility-selected pair's acceptance-LCB). Make
-  plan ↔ code ↔ reported-number consistent (documentation + a small certifier accessor).
+- [x] **G1b Certifier theorem-to-code note** — DONE (`docs/plan3/theorem-to-code-scorc.md`).
+  **Corrected finding:** after fetching Algorithm 1 in full, `scorc_certificate` implements it
+  **correctly and completely** (Lines 5/6/7/9 + `argmax U_LCB`; EB `log(64m/δ)`, CP `δ/16m`, utility
+  `log(8m/δ)`, sample size `32log(32m/δ)/π_min` all match). **U3/U4 are proof-only — NOT computed by
+  the algorithm**, so there is no implementation gap and they must not be added. One minor reporting
+  item: the code returns an extra `risk_upper = α + eb/p_LCB` not in the algorithm (valid conservative
+  diagnostic, but the Theorem-1 certified bound is simply `α`) — report `α` as the certified bound and
+  label the extra as a diagnostic. Not a validity blocker.
+- [x] **G1c Selector reconciliation** — DIAGNOSED. Code == paper (`argmax U_LCB`), and with `v=1,c=0`
+  the utility IS the acceptance rate, so the selector already maximizes an (M-P) acceptance lower
+  bound — close to the plan's intent. Reconcile plan wording + decide whether the headline `CA_s` uses
+  the M-P `U_LCB` or the Clopper–Pearson `p_LCB`; expose `max_{Ĝ}` if §8.1's max-acceptance headline is
+  kept. Documentation + small accessor, not a validity blocker.
+- [ ] **G1d Empirical coverage validation** (this is the real proof the certifier works — supersedes
+  the mis-flagged U3/U4 item). Monte-Carlo over resplits: VALID regime (`μ<α`) selected risk `≤α` at
+  rate `≥1−δ`, binomial-consistent; deliberately-INVALID regime (`μ>α`) forces abstention; negative
+  control: naive max-raw-acceptance selection violates `α` while the certified selector does not.
 - [ ] **G1d Negative control** added to the certifier validation suite: naive max-raw-acceptance
   threshold selection violates `α`; the certified selector does not. Plus Monte Carlo over a valid
   (`μ<α`) and a deliberately-invalid (`μ>α`) regime, reporting violations vs the `δ` budget.

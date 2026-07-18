@@ -6,13 +6,22 @@ method, "A Joint Finite-Sample Certificate for Adaptive Selective Conformal Risk
 (`https://arxiv.org/html/2606.08517v1`). The paper is a 2026 preprint — treat theorem/line
 numbers as version-specific.
 
-## Verdict
+## Verdict (corrected 2026-07-18 after fetching Algorithm 1 in full)
 
-**One genuine gap that blocks an unqualified "certified via Theorem 1" claim: the certifier
-omits the two Chernoff bounds on the accepted count (U3, U4).** Every other component matches
-the paper exactly. Resolve before any "certified" wording (not before the generation run, since
-the certifier is CPU and runs after predictions — but a run is only worth paying for if it can
-end in a valid certificate).
+**Our `scorc_certificate` implements Algorithm 1 correctly and completely — there is NO
+missing-bound implementation gap.** An earlier draft of this note flagged the two Chernoff
+accepted-count bounds (U3, U4) as "missing / blocks certified." That was wrong, and this
+correction records why: **U3/U4 are proof-only devices — Algorithm 1 never computes them.**
+The implementable algorithm is exactly Line 5 (empirical-Bernstein `EB`), Line 6 (Clopper–Pearson
+`p_LCB`), Line 7 (utility `U_LCB`), Line 9 feasibility (`EB≤0 ∧ p_LCB≥π_min`), then
+`argmax_{Ĝ} U_LCB`. Our code matches every line. The eligible set `ℋ={p_acc≥π_min}` and the
+Chernoff events E3/E4 depend on the unknown population `p_acc` and appear only in the proof's
+union bound (Table 2 δ-ledger), not in the computed certificate. So U3/U4 must NOT be added to
+the code — doing so would diverge from the paper's algorithm.
+
+**The remaining genuine items are (a) one reporting faithfulness point and (b) empirical
+validation** — neither blocks the algorithm's validity, but both should be settled before any
+"certified" wording.
 
 ## Component-by-component
 
@@ -22,43 +31,45 @@ Paper Table 2 (δ-ledger), per candidate pair over a grid of size `m`:
 |---|---|---|---|---|
 | U1 | Two-sided Maurer–Pontil / empirical-Bernstein on `Z=A(L−α)` | δ/(16m) | `risk_log=log(64m/δ)`; `eb = Z̄ + √(2σ̂²·risk_log/n) + 7·risk_log/(3(n−1))` | **match** (log-arg `64m/δ` = the paper's two-sided M-P at δ/(32m) per tail) |
 | U2 | Clopper–Pearson acceptance coverage | δ/(16m) | `beta.ppf(δ/(16m), count, n−count+1)` | **match** |
-| U3 | **Chernoff lower-tail on accepted count** `{s ≥ (3/4)·n·p_acc}`, over eligible set ℋ | δ/(16m) | **absent** | **MISSING** |
-| U4 | **Chernoff upper-tail on accepted count** `{s ≤ (3/2)·n·p_acc}`, over ℋ | δ/(16m) | **absent** | **MISSING** |
-| U6 | Two-sided Maurer–Pontil on deployment utility | δ/(2m) | `utility_log=log(8m/δ)`; symmetric M-P lower bound | **match** |
+| U3 | Chernoff lower-tail on accepted count `{s ≥ (3/4)·n·p_acc}`, over eligible set ℋ | δ/(16m) | not computed | **correct** — proof-only (depends on unknown `p_acc`); Algorithm 1 never computes it |
+| U4 | Chernoff upper-tail on accepted count `{s ≤ (3/2)·n·p_acc}`, over ℋ | δ/(16m) | not computed | **correct** — proof-only |
+| U6 | Two-sided Maurer–Pontil on deployment utility `U_LCB` (v=1, c=0 → utility = acceptance) | δ/(2m) | `utility_log=log(8m/δ)`; symmetric M-P lower bound on the accept indicator | **match** |
 | — | Sample size (Assumption 5) `n ≥ 32·log(32m/δ)/π_min` | — | `scorc_minimum_n = ceil(32·log(32m/δ)/floor)` | **match** |
 | — | Selector `argmax_{Ĝ} U_LCB` (Alg. 1 L9–14) | — | `max(feasible, key=(utility_lower, −index))` | **match** |
 
-Paper total failure budget `U1+U2+U3+U4+U6 = δ/16+δ/16+δ/16+δ/16+δ/2 = 3δ/4 ≤ δ`.
-Our code's realised budget `U1+U2+U6 = δ/16+δ/16+δ/2 = 5δ/8` — it *under-spends* δ, but that is
-not the issue: it omits the U3/U4 **correctness** events, which the paper states are "required
-for correctness, not for budget savings" and which make the ratio denominator `E[A]` concentrate
-so the reported conditional risk (`risk_upper = α + eb/acceptance_LCB`, our line ~216) is valid.
+Paper total failure budget `U1+U2+U3+U4+U6 = δ/16+δ/16+δ/16+δ/16+δ/2 = 3δ/4 ≤ δ`. Algorithm 1
+consumes this budget **in the proof**; the code computes only the U1/U2/U6 quantities because
+U3/U4 are population-restricted proof events, not computed outputs. The δ/16 shares for U3/U4 are
+"spent" analytically to license the risk guarantee, not by any runtime check — so the correct
+implementation does exactly what our code does.
 
-## G1b — the U3/U4 gap (OPEN, blocks "certified")
+## G1b — reporting faithfulness (was mis-flagged as a gap; now: minor, verify)
 
-- **Fact:** `scorc_certificate` never bounds the accepted count `s` against `(3/4)·n·p_acc` /
-  `(3/2)·n·p_acc`. Feasibility is decided by `eb ≤ 0 ∧ acceptance_LCB ≥ floor` only.
-- **Why it may still be *partly* sound:** the feasibility test `eb ≤ 0` bounds `E[Z]=E[A(L−α)]`
-  directly (Z is bounded in `[−α, 1−α]`), which already implies selected risk `E[AL]/E[A] ≤ α`
-  when `E[A]>0`. So the *feasibility decision* for risk may not need U3/U4.
-- **Why it is still a gap:** the paper's **joint** guarantee and the **reported** conditional
-  `risk_upper` (which divides by the acceptance LCB) rely on the denominator concentration that
-  U3/U4 provide. Reproducing "the paper's Theorem 1 certificate" requires them; omitting them
-  means our object is a *related* certificate whose exact validity must be re-proven for the
-  specialization, not the paper's.
-- **Fix path (needs Algorithm 1 lines 5–8, not on the fetched page):** either (a) add U3/U4 as
-  Chernoff bounds on `accepted_counts` at δ/(16m) each, restricted to the eligible set
-  `ℋ={acceptance_LCB ≥ floor}`, and wire them into the reported risk_upper per the paper's
-  algorithm; then re-validate with Monte Carlo (valid + deliberately-invalid regimes); OR
-  (b) write a proof that the fixed-output-policy specialization's `eb ≤ 0` feasibility plus the
-  Clopper–Pearson acceptance LCB is self-sufficient and drop the denominator-based `risk_upper`
-  in favour of the directly-bounded quantity. **Do not ship a "certified" claim until (a) or (b).**
+- **No missing bound.** Algorithm 1's feasibility (`EB ≤ 0 ∧ p_LCB ≥ π_min`) is fully implemented.
+- **The one real reporting item:** Algorithm 1 does **not** output a numeric selected-risk upper
+  bound — Theorem 1 proves `R_sel ≤ α` for any returned (feasible) pair, so the **certified upper
+  bound is α**. Our code additionally returns `risk_upper = α + eb/acceptance_LCB` (line ~216),
+  a self-derived quantity not in the algorithm. It is `≤ α` for feasible pairs and is a *valid
+  conservative* ratio upper bound when both `E[Z] ≤ eb` (U1) and `E[A] ≥ acceptance_LCB` (U2)
+  hold — since for `eb ≤ 0`, `sup_{E[A]∈[p_LCB,1]} eb/E[A] = eb/p_LCB`. So it is not wrong, but it
+  goes beyond what Theorem 1 states. **Recommendation:** report the certified bound as `α`
+  (Theorem-1-exact) and expose `α + eb/p_LCB` as a clearly-labeled *conservative diagnostic*, not
+  as "the certified bound"; the empirical selected risk is already reported separately. This is a
+  reporting/wording choice for Gate 0, not an algorithm change; the existing test only asserts
+  `risk_upper ≤ 0.2`, which either representation satisfies.
+- **What actually needs doing before a "certified" claim:** the empirical **coverage validation**
+  below (this, not U3/U4, is what proves the certifier controls risk).
 
 ## G1c — selector reconciliation (documentation fix)
 
 - **Code and paper agree:** deploy `argmax U_LCB` over `Ĝ`. No code change needed.
-- **Plan wording is the mismatch.** Plan §7.3/§8.1 says "select the feasible candidate with the
-  largest acceptance LCB" and defines `CA_s = max acceptance_LCB`. Reconcile as:
+- **The mismatch is smaller than it looked.** Our utility uses `v=1, c=0`, so `u_dep = A` (the
+  accept indicator) and `U_LCB` is a **Maurer–Pontil lower bound on the acceptance rate**. The code's
+  `argmax U_LCB` therefore already maximizes an acceptance-based lower bound — close to the plan's
+  intent. The subtlety: the feasibility/reported acceptance bound is **Clopper–Pearson** (`p_LCB`)
+  while the *selector* uses the **M-P** acceptance lower bound (`U_LCB`); two different valid lower
+  bounds on the same quantity. Plan §7.3/§8.1 says "select by max acceptance_LCB" and defines
+  `CA_s = max acceptance_LCB`. Reconcile as:
   - **Deployed policy** = `argmax U_LCB` (paper/code).
   - **Headline comparison object** `CA_s` = `max` over `Ĝ` of `acceptance_LCB` is **also valid**
     because the guarantee holds *uniformly* over `Ĝ` (every pair's acceptance LCB is simultaneously
