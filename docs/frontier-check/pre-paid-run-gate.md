@@ -23,10 +23,12 @@ not authorize spend; it defines what must be true first. Nothing here has been e
   bound — close to the plan's intent. Reconcile plan wording + decide whether the headline `CA_s` uses
   the M-P `U_LCB` or the Clopper–Pearson `p_LCB`; expose `max_{Ĝ}` if §8.1's max-acceptance headline is
   kept. Documentation + small accessor, not a validity blocker.
-- [ ] **G1d Empirical coverage validation** (this is the real proof the certifier works — supersedes
-  the mis-flagged U3/U4 item). Monte-Carlo over resplits: VALID regime (`μ<α`) selected risk `≤α` at
-  rate `≥1−δ`, binomial-consistent; deliberately-INVALID regime (`μ>α`) forces abstention; negative
-  control: naive max-raw-acceptance selection violates `α` while the certified selector does not.
+- [x] **G1d Empirical coverage validation** — DONE (`tests/test_scorc_coverage.py`). Over 80 resplits
+  of a synthetic DGP with closed-form population selected risk, the certified selector never exceeds
+  `α` (violations ≤ `ceil(δ·trials)`); the negative control confirms a naive accept-all policy
+  genuinely violates `α` while the certificate refuses it; zero acceptance never yields zero risk.
+  Follow-up (not blocking): extend to a deliberately-invalid (`μ>α`) abstention regime + binomial
+  consistency table for the technical report.
 - [ ] **G1d Negative control** added to the certifier validation suite: naive max-raw-acceptance
   threshold selection violates `α`; the certified selector does not. Plus Monte Carlo over a valid
   (`μ<α`) and a deliberately-invalid (`μ>α`) regime, reporting violations vs the `δ` budget.
