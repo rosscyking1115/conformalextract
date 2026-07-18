@@ -1,0 +1,75 @@
+{
+  "schema_version": "1",
+  "_record_notice": "Authoritative independent Plan 2 review record. Produced by a reviewer who did not implement Plan 2. Filled from the reviewer's own reproduction and break attempts, not from implementer self-review.",
+  "plan2_status": "reviewed_revise",
+  "independent_plan2_verdict": "REVISE",
+  "reviewed_commit": "fb6b55f5e28ead2cc8878a1e904a0161e2c318ec",
+  "review_range": "c719217..fb6b55f",
+  "review_checkout_note": "Gates were run at branch head 8078881 (codex/plan2-training). The only delta fb6b55f..8078881 is two docs/evidence commits (82c6951 reviewer brief, 8078881 record template); git diff --name-only fb6b55f..HEAD touches no src/, tests/, pyproject, uv.lock, or config. The reviewed code is therefore byte-identical to fb6b55f, and the brief/template needed to run this review live only at HEAD.",
+  "reviewer_identity": "Reviewer/QA (Claude Code, Opus 4.8) — independent Plan 2 quality gate; NOT the Plan 2 implementer (implementer commits are Codex-authored on codex/plan2-training).",
+  "reviewed_date": "2026-07-18",
+  "reproduced_gates": {
+    "pytest": "pass",
+    "ruff": "pass",
+    "mypy": "pass",
+    "git_diff_check": "clean",
+    "no_hf_token_in_tracked_files": "confirmed",
+    "no_paid_job_launched": "confirmed"
+  },
+  "reproduced_gate_detail": {
+    "pytest": "uv run pytest -q -> 83 passed in 33.07s (exit 0), matches expected 83.",
+    "ruff": "uv run ruff check . -> All checks passed! (exit 0).",
+    "mypy": "uv run mypy src -> Success: no issues found in 14 source files (exit 0).",
+    "git_diff_check": "git diff --check -> clean (exit 0); working tree clean.",
+    "no_hf_token_in_tracked_files": "git grep -nE 'hf_[A-Za-z0-9]{20,}' -- . ':(exclude)uv.lock' -> no match (exit 1). Broader grep for HF_TOKEN found only docs/gate0/hf-jobs-smoke.md describing the Jobs secrets mechanism (no token value).",
+    "no_paid_job_launched": "No hf_jobs/run_job/create_job/HfApi call anywhere in src/ (git grep exit 1). Only network-related import is urllib.parse (string parsing) in data.py. No job launched this session; all probing imported pure contracts as a library."
+  },
+  "audit_correction_verdicts": [
+    {
+      "id": 1,
+      "topic": "RAMS document aggregation; every-frame-valid; min confidence; empty-gold/multi-role",
+      "verdict": "pass",
+      "note": "Reproduced independently. all-valid -> status=valid, confidence=0.70 (= min over generations, verified against 0.9/0.7 inputs). valid+grounding_failure (frame retained) -> status=grounding_failure, confidence=-inf, 2 frames retained but NOT accepted (accept_whole_document -> False). valid+structural_failure -> status=structural_failure, confidence=-inf. Empty-gold (valid frame, zero arguments) -> valid, confidence preserved. Multiple generations fold into one PredictionRecord; mismatched (document_id,system_id,prompt_hash) binding is rejected. Retained failure frames do not leak into acceptance because the aggregated confidence is -inf and status != valid whenever any generation is non-valid."
+    },
+    {
+      "id": 2,
+      "topic": "R0 context ladder separate from R1 tuning; R2 inherits frozen R1",
+      "verdict": "pass",
+      "note": "validate_stage_config: R0 with a changed context rung -> 'only R1 may use approved compatibility adjustments'. R1 changed without evidence id -> 'R1 adjustments require a compatibility evidence ID'; with evidence id -> passes. R2 != frozen_r1_config -> 'R2/R3 must use the exact frozen R1 config'; R2 == frozen R1 -> passes. choose_pretraining_context enforces ladder-start at 2048 and [0,1] rate bounds. Off-nominal learning rate (0.999) rejected against APPROVED_LEARNING_RATES."
+    },
+    {
+      "id": 3,
+      "topic": "-inf allowed as worst confidence; NaN/+inf rejected",
+      "verdict": "pass",
+      "note": "risk_coverage_auc([1.0, -inf], [0.0, 1.0]) returns a finite AUC and orders -inf last (worst). NaN score -> 'scores cannot contain NaN or positive infinity'. +inf score -> same rejection. Losses independently required finite and within [0,1]."
+    },
+    {
+      "id": 4,
+      "topic": "Ephemeral download/checksum; delete raw before launch; never upload raw/sealed/recoverable text",
+      "verdict": "revise",
+      "note": "FAILS the row's 'launch never reads /raw' guarantee with concrete inputs. The model validator only checks the launch step's target/detail for the exact substring f'{workspace}/raw' (case-sensitive, single fixed path). Two hand-built plans were ACCEPTED while their launch step reads a surviving raw directory: (B5) extract to '/ws/RAW', delete '/ws/raw', launch detail 'read /ws/RAW/train.jsonl' -> accepted (case-variant defeats the check); (B6) extract to '/ws/sub/raw', delete '/ws/raw', launch detail 'read /ws/sub/raw/train.jsonl' -> accepted (nested raw dir is not '{workspace}/raw'). What HOLDS: the ordering invariant is sound (launch without delete_raw rejected; delete_raw after launch rejected; exact-case launch-reads-raw rejected; raw_retained=True rejected; non-allowlisted upload rejected via both factory and direct model), and the sanctioned factory plan_ephemeral_materialization derives raw_dir consistently and cannot produce an escaping plan. Because Plan 2 is pure contracts with no executor and the factory is safe, no raw data can actually leak this session -- hence REVISE, not STOP. FIX: before the raw check, normalize case/separators; check EVERY post-delete step (not only launch, not only the exact '{workspace}/raw') for any reference to a raw/extraction directory; and/or bind delete_raw.target to the actual extraction target(s) and reject launch if any raw-like extraction path is undeleted. Failing inputs recorded in challenge_attempts (B5, B6)."
+    },
+    {
+      "id": 5,
+      "topic": "Sealed gold unrepresentable/unreachable; hash-linked label-access log; tamper-evident",
+      "verdict": "pass",
+      "note": "Sealed roles: unrepresentable at the manifest level (TrainingRoleManifest has no sealed field; extra field rejected by extra='forbid'); representable in a LabelAccessRequest (DataRole Literal includes them) but unreachable -- _authorize_label_access and build_label_access_log raise 'sealed gold role ... is unreachable', and LabelAccessLog.verify re-authorizes every entry so a forged sealed-role chain (A10) verifies False. Alternate spelling ('Certification') rejected by the closed Literal; extra 'secret_path' field rejected; development gold with SFT purpose rejected. Tamper detection: honest log verifies True; reordered entries -> False; single-field edit keeping old entry_hash -> False. OBSERVATION (not a row failure): a tail-truncated log with head_hash refit to the new last entry (A9) verifies True -- inherent to a self-describing hash chain with no external length/head commitment; verify() detects edits/reorders/substitutions/sealed-injection ('tamper of any entry') but cannot detect an omitted trailing read on its own. Recommend anchoring head_hash (and entry count) in the lineage manifest so completeness is externally checkable."
+    },
+    {
+      "id": 6,
+      "topic": "No paid R0 until manifests/privacy/Trackio/forecast frozen (no launch authorized by this review)",
+      "verdict": "pass",
+      "note": "freeze_preparation_manifests emits exactly 7 records (source, split, trainer, prompt, mask, context_window, lineage), all StrictRecord (extra='forbid', frozen) carrying only hashes, counts, and pinned Literals -- no document text; role boundaries encoded as Literal allow/forbid lists (train/development allowed; certification/final/shift forbidden). SourceManifest pins ephemeral transport, verify-before-use, and local-raw-upload-forbidden. A conservative forecast exists (forecast_whole_programme) and the launch authority (TrainingRunLedger) pins the $25 aggregate cap. This review explicitly does NOT authorize any launch; row is judged on the frozen-contract requirements only."
+    },
+    {
+      "id": 7,
+      "topic": "Naive unbatched infeasible; batched R0 forecast returns stop/infeasible if it cannot fit $24.7992",
+      "verdict": "pass",
+      "note": "Naive unbatched benchmark -> decision 'infeasible' (essential floor ~$3602 over cap). Over-scoped full plan with affordable essential path -> 'stop'. Core invariant holds unconditionally: over 20,000 randomized inputs, decision=='go' implied total_committed_usd <= remaining_budget_usd with ZERO violations. NOTE (input-trust, not a computation defect): safety_buffer and reserve_usd are caller-supplied and only validated >= 0, so passing safety_buffer=0.0 turned a properly-0.20-buffered 'infeasible' ($28.40) into 'go' ($24.00). The function is honest about the inputs it is given; recommend the frozen R0 forecast (and/or TrainingRunLedger authorization) pin safety_buffer >= 0.20 and reserve_usd > 0, or reject a forecast whose buffer is understated, so the recorded 'go' cannot be manufactured by zeroing conservatism."
+    }
+  ],
+  "challenge_attempts": "Ran all break attempts as a standalone script importing the contracts as a library (no repo edits). LABEL ISOLATION: sealed role via authorize/build_log -> rejected; alt-spelling 'Certification' -> rejected (closed Literal); extra field on request and on TrainingRoleManifest -> rejected (extra=forbid); development+SFT purpose -> rejected; honest log verify=True; reorder -> False; single-field edit w/ stale hash -> False; forged sealed-role chain -> False; tail-truncation-with-refit-head -> True (inherent limitation, recorded under correction 5). RAW ESCAPE: factory happy path OK; launch-without-delete_raw, delete_after_launch, exact-case launch-reads-raw, decoy-delete + '/ws/rawdata', non-allowlisted upload (factory + direct), and raw_retained=True all rejected; BUT case-variant '/ws/RAW' (B5) and nested '/ws/sub/raw' (B6) launch-reads-raw plans were ACCEPTED -> the failing inputs behind the correction-4 REVISE. COST FORECAST: naive->infeasible, over-scoped->stop, go-implies-affordable 0/20000 violations; zeroing safety_buffer/reserve flips infeasible->go (input-trust note on correction 7). AGGREGATION: mixed valid+grounding/structural -> -inf and not accepted; empty-gold valid; multi-frame folds to one record; retained failure frames do not leak into acceptance. CONFIG PINNING: lora dropout!=0.05, non-pinned model_id/model_revision, aggregate_cap!=25.0 all rejected by equal-bound Field / Literal aliases (pins, not mere defaults). RISK-COVERAGE: -inf finite & worst; NaN/+inf rejected.",
+  "acceptance_rule": "Plan 2 PASS requires the reviewer to independently reproduce all four gates from a clean checkout, confirm no token/paid-job leakage, and mark every audit correction pass. Any revise/stop keeps the gate closed. The Plan 2 implementer may not complete this record.",
+  "decision": "revise -> Plan 3 stays BLOCKED. Failing row: correction 4 (ephemeral raw isolation) -- the 'launch never reads /raw' guarantee is defeatable by a hand-built plan using a case-variant ('/ws/RAW') or nested ('/ws/sub/raw') raw directory (concrete failing inputs B5, B6). All other rows (1,2,3,5,6,7) pass under independent reproduction and break attempts, with two non-blocking hardening notes (correction 5 tail-truncation head-anchoring; correction 7 pin safety_buffer/reserve). Not STOP: the delete-before-launch ordering invariant is sound, the sanctioned factory cannot produce an escaping plan, and these are pure contracts with no executor, so no raw data can leak this session; the fix is localized. Implementer fixes correction 4 (and ideally the two notes), resubmits, and the gate is re-run.",
+  "blocks_until_pass": ["Plan 3"]
+}
