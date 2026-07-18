@@ -213,6 +213,44 @@ def prepare_data(
     typer.echo(json.dumps({"output_dir": str(output_dir), "sha256": hashes}, sort_keys=True))
 
 
+@app.command("build-profiles")
+def build_profiles_command(
+    rams_archive: Annotated[Path, typer.Option()] = Path("data/raw/rams/RAMS_1.0c.tar.gz"),
+    roles: Annotated[Path, typer.Option()] = Path("data/private/splits/rams_roles.jsonl"),
+    tokenizer_dir: Annotated[Path, typer.Option()] = Path("data/private/qwen-metadata"),
+    prompt_template: Annotated[Path, typer.Option()] = Path("docs/gate0/prompt-template.md"),
+    output: Annotated[Path, typer.Option()] = Path("data/private/plan2/example_profiles.jsonl"),
+) -> None:
+    """Generate the text-free example_profiles.jsonl from raw RAMS (CPU, no upload)."""
+
+    from conformalextract.profiles import (
+        build_profiles,
+        load_prompt_template,
+        load_role_map,
+        qwen_token_counter,
+        read_ontology,
+        read_rams_instances,
+        write_profiles,
+    )
+
+    instances = read_rams_instances(rams_archive)
+    ontology = read_ontology(rams_archive)
+    role_map = load_role_map(roles)
+    template = load_prompt_template(prompt_template)
+    profiles, summary = build_profiles(
+        instances=instances, role_map=role_map, ontology=ontology, template=template,
+        count_tokens=qwen_token_counter(tokenizer_dir),
+    )
+    write_profiles(profiles, output)
+    typer.echo(
+        json.dumps(
+            {"output": str(output), "emitted": summary.emitted,
+             "sealed_dropped": summary.sealed_dropped, "total": summary.total},
+            sort_keys=True,
+        )
+    )
+
+
 for command_name in (
     "train",
     "generate-predictions",

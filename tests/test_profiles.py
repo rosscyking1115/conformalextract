@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from conformalextract.preparation import load_training_profiles
 from conformalextract.profiles import (
     ProfileBuildSummary,
     RamsArgument,
@@ -15,10 +16,12 @@ from conformalextract.profiles import (
     instance_hashes,
     load_event_ontology,
     load_prompt_template,
+    load_role_map,
     ordered_argument_roles,
     parse_rams_instance,
     render_completion,
     render_prompt,
+    write_profiles,
 )
 
 ONTOLOGY_TEXT = (
@@ -195,3 +198,36 @@ def test_build_profiles_conservation_holds_on_join() -> None:
 def test_ontology_coverage_preflight_fails_on_missing_event() -> None:
     with pytest.raises(ValueError, match="unknown_event"):
         assert_ontology_coverage(_instances(), {})
+
+
+def test_load_role_map_parses_group_and_role(tmp_path: Path) -> None:
+    path = tmp_path / "roles.jsonl"
+    path.write_text(
+        '{"document_id":"k1","group_id":"g1","role":"train","schema_version":"1"}\n'
+        '{"document_id":"k2","group_id":"g1","role":"certification","schema_version":"1"}\n',
+        encoding="utf-8",
+    )
+    role_map = load_role_map(path)
+    assert role_map["k1"] == ("g1", "train")
+    assert role_map["k2"] == ("g1", "certification")
+
+
+def test_write_then_reload_profiles_roundtrips(tmp_path: Path) -> None:
+    role_map = {
+        "k_train": ("g1", "train"),
+        "k_dev": ("g1", "development"),
+        "k_cert": ("g2", "final"),
+    }
+    profiles, _ = build_profiles(
+        instances=_instances(),
+        role_map=role_map,
+        ontology=ONTOLOGY,
+        template=TEMPLATE,
+        count_tokens=lambda text: len(text.split()),
+    )
+    output = tmp_path / "example_profiles.jsonl"
+    write_profiles(profiles, output)
+    reloaded = load_training_profiles(output)  # existing consumer-side loader
+    assert len(reloaded) == 2
+    with pytest.raises(FileExistsError):
+        write_profiles(profiles, output)

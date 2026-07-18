@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import tarfile
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -256,3 +257,49 @@ def build_profiles(
     if summary.emitted + summary.sealed_dropped != summary.total:
         raise ValueError("conservation failed: emitted + sealed_dropped != total")
     return profiles, summary
+
+
+def load_role_map(path: Path) -> dict[str, tuple[str, str]]:
+    role_map: dict[str, tuple[str, str]] = {}
+    with path.open(encoding="utf-8") as handle:
+        for line in handle:
+            record = json.loads(line)
+            role_map[str(record["document_id"])] = (str(record["group_id"]), str(record["role"]))
+    return role_map
+
+
+def read_ontology(archive: Path) -> dict[str, tuple[str, ...]]:
+    with tarfile.open(archive, "r:gz") as tar:
+        member = tar.extractfile("RAMS_1.0c/scorer/event_role_multiplicities.txt")
+        if member is None:
+            raise ValueError("ontology missing from RAMS archive")
+        return load_event_ontology(member.read().decode("utf-8"))
+
+
+def read_rams_instances(archive: Path) -> list[RamsInstance]:
+    instances: list[RamsInstance] = []
+    with tarfile.open(archive, "r:gz") as tar:
+        for split in ("train", "dev", "test"):
+            member = tar.extractfile(f"RAMS_1.0c/data/{split}.jsonlines")
+            if member is None:
+                continue
+            for line in member.read().decode("utf-8").splitlines():
+                if line.strip():
+                    instances.append(parse_rams_instance(json.loads(line)))
+    return instances
+
+
+def qwen_token_counter(tokenizer_dir: Path) -> Callable[[str], int]:
+    from transformers import AutoTokenizer
+
+    tokenizer = AutoTokenizer.from_pretrained(str(tokenizer_dir))  # type: ignore[no-untyped-call]
+    return lambda text: len(tokenizer(text, add_special_tokens=False)["input_ids"])
+
+
+def write_profiles(profiles: Sequence[ExampleProfile], output: Path) -> None:
+    if output.exists():
+        raise FileExistsError(f"refusing to overwrite {output}")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with output.open("w", encoding="utf-8") as handle:
+        for profile in profiles:
+            handle.write(profile.model_dump_json() + "\n")
