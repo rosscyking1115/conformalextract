@@ -1,0 +1,72 @@
+{
+  "schema_version": "1",
+  "_record_notice": "Authoritative independent Plan 2 FOCUSED RE-REVIEW record (v2). Supersedes the v1 REVISE (evidence/plan2/reviewer_record.json) for gate purposes. Produced by a reviewer who did not implement Plan 2, from the reviewer's own reproduction and break attempts.",
+  "review_kind": "focused_re_review",
+  "plan2_status": "reviewed_pass",
+  "independent_plan2_verdict": "PASS",
+  "reviewed_commit": "8e5a2c83ce545236cb2bb8609c73e9a92f2d5a60",
+  "prior_record": "evidence/plan2/reviewer_record.json (v1 REVISE, commit fb6b55f)",
+  "fix_commits_reviewed": ["5b60dc8", "4779794"],
+  "reviewer_identity": "Reviewer/QA (Claude Code, Opus 4.8) — independent Plan 2 quality gate; NOT the Plan 2 implementer (fix commits are Codex-authored on codex/plan2-training).",
+  "reviewed_date": "2026-07-18",
+  "reproduced_gates": {
+    "pytest": "pass",
+    "ruff": "pass",
+    "mypy": "pass",
+    "git_diff_check": "clean",
+    "no_hf_token_in_tracked_files": "confirmed",
+    "no_paid_job_launched": "confirmed"
+  },
+  "reproduced_gate_detail": {
+    "pytest": "uv run pytest -q -> 89 passed in 6.31s (exit 0), matches expected 89 (up from 83; the fix added ephemeral-isolation and forecast-conservatism tests).",
+    "ruff": "uv run ruff check . -> All checks passed! (exit 0).",
+    "mypy": "uv run mypy src -> Success: no issues found in 14 source files (exit 0).",
+    "git_diff_check": "git diff --check -> clean (exit 0); working tree clean at 8e5a2c8.",
+    "no_hf_token_in_tracked_files": "git grep -nE 'hf_[A-Za-z0-9]{20,}' -- . ':(exclude)uv.lock' -> no match (exit 1).",
+    "no_paid_job_launched": "No hf_jobs/run_job/create_job/HfApi/jobs.run in src/ (git grep exit 1). No job launched this session; all probing imported the pure contracts as a library.",
+    "scope_of_fix": "git diff fb6b55f..8e5a2c8 touches src only in training.py (ephemeral-plan + forecast sections) plus tests/test_ephemeral_jobs.py and tests/test_cost_forecast.py. The label-access, aggregation, ladder, and context-selection functions in training.py are byte-unchanged; selection.py, contracts.py, and preparation.py are untouched -- so corrections 1/2/3/5/6 have no regression surface beyond what was re-run."
+  },
+  "correction_4_fix_verified": {
+    "verdict": "pass",
+    "v1_escapes_now_rejected": {
+      "B5_case_variant_/ws/RAW": "REJECTED ('every raw extraction must be deleted before launch')",
+      "B6_nested_/ws/sub/raw": "REJECTED ('every raw extraction must be deleted before launch')"
+    },
+    "new_escape_attempts": {
+      "N1_launch_input_not_materialized": "REJECTED ('launch inputs must come from a materialize_input step')",
+      "N2_materialize_target_outside_inputs": "REJECTED ('launch inputs must reside under the sanctioned inputs directory')",
+      "N3_dotdot_traversal_into_raw": "REJECTED (normpath collapses '..'; 'must reside under the sanctioned inputs directory')",
+      "N4_undeleted_extract_target": "REJECTED ('every raw extraction must be deleted before launch')",
+      "N5_decoy_delete_target": "REJECTED (path-coverage check: decoy does not cover the raw extract)",
+      "N6_trailing_slash_extract_vs_delete": "ACCEPTED and CORRECT -- posixpath.normpath makes '/ws/raw/' == '/ws/raw'; legitimate, not an escape",
+      "N7_launch_input_inside_raw_tree": "REJECTED ('launch inputs must not reside in a raw location')",
+      "N8_launch_with_empty_input_paths": "REJECTED ('launch requires explicit allowlisted input paths')",
+      "N9_launch_input_in_case_variant_raw_dir": "REJECTED ('must reside under the sanctioned inputs directory')",
+      "symlink_style_aliasing": "Not expressible at the pure path-string layer: a launch input must be a normalized path under {workspace}/inputs that is textually not within any extract (raw) target; a real filesystem symlink is an executor-resolution concern. Recommend the eventual executor resolve realpath before honoring launch_input_paths. All string-expressible variants (case, nested, '..', trailing slash) are handled."
+    },
+    "security_property_holds": "The load-bearing invariant -- a launched input can never be, or reside in, a raw location -- holds under every attempt. Directly probed: a plan whose launch_input_paths points at a surviving raw path is rejected because it is neither a materialize_input target, under /inputs, nor outside every raw location (Q1). Every launch input is forced to be an explicit materialize_input destination under {workspace}/inputs and outside all extract-derived raw locations."
+  },
+  "audit_correction_verdicts": [
+    {"id": 1, "topic": "RAMS document aggregation; every-frame-valid; min confidence; empty-gold/multi-role", "verdict": "pass", "note": "Not touched by the fix. Re-confirmed: all-valid -> min confidence 0.70; valid+grounding_failure -> status grounding_failure, confidence -inf, not accepted (accept_whole_document False). No regression."},
+    {"id": 2, "topic": "R0 context ladder separate from R1 tuning; R2 inherits frozen R1", "verdict": "pass", "note": "Not touched by the fix. Re-confirmed: R2 == frozen R1 passes; R0 with a changed context rung rejected ('only R1 may use approved compatibility adjustments'). No regression."},
+    {"id": 3, "topic": "-inf allowed as worst confidence; NaN/+inf rejected", "verdict": "pass", "note": "selection.py untouched. Re-confirmed: risk_coverage_auc([1.0,-inf],[0,1]) finite; NaN score rejected. No regression."},
+    {"id": 4, "topic": "Ephemeral download/checksum; delete raw before launch; never upload raw/sealed/recoverable text", "verdict": "pass", "note": "v1 REVISE finding fixed. The guard was reworked from substring-sniffing a fixed '{workspace}/raw' to a structural check: raw locations are derived from extract steps and posixpath.normpath-normalized; every launch input must be a materialize_input destination under {workspace}/inputs and outside all raw locations; every extract-derived raw location must be covered by a delete_raw target. Both v1 escapes (B5 case-variant, B6 nested) and eight new escapes (N1-N5, N7-N9) are rejected; N6 (trailing slash) is correctly accepted. See correction_4_fix_verified and the N10 hardening note."},
+    {"id": 5, "topic": "Sealed gold unrepresentable/unreachable; hash-linked label-access log; tamper-evident", "verdict": "pass", "note": "Label-access code byte-unchanged by the fix. Re-confirmed: honest log verifies True; reordered -> False; sealed role unreachable via authorize. Deferred v1 note (tail-truncation with refit head still verifies True) judged ACCEPTABLE for this gate -- see deferred_notes."},
+    {"id": 6, "topic": "No paid R0 until manifests/privacy/Trackio/forecast frozen (no launch authorized by this review)", "verdict": "pass", "note": "preparation.py untouched; 7 text-free role-bound manifests unchanged; conservative forecast now strengthened (correction 7). This review does not authorize any launch."},
+    {"id": 7, "topic": "Naive unbatched infeasible; batched R0 forecast returns stop/infeasible if it cannot fit $24.7992", "verdict": "pass", "note": "v1 note fixed. safety_buffer < 0.20 rejected ('a conservative forecast requires a safety buffer of at least 0.20'); reserve_usd <= 0 rejected ('requires a positive held-back reserve'); the buffer=0 / reserve=0 'false go' from v1 is no longer constructible. go=>affordable held with 0 violations over 20,000 randomized inputs under the enforced floors; naive unbatched still infeasible; over-scoped-but-essential-affordable still stop."}
+  ],
+  "deferred_notes": {
+    "note_5_label_access_truncation": {
+      "status": "deferred_acceptable",
+      "detail": "verify() still returns True for a tail-truncated log whose head_hash is refit to the new last entry -- inherent to a self-describing hash chain with no external length/head commitment. This was a v1 NOTE, not a failing row: verify() detects edits, reorders, substitutions, and sealed-role injection ('tamper of any entry'), just not omission of a trailing read in isolation. The implementer deferred it to manifest-anchoring follow-up (commit head_hash + entry count into the lineage/evidence manifest so completeness is externally checkable). ACCEPTABLE for this gate: no sealed gold becomes reachable, no committed read can be silently altered, and the anchor is a Plan-3-adjacent provenance task rather than a Plan-2 contract defect."
+    },
+    "note_N10_raw_deletion_temporal_ordering": {
+      "status": "non_blocking_hardening_recommendation",
+      "detail": "The delete-coverage check verifies each extract-derived raw location is a member covered by SOME delete_raw target, but not that the covering deletion occurs AFTER that particular extract. So a plan that re-extracts a raw path after its delete_raw (or after launch) is accepted, leaving an orphaned raw directory present at launch (concrete input N10 / Q2). This does NOT violate the row-4 security requirement: the launched inputs remain strictly sanctioned (materialize_input destinations under /inputs, outside all raw locations), so no launched input reaches the surviving raw (Q1 rejected). It also creates no new raw-text-to-model path beyond the pre-existing, accepted content-trust boundary of materialize_input (whose SOURCE is unmodeled in both v1 and v2 designs; an executor is trusted to copy only sanctioned content). RECOMMENDED HARDENING (not blocking): require the covering delete_raw to occur at a step index greater than the last extract of that path, and/or forbid extract steps after launch. Flagged for the implementer as follow-up alongside note 5."
+    }
+  },
+  "challenge_summary": "Re-ran both v1 escapes (B5 case-variant, B6 nested) -> now rejected by the structural guard. Ran nine new escapes against the reworked guard: launch input not materialized, materialize target outside /inputs, '..' traversal, undeleted extract, decoy delete target, trailing-slash normalization, launch input inside the raw tree, empty launch inputs, and a case-variant raw input -> all correctly handled (N6 trailing-slash correctly accepted as legitimate). Directly probed the security property (Q1): a launch input pointing at surviving raw is rejected. Found one temporal-ordering robustness gap (N10/Q2): an orphaned raw directory can survive into launch via a late re-extract, but no launched input can reach it -- recorded as a non-blocking hardening recommendation. Verified forecast conservatism floors (safety_buffer>=0.20, reserve_usd>0) reject the v1 'false go' and the go=>affordable invariant holds over 20,000 randomized inputs. Spot-checked corrections 1,2,3,5,6 for regression (none; most are byte-unchanged by the fix).",
+  "acceptance_rule": "Plan 2 PASS requires the reviewer to independently reproduce all four gates from a clean checkout, confirm no token/paid-job leakage, mark every audit correction pass, and confirm the v1 REVISE findings are fixed under the reviewer's own break attempts. The Plan 2 implementer may not complete this record.",
+  "decision": "pass -> Plan 3 MAY BEGIN. All four gates reproduced (89 passed / ruff / mypy / git diff clean); no token, no paid job. The v1 REVISE finding (correction 4 raw-isolation, escapes B5/B6) is fixed and confirmed via the reviewer's own re-run plus nine new escape attempts; the v1 forecast note (correction 7) is enforced. Corrections 1,2,3,5,6 show no regression. Two non-blocking follow-ups are recorded (note 5 label-access truncation anchoring, deferred-acceptable; note N10 raw-deletion temporal ordering, hardening recommendation) -- neither lets a launched input reach raw, sealed gold, or an unaffordable spend, so neither blocks this gate.",
+  "blocks_until_pass": []
+}
