@@ -681,6 +681,45 @@ def validate_stage_config(
         raise ValueError("R1 adjustments require a compatibility evidence ID")
 
 
+class TrainingRuntimeConfig(FrozenModel):
+    """TRL/SFT framework settings that must stay consistent with the frozen TrainingConfig.
+
+    Captures the framework-level knobs the 2026-07-18 frontier check flagged as silent-failure
+    traps: TRL ``SFTConfig.max_length`` defaults to 1024 and truncates document-level inputs;
+    reentrant gradient checkpointing with PEFT can silently drop adapter gradients; and a missing
+    pad token corrupts completion-only masking. The pinned booleans below make the wrong value
+    unconstructable; the cross-checks against ``TrainingConfig`` live in the pre-flight.
+    """
+
+    max_length: int = Field(ge=1)
+    learning_rate: float
+    pad_token_set: bool
+    tokenizer_revision: str = Field(min_length=1)
+    use_cache: Literal[False] = False
+    gradient_checkpointing: Literal[True] = True
+    use_reentrant: Literal[False] = False
+    packing: Literal[False] = False
+    completion_only: Literal[True] = True
+
+
+def validate_training_preflight(
+    runtime: TrainingRuntimeConfig, config: TrainingConfig
+) -> None:
+    """Raise unless the framework runtime matches the frozen training contract (gate G3)."""
+
+    if runtime.max_length != config.context_tokens:
+        raise ValueError(
+            "SFT max_length must equal the frozen context_tokens "
+            "(the TRL default of 1024 silently truncates document-level inputs)"
+        )
+    if runtime.learning_rate != config.learning_rate:
+        raise ValueError("SFT learning_rate must equal the frozen training learning_rate")
+    if not runtime.pad_token_set:
+        raise ValueError("tokenizer pad_token must be set before training")
+    if runtime.tokenizer_revision != config.model_revision:
+        raise ValueError("tokenizer revision must be pinned to the model revision")
+
+
 def choose_pretraining_context(
     exclusion_rates: dict[int, tuple[float, dict[str, float]]],
 ) -> int:
