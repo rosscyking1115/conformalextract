@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import json
+
 from conformalextract.profiles import (
     RamsArgument,
     load_event_ontology,
+    ordered_argument_roles,
     parse_rams_instance,
+    render_completion,
+    render_prompt,
 )
 
 ONTOLOGY_TEXT = (
@@ -46,3 +51,37 @@ def test_parse_rams_instance_extracts_trigger_and_half_open_arguments() -> None:
 def test_parse_rams_instance_supports_empty_gold() -> None:
     record = {**RAMS_RECORD, "gold_evt_links": []}
     assert parse_rams_instance(record).arguments == ()
+
+
+TEMPLATE = (
+    "Event type: {event_type}\n"
+    "Trigger token span [start, end): {trigger_start}, {trigger_end}\n"
+    "Allowed roles: {allowed_roles_json}\n"
+    "Document tokens: {numbered_tokens_json}\n"
+    'Return: {"arguments":[]}\n'  # literal JSON braces must survive rendering
+)
+
+
+def test_render_prompt_fills_placeholders_and_keeps_literal_json() -> None:
+    instance = parse_rams_instance(RAMS_RECORD)
+    prompt = render_prompt(TEMPLATE, instance, ("attacker", "target", "instrument", "place"))
+    assert "Event type: conflict.attack.n/a" in prompt
+    assert "[start, end): 1, 2" in prompt
+    assert '["attacker", "target", "instrument", "place"]' in prompt
+    assert '"arguments":[]' in prompt  # literal example untouched
+    assert '"Alpha"' in prompt  # numbered tokens present
+
+
+def test_render_completion_is_deterministic_in_ontology_order() -> None:
+    instance = parse_rams_instance(RAMS_RECORD)  # attacker@0, target@2
+    allowed = ("attacker", "target", "instrument", "place")
+    completion = render_completion(instance, allowed)
+    payload = json.loads(completion)
+    assert [a["role"] for a in payload["arguments"]] == ["attacker", "target"]
+    assert payload["arguments"][0] == {"role": "attacker", "start": 0, "end": 1, "text": "Alpha"}
+    assert ordered_argument_roles(instance, allowed) == ("attacker", "target")
+
+
+def test_render_completion_empty_gold() -> None:
+    instance = parse_rams_instance({**RAMS_RECORD, "gold_evt_links": []})
+    assert render_completion(instance, ("attacker",)) == '{"arguments":[]}'
