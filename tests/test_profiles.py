@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -7,6 +8,8 @@ import pytest
 
 from conformalextract.profiles import (
     RamsArgument,
+    build_example_profile,
+    instance_hashes,
     load_event_ontology,
     load_prompt_template,
     ordered_argument_roles,
@@ -65,6 +68,8 @@ TEMPLATE = (
     'Return: {"arguments":[]}\n'  # literal JSON braces must survive rendering
 )
 
+ONTOLOGY = {"conflict.attack.n/a": ("attacker", "target", "instrument", "place")}
+
 
 def test_render_prompt_fills_placeholders_and_keeps_literal_json() -> None:
     instance = parse_rams_instance(RAMS_RECORD)
@@ -106,3 +111,42 @@ def test_load_prompt_template_fails_loud_without_a_fence(tmp_path: Path) -> None
     bare.write_text("just prose, no code fence\n", encoding="utf-8")
     with pytest.raises(ValueError, match="fenced"):
         load_prompt_template(bare)
+
+
+def test_instance_hashes_are_deterministic_and_suffix_disjoint() -> None:
+    a = instance_hashes("k1", "g1")
+    b = instance_hashes("k1", "g1")
+    example, document, group, frame = a
+    assert a == b
+    assert example != frame  # disjoint-by-suffix
+    assert document == hashlib.sha256(b"k1").hexdigest()
+    assert group == hashlib.sha256(b"g1").hexdigest()
+
+
+def test_build_example_profile_counts_and_is_text_free() -> None:
+    instance = parse_rams_instance(RAMS_RECORD)
+    profile = build_example_profile(
+        instance,
+        data_role="train",
+        group_id="g1",
+        ontology=ONTOLOGY,
+        template=TEMPLATE,
+        count_tokens=lambda text: len(text.split()),  # fake counter
+    )
+    assert profile.data_role == "train"
+    assert profile.event_type == "conflict.attack.n/a"
+    assert profile.argument_roles == ("attacker", "target")
+    # completion-only masking invariant
+    assert profile.prompt_masked_tokens == profile.prompt_tokens
+    assert profile.completion_supervised_tokens == profile.completion_tokens
+    # text-free: no source token appears in the serialized profile
+    assert "Alpha" not in profile.model_dump_json()
+
+
+def test_build_example_profile_rejects_unknown_event() -> None:
+    instance = parse_rams_instance(RAMS_RECORD)
+    with pytest.raises(ValueError, match="unknown_event"):
+        build_example_profile(
+            instance, data_role="train", group_id="g1", ontology={}, template=TEMPLATE,
+            count_tokens=lambda text: len(text.split()),
+        )

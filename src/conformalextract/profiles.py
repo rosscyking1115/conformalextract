@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
 
 from conformalextract.data import rams_inclusive_to_half_open
+from conformalextract.preparation import DataRole, ExampleProfile
 
 _ROLE_RE = re.compile(r"^evt\d+arg\d+(.+)$")
 
@@ -141,3 +143,57 @@ def render_completion(instance: RamsInstance, allowed_roles: tuple[str, ...]) ->
         for arg in _ordered_arguments(instance, allowed_roles)
     ]
     return json.dumps({"arguments": arguments}, separators=(",", ":"))
+
+
+def _sha256(value: str) -> str:
+    return hashlib.sha256(value.encode()).hexdigest()
+
+
+def instance_hashes(instance_key: str, group_id: str) -> tuple[str, str, str, str]:
+    return (
+        _sha256(f"{instance_key}#example"),
+        _sha256(instance_key),
+        _sha256(group_id),
+        _sha256(f"{instance_key}#frame"),
+    )
+
+
+def build_example_profile(
+    instance: RamsInstance,
+    *,
+    data_role: DataRole,
+    group_id: str,
+    ontology: Mapping[str, tuple[str, ...]],
+    template: str,
+    count_tokens: Callable[[str], int],
+) -> ExampleProfile:
+    allowed = ontology.get(instance.event_type)
+    if allowed is None:
+        raise ValueError(f"unknown_event {instance.event_type!r} for {instance.instance_key}")
+    for arg in instance.arguments:
+        if arg.role not in allowed:
+            raise ValueError(
+                f"unknown_role {arg.role!r} for {instance.event_type} ({instance.instance_key})"
+            )
+        if not 0 <= arg.start < arg.end <= len(instance.tokens):
+            raise ValueError(f"bad_span {arg.start},{arg.end} for {instance.instance_key}")
+    prompt = render_prompt(template, instance, allowed)
+    completion = render_completion(instance, allowed)
+    prompt_tokens = count_tokens(prompt)
+    completion_tokens = count_tokens(completion)
+    example_hash, document_hash, group_hash, frame_hash = instance_hashes(
+        instance.instance_key, group_id
+    )
+    return ExampleProfile(
+        example_id_hash=example_hash,
+        document_id_hash=document_hash,
+        group_id_hash=group_hash,
+        frame_id_hash=frame_hash,
+        data_role=data_role,
+        event_type=instance.event_type,
+        argument_roles=ordered_argument_roles(instance, allowed),
+        prompt_tokens=prompt_tokens,
+        completion_tokens=completion_tokens,
+        prompt_masked_tokens=prompt_tokens,
+        completion_supervised_tokens=completion_tokens,
+    )
