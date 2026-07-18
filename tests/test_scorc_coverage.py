@@ -80,6 +80,33 @@ def test_scorc_controls_risk_and_refuses_the_risk_violating_naive_policy() -> No
     assert naive_selected_by_certifier == 0
 
 
+def test_scorc_abstains_when_no_policy_can_control_risk() -> None:
+    # Deliberately-invalid regime: loss is independent of the score, so selective
+    # abstention cannot pull selected risk below alpha at any threshold. The certifier
+    # must return infeasible (abstain), not certify a risk-violating policy.
+    n = scorc_minimum_n(candidate_count=len(THRESHOLDS), delta=DELTA, acceptance_floor=FLOOR)
+    trials = 40
+    certified_when_invalid = 0
+    for seed in range(1000, 1000 + trials):
+        rng = np.random.default_rng(seed)
+        x = rng.uniform(0.0, 1.0, size=n)
+        loss = (rng.uniform(0.0, 1.0, size=n) < 0.5).astype(float)  # base risk 0.5, no signal
+        accepted = np.stack([x >= t for t in THRESHOLDS], axis=1)
+        losses = np.repeat(loss[:, None], len(THRESHOLDS), axis=1)
+        result = scorc_certificate(
+            losses=losses.tolist(),
+            accepted=accepted.tolist(),
+            candidate_ids=IDS,
+            alpha=ALPHA,
+            acceptance_floor=FLOOR,
+            delta=DELTA,
+        )
+        if result.feasible:
+            certified_when_invalid += 1
+
+    assert certified_when_invalid <= math.ceil(DELTA * trials)
+
+
 def test_scorc_never_reports_zero_risk_for_zero_acceptance() -> None:
     # A threshold that accepts nothing must be ineligible, never a zero-risk certificate.
     n = scorc_minimum_n(candidate_count=2, delta=DELTA, acceptance_floor=FLOOR)
