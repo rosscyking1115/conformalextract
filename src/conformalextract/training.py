@@ -564,16 +564,19 @@ def forecast_whole_programme(
 ) -> ProgrammeForecast:
     """Roll every stage into a conservative whole-programme forecast and decide.
 
-    Costs are padded by ``safety_buffer`` and an explicit ``reserve_usd`` is held back.
-    The decision is honest about affordability: ``infeasible`` when even the essential
-    path plus reserve overflows the cap, ``stop`` when the full plan overflows but the
-    essential path fits, and ``go`` only when the buffered total fits inside the cap.
+    Costs are padded by ``safety_buffer`` (floored at 0.20 so the forecast cannot be
+    made non-conservative) and an explicit, strictly-positive ``reserve_usd`` is held
+    back. The decision is honest about affordability: ``infeasible`` when even the
+    essential path plus reserve overflows the cap, ``stop`` when the full plan overflows
+    but the essential path fits, and ``go`` only when the buffered total fits the cap.
     """
 
-    if r0_cost_usd < 0 or upload_cost_usd < 0 or reserve_usd < 0:
-        raise ValueError("costs and reserve must be non-negative")
-    if safety_buffer < 0:
-        raise ValueError("safety buffer must be non-negative")
+    if r0_cost_usd < 0 or upload_cost_usd < 0:
+        raise ValueError("costs must be non-negative")
+    if safety_buffer < 0.20:
+        raise ValueError("a conservative forecast requires a safety buffer of at least 0.20")
+    if reserve_usd <= 0:
+        raise ValueError("a conservative forecast requires a positive held-back reserve")
     if remaining_budget_usd <= 0:
         raise ValueError("remaining budget must be positive")
     seen = [stage.stage for stage in stages]

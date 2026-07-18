@@ -56,12 +56,35 @@ def test_conservative_buffer_inflates_each_stage_cost() -> None:
         benchmark=PADDED_BATCHED,
         stages=(StageDemand(stage="predictions", items=4000, essential=True),),
         r0_cost_usd=0.0,
-        reserve_usd=0.0,
+        reserve_usd=1.00,
         safety_buffer=0.20,
     )
 
     # 4000 items / 4000 items-per-hour = 1.0 h; 1.0 h * $1.80 * 1.20 buffer = $2.16.
     assert forecast.stage_costs_usd["predictions"] == pytest.approx(2.16)
+
+
+def test_forecast_rejects_a_non_conservative_buffer() -> None:
+    # A "conservative" forecast must keep at least a 20% buffer; a zero buffer could
+    # flip a properly-buffered infeasible into a false go.
+    with pytest.raises(ValueError, match="buffer"):
+        forecast_whole_programme(
+            benchmark=PADDED_BATCHED,
+            stages=(StageDemand(stage="predictions", items=9124, essential=True),),
+            r0_cost_usd=0.60,
+            reserve_usd=2.00,
+            safety_buffer=0.0,
+        )
+
+
+def test_forecast_requires_a_positive_held_back_reserve() -> None:
+    with pytest.raises(ValueError, match="reserve"):
+        forecast_whole_programme(
+            benchmark=PADDED_BATCHED,
+            stages=(StageDemand(stage="predictions", items=9124, essential=True),),
+            r0_cost_usd=0.60,
+            reserve_usd=0.0,
+        )
 
 
 def test_overscoped_but_essential_affordable_programme_says_stop() -> None:
