@@ -1,9 +1,8 @@
 # /// script
 # requires-python = ">=3.12"
 # dependencies = [
-#   "vllm==0.11.0",
-#   "huggingface-hub==0.36.2",
-#   "numpy==2.5.1",
+#   "vllm==0.25.1",
+#   "numpy",
 # ]
 # ///
 """R0 inference-throughput benchmark for ConformalExtract (DRAFT — not yet launched).
@@ -26,9 +25,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import time
 
 import numpy as np
+
+# The slim uv image has the CUDA runtime but no toolkit (nvcc). vLLM auto-enables the
+# flashinfer sampler when flashinfer is installed, and flashinfer JIT-compiles its kernels
+# at runtime (needs nvcc). Force the native PyTorch sampler so no runtime compilation occurs.
+os.environ.setdefault("VLLM_USE_FLASHINFER_SAMPLER", "0")
 
 MODEL_ID = "Qwen/Qwen3-4B-Instruct-2507"
 MODEL_REVISION = "cdbee75f17c01a7cc42f958dc650907174af0554"
@@ -62,17 +67,22 @@ def run_benchmark(args: argparse.Namespace) -> dict[str, object]:
         dtype="bfloat16",
         gpu_memory_utilization=args.gpu_memory_utilization,
         max_model_len=args.max_model_len,
-        enforce_eager=False,
+        # The slim uv image ships the CUDA runtime but not the toolkit (nvcc), which
+        # vLLM's torch.compile path needs. Eager mode skips compilation entirely and
+        # yields a conservative throughput floor for the cost forecast.
+        enforce_eager=True,
     )
     vocab_size = llm.get_tokenizer().vocab_size
     lengths = sample_prompt_lengths(
         rng, count=args.num_prompts, mean=args.mean_input, low=args.min_input, high=args.max_input
     )
     prompt_token_ids = build_random_token_prompts(lengths, vocab_size, rng)
+    # vLLM 0.25.x takes token-id prompts positionally as prompt dicts, not a kwarg.
+    token_prompts = [{"prompt_token_ids": ids} for ids in prompt_token_ids]
     sampling = SamplingParams(temperature=0.0, max_tokens=args.max_output)
 
     started = time.monotonic()
-    outputs = llm.generate(prompt_token_ids=prompt_token_ids, sampling_params=sampling)
+    outputs = llm.generate(token_prompts, sampling_params=sampling)
     elapsed = time.monotonic() - started
 
     input_tokens = int(sum(lengths))

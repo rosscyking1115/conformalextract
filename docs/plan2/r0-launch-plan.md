@@ -1,8 +1,35 @@
-# R0 inference-benchmark launch plan (DRAFT — awaiting Ross's approval)
+# R0 inference-benchmark launch plan + RESULT
 
-**Nothing here has been run.** Paid GPU execution is a hard approval gate. This document is the
-exact spec for the first small paid step; the assistant will not launch it. Ross runs it (or
-explicitly authorizes a single run) after confirming prepaid Hugging Face Jobs credit.
+## R0 RESULT (2026-07-18) — completed, decision GO
+
+Ran on 1× L4 (job `6a5bcee6bee6ee1cf4ecfe08`, COMPLETED). Measured, at the assumed length
+distribution (mean 1502 input / ~502 output):
+
+| Metric | Value |
+|---|---|
+| items/hour | **2,771** (worst-case: random tokens ran to the full 512 cap, so real RAMS output is shorter → real throughput higher) |
+| aggregate tok/s | 1,542 · output tok/s 386 |
+| cost / 1M tokens | $0.144 |
+
+Whole-programme forecast (`forecast_whole_programme`, measured 2,771 items/hr, predictions =
+9124×3 = 27,372 items essential, R0+R1/R2 allowance $4.50, upload $0.10, reserve $2.00, 20%
+buffer): **decision = GO**, total **$16.08 of the $24.7992 cap**, **$8.72 headroom**. Conservative;
+real cost likely ~$8–12 once true (shorter) output lengths and the real prompt distribution apply.
+
+**Fixes applied to make it run** (record for the next job): token needed **Write** scope; deps
+must pin only `vllm==0.25.1` (+ numpy) — over-pinning numpy/hf-hub breaks uv resolution; the slim
+uv image lacks nvcc so use `enforce_eager=True` and `VLLM_USE_FLASHINFER_SAMPLER=0` (flashinfer JITs
+its sampler); vLLM 0.25.x takes token prompts positionally as `{"prompt_token_ids": ids}` dicts.
+
+**Remaining before R1/R2:** re-run with the real frozen prompt-length distribution + true output
+lengths once `prepare-data` runs (will only improve the margin); and the training pre-flight (G3).
+
+---
+
+## Original launch spec (below) — retained for reference
+
+Paid GPU execution is a hard approval gate. The assistant will not launch expensive stages;
+Ross approves each after confirming prepaid Hugging Face Jobs credit.
 
 ## Purpose
 Measure Qwen3-4B vLLM batched-generation throughput on the real RAMS prompt-length distribution,
