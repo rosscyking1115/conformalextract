@@ -1,0 +1,31 @@
+{
+  "schema_version": "1",
+  "_template_notice": "TEMPLATE — not an authority record. The independent reviewer copies this to evidence/plan2/reviewer_record.json, fills every <...> placeholder, and sets verdicts. Until then Plan 2 has NO pass and Plan 3 stays blocked. Do not let the implementer complete this file.",
+  "plan2_status": "pending_independent_review",
+  "independent_plan2_verdict": "<PASS|REVISE|STOP>",
+  "reviewed_commit": "fb6b55f5e28ead2cc8878a1e904a0161e2c318ec",
+  "review_range": "c719217..fb6b55f",
+  "reviewer_identity": "<name or fresh-agent id; MUST NOT be the Plan 2 implementer>",
+  "reviewed_date": "<YYYY-MM-DD>",
+  "reproduced_gates": {
+    "pytest": "<pass|fail>",
+    "ruff": "<pass|fail>",
+    "mypy": "<pass|fail>",
+    "git_diff_check": "<clean|dirty>",
+    "no_hf_token_in_tracked_files": "<confirmed|violated>",
+    "no_paid_job_launched": "<confirmed|violated>"
+  },
+  "audit_correction_verdicts": [
+    {"id": 1, "topic": "RAMS document aggregation; every-frame-valid; min confidence; empty-gold/multi-role", "verdict": "<pass|revise|stop>", "note": "<evidence or failing input>"},
+    {"id": 2, "topic": "R0 context ladder separate from R1 tuning; R2 inherits frozen R1", "verdict": "<pass|revise|stop>", "note": "<...>"},
+    {"id": 3, "topic": "-inf allowed as worst confidence; NaN/+inf rejected", "verdict": "<pass|revise|stop>", "note": "<...>"},
+    {"id": 4, "topic": "Ephemeral download/checksum; delete raw before launch; never upload raw/sealed/recoverable text", "verdict": "<pass|revise|stop>", "note": "<...>"},
+    {"id": 5, "topic": "Sealed gold unrepresentable/unreachable; hash-linked label-access log; tamper-evident", "verdict": "<pass|revise|stop>", "note": "<...>"},
+    {"id": 6, "topic": "No paid R0 until manifests/privacy/Trackio/forecast frozen (no launch authorized by this review)", "verdict": "<pass|revise|stop>", "note": "<...>"},
+    {"id": 7, "topic": "Naive unbatched infeasible; batched R0 forecast returns stop/infeasible if it cannot fit $24.7992", "verdict": "<pass|revise|stop>", "note": "<...>"}
+  ],
+  "challenge_attempts": "<summary of what you tried to break and the result>",
+  "acceptance_rule": "Plan 2 PASS requires the reviewer to independently reproduce all four gates from a clean checkout, confirm no token/paid-job leakage, and mark every audit correction pass. Any revise/stop keeps the gate closed. The Plan 2 implementer may not complete this record.",
+  "decision": "<pass -> Plan 3 may begin | revise -> return list of failing rows | stop -> halt Plan 2>",
+  "blocks_until_pass": ["Plan 3"]
+}
