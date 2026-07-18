@@ -310,3 +310,78 @@ def scorc_certificate(
         candidate_count=candidate_count,
         theorem_minimum_n=minimum_n,
     )
+
+
+@dataclass(frozen=True)
+class HypothesisDecision:
+    """One preregistered certified-acceptance comparison (plan section 8)."""
+
+    hypothesis: str
+    comparison: str
+    qa_acceptance: float | None
+    baseline_acceptance: float | None
+    material_gain: float
+    outcome: str
+    detail: str
+
+
+def certified_acceptance(result: CertificationResult) -> float | None:
+    """The system's certified acceptance `CA_s` (acceptance LCB), or None if infeasible."""
+
+    return result.acceptance_lower if result.feasible else None
+
+
+def _decide_hypothesis(
+    hypothesis: str,
+    comparison: str,
+    qa: float | None,
+    baseline: float | None,
+    material_gain: float,
+) -> HypothesisDecision:
+    if qa is None and baseline is None:
+        outcome = "both_infeasible"
+        detail = "neither QA nor the baseline is certified feasible"
+    elif qa is None:
+        outcome = "qa_infeasible"
+        detail = "QA infeasible while the baseline is feasible (adaptation harmed certifiability)"
+    elif baseline is None:
+        outcome = "boundary_crossing"
+        detail = "QA feasible where the baseline is infeasible; no numerical difference invented"
+    elif qa - baseline >= material_gain:
+        outcome = "supported"
+        detail = f"CA_QA {qa:.4f} >= CA_baseline {baseline:.4f} + {material_gain:.4f}"
+    else:
+        outcome = "no_material_gain"
+        detail = f"CA_QA {qa:.4f} - CA_baseline {baseline:.4f} < {material_gain:.4f}"
+    return HypothesisDecision(
+        hypothesis=hypothesis,
+        comparison=comparison,
+        qa_acceptance=qa,
+        baseline_acceptance=baseline,
+        material_gain=material_gain,
+        outcome=outcome,
+        detail=detail,
+    )
+
+
+def compare_certified_acceptance(
+    *,
+    qa: float | None,
+    zs: float | None,
+    fs: float | None,
+    material_gain: float = 0.05,
+) -> tuple[HypothesisDecision, HypothesisDecision]:
+    """Decide H1 (QA vs zero-shot) and H2 (QA vs few-shot) on certified acceptance.
+
+    Certified acceptance ``CA_s`` is each system's certified acceptance lower bound, or
+    None when the system is infeasible. The comparison never invents a numerical
+    difference against an infeasible baseline (plan section 8.2); a feasible QA over an
+    infeasible baseline is a boundary crossing, and an infeasible QA against a feasible
+    baseline is recorded as adaptation harm rather than a hidden failure.
+    """
+
+    if material_gain < 0.0:
+        raise ValueError("material_gain must be non-negative")
+    h1 = _decide_hypothesis("H1", "QA_vs_ZS", qa, zs, material_gain)
+    h2 = _decide_hypothesis("H2", "QA_vs_FS", qa, fs, material_gain)
+    return h1, h2
