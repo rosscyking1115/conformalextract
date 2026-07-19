@@ -69,3 +69,24 @@ with epochs sized from this pilot's measured step time.
    passed as a secret, never printed).
 3. Poll detached; on completion, verify the report, commit the evidence reference, and bring
    the R2 sizing decision back for approval.
+
+---
+
+## R1 RESULT (2026-07-19) — PASS
+
+Job `6a5d58e6d216bd6f3a2022c3`, COMPLETED on L40S in 13.4 min, **actual cost ≈ $0.40**.
+Evidence persisted: `plan2/r1_pilot.v1.json` + adapter at `plan2/r1/adapter/` (hub commit
+`f76f92a54ce8ab5bb981fbd267447e5968fa961d`, artifact sha256 `4e300a57…dcb6c6e`).
+
+| Metric | Value |
+|---|---|
+| dev loss before → after | **1.197 → 0.204** (Δ −0.993, an ~83% drop) |
+| train loss first→last quarter | 0.485 → 0.224 |
+| trained / excluded-over-context | 511 / 1 (of 512 sampled; consistent with 7-total frozen exclusions) |
+| optimizer steps | 32 |
+| seconds per trained example | **1.340** (L40S) |
+| label access | train_sft 512 · development_selection 128 · **sealed_reads 0** · chain head `0e96e589…` |
+| raw deleted before model load | true |
+
+`r1_pilot_pass: true` — a real, strong learning signal on the frozen contract. R2 sizing from
+the measured rate: 1 epoch $2.72 / 2 epochs $5.44 / 3 epochs $8.16 raw on L40S.
