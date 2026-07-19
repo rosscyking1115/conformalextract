@@ -21,8 +21,26 @@ must pin only `vllm==0.25.1` (+ numpy) — over-pinning numpy/hf-hub breaks uv r
 uv image lacks nvcc so use `enforce_eager=True` and `VLLM_USE_FLASHINFER_SAMPLER=0` (flashinfer JITs
 its sampler); vLLM 0.25.x takes token prompts positionally as `{"prompt_token_ids": ids}` dicts.
 
-**Remaining before R1/R2:** re-run with the real frozen prompt-length distribution + true output
-lengths once `prepare-data` runs (will only improve the margin); and the training pre-flight (G3).
+**Remaining before R1/R2:** ~~re-run with the real frozen prompt-length distribution~~ **DONE
+2026-07-19** (below); and the training pre-flight (G3) at R1 submission.
+
+## R0 re-run at the REAL distribution (2026-07-19) — new-rung smoke, decision GO
+
+Job `6a5d517ed216bd6f3a2021f1`, COMPLETED on 1× L4. Parameters from the frozen evidence
+(analysis `plan2prep-f3f2f7a938061a92b2cb`): mean-input 2,000 (measured 2,011), max-input 6,144
+(the ADR-0003 selected rung — this run satisfies the data contract's changed-rung smoke),
+max-model-len 6,656, output cap 512 (worst case; real completion max = 162).
+
+| Metric | Value |
+|---|---|
+| items/hour | **2,196.6** |
+| aggregate / output tok/s | 1,536.9 / 309.5 |
+| cost per 1M tokens | $0.1446 |
+| run cost | ≈ $0.10 |
+
+Whole-programme forecast at the measured rate (27,372 predictions essential, R0+training
+allowance $4.50, upload $0.10, reserve $2.00, 20% buffer): **GO — total $18.56 of $24.7992,
+headroom $6.24** (worst-case output lengths; real ≤162-token completions will land lower).
 
 ---
 
