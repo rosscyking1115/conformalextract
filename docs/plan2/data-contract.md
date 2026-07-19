@@ -13,8 +13,11 @@ role and schema metadata; any text-bearing or label-bearing field is rejected. D
 not cross roles.
 
 The context policy starts at 2,048 input tokens with at most 512 output tokens. It selects the lowest
-512-token rung through 4,096 for which exclusions are at most 5% overall and 10% in every event-role
-slice. Empty-gold frames form an explicit `<EMPTY>` slice. A changed rung requires a new R0 smoke.
+rung of the ladder 2,048 / 2,560 / 3,072 / 3,584 / 4,096 / 4,608 / 5,120 / 6,144 for which exclusions
+are at most 5% overall and 10% in every event-role slice. Empty-gold frames form an explicit `<EMPTY>`
+slice. A changed rung requires a new R0 smoke. *(Ladder extended past 4,096 on 2026-07-19, Ross-approved
+— ADR 0003: measured RAMS token counts made the per-slice limit unsatisfiable at 4,096 via tiny slices
+with a single long example; at 6,144 the policy passes with 7/5,001 excluded.)*
 This pre-training/R0 decision is separate from R1 changes, which are allowed only for a demonstrated
 compatibility problem.
 

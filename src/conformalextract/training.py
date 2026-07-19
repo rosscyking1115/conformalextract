@@ -29,7 +29,10 @@ MODEL_REVISION: Final = "cdbee75f17c01a7cc42f958dc650907174af0554"
 ModelId = Literal["Qwen/Qwen3-4B-Instruct-2507"]
 ModelRevision = Literal["cdbee75f17c01a7cc42f958dc650907174af0554"]
 APPROVED_LEARNING_RATES = frozenset({2e-4, 1e-4, 5e-5})
-CONTEXT_LADDER = (2048, 2560, 3072, 3584, 4096)
+# Extended 4096 -> 6144 on 2026-07-19 (Ross-approved, ADR 0003): real RAMS token counts
+# made the per-slice exclusion policy unsatisfiable at 4096 (tiny slices with one long
+# example); at 6144 the policy passes with 7/5001 excluded.
+CONTEXT_LADDER = (2048, 2560, 3072, 3584, 4096, 4608, 5120, 6144)
 
 
 class FrozenModel(BaseModel):

@@ -270,3 +270,26 @@ def test_any_invalid_trigger_rejects_whole_document_at_worst_confidence() -> Non
     assert prediction.status == "structural_failure"
     assert prediction.confidence == float("-inf")
     assert prediction.frames == []
+
+
+def test_extended_context_ladder_reaches_6144() -> None:
+    # Ross-approved 2026-07-19 (ADR 0003): ladder extended so the frozen exclusion
+    # policy can be satisfied on the real RAMS token distribution.
+    validate_stage_config(
+        RunStage.R1,
+        TrainingConfig(context_tokens=6144),
+        compatibility_evidence_id="context-evidence-20260719",
+    )
+    selected = choose_pretraining_context(
+        {
+            2048: (0.30, {}),
+            2560: (0.20, {}),
+            3072: (0.10, {}),
+            3584: (0.08, {}),
+            4096: (0.009, {"conflict.attack.bombing::<EMPTY>": 1.0}),
+            4608: (0.005, {"conflict.attack.bombing::<EMPTY>": 1.0}),
+            5120: (0.003, {"conflict.attack.bombing::<EMPTY>": 0.5}),
+            6144: (0.0014, {"transaction.transfermoney.purc::money": 0.091}),
+        }
+    )
+    assert selected == 6144

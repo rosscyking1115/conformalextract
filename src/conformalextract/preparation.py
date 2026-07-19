@@ -207,7 +207,7 @@ def _context_rates(
 def choose_context_window(
     profiles: Sequence[ExampleProfile],
     *,
-    ladder: Sequence[int] = (2048, 2560, 3072, 3584, 4096),
+    ladder: Sequence[int] = (2048, 2560, 3072, 3584, 4096, 4608, 5120, 6144),
     max_output_tokens: int = 512,
     overall_limit: float = 0.05,
     slice_limit: float = 0.10,
