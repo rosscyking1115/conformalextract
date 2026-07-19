@@ -281,3 +281,99 @@ def test_generated_profiles_are_accepted_by_prepare_data(tmp_path: Path) -> None
     assert set(hashes) == {
         "source", "split", "trainer", "prompt", "mask", "context_window", "lineage",
     }
+
+
+def _demo_pool():
+    from dataclasses import replace
+
+    base = parse_rams_instance(RAMS_RECORD)  # 2 arguments -> multi-argument
+    empty = parse_rams_instance({**RAMS_RECORD, "gold_evt_links": []})
+    single = replace(base, arguments=base.arguments[:1])
+    return {
+        "k_multi_a": replace(base, instance_key="k_multi_a"),
+        "k_multi_b": replace(base, instance_key="k_multi_b"),
+        "k_empty_a": replace(empty, instance_key="k_empty_a"),
+        "k_empty_dev": replace(empty, instance_key="k_empty_dev"),
+        "k_single": replace(single, instance_key="k_single"),
+    }
+
+
+def _demo_role_map():
+    return {
+        "k_multi_a": ("g1", "train"),
+        "k_multi_b": ("g2", "train"),
+        "k_empty_a": ("g3", "train"),
+        "k_empty_dev": ("g4", "development"),
+        "k_single": ("g5", "train"),
+    }
+
+
+def test_fs_demonstrations_pick_train_only_multi_and_empty_by_lowest_hash() -> None:
+    from conformalextract.profiles import select_fs_demonstrations
+
+    pool = _demo_pool()
+    multi, empty = select_fs_demonstrations(list(pool.values()), _demo_role_map())
+
+    assert len(multi.arguments) >= 2
+    assert empty.arguments == ()
+    # Lexicographically-lowest example hash within each category.
+    expected_multi = min(
+        ("k_multi_a", "k_multi_b"),
+        key=lambda k: hashlib.sha256(f"{k}#example".encode()).hexdigest(),
+    )
+    assert multi.instance_key == expected_multi
+    # The development empty-gold instance is never eligible.
+    assert empty.instance_key == "k_empty_a"
+
+
+def test_fs_demonstrations_are_deterministic_under_input_order() -> None:
+    from conformalextract.profiles import select_fs_demonstrations
+
+    pool = list(_demo_pool().values())
+    first = select_fs_demonstrations(pool, _demo_role_map())
+    second = select_fs_demonstrations(list(reversed(pool)), _demo_role_map())
+    assert (first[0].instance_key, first[1].instance_key) == (
+        second[0].instance_key,
+        second[1].instance_key,
+    )
+
+
+def test_fs_demonstrations_fail_loud_when_a_category_is_missing() -> None:
+    from conformalextract.profiles import select_fs_demonstrations
+
+    pool = _demo_pool()
+    only_multi = [pool["k_multi_a"], pool["k_single"]]
+    with pytest.raises(ValueError, match="empty-gold"):
+        select_fs_demonstrations(only_multi, _demo_role_map())
+
+
+def test_render_and_write_demonstrations_roundtrip(tmp_path: Path) -> None:
+    import json as json_module
+
+    from conformalextract.profiles import (
+        render_demonstrations,
+        select_fs_demonstrations,
+        write_demonstrations,
+    )
+    from conformalextract.training import build_system_configs
+
+    pair = select_fs_demonstrations(list(_demo_pool().values()), _demo_role_map())
+    demos = render_demonstrations(pair, ontology=ONTOLOGY, template=TEMPLATE)
+
+    assert len(demos) == 2
+    ids = tuple(demo.demonstration_id for demo in demos)
+    assert len(set(ids)) == 2
+    # IDs satisfy the frozen FS system contract.
+    systems = build_system_configs(fs_demonstration_ids=(ids[0], ids[1]))
+    assert systems[1].family == "FS"
+    # Prompts/completions are rendered from the frozen template pipeline.
+    assert "Event type: conflict.attack.n/a" in demos[0].prompt
+    assert json_module.loads(demos[1].completion) == {"arguments": []}
+
+    output = tmp_path / "fs_demonstrations.jsonl"
+    write_demonstrations(demos, output)
+    lines = output.read_text(encoding="utf-8").splitlines()
+    assert len(lines) == 2
+    assert set(json_module.loads(lines[0])) == {"demonstration_id", "prompt", "completion"}
+    with pytest.raises(FileExistsError):
+        write_demonstrations(demos, output)

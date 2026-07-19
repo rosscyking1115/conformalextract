@@ -305,3 +305,97 @@ def write_profiles(profiles: Sequence[ExampleProfile], output: Path) -> None:
     with output.open("w", encoding="utf-8") as handle:
         for profile in profiles:
             handle.write(profile.model_dump_json() + "\n")
+
+
+@dataclass(frozen=True)
+class Demonstration:
+    """One frozen few-shot demonstration: rendered prompt + gold completion."""
+
+    demonstration_id: str
+    prompt: str
+    completion: str
+
+
+def select_fs_demonstrations(
+    instances: Sequence[RamsInstance],
+    role_map: Mapping[str, tuple[str, str]],
+) -> tuple[RamsInstance, RamsInstance]:
+    """Pick the two frozen FS demonstrations (Ross-approved 2026-07-19 rule).
+
+    Train split only (never development — leakage rule): one multi-argument frame plus
+    one empty-gold frame so the demonstrations teach both behaviours, each chosen as the
+    lexicographically-lowest ``example_id_hash`` in its category. Deterministic in the
+    instance set and independent of input order.
+    """
+
+    multi: list[tuple[str, RamsInstance]] = []
+    empty: list[tuple[str, RamsInstance]] = []
+    for instance in instances:
+        binding = role_map.get(instance.instance_key)
+        if binding is None or binding[1] != "train":
+            continue
+        example_hash = _sha256(f"{instance.instance_key}#example")
+        if len(instance.arguments) >= 2:
+            multi.append((example_hash, instance))
+        elif not instance.arguments:
+            empty.append((example_hash, instance))
+    if not multi:
+        raise ValueError("train split has no multi-argument instance for FS demonstrations")
+    if not empty:
+        raise ValueError("train split has no empty-gold instance for FS demonstrations")
+    return (
+        min(multi, key=lambda item: item[0])[1],
+        min(empty, key=lambda item: item[0])[1],
+    )
+
+
+def render_demonstrations(
+    pair: tuple[RamsInstance, RamsInstance],
+    *,
+    ontology: Mapping[str, tuple[str, ...]],
+    template: str,
+) -> list[Demonstration]:
+    """Render the selected pair through the frozen template pipeline."""
+
+    demonstrations: list[Demonstration] = []
+    for instance in pair:
+        allowed = ontology.get(instance.event_type)
+        if allowed is None:
+            raise ValueError(
+                f"unknown_event {instance.event_type!r} for {instance.instance_key}"
+            )
+        for argument in instance.arguments:
+            if argument.role not in allowed:
+                raise ValueError(
+                    f"unknown_role {argument.role!r} for {instance.event_type}"
+                    f" ({instance.instance_key})"
+                )
+        demonstrations.append(
+            Demonstration(
+                demonstration_id=_sha256(f"{instance.instance_key}#example"),
+                prompt=render_prompt(template, instance, allowed),
+                completion=render_completion(instance, allowed),
+            )
+        )
+    return demonstrations
+
+
+def write_demonstrations(demonstrations: Sequence[Demonstration], output: Path) -> None:
+    """Freeze the demonstrations file; refuse to overwrite an existing freeze."""
+
+    if output.exists():
+        raise FileExistsError(f"refusing to overwrite {output}")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with output.open("w", encoding="utf-8") as handle:
+        for demonstration in demonstrations:
+            handle.write(
+                json.dumps(
+                    {
+                        "demonstration_id": demonstration.demonstration_id,
+                        "prompt": demonstration.prompt,
+                        "completion": demonstration.completion,
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )

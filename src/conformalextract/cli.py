@@ -251,6 +251,45 @@ def build_profiles_command(
     )
 
 
+@app.command("freeze-demonstrations")
+def freeze_demonstrations_command(
+    rams_archive: Annotated[Path, typer.Option()] = Path("data/raw/rams/RAMS_1.0c.tar.gz"),
+    roles: Annotated[Path, typer.Option()] = Path("data/private/splits/rams_roles.jsonl"),
+    prompt_template: Annotated[Path, typer.Option()] = Path("docs/gate0/prompt-template.md"),
+    output: Annotated[Path, typer.Option()] = Path("data/private/plan2/fs_demonstrations.jsonl"),
+) -> None:
+    """Freeze the two FS demonstrations (train-only; multi-arg + empty-gold; deterministic)."""
+
+    from conformalextract.artifacts import sha256_file
+    from conformalextract.profiles import (
+        load_prompt_template,
+        load_role_map,
+        read_ontology,
+        read_rams_instances,
+        render_demonstrations,
+        select_fs_demonstrations,
+        write_demonstrations,
+    )
+
+    pair = select_fs_demonstrations(read_rams_instances(rams_archive), load_role_map(roles))
+    demonstrations = render_demonstrations(
+        pair,
+        ontology=read_ontology(rams_archive),
+        template=load_prompt_template(prompt_template),
+    )
+    write_demonstrations(demonstrations, output)
+    typer.echo(
+        json.dumps(
+            {
+                "output": str(output),
+                "demonstration_ids": [d.demonstration_id for d in demonstrations],
+                "sha256": sha256_file(output),
+            },
+            sort_keys=True,
+        )
+    )
+
+
 for command_name in (
     "train",
     "generate-predictions",
