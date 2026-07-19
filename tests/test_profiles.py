@@ -50,7 +50,9 @@ RAMS_RECORD = {
 
 def test_parse_rams_instance_extracts_trigger_and_half_open_arguments() -> None:
     instance = parse_rams_instance(RAMS_RECORD)
-    assert instance.instance_key == "nw_RC00example"
+    # Canonical repo-wide document id: the "rams:" prefix matches load_rams and the
+    # frozen private split (rams_roles.jsonl), so the role join shares one identity space.
+    assert instance.instance_key == "rams:nw_RC00example"
     assert instance.source_id == "http://example.test/article"
     assert instance.tokens == ("Alpha", "attacked", "Beta", "in", "Gamma", "yesterday")
     assert instance.event_type == "conflict.attack.n/a"

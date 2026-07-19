@@ -62,7 +62,9 @@ def load_event_ontology(text: str) -> dict[str, tuple[str, ...]]:
 def parse_rams_instance(record: Mapping[str, object]) -> RamsInstance:
     """Parse one RAMS ``.jsonlines`` record into a half-open-span instance."""
 
-    instance_key = str(record["doc_key"])
+    # Canonical repo-wide id: prefix the raw doc_key exactly as load_rams does, so the
+    # instance key joins the frozen private split (rams_roles.jsonl) in one identity space.
+    instance_key = f"rams:{record['doc_key']}"
     sentences = record["sentences"]
     if not isinstance(sentences, Sequence):
         raise ValueError(f"RAMS sentences must be a sequence: {instance_key}")
@@ -80,7 +82,7 @@ def parse_rams_instance(record: Mapping[str, object]) -> RamsInstance:
         arguments.append(RamsArgument(role=_parse_role(str(link_role)), start=start, end=end))
     return RamsInstance(
         instance_key=instance_key,
-        source_id=str(record.get("source_url") or f"rams:{instance_key}"),
+        source_id=str(record.get("source_url") or instance_key),
         tokens=tokens,
         event_type=event_type,
         trigger_start=trigger_start,
