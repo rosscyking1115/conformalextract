@@ -71,3 +71,21 @@ def test_r2_job_report_is_text_free() -> None:
     report_section = SCRIPT.split("report = {", maxsplit=1)[1].split("R2_REPORT=")[0]
     for banned in ('"prompt"', '"completion"', '"raw_output"', '"sentences"'):
         assert banned not in report_section
+
+
+def test_g2b_benchmark_pins_the_frozen_serving_stack() -> None:
+    script = (ROOT / "jobs" / "g2b_serving_benchmark.py").read_text(encoding="utf-8")
+    assert 'MODEL_REVISION = "cdbee75f17c01a7cc42f958dc650907174af0554"' in script
+    assert 'ADAPTER_REPO = "rosscyking/conformalextract-qwen3-4b-qlora"' in script
+    # Pinned to R2's copy-B commit so the benchmark measures THE selected adapter.
+    assert 'ADAPTER_REVISION = "edd69373be3d46ae2a982e555f4ec9549491e8e4"' in script
+    # The frozen 4-bit inference stack, both arms.
+    assert 'quantization="bitsandbytes"' in script
+    assert "load_in_4bit=True" in script
+    assert "enable_lora=True" in script
+    # R0-proven recipe: no flashinfer JIT, eager mode.
+    assert 'os.environ.setdefault("VLLM_USE_FLASHINFER_SAMPLER", "0")' in script
+    assert "enforce_eager=True" in script
+    # Text-free: random token ids, nothing persisted.
+    assert "random_token_prompts" in script
+    assert "CommitOperationAdd" not in script
