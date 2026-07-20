@@ -13,6 +13,12 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Guard - no restricted data or secrets tracked
+        run: |
+          tracked=$(git ls-files 'data/raw/**' 'data/private/**' '**/*.env' '.env' || true)
+          if [ -n "$tracked" ]; then
+            echo "Restricted/secret files are tracked (must be gitignored):"; echo "$tracked"; exit 1
+          fi
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.12"
