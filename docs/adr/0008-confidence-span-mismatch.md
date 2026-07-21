@@ -53,9 +53,23 @@ H2 (`CA_QA ≥ CA_FS + δ_material`) an understated `CA_FS` makes H2 **easier to
 defect therefore biases the evidence **in favour of the implementer's own hypothesis** — the
 dangerous direction. The same applies more weakly to H1 via ZS.
 
-Supporting evidence that the contamination is doing real damage: FS's best development
-risk-coverage AUC is 0.9467 against a base risk of 0.9586 — the score is very close to
-non-discriminative, which is what a mostly-noise signal looks like.
+**The magnitude of the damage is unknown and must not be asserted.** An earlier version of this
+ADR offered FS's near-zero discrimination gap (best development AUC 0.9467 against base risk
+0.9586) as evidence that contamination was doing real damage. That inference does not hold, and
+the correction is recorded here rather than quietly dropped:
+
+| System | discarded share of generation | best AUC | base risk | discrimination gap |
+|---|---|---|---|---|
+| ZS | 37% | 0.9888 | 0.9927 | 0.0039 |
+| FS | **89%** | 0.9467 | 0.9586 | 0.0120 |
+| QA | 0% | 0.4401 | 0.5834 | 0.1433 |
+
+If contamination drove non-discrimination, ZS at 37% should show a *larger* gap than FS at 89%.
+It shows a **smaller** one. Both baselines are near-non-discriminative irrespective of
+contamination level, which is at least as well explained by base risks of 0.96–0.99 leaving
+almost no signal for any score to find. The direction of the bias (below) is established by
+reasoning about the mechanism; its **size is not measurable from these artifacts** and no
+estimate of it may be reported.
 
 ## What bounds the damage
 
