@@ -1,0 +1,95 @@
+{
+  "schema_version": "1",
+  "_record_notice": "Independent reviewer PLAN 2 CLOSE record. Consolidates the two rulings that were outstanding at the close (extraction-policy conditions C1-C7, and the serving-equivalence probe assessment) and records the reviewer's own reproduction of the Plan 2 evidence base. Produced by a reviewer who did not implement Plan 2.",
+  "review_kind": "plan_close",
+  "plan": "Plan 2",
+  "reviewed_commit": "2d3c6be",
+  "reviewed_date": "2026-07-21",
+  "reviewer_identity": "Reviewer/QA (Claude Code, Opus 4.8) — independent; NOT the Plan 2 implementer.",
+  "prior_records": [
+    "evidence/plan2/reviewer_record.v2.json (Plan 2 PASS at 8e5a2c8)",
+    "evidence/plan2/reviewer_record.extraction-policy.json (adopt + require, at 26e41d5)"
+  ],
+
+  "verdict": "PASS — Plan 2 CLOSED. Plan 3 may open.",
+
+  "ruling_1_extraction_conditions": {
+    "verdict": "all seven conditions DISCHARGED",
+    "authority": "docs/adr/0006-output-extraction-policy.md",
+    "per_condition": {
+      "C1_real_parser_semantics": "Discharged. ADR carries the authoritative table (ZS 8,959 / FS 9,105 / QA 9,085) under json.loads + duplicate-key rejection + strict pydantic (extra='forbid'), and explicitly supersedes the brief's loose-proxy 8,965 / 9,091.",
+      "C2_algorithm_specified": "Discharged. From-index-0 global-string-state scan is normative in the ADR AND implemented as parsing.extract_first_json_object; guarded by tests/test_parsing.py::test_extractor_scans_from_index_zero_with_global_string_state. The rejected find-first-brace variant is recorded as correct only incidentally (reviewer measured zero divergence over 27,318 records).",
+      "C3_empty_frames_first_class": "Discharged, and materially load-bearing. FS's 6,217 'valid' frames are 46% empty (2,887), so on content-bearing frames FS (3,330) falls BELOW ZS (3,550). A single conflated acceptance number would have credited FS for saying nothing.",
+      "C4_post_hoc_disclosure": "Discharged. ADR names the pre-registered artifact (strict parser) and both harness defects (ZS instruction echo; FS missing stop sequence, 9,106/9,106 finish_reason='length').",
+      "C5_unrecovered_residual": "Discharged. 140 ZS cap-truncated records disclosed as a residual harness artifact, not model failure; guarded by tests/test_parsing.py::test_extraction_preserves_genuine_failures.",
+      "C6_sign_change_recorded": "Discharged. ADR records that the structural gap inverts (QA -20 vs FS; +126 vs ZS; -280 vs ZS on content-bearing) and that H1/H2 must rest on grounding and certified acceptance, not structural validity.",
+      "C7_one_code_path_guarded": "Discharged. Single code path applied to all arms; tests/test_parsing.py::test_extraction_is_a_no_op_on_already_bare_json cites the condition in its docstring."
+    },
+    "beyond_conditions": "The ADR additionally carries the template-echo false-accept probe forward as a standing requirement if the prompt template ever changes. Not a reviewer condition; the correct instinct — it closes the failure path at its source rather than at one point in time."
+  },
+
+  "ruling_2_serving_equivalence_probe": {
+    "verdict": "PASS-with-conditions",
+    "framing": "This is explicitly NOT a declaration that 86.33% clears a threshold. No threshold was pre-registered, and inventing one after seeing the result is the exact post-hoc move condition C4 exists to prevent. The probe was specified to QUANTIFY parity; it did so at n=300 with correct statistics. The ruling is narrower: the measured limitation is COMPATIBLE with Plan 2 close and with certification AS SCOPED.",
+    "why_compatible": "Internal validity is intact — all three arms (ZS/FS/QA) were generated on the same vLLM 4-bit + LoRA stack, so the QA-vs-baseline comparison is internally consistent, and the certified system is DEFINED as the adapter as served on the frozen stack. Portability is a separate claim that has not been made and must not be implied.",
+    "measured": {
+      "prompt_reproduction": "300/300 prompt_sha256 exact",
+      "parsed_output_agreement": "86.33% (259/300), Wilson 95% [81.98%, 89.76%] — reviewer recomputed, matches to 2dp",
+      "divergence_rate": "13.67% (41/300), Wilson 95% [10.24%, 18.02%] — reviewer recomputed, matches",
+      "quality_neutrality": "vs train gold on the 41 divergent frames: served F1 0.341 / exact 5, local F1 0.392 / exact 2. A 4-true-positive difference over 96 gold arguments at n=41 — accepted as noise, not a systematic gap. Downgrades severity from quality defect to reproducibility caveat.",
+      "confidence_concentration": "0 of 41 divergent frames in the top confidence quartile (chance 25%). Reviewer recomputed P(0 of 41 | uniform) = 7.5e-06 — the concentration is real, not sampling noise. Divergence falls monotonically with acceptance: 13.67% / 12.59% / 9.33% / 6.00% / 0% at 100/90/75/50/25%.",
+      "top_quartile_bound": "0/75 carries a 4.80% two-sided Clopper-Pearson 95% upper bound (reviewer recomputed; the rule of three would give 4.00%). Attribution corrected in the doc at the reviewer's request."
+    },
+    "conditions": {
+      "1_reoperating_point": "CARRIED TO PLAN 3 (calibration has not run). The reassurance is operating-point-dependent: at top-90% acceptance divergence is 12.59%, barely below the 13.67% raw rate. The near-zero result holds only under aggressive abstention. Re-report divergence AT the realised operating point before any stability claim; do not carry '0% / <=4.8%' forward as though it applies at whatever acceptance rate calibration selects.",
+      "2_abstain_flip_location": "DISCHARGED, and the answer is worse than the aggregate suggested — reported honestly. The 4 empty_vs_nonempty flips sit at min-logprob percentiles 0.503, 0.507, 0.370, 0.347. None reaches the top quartile, but TWO sit just above the median, so they survive into the accepted set at plausible operating points. The flip rate is now stated as 1.3-1.8% at plausible operating points, i.e. it can exceed the raw 1.3%.",
+      "3_confidence_provenance": "DISCHARGED and independently verified in source. jobs/plan2_prediction_generation.py: chosen_transition_logprobs(request_output.outputs[0]) under SamplingParams(temperature=0.0, max_tokens=256, logprobs=1). The scores are the SERVED stack's own logprobs with no local recomputation, so the analysis reflects the deployment-relevant case."
+    },
+    "standing_limitation": "Carry into Plan 4 limitations and any model/report card, scoped to the exact serving stack: 13.67% raw divergence; 1.3-1.8% abstain/extract flip rate at plausible operating points; quality-neutrality; and confidence-concentration with its 4.80% upper bound in the top quartile. Probe frames are train-split only, so the rate may differ on certification/final splits. Cause is not isolated to a specific kernel."
+  },
+
+  "reviewer_reproduction_evidence": {
+    "green_command_at_reviewed_commit": "uv run pytest -q -> 188 passed; uv run ruff check . -> All checks passed; uv run mypy -> Success, no issues in 17 source files. Working tree clean.",
+    "headline_table_reproduced": "Reviewer re-ran the committed CLI (uv run conformalextract parse-predictions) on the real data, writing to a scratch path so the committed summary was not overwritten. Output matched evidence/plan2/prediction_parse_summary.json EXACTLY — every count and every failure_reason breakdown.",
+    "grounding_result": {
+      "zs": {"valid": 3596, "pct": "39.4%", "content_bearing": 3550, "empty": 46, "grounding_failure": 5355, "structural_failure": 173},
+      "fs": {"valid": 6217, "pct": "68.1%", "content_bearing": 3330, "empty": 2887, "grounding_failure": 2875, "structural_failure": 32},
+      "qa": {"valid": 8729, "pct": "95.7%", "content_bearing": 8277, "empty": 452, "grounding_failure": 340, "structural_failure": 55},
+      "denominator": "9,124 records per arm (all records, including the 18 context_overflow counted as failures) — the conservative denominator."
+    },
+    "cross_check_against_reviewer_own_prior_measurement": "Reconciles precisely. The reviewer's independent extraction measurement at 26e41d5 gave ZS 8,959 structurally valid over 9,106 generated. The parse summary gives ZS 173 structural failures over 9,124, i.e. 155 among generated. 155 = the reviewer's 147 json/schema failures + unknown_role 5 + invalid_span 3 — exactly the post-schema role/span checks the reviewer's proxy could not apply (they require allowed_roles and document_tokens). FS and QA reconcile the same way.",
+    "arithmetic_closure": "All three arms: valid + grounding_failure + structural_failure = 9,124; valid = content_bearing + empty. Verified.",
+    "probe_statistics": "Wilson CIs, Clopper-Pearson bounds, quartile-concentration significance and acceptance-tier rates all independently recomputed and matching."
+  },
+
+  "producer_close_pass_verified": {
+    "note": "The implementer ran its own close pass and reported clean on every check. The reviewer re-verified the security- and honesty-critical items independently at the reviewed commit rather than accepting the summary.",
+    "hf_tokens_in_tracked_files": "clean (git grep hf_[A-Za-z0-9]{20,} excluding uv.lock — no match)",
+    "restricted_data_tracked": "clean (no data/raw/, data/private/, or .env in git ls-files)",
+    "predictions_with_text_tracked": "clean (no prediction jsonl or divergence file tracked; private HF repo only, per ADR 0005)",
+    "accuracy_overclaim": "clean. '95.7' occurs exactly twice in docs/: once in the results table correctly labelled 'valid', and once in the sentence forbidding its misuse.",
+    "certified_misuse": "clean. Uses are scoped disclaimers ('Nor is this certified acceptance...').",
+    "sealed_labels": "clean. src/conformalextract/predictions.py documents 'source tokens only, never gold' and states instance.arguments (gold) is deliberately not touched. Grounding is a round-trip against source document tokens, so parsing every split — including sealed ones — reads no label."
+  },
+
+  "headline_assessment": {
+    "finding": "Grounding, not structure, is what discriminates — and the comparison reverses between stages. Structurally the arms are saturated and near-indistinguishable (FS 9,105 >= QA 9,085 > ZS 8,959). On grounding they separate widely (QA 95.7% vs FS 68.1% vs ZS 39.4%), with ungrounded spans at QA 340 (3.7%) against ZS 5,355 (58.7%) — a ~16x separation on exactly the axis structural validity could not see. The adapter's principal learned behaviour is grounding fidelity, not format compliance.",
+    "honesty_boundary_upheld": "'Valid' means parsed AND grounded — NOT correct. A span can point at real text and still name the wrong entity or role. Correctness is scored only against sealed gold during certification. 95.7% must never be quoted as accuracy, and H1/H2 remain genuinely open. The write-up states this explicitly.",
+    "extraction_ruling_vindicated_with_a_caveat": "The adopt ruling is vindicated on the merits: under the strict parser both baselines scored 0, which would have attributed a missing stop sequence to model quality when the real deficit is grounding. The fair statement is that 'regenerate' would have reached the same place for the recoverable mass; what actually prevented a wrong conclusion was condition C3, which forced empty frames to be first-class.",
+    "promoted_finding": "On content-bearing frames the ZERO-shot baseline beats the FEW-shot one (3,550 vs 3,330), and FS emits 63x more empty frames (2,887 vs 46). The two frozen demonstrations appear to have taught emptiness and continuation, actively harming the arm. Promoted at the reviewer's request from an aside to a stated result, scoped to these two demonstrations, this template and this model."
+  },
+
+  "what_this_close_does_and_does_not_authorise": {
+    "authorises": "Plan 2 is CLOSED. Plan 3 (certification) may open, at $0, against sealed labels under the existing label-access contract.",
+    "does_not_authorise": "No spend (~$6.0 of $24.7992 remains unspent and nothing pending needs it). No publication. No portability claim for the adapter on any other serving stack. No accuracy claim from any Plan 2 figure.",
+    "carried_into_plan_3": [
+      "Probe condition 1 — re-report divergence at the realised operating point before any stability claim.",
+      "C3 — empty frames reported as a separate first-class column; certified acceptance must state how an empty prediction scores against empty vs non-empty gold; FS acceptance never reported as a single conflated number.",
+      "C6 — H1/H2 rest on grounding and certified acceptance, not structural validity.",
+      "The abstain/extract flip finding: two of four flips survive into the accepted set at plausible operating points — the abstention mechanism itself is stack-dependent at the margin."
+    ],
+    "honest_cliff_edge": "QA leads comfortably on grounding, but certification is scored against sealed gold and none of the Plan 2 numbers guarantee it wins there. Per the CLAUDE.md honesty boundary, a negative or infeasibility result at Plan 3 is a first-class publishable outcome, not a failure."
+  },
+
+  "acceptance_rule": "Plan 2 close requires: the independent reviewer to reproduce the evidence base from committed commands, confirm both outstanding rulings, verify no token/restricted-data/sealed-label leakage, and confirm no claim exceeds its evidence. The Plan 2 implementer may not complete this record."
+}
