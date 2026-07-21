@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import math
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import Final
 
 import numpy as np
@@ -20,7 +21,12 @@ FROZEN_DELTA: Final[float] = 0.05
 FROZEN_ACCEPTANCE_FLOOR: Final[float] = 0.20
 FROZEN_MATERIAL_GAIN: Final[float] = 0.05
 FROZEN_BOOTSTRAP_REPLICATES: Final[int] = 2000
-FROZEN_CONFIDENCE_CANDIDATE: Final[str] = "minimum"
+# Per system, not a single scalar: the confidence score is part of each system's own selective
+# policy (reviewer Phase-A ruling 1a). A scalar default here previously encoded the superseded
+# pooled choice ("minimum") and could bind an analysis id to a candidate no system deploys.
+FROZEN_CONFIDENCE_CANDIDATES: Final[Mapping[str, str]] = MappingProxyType(
+    {"fs": "tenth_percentile", "qa": "mean", "zs": "mean"}
+)
 
 
 def hoeffding_upper(losses: Sequence[float], failure_probability: float) -> float:

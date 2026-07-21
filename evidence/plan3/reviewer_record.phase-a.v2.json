@@ -1,0 +1,81 @@
+{
+  "schema_version": "1",
+  "_record_notice": "Independent reviewer FOCUSED RE-REVIEW of the Plan 3 Phase-A gate, following the REVISE recorded in evidence/plan3/reviewer_record.phase-a.json. Confirms discharge of rulings 1(a) and 1(d), re-confirms the ruling-2 conditions, and rules on the authorization previously withheld. Produced by a reviewer who did not implement any of it.",
+  "review_kind": "plan3_phase_a_re_review",
+  "reviewed_commit": "beb636a",
+  "review_range": "b2ea048..beb636a",
+  "prior_record": "evidence/plan3/reviewer_record.phase-a.json (REVISE at b2ea048)",
+  "reviewer_identity": "Reviewer/QA (Claude Code, Opus 4.8) — independent; NOT the implementer.",
+  "reviewed_date": "2026-07-21",
+
+  "verdict": "PASS — items 1 and 2 discharged. AUTHORIZATION GRANTED, conditional on the three pre-conditions below being closed before certify runs.",
+
+  "external_signal": {
+    "green_command": "uv run pytest -q -> 222 passed; ruff -> All checks passed; mypy -> Success, no issues in 21 source files. Working tree clean at beb636a.",
+    "gate_reproduction": "uv run conformalextract development-gate re-run to a scratch path: output IDENTICAL to the committed evidence/plan2/development_gate_summary.json."
+  },
+
+  "item_1_per_system_selection": {
+    "verdict": "DISCHARGED — verified, and it is a genuine rebuild rather than a relabel",
+    "selection_matches_independent_computation": "The three frozen candidates reproduce my own prior independent computation to full float precision: ZS 'mean' (0.9888477764726477), FS 'tenth_percentile' (0.9466627078627017), QA 'mean' (0.4401241770361072). selection_scope is recorded as 'per_system'.",
+    "grids_built_from_the_recorded_candidate": "Verified by score-scale forensics rather than by trusting the label. QA's thresholds moved from the superseded 'minimum' scale (-1.144, -0.995 at the prior commit) to -0.0695 / -0.0453, which sit in QA's 'mean' distribution (median -0.0575). FS's thresholds (-0.0051, -0.0016) sit in its 'tenth_percentile' distribution (median -0.0028); ZS's (-0.1007, -0.0835) sit in 'mean' (median -0.0927). For each system the threshold location is closest to the recorded candidate's distribution, so the grids were genuinely rebuilt from the per-system scores.",
+    "delta_applied": "threshold_grids.json records delta = 0.0166666666666667 (delta/3) with requested = realized = 3 per system, matching my independently computed largest_scorc_grid at delta/3. My prior carry-forward is discharged: the delta=0.05 grid file is not carried into certification.",
+    "guard_is_enforceable": "build-grid raises RuntimeError unless the development-gate summary records selection_scope == 'per_system' (cli.py:531). It then reads each system's own selected_candidate (cli.py:538). This is a hard failure, not a convention.",
+    "residual_found": "See pre_condition_1 — a stale scalar FROZEN_CONFIDENCE_CANDIDATE = 'minimum' survives and is the silent default of certification_config_hash. It cannot reach score selection (predictions.py defaults independently to 'mean' and validates membership), so this is a provenance-binding defect, not a computational one."
+  },
+
+  "item_2_confidence_span_mismatch": {
+    "verdict": "The decision to disclose rather than re-run is CORRECT. Both challenged claims hold.",
+    "claim_a_bias_direction": {
+      "assessment": "STATED CORRECTLY",
+      "reasoning": "A contaminated score is a worse selective signal, so for any acceptance level the selective risk is higher and the achievable acceptance at the target is lower. CA_FS and CA_ZS are therefore understated. H2 is CA_QA >= CA_FS + delta_material, so an understated CA_FS makes H2 easier to support. The defect biases the evidence toward the implementer's own hypothesis, and ADR 0008 says so in those words ('the dangerous direction') rather than softening it. That is the correct and creditable framing.",
+      "minor_over_reading": "The supporting diagnostic — FS's best AUC 0.9467 against base risk 0.9586, 'close to non-discriminative' — is suggestive but not diagnostic OF CONTAMINATION specifically. ZS shows the same near-zero gap (0.9888 vs 0.9927) at only 37% contamination, so the pattern is equally consistent with the baselines simply being poor. Does not change the conclusion; the claim should not be leaned on as evidence of contamination magnitude."
+    },
+    "claim_b_damage_bounded": {
+      "assessment": "SOUND, and it is NOT doing too much work to excuse (a)",
+      "reasoning": "The forced-abstention bound max_acceptance = (1 - base_risk)/(1 - alpha) depends only on the always-answer base risk. The confidence score determines the ORDERING of documents for abstention; it cannot change the base risk. So the bound holds even for an ORACLE score that orders perfectly by true loss. I verified this independently at the prior commit and the favourable_bound_check now recorded in the gate summary reproduces my numbers exactly: ZS 0.0647, FS 0.1073 at the base risk most favourable to them, both far below the 0.20 floor. No score quality could rescue either baseline. This is a valid, verifiable, score-independent argument, not a rationalisation.",
+      "what_b_does_not_cover": "(i) the MAGNITUDE of any QA-over-FS advantage — ADR 0008 concedes this explicitly in its cap; (ii) any score-DEPENDENT descriptive claim about ZS/FS selective behaviour (abstention rates at a threshold, risk-coverage shape), which the current cap does not reach — see pre_condition_2; (iii) FS as a fair representative of few-shot prompting as a method, since the same missing-stop-sequence bug compromised both its parsing and its scoring — the cap's 'may not be reported as a clean QLoRA-versus-few-shot comparison' does address this."
+    },
+    "affordability_argument_is_imprecise": "ADR 0008 declines the re-run partly on cost ('~$11 over ~14h' against '~$6.0 remaining', 'a re-run is not affordable'). That figure is for the FULL three-arm run over all splits. A targeted re-run — baselines only, certification-split records only, same greedy settings, purely to persist per-token log-probabilities — is a fraction of that and may well fall inside the remaining budget; the ADR does not cost that option. The DECISION is nonetheless correct, on the other ground the ADR gives: because base-risk infeasibility is score-independent, a cleaner baseline score would not change any verdict, so the spend would buy nothing. The justification should lead with the argument that actually holds rather than an affordability claim that is not costed for the targeted case.",
+    "standing_requirement_endorsed": "ADR 0008 item 3 — any future generation run must persist per-token log-probabilities so a span-restricted score is recomputable without re-inference. Correct, and it is the durable fix."
+  },
+
+  "h2_pre_commitment": {
+    "ruling": "KEEP H2 with the cap; do NOT withdraw it — but strengthen the cap.",
+    "why_not_withdraw": "Plan §8.3 defines H2 as secondary confirmatory, existing so that 'failure against a strong few-shot baseline is not hidden even if H1 succeeds'. Its value now lies almost entirely in its NULL: if QA fails to clear even a baseline that is infeasible by construction and biased in QA's favour, that is a strong negative result, and the honesty boundary treats such a result as first-class. Withdrawing H2 would discard the one informative outcome. The cap is also pre-registered BEFORE the sealed split opens, which is the strongest position a caveat can occupy — it cannot later be added to explain away an unwelcome result.",
+    "required_strengthening": [
+      "Extend the cap beyond 'H2 support' to cover ANY score-dependent descriptive claim about ZS/FS selective behaviour (abstention rate at a threshold, risk-coverage curve shape, per-threshold acceptance). Those are contaminated and the current cap does not reach them.",
+      "Record that H2 is retained principally as a FALSIFICATION OPPORTUNITY: its support is expected, near-guaranteed by a score-independent mechanism, and confounded; its non-support is the informative outcome. This prevents 'H2 supported' from becoming a headline."
+    ]
+  },
+
+  "item_3_ruling_2_conditions": {
+    "verdict": "Recorded faithfully in §7; enforceability is mixed and should be described honestly.",
+    "condition_1_bounds_not_differences": "Recorded accurately. Review-enforced phrasing commitment; no code gate.",
+    "condition_2_construction_a_fixed": "GENUINELY CODE-ENFORCED — I verified. certification_config_hash binds delta_allocation and primary_construction into the analysis id: changing the allocation changes the hash, changing the primary construction changes the hash, and a non-exhausting allocation is rejected outright ('delta_allocation sums to 0.03, which does not match delta 0.05'), which protects the union bound from a silently invalid split.",
+    "condition_3_both_constructions_reported": "Recorded accurately. Reporting discipline; review-enforced at Plan 4, not automated.",
+    "condition_4_coarse_null_caveat": "Recorded, but its NUMBER is now wrong in the direction that understates the problem — see pre_condition_3. It says the design admitted '~two usable abstention thresholds per system'. Measured against each system's feasible acceptance region, QA — the only certifiable system — has exactly ONE.",
+    "honest_summary": "One of four conditions is machine-enforced; three are pre-registered commitments that the reviewer must police at Plan 4. That is normal and acceptable, and §8 correctly states that the weights and primary construction remain Gate-0 freezes requiring independent sign-off."
+  },
+
+  "decisive_finding_grid_resolution": {
+    "measurement": "For each system I computed the acceptance rate each grid threshold produces on development data and compared it against that system's max feasible acceptance. QA (max feasible 0.465): -inf -> 1.000 (outside), -0.0695 -> 0.666 (outside), -0.0453 -> 0.334 (INSIDE). ZS and FS (max feasible 0.000): no threshold can be inside.",
+    "consequence": "Certification will test the only certifiable system at exactly ONE viable operating point. A certificate there would be valid, non-vacuous and above the 0.20 acceptance floor (0.334), so the run can produce a real result — but it yields a single point, not a risk-coverage curve, and the selective trade-off cannot be exhibited.",
+    "h1_h2_collapse": "Because ZS and FS have max feasible acceptance 0.000, CA_ZS = CA_FS = 0 by construction. H1 (CA_QA >= CA_ZS + 0.05) and H2 (CA_QA >= CA_FS + 0.05) therefore BOTH reduce to the single condition CA_QA >= 0.05. They are not two independent confirmatory comparisons; they are one single-system threshold test stated twice, and the baselines contribute only a zero. Reporting them as two comparisons would overstate the evidence.",
+    "on_the_delta_3_allocation": "My prior endorsement of equal delta/3 weighed the QA-weighted alternative as buying 'one extra threshold (4 vs 3)'. That used grid SIZE as the metric; the operative metric is usable operating points inside the feasible region, by which delta/3 leaves QA with the minimum possible for a non-vacuous certificate — one. I am not reopening the allocation: reallocating after seeing which thresholds land in the feasible region would read as tuning toward the hypothesis, the freeze is already reviewed and bound into the analysis id, and n=1,396 is grid-starved under any three-way split, so reallocation shuffles scarcity rather than fixing it. But the cost is larger than I previously stated and condition 4 must carry the true figure."
+  },
+
+  "authorization": {
+    "ruling": "GRANTED — certify may be implemented and run against the sealed certification split, subject to the three pre-conditions below.",
+    "why_granted": "Both withheld items are discharged under my own reproduction: the per-system freeze matches my independent computation to full precision and the grids were genuinely rebuilt from those candidates; the confidence-span residual is disclosed with a pre-registered claim cap and its damage is bounded by a score-independent argument I verified. My carry-forward (grids at delta/3, the delta=0.05 file not carried forward) is discharged. QA retains one viable operating point at acceptance 0.334, above the 0.20 floor, so the run can produce a genuine certificate rather than a foregone conclusion.",
+    "why_not_withheld_again": "I considered ruling 'do not run', which the honesty boundary makes a legitimate outcome. I declined because a single valid operating point still yields a complete and interpretable claim ('at threshold T, QA accepts 33.4% of documents with certified risk <= 20% at 95% confidence'), the baselines' certification-split confirmation of infeasibility is score-independent and cannot be obtained without opening the split, and the run costs nothing. The result will be narrow, and the conditions below exist so that its narrowness is stated by the design rather than discovered by a reader.",
+    "pre_conditions": {
+      "pre_condition_1": "Close the provenance residual before certify computes an analysis id. FROZEN_CONFIDENCE_CANDIDATE = 'minimum' (certification.py:23) is the superseded pooled value and is the silent default of certification_config_hash (analysis_version.py:48). With per-system selection there is no single frozen candidate, so the scalar cannot represent the frozen configuration: bind the per-system candidates as a mapping (as delta_allocation already is), and remove or correct the scalar so it cannot be inherited by a naive call. Verified impact: changing the value changes the analysis id, so a naive call would bind a candidate no system deploys.",
+      "pre_condition_2": "Extend ADR 0008's claim cap to cover any score-dependent descriptive claim about ZS/FS selective behaviour, and record H2 as retained principally as a falsification opportunity (see h2_pre_commitment).",
+      "pre_condition_3": "Correct condition 4 in docs/plan3/theorem-to-code-global-multiplicity.md §7 from '~two usable abstention thresholds per system' to the measured figure: QA, the only certifiable system, has exactly ONE threshold inside its feasible acceptance region. Additionally pre-register that H1 and H2 collapse to the single condition CA_QA >= 0.05 and must not be reported as two independent confirmatory comparisons."
+    },
+    "not_authorised": "No spend. No Plan 4. No claim of certified acceptance until the run completes and its evidence is independently reviewed. Nothing in this review opened a sealed label or spent money."
+  },
+
+  "acceptance_rule": "Discharge of a REVISE requires the reviewer to independently reproduce the corrected artifacts, verify the fix is substantive rather than cosmetic, and confirm that no superseded value survives on the path to the gated action. The implementer may not complete this record."
+}

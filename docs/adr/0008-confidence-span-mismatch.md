@@ -27,15 +27,23 @@ about 37% of ZS's are its instruction-echo preamble. QA is clean. This is the sa
 sequence harness bug ADR 0006 corrected for *parsing*, propagating into the *scoring* channel,
 where it was not corrected.
 
-## Why it cannot be fixed here
+## Why it is not fixed here
 
 The generation job persisted only the three aggregate candidates, **not the per-token
 log-probabilities** (`confidence_candidates` is a 3-float dict per record). Recomputing a
-span-restricted score is therefore impossible from the saved artifacts; it requires re-running
-generation. The original three-arm run cost ~$11 over ~14h, and FS alone was the expensive arm.
-Remaining programme budget is ~$6.0 of $24.7992. **A re-run is not affordable**, and spending
-essentially the entire remaining budget to re-derive a score for two systems that are
-base-risk-infeasible regardless (below) would be poor judgement.
+span-restricted score is therefore impossible from the saved artifacts; it requires re-inference.
+
+**The reason not to re-run is that it would buy nothing, not that it is unaffordable.** The
+decision rests on the score-independence argument below: neither baseline can reach the
+acceptance floor at *any* score quality, so a clean score cannot change either system's
+feasibility verdict — the quantity H1/H2 actually turn on. A re-run would purchase a better
+score for two systems that remain infeasible with it.
+
+*(An earlier version of this ADR led with affordability — "~$11 against ~$6.0 remaining." That
+framing was imprecise and is corrected at the reviewer's instruction: the ~$11 prices the full
+three-arm run, whereas a targeted re-run of the baselines purely to persist per-token
+log-probabilities was never costed. Cost is not the load-bearing reason and should not be
+presented as one.)*
 
 ## Direction of the bias — stated plainly
 
@@ -53,25 +61,42 @@ non-discriminative, which is what a mostly-noise signal looks like.
 
 **Base-risk infeasibility is score-independent.** The forced-abstention bound
 `(base_risk − α)/(1 − α)` depends only on the always-answer base risk, not on the confidence
-score. ZS (0.9927) and FS (0.9586) cannot reach the 0.20 acceptance floor at **any** score
-quality, and ADR 0007's two-directional check confirms this holds even at the bound most
-favourable to them (max acceptance 0.0647 and 0.1073). A perfect confidence score could not
-rescue either baseline.
+score — the score sets the *ordering* of documents, not the base rate. ZS (0.9927) and FS
+(0.9586) cannot reach the 0.20 acceptance floor at **any** score quality, including an oracle
+score, and ADR 0007's two-directional check confirms this holds even at the bound most favourable
+to them (max acceptance 0.0647 and 0.1073). A perfect confidence score could not rescue either
+baseline.
 
 So the contamination cannot flip a feasible/infeasible verdict for either baseline, which is what
 the predicted `boundary_crossing` H1/H2 pattern actually turns on. It affects *how good* a
 baseline's selective policy looks, in a regime where no policy can qualify.
 
+**What this argument does NOT cover** (independently confirmed at review):
+
+1. **The magnitude of any QA-over-FS advantage.** Conceded in the claim cap below.
+2. **Any score-dependent descriptive claim about a baseline.** Risk–coverage curves, AUC values,
+   calibration statements, "FS's confidence is uninformative", or any comparison of selective
+   *behaviour* between systems are contaminated for ZS and FS and are **not** protected by
+   score-independence. FS's development AUC of 0.9467 must not be reported as a property of
+   few-shot prompting; it is a property of few-shot prompting *as scored over a span that is 89%
+   discarded text*.
+
 ## Decision
 
 1. **Disclose, do not re-run.** The residual is recorded here, in ADR 0007's consequences, and
    must appear in the Plan 4 limitations section and any model/report card.
-2. **Pre-commit a claim cap.** If H2 is supported, it **may not** be reported as a clean
-   QLoRA-versus-few-shot comparison. The mandatory wording is that FS's selective policy was
-   handicapped by a harness artifact of known direction and unknown magnitude, so H2 support is
-   **confounded** and is not evidence of the size of any QA-over-FS advantage. If H2 is *not*
-   supported despite this favourable-to-QA bias, that is a strong negative result and may be
-   reported as such.
+2. **Pre-commit a claim cap, in three parts.**
+   - **H2 support is confounded.** If H2 is supported it **may not** be reported as a clean
+     QLoRA-versus-few-shot comparison. The mandatory wording is that FS's selective policy was
+     handicapped by a harness artifact of known direction and unknown magnitude, so H2 support is
+     not evidence of the *size* of any QA-over-FS advantage.
+   - **H2 is retained as a falsification opportunity, not a confirmation.** Its evidential value
+     now lies almost entirely in its null. Because the defect biases *toward* H2, a failure to
+     support H2 despite that bias is a strong, clean negative result and may be reported as such
+     without this caveat. H2 is kept for exactly that reason rather than withdrawn.
+   - **No score-dependent descriptive claim about ZS or FS.** Per "What this argument does NOT
+     cover" above, contaminated selective-behaviour statistics for the baselines are not reported
+     as properties of zero-shot or few-shot prompting.
 3. **Any future generation run must persist per-token log-probabilities**, so a span-restricted
    score is recomputable without re-inference. Recorded as a standing requirement.
 

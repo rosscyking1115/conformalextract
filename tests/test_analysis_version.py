@@ -84,6 +84,38 @@ def test_certification_config_hash_reflects_the_adr_0007_freeze_by_default() -> 
     assert certification_config_hash(alpha=FROZEN_ALPHA) == frozen
 
 
+def test_confidence_candidates_are_bound_per_system_not_as_a_scalar() -> None:
+    """Reviewer Phase-A pre-condition 1: a scalar default encoded the superseded pooled choice."""
+    from conformalextract.certification import FROZEN_CONFIDENCE_CANDIDATES
+
+    assert dict(FROZEN_CONFIDENCE_CANDIDATES) == {
+        "zs": "mean",
+        "fs": "tenth_percentile",
+        "qa": "mean",
+    }
+    # The stale pooled scalar must no longer exist anywhere.
+    import conformalextract.certification as certification_module
+
+    assert not hasattr(certification_module, "FROZEN_CONFIDENCE_CANDIDATE")
+    # A different per-system assignment is a different config.
+    assert certification_config_hash() != certification_config_hash(
+        confidence_candidates={"zs": "minimum", "fs": "minimum", "qa": "minimum"}
+    )
+    # Key order must not matter.
+    assert certification_config_hash(
+        confidence_candidates={"qa": "mean", "fs": "tenth_percentile", "zs": "mean"}
+    ) == certification_config_hash()
+
+
+def test_confidence_candidates_must_cover_all_systems_with_known_values() -> None:
+    with pytest.raises(ValueError, match="exactly zs/fs/qa"):
+        certification_config_hash(confidence_candidates={"zs": "mean", "qa": "mean"})
+    with pytest.raises(ValueError, match="unknown confidence candidate"):
+        certification_config_hash(
+            confidence_candidates={"zs": "mean", "fs": "median", "qa": "mean"}
+        )
+
+
 def test_delta_allocation_binds_the_5_5_multiplicity_decision() -> None:
     """§5.5: the cross-system split must be bound so it cannot be swapped silently."""
     equal = {"qa": 0.05 / 3, "zs": 0.05 / 3, "fs": 0.05 / 3}

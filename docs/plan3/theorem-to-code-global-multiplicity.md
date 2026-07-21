@@ -161,9 +161,45 @@ extrapolation does not), and confirmed the union-bound argument. Binding conditi
 3. **Both constructions are reported unconditionally**, whatever they show. B is never used to
    support a claim A does not support; A is never quietly dropped if B looks better.
 4. **A coarse null is not a model result.** If certification returns infeasible or no material
-   gain, it may **not** be reported as "QLoRA did not certify" without stating that the design
-   admitted ~two usable abstention thresholds per system. Grid starvation at n=1396 is a
-   property of the design, not of the model.
+   gain, it may **not** be reported as "QLoRA did not certify" without stating the true grid
+   resolution. **Corrected at re-review — the original wording ("~two usable thresholds per
+   system") understated the problem.** Measured against each system's feasible region on
+   development data:
+
+   | System | thresholds | inside the feasible region |
+   |---|---|---|
+   | QA | −inf (acc 0.955), −0.0695 (acc 0.641), **−0.0453 (acc 0.330)** | **exactly 1** |
+   | ZS | acc 0.389 / 0.285 / 0.127 | 0 (max feasible acceptance is 0) |
+   | FS | acc 0.659 / 0.475 / 0.244 | 0 (max feasible acceptance is 0) |
+
+   **QA has exactly one usable operating point** — the minimum for a non-vacuous certificate.
+   Grid starvation at n=1396 is a property of the design, not of the model, and this is the
+   number that must be stated.
+
+## 7a. Pre-registered: H1 and H2 collapse to a single test
+
+Recorded **before** the sealed split opens, so it is not discovered afterwards.
+
+Base-risk feasibility (ADR 0007) puts `CA_ZS = CA_FS = Infeasible`, and the grid measurement
+above shows no ZS or FS threshold lands in a feasible region. If that holds on the certification
+split, then `CA_ZS = CA_FS = 0` **by construction**, and both hypotheses reduce to the same
+statement:
+
+> `CA_QA ≥ 0.05`
+
+H1 and H2 are then **one single-system threshold test stated twice** — the baselines contribute
+only a zero. Consequences, binding:
+
+- They **must not** be reported as two independent confirmatory comparisons; doing so would
+  overstate the evidence by counting one test twice.
+- The `boundary_crossing` outcome that `compare_certified_acceptance` will emit is the correct
+  and honest encoding (§8.2 forbids inventing a numerical difference against an infeasible
+  baseline) — but the write-up must say plainly that the comparison degenerated, not present a
+  crossing as though a contested margin had been won.
+- Given QA's single usable threshold, the achievable claim is narrow and its shape is known in
+  advance: *at one frozen threshold, QA accepts ≈33% of documents with certified risk ≤ α at
+  1−δ confidence, where neither baseline can certify at any threshold.* That is worth
+  establishing on sealed data, and it is all that is on offer.
 
 ## 8. Still a decision, not invented here
 

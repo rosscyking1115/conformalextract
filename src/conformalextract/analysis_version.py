@@ -23,7 +23,7 @@ from conformalextract.certification import (
     FROZEN_ACCEPTANCE_FLOOR,
     FROZEN_ALPHA,
     FROZEN_BOOTSTRAP_REPLICATES,
-    FROZEN_CONFIDENCE_CANDIDATE,
+    FROZEN_CONFIDENCE_CANDIDATES,
     FROZEN_DELTA,
     FROZEN_MATERIAL_GAIN,
 )
@@ -45,11 +45,15 @@ def certification_config_hash(
     acceptance_floor: float = FROZEN_ACCEPTANCE_FLOOR,
     material_gain: float = FROZEN_MATERIAL_GAIN,
     bootstrap_replicates: int = FROZEN_BOOTSTRAP_REPLICATES,
-    confidence_candidate: str = FROZEN_CONFIDENCE_CANDIDATE,
+    confidence_candidates: Mapping[str, str] = FROZEN_CONFIDENCE_CANDIDATES,
     delta_allocation: Mapping[str, float] | None = None,
     primary_construction: str | None = None,
 ) -> str:
     """Hash of the frozen ADR 0007 certification config; a drift from any default changes it.
+
+    ``confidence_candidates`` is a **per-system mapping** (reviewer Phase-A ruling 1a), never a
+    scalar: the score is part of each system's own selective policy, so binding one shared value
+    would encode a candidate no system deploys.
 
     ``delta_allocation`` (per-system δ_s) and ``primary_construction`` bind the §5.5 global
     multiplicity decision (see `docs/plan3/theorem-to-code-global-multiplicity.md`), so the
@@ -59,6 +63,13 @@ def certification_config_hash(
     ``delta`` -- a split that does not exhaust (or that overspends) the budget is rejected here
     rather than silently invalidating the union bound.
     """
+
+    if set(confidence_candidates) != {"zs", "fs", "qa"}:
+        raise ValueError("confidence_candidates must cover exactly zs/fs/qa")
+    known = {"mean", "tenth_percentile", "minimum"}
+    unknown = set(confidence_candidates.values()) - known
+    if unknown:
+        raise ValueError(f"unknown confidence candidate(s): {sorted(unknown)}")
 
     if delta_allocation is not None:
         total = sum(delta_allocation.values())
@@ -78,7 +89,7 @@ def certification_config_hash(
                 "acceptance_floor": acceptance_floor,
                 "material_gain": material_gain,
                 "bootstrap_replicates": bootstrap_replicates,
-                "confidence_candidate": confidence_candidate,
+                "confidence_candidates": dict(sorted(confidence_candidates.items())),
                 "delta_allocation": (
                     None
                     if delta_allocation is None
