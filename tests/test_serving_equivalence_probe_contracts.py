@@ -89,4 +89,28 @@ def test_probe_reports_both_strict_and_extracted_agreement() -> None:
     assert '"exact_raw_string_matches"' in SCRIPT
     assert '"parsed_output_agreement"' in SCRIPT
     assert '"parsed_output_agreement_rate"' in SCRIPT
-    assert "PROBE_SIZE = 24" in SCRIPT
+    # v2: n=24 gave a 95% interval of [0.69, 0.96] - too loose for the reviewer to judge.
+    assert "PROBE_SIZE = 300" in SCRIPT
+
+
+def test_probe_characterises_divergences_rather_than_only_counting_them() -> None:
+    """A differing span and a wholly different frame differ in what they imply for risk."""
+    body = _block(SCRIPT, "def characterise_divergence", "def main()")
+    for category in (
+        '"empty_vs_nonempty"',
+        '"argument_count_differs"',
+        '"different_roles"',
+        '"same_roles_different_spans"',
+    ):
+        assert category in body
+    assert '"divergence_categories"' in SCRIPT
+    assert '"divergence_count"' in SCRIPT
+
+
+def test_probe_persists_divergent_pairs_to_the_private_evidence_repo_only() -> None:
+    """Divergent pairs carry grounded text - ADR 0005 confines them to the private repo."""
+    assert 'DIVERGENCE_PATH = "plan2/serving_equivalence_divergences.v2.jsonl"' in SCRIPT
+    assert "private is not True" in SCRIPT
+    # Only written when there is something to write, and never overwrites v1.
+    assert "if divergences:" in SCRIPT
+    assert 'REPORT_PATH = "plan2/serving_equivalence_probe.v2.json"' in SCRIPT

@@ -54,11 +54,12 @@ ROLES_SHA256 = "17718598eb279e668cf56eb33b4936a09a6898367d79838e7107c0a83906aaf3
 QA_PREDICTIONS_PATH = "plan2/predictions/qa.v1.jsonl"
 QA_PREDICTIONS_SHA256 = "036f8f08dcbe7587c19def951f81e62e4be0a5de1485b406c64514d03bf721f3"
 ANALYSIS_ID = "plan2prep-f3f2f7a938061a92b2cb"
-REPORT_PATH = "plan2/serving_equivalence_probe.v1.json"
+REPORT_PATH = "plan2/serving_equivalence_probe.v2.json"
+DIVERGENCE_PATH = "plan2/serving_equivalence_divergences.v2.jsonl"
 
 CONTEXT_TOKENS = 6144
 MAX_NEW_TOKENS = 256  # identical to the generation run
-PROBE_SIZE = 24
+PROBE_SIZE = 300  # v2: n=24 gave a 95% interval of [0.69, 0.96] - too loose to judge
 PROBE_PROMPT_CAP = 4096
 HOURLY_RATE_USD = 0.80  # l4x1
 
@@ -167,6 +168,29 @@ def render_zs_prompt(record: dict, ontology: dict[str, list[str]]) -> dict:
     return {"instance_key": instance_key, "prompt": prompt}
 
 
+def characterise_divergence(served: dict, local: dict) -> str:
+    """Name the KIND of disagreement — a differing span and a wholly different frame have
+    very different implications for a risk guarantee, so counting alone is not enough."""
+
+    served_arguments = served.get("arguments") or []
+    local_arguments = local.get("arguments") or []
+    if not served_arguments and not local_arguments:
+        return "equal_but_unequal_serialisation"
+    if bool(served_arguments) != bool(local_arguments):
+        return "empty_vs_nonempty"
+    if len(served_arguments) != len(local_arguments):
+        return "argument_count_differs"
+    served_roles = sorted(str(a.get("role")) for a in served_arguments)
+    local_roles = sorted(str(a.get("role")) for a in local_arguments)
+    if served_roles != local_roles:
+        return "different_roles"
+    served_spans = sorted((a.get("start"), a.get("end")) for a in served_arguments)
+    local_spans = sorted((a.get("start"), a.get("end")) for a in local_arguments)
+    if served_spans != local_spans:
+        return "same_roles_different_spans"
+    return "same_roles_same_spans_different_text"
+
+
 def main() -> None:
     started = time.monotonic()
     WORKSPACE.mkdir(parents=True, exist_ok=True)
@@ -256,6 +280,8 @@ def main() -> None:
     both_extractable = 0
     served_extractable = 0
     output_lengths: list[int] = []
+    divergences: list[dict] = []
+    categories: dict[str, int] = {}
     for _key, _prompt, prompt_ids, record in selected:
         inputs = torch.tensor([prompt_ids]).to(device)
         with torch.no_grad():
@@ -277,10 +303,27 @@ def main() -> None:
             continue
         both_extractable += 1
         try:
-            if json.loads(local_object) == json.loads(served_object):
-                extracted_equal += 1
+            local_parsed = json.loads(local_object)
+            served_parsed = json.loads(served_object)
         except json.JSONDecodeError:
-            pass
+            continue
+        if local_parsed == served_parsed:
+            extracted_equal += 1
+            continue
+        category = characterise_divergence(served_parsed, local_parsed)
+        categories[category] = categories.get(category, 0) + 1
+        # Divergent pairs carry grounded text -> private evidence Dataset only (ADR 0005).
+        divergences.append(
+            {
+                "schema_version": "1",
+                "instance_key": record["instance_key"],
+                "category": category,
+                "served_raw_output": record["raw_output"],
+                "local_raw_output": completion,
+                "served_object": served_object,
+                "local_object": local_object,
+            }
+        )
 
     report = {
         "schema_version": "1",
@@ -305,6 +348,9 @@ def main() -> None:
         "parsed_output_agreement_rate": (
             extracted_equal / both_extractable if both_extractable else None
         ),
+        "divergence_count": len(divergences),
+        "divergence_categories": categories,
+        "divergences_path": DIVERGENCE_PATH if divergences else None,
         "local_output_tokens": {
             "mean": sum(output_lengths) / len(output_lengths),
             "max": max(output_lengths),
@@ -322,11 +368,24 @@ def main() -> None:
     if info.private is not True:
         raise RuntimeError("evidence repository must be private")
     data = (json.dumps(report, sort_keys=True, separators=(",", ":")) + "\n").encode()
+    operations = [
+        CommitOperationAdd(path_in_repo=REPORT_PATH, path_or_fileobj=io.BytesIO(data))
+    ]
+    if divergences:
+        payload = "".join(
+            json.dumps(item, sort_keys=True, separators=(",", ":")) + "\n"
+            for item in divergences
+        ).encode("utf-8")
+        operations.append(
+            CommitOperationAdd(
+                path_in_repo=DIVERGENCE_PATH, path_or_fileobj=io.BytesIO(payload)
+            )
+        )
     commit = api.create_commit(
         repo_id=EVIDENCE_REPO,
         repo_type="dataset",
-        operations=[CommitOperationAdd(path_in_repo=REPORT_PATH, path_or_fileobj=io.BytesIO(data))],
-        commit_message="evidence: plan2 serving-equivalence probe",
+        operations=operations,
+        commit_message="evidence: plan2 serving-equivalence probe (v2, n=300 + divergences)",
         parent_commit=info.sha,
     )
     print(json.dumps({"report_commit_oid": commit.oid, "path": REPORT_PATH}, sort_keys=True))
