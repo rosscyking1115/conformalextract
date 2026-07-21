@@ -82,3 +82,35 @@ def test_certification_config_hash_reflects_the_adr_0007_freeze_by_default() -> 
     assert frozen != drifted
     # Passing the frozen value explicitly reproduces the default exactly.
     assert certification_config_hash(alpha=FROZEN_ALPHA) == frozen
+
+
+def test_delta_allocation_binds_the_5_5_multiplicity_decision() -> None:
+    """§5.5: the cross-system split must be bound so it cannot be swapped silently."""
+    equal = {"qa": 0.05 / 3, "zs": 0.05 / 3, "fs": 0.05 / 3}
+    weighted = {"qa": 0.025, "zs": 0.0125, "fs": 0.0125}
+    assert certification_config_hash(delta_allocation=equal) != certification_config_hash(
+        delta_allocation=weighted
+    )
+    # An unbound allocation is a different config from any bound one.
+    assert certification_config_hash() != certification_config_hash(delta_allocation=equal)
+    # The primary construction is bound too (A vs B changes the headline guarantee).
+    assert certification_config_hash(
+        delta_allocation=equal, primary_construction="scorc_union_bound"
+    ) != certification_config_hash(
+        delta_allocation=equal, primary_construction="conservative_global"
+    )
+    # Key order must not matter.
+    reordered = {"fs": 0.05 / 3, "qa": 0.05 / 3, "zs": 0.05 / 3}
+    assert certification_config_hash(delta_allocation=equal) == certification_config_hash(
+        delta_allocation=reordered
+    )
+
+
+def test_delta_allocation_must_exhaust_exactly_delta() -> None:
+    """A split that under- or over-spends silently invalidates the union bound."""
+    with pytest.raises(ValueError, match="does not match delta"):
+        certification_config_hash(delta_allocation={"qa": 0.01, "zs": 0.01, "fs": 0.01})
+    with pytest.raises(ValueError, match="does not match delta"):
+        certification_config_hash(delta_allocation={"qa": 0.04, "zs": 0.04, "fs": 0.04})
+    with pytest.raises(ValueError, match="strictly positive"):
+        certification_config_hash(delta_allocation={"qa": 0.05, "zs": 0.0, "fs": 0.0})

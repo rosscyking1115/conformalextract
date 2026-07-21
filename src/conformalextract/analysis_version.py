@@ -46,8 +46,29 @@ def certification_config_hash(
     material_gain: float = FROZEN_MATERIAL_GAIN,
     bootstrap_replicates: int = FROZEN_BOOTSTRAP_REPLICATES,
     confidence_candidate: str = FROZEN_CONFIDENCE_CANDIDATE,
+    delta_allocation: Mapping[str, float] | None = None,
+    primary_construction: str | None = None,
 ) -> str:
-    """Hash of the frozen ADR 0007 certification config; a drift from any default changes it."""
+    """Hash of the frozen ADR 0007 certification config; a drift from any default changes it.
+
+    ``delta_allocation`` (per-system δ_s) and ``primary_construction`` bind the §5.5 global
+    multiplicity decision (see `docs/plan3/theorem-to-code-global-multiplicity.md`), so the
+    cross-system failure-budget split cannot be swapped after the fact without producing a new
+    ``analysis_id``. They are optional only because that decision is still awaiting its Gate-0
+    review sign-off; ``certify`` must supply both. When supplied, the allocation must sum to
+    ``delta`` -- a split that does not exhaust (or that overspends) the budget is rejected here
+    rather than silently invalidating the union bound.
+    """
+
+    if delta_allocation is not None:
+        total = sum(delta_allocation.values())
+        if abs(total - delta) > 1e-12:
+            raise ValueError(
+                f"delta_allocation sums to {total!r}, which does not match delta {delta!r}; "
+                "the cross-system union bound requires the split to exhaust exactly delta"
+            )
+        if any(value <= 0.0 for value in delta_allocation.values()):
+            raise ValueError("every per-system delta share must be strictly positive")
 
     return sha256_bytes(
         canonical_json_bytes(
@@ -58,6 +79,12 @@ def certification_config_hash(
                 "material_gain": material_gain,
                 "bootstrap_replicates": bootstrap_replicates,
                 "confidence_candidate": confidence_candidate,
+                "delta_allocation": (
+                    None
+                    if delta_allocation is None
+                    else dict(sorted(delta_allocation.items()))
+                ),
+                "primary_construction": primary_construction,
             }
         )
     )
