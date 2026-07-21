@@ -1,0 +1,386 @@
+"""Certification execution (Plan 3 §7): group aggregation, per-system certificates, H1/H2.
+
+This is the only module that reads **certification** gold. It deliberately does **not** reuse
+``training.build_label_access_log``: that chain hard-rejects every sealed role, which is a Plan 2
+training-time invariant (``sealed_reads: 0``) that must stay intact. Instead this module keeps a
+parallel chain with its own genesis that permits ``certification`` and **only** ``certification`` --
+``final`` and ``shift`` remain unreachable from here, so opening the certification split cannot
+become a foothold for opening the others.
+
+Within-group aggregation follows ADR 0009 (min score, all-members-valid, mean loss), reusing
+``selection.accept_whole_document`` one level up rather than reimplementing it.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
+
+import numpy as np
+
+from conformalextract.certification import (
+    HypothesisDecision,
+    certified_acceptance,
+    compare_certified_acceptance,
+    conservative_certificate,
+    scorc_certificate,
+)
+from conformalextract.contracts import CertificationResult
+from conformalextract.selection import accept_whole_document
+
+CERTIFICATION_ACCESS_GENESIS = hashlib.sha256(
+    b"conformalextract/certification-access/v1"
+).hexdigest()
+CERTIFICATION_ONLY_ROLE = "certification"
+FORBIDDEN_ROLES = frozenset({"final", "shift", "train", "development"})
+
+
+class SealedRoleError(ValueError):
+    """Raised when anything other than the certification split is reached from here."""
+
+
+@dataclass(frozen=True)
+class CertificationAccessLog:
+    """Tamper-evident, text-free chain over certification gold reads."""
+
+    entries: tuple[str, ...]
+    head_hash: str
+    document_count: int
+
+    def verify(self) -> bool:
+        previous = CERTIFICATION_ACCESS_GENESIS
+        for entry in self.entries:
+            previous = hashlib.sha256(
+                json.dumps(
+                    {"previous": previous, "document_id_hash": entry},
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ).encode()
+            ).hexdigest()
+        return previous == self.head_hash
+
+
+def build_certification_access_log(
+    document_ids: Sequence[str], *, data_role: str = CERTIFICATION_ONLY_ROLE
+) -> CertificationAccessLog:
+    """Authorize and chain every certification gold read; refuse any other role."""
+
+    if data_role != CERTIFICATION_ONLY_ROLE:
+        raise SealedRoleError(
+            f"role {data_role!r} is unreachable from certification; this command opens "
+            "the certification split only"
+        )
+    previous = CERTIFICATION_ACCESS_GENESIS
+    entries: list[str] = []
+    for document_id in document_ids:
+        digest = hashlib.sha256(document_id.encode()).hexdigest()
+        entries.append(digest)
+        previous = hashlib.sha256(
+            json.dumps(
+                {"previous": previous, "document_id_hash": digest},
+                sort_keys=True,
+                separators=(",", ":"),
+            ).encode()
+        ).hexdigest()
+    return CertificationAccessLog(
+        entries=tuple(entries), head_hash=previous, document_count=len(entries)
+    )
+
+
+@dataclass(frozen=True)
+class GroupRow:
+    """One independent certification unit (ADR 0009)."""
+
+    group_id: str
+    score: float
+    all_valid: bool
+    loss: float
+    document_count: int
+
+
+def aggregate_to_groups(
+    *,
+    document_ids: Sequence[str],
+    group_by_document: Mapping[str, str],
+    score_by_document: Mapping[str, float],
+    valid_by_document: Mapping[str, bool],
+    loss_by_document: Mapping[str, float],
+) -> list[GroupRow]:
+    """Fold documents into one row per source-document group, per ADR 0009.
+
+    Group score is the **minimum** member confidence, a group is valid only if **every**
+    member is, and group loss is the **mean** member loss (bounded in [0,1], as the certifier
+    requires). Rows are returned in deterministic group-id order.
+    """
+
+    members: dict[str, list[str]] = {}
+    for document_id in document_ids:
+        group_id = group_by_document.get(document_id)
+        if group_id is None:
+            raise ValueError(f"no group assignment for {document_id}")
+        members.setdefault(group_id, []).append(document_id)
+
+    rows: list[GroupRow] = []
+    for group_id in sorted(members):
+        documents = members[group_id]
+        losses = [loss_by_document[d] for d in documents]
+        if any(loss < 0.0 or loss > 1.0 for loss in losses):
+            raise ValueError(f"group {group_id} has an out-of-range document loss")
+        rows.append(
+            GroupRow(
+                group_id=group_id,
+                score=min(score_by_document[d] for d in documents),
+                all_valid=all(valid_by_document[d] for d in documents),
+                loss=sum(losses) / len(losses),
+                document_count=len(documents),
+            )
+        )
+    return rows
+
+
+def group_accepted(row: GroupRow, threshold: float) -> bool:
+    """Accept a group only if every member is valid and its worst score clears the threshold.
+
+    Delegates to the tested ``accept_whole_document`` rather than restating the rule.
+    """
+
+    return accept_whole_document(
+        frame_confidences=[row.score],
+        structurally_valid=[row.all_valid],
+        threshold=threshold,
+    )
+
+
+def _matrices(
+    rows: Sequence[GroupRow], thresholds: Sequence[float]
+) -> tuple[list[list[float]], list[list[bool]]]:
+    losses = [[row.loss for _ in thresholds] for row in rows]  # loss is threshold-independent
+    accepted = [[group_accepted(row, threshold) for threshold in thresholds] for row in rows]
+    return losses, accepted
+
+
+def certify_system(
+    system_id: str,
+    rows: Sequence[GroupRow],
+    thresholds: Sequence[float],
+    *,
+    alpha: float,
+    delta_s: float,
+    acceptance_floor: float,
+) -> CertificationResult:
+    """Construction A: this system's SCoRC certificate at its allocated ``delta_s``."""
+
+    if not thresholds:
+        raise ValueError(f"{system_id}: threshold grid must be non-empty")
+    losses, accepted = _matrices(rows, thresholds)
+    candidate_ids = [f"{system_id}@{threshold}" for threshold in thresholds]
+    return scorc_certificate(
+        losses=losses,
+        accepted=accepted,
+        candidate_ids=candidate_ids,
+        alpha=alpha,
+        acceptance_floor=acceptance_floor,
+        delta=delta_s,
+    )
+
+
+def conservative_system_view(
+    system_id: str,
+    rows: Sequence[GroupRow],
+    thresholds: Sequence[float],
+    *,
+    alpha: float,
+    delta: float,
+    acceptance_floor: float,
+    family_size: int,
+    min_accepted: int = 1,
+) -> CertificationResult:
+    """Construction B: global-Bonferroni audit, best feasible candidate by acceptance LCB.
+
+    Reported as a descriptive robustness view only; it never supports a claim Construction A
+    does not (theorem-to-code note §7, condition 3).
+    """
+
+    best: CertificationResult | None = None
+    for threshold in thresholds:
+        accepted = [group_accepted(row, threshold) for row in rows]
+        result = conservative_certificate(
+            losses=[row.loss for row in rows],
+            accepted=accepted,
+            alpha=alpha,
+            acceptance_floor=acceptance_floor,
+            delta=delta,
+            family_size=family_size,
+            min_accepted=min_accepted,
+        )
+        if result.feasible and (best is None or result.acceptance_lower > best.acceptance_lower):
+            best = result
+    if best is not None:
+        return best
+    # No feasible candidate: report the last computed infeasible result shape, not a zero-risk one.
+    return conservative_certificate(
+        losses=[row.loss for row in rows],
+        accepted=[group_accepted(row, thresholds[-1]) for row in rows],
+        alpha=alpha,
+        acceptance_floor=acceptance_floor,
+        delta=delta,
+        family_size=family_size,
+        min_accepted=min_accepted,
+    )
+
+
+@dataclass(frozen=True)
+class SystemCertification:
+    system_id: str
+    confidence_candidate: str
+    thresholds: tuple[float, ...]
+    delta_s: float
+    primary: CertificationResult
+    conservative: CertificationResult
+    certified_acceptance: float | None
+    group_count: int
+
+
+@dataclass(frozen=True)
+class CertificationRun:
+    systems: dict[str, SystemCertification]
+    h1: HypothesisDecision
+    h2: HypothesisDecision
+    hypotheses_collapsed: bool
+    access_log: CertificationAccessLog
+
+
+def run_certification(
+    *,
+    rows_by_system: Mapping[str, Sequence[GroupRow]],
+    thresholds_by_system: Mapping[str, Sequence[float]],
+    candidates_by_system: Mapping[str, str],
+    delta_allocation: Mapping[str, float],
+    access_log: CertificationAccessLog,
+    alpha: float,
+    delta: float,
+    acceptance_floor: float,
+    material_gain: float,
+) -> CertificationRun:
+    """Certify all three systems and decide H1/H2 (plan §7-§8)."""
+
+    if set(rows_by_system) != {"zs", "fs", "qa"}:
+        raise ValueError("certification requires exactly zs/fs/qa")
+    total = sum(delta_allocation.values())
+    if abs(total - delta) > 1e-12:
+        raise ValueError(f"delta allocation sums to {total}, not delta {delta}")
+
+    family_size = sum(len(thresholds_by_system[s]) for s in rows_by_system)
+    systems: dict[str, SystemCertification] = {}
+    for system_id in sorted(rows_by_system):
+        rows = rows_by_system[system_id]
+        thresholds = thresholds_by_system[system_id]
+        primary = certify_system(
+            system_id,
+            rows,
+            thresholds,
+            alpha=alpha,
+            delta_s=delta_allocation[system_id],
+            acceptance_floor=acceptance_floor,
+        )
+        conservative = conservative_system_view(
+            system_id,
+            rows,
+            thresholds,
+            alpha=alpha,
+            delta=delta,
+            acceptance_floor=acceptance_floor,
+            family_size=family_size,
+        )
+        systems[system_id] = SystemCertification(
+            system_id=system_id,
+            confidence_candidate=candidates_by_system[system_id],
+            thresholds=tuple(thresholds),
+            delta_s=delta_allocation[system_id],
+            primary=primary,
+            conservative=conservative,
+            certified_acceptance=certified_acceptance(primary),
+            group_count=len(rows),
+        )
+
+    h1, h2 = compare_certified_acceptance(
+        qa=systems["qa"].certified_acceptance,
+        zs=systems["zs"].certified_acceptance,
+        fs=systems["fs"].certified_acceptance,
+        material_gain=material_gain,
+    )
+    # Pre-registered in the §5.5 note §7a: when both baselines are infeasible, H1 and H2 are one
+    # single-system test stated twice and must not be presented as two confirmatory comparisons.
+    collapsed = (
+        systems["zs"].certified_acceptance is None and systems["fs"].certified_acceptance is None
+    )
+    return CertificationRun(
+        systems=systems, h1=h1, h2=h2, hypotheses_collapsed=collapsed, access_log=access_log
+    )
+
+
+def certification_artifact(
+    run: CertificationRun, *, provenance: Mapping[str, object]
+) -> dict[str, object]:
+    """Assemble the immutable §7.4 certification artifact (text-free)."""
+
+    def result_dict(result: CertificationResult) -> dict[str, object]:
+        parsed: dict[str, object] = json.loads(result.model_dump_json())
+        return parsed
+
+    return {
+        "schema_version": "1",
+        "method": (
+            "scorc-joint-finite-grid (primary) + "
+            "hoeffding-clopper-pearson-bonferroni (audit)"
+        ),
+        "theorem_reference": "arXiv 2606.08517 Theorem 1 / Algorithm 1; see "
+        "docs/plan3/theorem-to-code-scorc.md and theorem-to-code-global-multiplicity.md",
+        "systems": {
+            system_id: {
+                "confidence_candidate": certification.confidence_candidate,
+                "thresholds": [
+                    "-inf" if np.isneginf(t) else ("+inf" if np.isposinf(t) else t)
+                    for t in certification.thresholds
+                ],
+                "delta_s": certification.delta_s,
+                "group_count": certification.group_count,
+                "primary": result_dict(certification.primary),
+                "conservative_audit": result_dict(certification.conservative),
+                "certified_acceptance": certification.certified_acceptance,
+            }
+            for system_id, certification in run.systems.items()
+        },
+        "hypotheses": {
+            "h1": {
+                "outcome": run.h1.outcome,
+                "detail": run.h1.detail,
+                "qa": run.h1.qa_acceptance,
+                "baseline": run.h1.baseline_acceptance,
+            },
+            "h2": {
+                "outcome": run.h2.outcome,
+                "detail": run.h2.detail,
+                "qa": run.h2.qa_acceptance,
+                "baseline": run.h2.baseline_acceptance,
+            },
+            "collapsed_to_single_test": run.hypotheses_collapsed,
+            "collapse_note": (
+                "Both baselines infeasible: H1 and H2 reduce to CA_QA >= material_gain and are "
+                "ONE test stated twice. Must not be reported as two confirmatory comparisons "
+                "(pre-registered, theorem-to-code-global-multiplicity.md section 7a)."
+                if run.hypotheses_collapsed
+                else None
+            ),
+        },
+        "certification_access": {
+            "head_hash": run.access_log.head_hash,
+            "documents_read": run.access_log.document_count,
+            "verified": run.access_log.verify(),
+            "final_reads": 0,
+            "shift_reads": 0,
+        },
+        **dict(provenance),
+    }
