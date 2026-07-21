@@ -45,7 +45,27 @@ well-formed but only 39%/68% grounded, against QA's 96%.
 **Condition C3 matters exactly as anticipated.** FS's 6,217 "valid" frames include **2,887 empty
 ones (46%)** — contentless predictions that are structurally valid and ground trivially. On
 content-bearing frames FS (3,330) falls *below* ZS (3,550). Reporting FS acceptance as a single
-number would credit it for saying nothing 46% of the time.
+number would credit it for saying nothing 46% of the time. It was C3, not the extraction policy
+itself, that prevented a wrong conclusion here.
+
+**The grounding separation is stark on the axis structural validity could not see:** ungrounded
+spans are **QA 340 (3.7%) vs ZS 5,355 (58.7%)** — a ~16× difference.
+
+### Stated result: few-shot prompting *harms* this task
+
+On content-bearing frames the **zero-shot baseline beats the few-shot one** (ZS 3,550 vs FS 3,330),
+and FS emits 63× more empty frames than ZS (2,887 vs 46). The two frozen demonstrations appear to
+have taught the model two counterproductive behaviours: emit `{"arguments":[]}`, and continue
+generating a fabricated next example. This is a genuine and slightly counterintuitive finding
+about few-shot prompting for grounded event-argument extraction, and it is recorded here as a
+claim in its own right rather than as an aside.
+
+Boundaries on that claim: it holds for *these* two demonstrations, selected by the frozen
+Ross-approved rule (one multi-argument plus one empty-gold frame, lowest example-id hash in each
+category), under this template and this model. A different demonstration set — in particular one
+without an empty-gold exemplar — might not reproduce it. The missing stop sequence contributed to
+the continuation behaviour but not to the empty-frame rate, which survives extraction and is
+genuine model output.
 
 ## What this is NOT
 

@@ -102,9 +102,56 @@ transition log-probability measures. Selective prediction abstains on exactly th
 
 **This materially softens — but does not eliminate — the limitation.** The *raw* system is 13.67%
 stack-dependent; the *accepted* set is far more stable, and at a 25% acceptance rate we observed
-no divergence at all. It must not be reported as "0%": 0/75 carries a 95% upper bound of roughly
-**4.8%** (rule of three). The honest claim is that stack-dependence falls steeply with confidence
-and is small-to-negligible in the high-confidence region a certified policy would accept.
+no divergence at all. It must not be reported as "0%": 0/75 carries a 95% upper bound of
+**4.8%** (two-sided Clopper–Pearson; the rule of three gives the less conservative 4.0%). The
+honest claim is that stack-dependence falls steeply with confidence and is small-to-negligible in
+the high-confidence region a certified policy would accept.
+
+**This reassurance is operating-point-dependent and must not be carried forward unqualified**
+(reviewer condition 1). At top-90% acceptance divergence is 12.59% — barely below the 13.67% raw
+rate. The near-zero result holds only under aggressive abstention. Plan 3 calibration selects an
+operating point to hit a risk level, and that point may accept far more than 25%; the divergence
+rate **must be re-reported at the realised operating point** before any stability claim is made.
+
+## Follow-up 3 — where the abstain/extract flips sit (reviewer condition 2)
+
+The 4 `empty_vs_nonempty` flips are the sharpest concern, because the abstain/extract decision is
+the mechanism the whole thesis rests on. Located within the tested 300 by min-logprob percentile:
+
+| Instance | Percentile | Direction |
+|---|---|---|
+| `nw_RC15d4569…` | 0.503 | served abstains, local extracts |
+| `nw_RCade9553…` | 0.507 | served abstains, local extracts |
+| `nw_RC076608d…` | 0.370 | served extracts, local abstains |
+| `nw_RCc12ed22…` | 0.347 | served extracts, local abstains |
+
+**None reaches the top quartile**, but two sit just above the median — they survive into the
+accepted set at any acceptance rate above ~50%. And the flip rate behaves differently from
+ordinary divergence:
+
+| Accept | Overall divergence | Abstention flips |
+|---|---|---|
+| 100% | 13.67% | 1.33% |
+| top 90% | 12.59% | **1.48%** |
+| top 75% | 9.33% | **1.78%** |
+| top 50% | 6.00% | 1.33% |
+| top 25% | 0.00% | 0.00% |
+
+**Flips do not thin out under tightening — proportionally they concentrate**, rising to 1.78% at
+top-75% acceptance, because they cluster mid-distribution while ordinary divergences cluster at
+the bottom. The aggregate "divergence falls with confidence" result therefore **overstates safety
+for this specific failure mode**. At plausible operating points (50–90% acceptance), roughly
+**1.3–1.8% of accepted frames carry a stack-dependent abstain/extract decision**. Only aggressive
+abstention removes them. This qualification supersedes any unqualified reading of Follow-up 2.
+
+## Confidence provenance (reviewer condition 3)
+
+**Confirmed: the confidence scores are the served stack's own logprobs.** In
+`jobs/plan2_prediction_generation.py`, `chosen_transition_logprobs` reads
+`request_output.outputs[0]` returned by vLLM's `llm.generate(...)` under
+`SamplingParams(temperature=0.0, max_tokens=256, logprobs=1)`. No local recomputation is involved,
+so the analysis reflects the deployment-relevant case: a selective policy scoring with the serving
+stack's own logprobs.
 
 Caveats on this follow-up: train split only; n=41 divergences; `minimum` is one of three
 predeclared confidence candidates and the operative one is not chosen until Plan 3 calibration;
@@ -122,10 +169,22 @@ and the relationship is correlational, established on the frames the probe happe
   does not attribute the divergence to a specific kernel, batching effect, or prefix-caching
   behaviour.
 
-## Standing follow-up
+## Reviewer ruling and carried conditions
+
+Ruled **PASS-with-conditions** (2026-07-21). The reviewer explicitly declined to declare 86.33% a
+pass against a threshold — inventing one after the fact is the move ADR 0006's C4 exists to
+prevent. The narrower ruling: the measured limitation is compatible with the Plan 2 close and with
+certification *as scoped*, because internal validity is intact (all three arms share one stack and
+the certified system is defined as the adapter as served). **Portability is a separate claim that
+has not been made and must not be implied.**
+
+| # | Condition | Status |
+|---|---|---|
+| 1 | Re-report divergence at the **realised** operating point before any stability claim | **Carried to Plan 3** — calibration has not run |
+| 2 | Break out where the abstain/extract flips sit in confidence | **Discharged** — Follow-up 3 above |
+| 3 | Confirm confidence comes from the **served** stack's logprobs | **Discharged** — confirmed above |
 
 Carry into the Plan 4 limitations section and any model/report card, scoped to the serving stack:
-the **13.67% raw divergence rate**, the **1.3% abstain/extract flip rate**, the quality-neutrality
-result, and the confidence-concentration result with its ~4.8% upper bound in the top quartile.
-Both follow-ups above are complete; the two remaining open items are the reviewer's assessment
-(no threshold was pre-registered) and re-measuring on a non-train split if that is ever wanted.
+the **13.67% raw divergence rate**, the **1.3–1.8% abstain/extract flip rate at plausible
+operating points**, the quality-neutrality result, and the confidence-concentration result with
+its 4.8% Clopper–Pearson upper bound in the top quartile.
