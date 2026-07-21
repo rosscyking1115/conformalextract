@@ -54,6 +54,62 @@ train-split frames whose labels are not sealed.
   on, so a guarantee about *selective* extraction inherits this instability when the serving stack
   changes. Any claim must be scoped to the exact serving stack, quantified with this figure.
 
+## Follow-up 1 — is either stack better? No (quality-neutral)
+
+The 41 divergent pairs scored against **train gold** (train labels are not sealed; the probe used
+train frames only):
+
+| Stack | P | R | F1 | Exact-set match |
+|---|---|---|---|---|
+| served (vLLM — the evidence base) | 0.321 | 0.365 | 0.341 | 5/41 |
+| local (transformers+peft) | 0.379 | 0.406 | 0.392 | 2/41 |
+
+Local edges F1; served wins exact matches. That is a 4-true-positive difference over 96 gold
+arguments at n=41 — **noise, not a systematic gap**. This downgrades the severity: the served
+evidence base is *not* measurably worse than the adapter is capable of. It is a reproducibility
+caveat, not a quality defect.
+
+Note the absolute level: **F1 ≈ 0.35 on divergent frames** is far below what either stack manages
+generally, which motivated the next question.
+
+## Follow-up 2 — divergence concentrates where the model is uncertain
+
+Comparing the 41 divergent frames against the **259 tested-and-agreeing** frames (not against
+untested frames — the probe's deterministic selection was reproduced exactly to get this right):
+
+| Confidence candidate | Divergent (median) | Agreeing (median) |
+|---|---|---|
+| mean transition logprob | −0.0782 | −0.0529 |
+| 10th percentile | −0.2989 | −0.1619 |
+| minimum | −0.9387 | −0.6872 |
+
+Divergent frames sit at median percentile **0.26** of the tested set by min-logprob: **48.8% fall in
+the bottom quartile** (chance 25%) and **0.0% in the top quartile** (chance 25%).
+
+Divergence rate under a selective acceptance policy (accept the top X% by min-logprob):
+
+| Accept | Divergence rate |
+|---|---|
+| 100% (no abstention) | 13.67% |
+| top 90% | 12.59% |
+| top 75% | 9.33% |
+| top 50% | 6.00% |
+| **top 25%** | **0/75 = 0%** |
+
+**Why this is the mechanism you would predict:** a numerical difference between kernels flips an
+argmax only where the model is near-indifferent, and near-indifference is precisely what a low
+transition log-probability measures. Selective prediction abstains on exactly those frames.
+
+**This materially softens — but does not eliminate — the limitation.** The *raw* system is 13.67%
+stack-dependent; the *accepted* set is far more stable, and at a 25% acceptance rate we observed
+no divergence at all. It must not be reported as "0%": 0/75 carries a 95% upper bound of roughly
+**4.8%** (rule of three). The honest claim is that stack-dependence falls steeply with confidence
+and is small-to-negligible in the high-confidence region a certified policy would accept.
+
+Caveats on this follow-up: train split only; n=41 divergences; `minimum` is one of three
+predeclared confidence candidates and the operative one is not chosen until Plan 3 calibration;
+and the relationship is correlational, established on the frames the probe happened to sample.
+
 ## Honest limitations
 
 - **No pass threshold was pre-declared.** The probe was specified to *quantify* parity, not gate on
@@ -66,11 +122,10 @@ train-split frames whose labels are not sealed.
   does not attribute the divergence to a specific kernel, batching effect, or prefix-caching
   behaviour.
 
-## Recommended follow-ups ($0)
+## Standing follow-up
 
-1. Score the 41 divergent pairs against **train gold** (not sealed) to establish whether either
-   stack is systematically better, or whether divergence is quality-neutral noise. This changes the
-   severity materially: neutral divergence is a reproducibility caveat, whereas a systematic
-   quality gap would mean the served evidence base is measurably worse than the adapter can do.
-2. Carry the 13.67% figure and the 1.3% abstention-flip rate into the Plan 4 limitations section
-   and any model/report card, scoped to the serving stack.
+Carry into the Plan 4 limitations section and any model/report card, scoped to the serving stack:
+the **13.67% raw divergence rate**, the **1.3% abstain/extract flip rate**, the quality-neutrality
+result, and the confidence-concentration result with its ~4.8% upper bound in the top quartile.
+Both follow-ups above are complete; the two remaining open items are the reviewer's assessment
+(no threshold was pre-registered) and re-measuring on a non-train split if that is ever wanted.
