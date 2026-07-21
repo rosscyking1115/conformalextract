@@ -345,8 +345,8 @@ def parse_predictions_command(
 def development_gate_command(
     predictions_dir: Annotated[Path, typer.Option()] = Path("data/private/plan2/predictions"),
     rams_archive: Annotated[Path, typer.Option()] = Path("data/raw/rams/RAMS_1.0c.tar.gz"),
-    alpha: Annotated[float, typer.Option()] = 0.20,
-    acceptance_floor: Annotated[float, typer.Option()] = 0.20,
+    alpha: Annotated[float, typer.Option()] = 0.20,  # ADR 0007 freeze (certification.FROZEN_ALPHA)
+    acceptance_floor: Annotated[float, typer.Option()] = 0.20,  # ADR 0007 (FROZEN_ACCEPTANCE_FLOOR)
     summary_out: Annotated[Path, typer.Option()] = Path(
         "evidence/plan2/development_gate_summary.json"
     ),

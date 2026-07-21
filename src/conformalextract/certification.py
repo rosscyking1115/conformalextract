@@ -5,11 +5,22 @@ from __future__ import annotations
 import math
 from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import Final
 
 import numpy as np
 from scipy.stats import beta
 
 from conformalextract.contracts import CertificationResult
+
+# Gate 0 freeze (ADR 0007), exercised against real development-split evidence before any
+# certification/final/shift label is read. Changing any of these after certification labels
+# open requires an independent review, per the general evaluation-change rule.
+FROZEN_ALPHA: Final[float] = 0.20
+FROZEN_DELTA: Final[float] = 0.05
+FROZEN_ACCEPTANCE_FLOOR: Final[float] = 0.20
+FROZEN_MATERIAL_GAIN: Final[float] = 0.05
+FROZEN_BOOTSTRAP_REPLICATES: Final[int] = 2000
+FROZEN_CONFIDENCE_CANDIDATE: Final[str] = "minimum"
 
 
 def hoeffding_upper(losses: Sequence[float], failure_probability: float) -> float:
