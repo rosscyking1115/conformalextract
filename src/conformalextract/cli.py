@@ -304,6 +304,43 @@ for command_name in (
     app.command(command_name)(lambda name=command_name: _not_ready(name))
 
 
+@app.command("parse-predictions")
+def parse_predictions_command(
+    predictions_dir: Annotated[Path, typer.Option()] = Path("data/private/plan2/predictions"),
+    rams_archive: Annotated[Path, typer.Option()] = Path("data/raw/rams/RAMS_1.0c.tar.gz"),
+    summary_out: Annotated[Path, typer.Option()] = Path(
+        "evidence/plan2/prediction_parse_summary.json"
+    ),
+    systems: Annotated[str, typer.Option(help="Comma-separated system ids.")] = "zs,fs,qa",
+) -> None:
+    """Parse generated predictions under the ADR 0006 policy; emit a text-free summary.
+
+    Grounding validates spans against source document tokens, so no gold label is read and
+    every split — including the sealed ones — is safe to parse here.
+    """
+
+    from conformalextract.predictions import (
+        build_document_contexts,
+        parse_arm,
+        read_prediction_jsonl,
+    )
+    from conformalextract.profiles import read_ontology, read_rams_instances
+
+    contexts = build_document_contexts(
+        read_rams_instances(rams_archive), read_ontology(rams_archive)
+    )
+    summaries = {}
+    for system_id in [s.strip() for s in systems.split(",") if s.strip()]:
+        records = read_prediction_jsonl(predictions_dir / f"{system_id}.v1.jsonl")
+        _, summary = parse_arm(records, contexts)
+        summaries[system_id] = summary.as_dict()
+    summary_out.parent.mkdir(parents=True, exist_ok=True)
+    summary_out.write_text(
+        json.dumps(summaries, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    typer.echo(json.dumps({"summary": str(summary_out), "systems": summaries}, sort_keys=True))
+
+
 @app.command("hash-file")
 def hash_file(path: Path) -> None:
     """Print a local artifact SHA-256 without reading it into a report."""

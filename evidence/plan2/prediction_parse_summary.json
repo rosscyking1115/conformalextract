@@ -1,0 +1,56 @@
+{
+  "fs": {
+    "context_overflow": 18,
+    "failure_reasons": {
+      "context_overflow": 18,
+      "invalid_json": 1,
+      "ungrounded_span": 2875,
+      "unknown_role": 13
+    },
+    "grounding_failure": 2875,
+    "records": 9124,
+    "structural_failure": 32,
+    "system_id": "fs",
+    "valid": 6217,
+    "valid_content_bearing": 3330,
+    "valid_empty": 2887
+  },
+  "qa": {
+    "context_overflow": 18,
+    "failure_reasons": {
+      "context_overflow": 18,
+      "invalid_json": 14,
+      "invalid_span": 16,
+      "no_json_object": 1,
+      "schema_violation": 6,
+      "ungrounded_span": 340
+    },
+    "grounding_failure": 340,
+    "records": 9124,
+    "structural_failure": 55,
+    "system_id": "qa",
+    "valid": 8729,
+    "valid_content_bearing": 8277,
+    "valid_empty": 452
+  },
+  "zs": {
+    "context_overflow": 18,
+    "failure_reasons": {
+      "context_overflow": 18,
+      "duplicate_contradiction": 4,
+      "invalid_json": 1,
+      "invalid_span": 3,
+      "no_json_object": 140,
+      "schema_violation": 2,
+      "ungrounded_span": 5355,
+      "unknown_role": 5
+    },
+    "grounding_failure": 5355,
+    "records": 9124,
+    "structural_failure": 173,
+    "system_id": "zs",
+    "valid": 3596,
+    "valid_content_bearing": 3550,
+    "valid_empty": 46
+  }
+}
