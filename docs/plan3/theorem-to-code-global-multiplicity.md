@@ -143,7 +143,29 @@ applies to the risk-target sweep (single confirmatory α; the sweep is descripti
 - No change to `scorc_certificate` or `conservative_certificate` themselves — both already
   implement what each construction needs. This is a wiring-and-freeze decision, not new theory.
 
-## 7. Still a decision, not invented here
+## 7. Reviewer ruling and binding conditions (2026-07-21)
+
+Ruled **ADOPT with conditions** (`evidence/plan3/reviewer_record.phase-a.json`). The reviewer
+independently reproduced all four grid claims (9 / 4 / 3 / 2 at n=1396), endorsed δ/3 after
+building and rejecting the case against it (QA-weighted buys one extra threshold while creating
+an allocation readable as tuned to help QA; certifying QA alone at full δ was also rejected
+because the baselines' certification-split certificates carry evidentiary value a development
+extrapolation does not), and confirmed the union-bound argument. Binding conditions:
+
+1. **The union bound licenses comparing certified *bounds*, not a certified *difference*.**
+   H1/H2 must be phrased as a comparison of jointly-valid certified acceptances — not as a
+   confidence statement about `CA_QA − CA_ZS`. No interval on the difference is claimed.
+2. **Construction A is fixed before running.** The primary construction and the δ/3 allocation
+   are frozen here and bound into `analysis_id` via
+   `analysis_version.certification_config_hash(delta_allocation=..., primary_construction=...)`.
+3. **Both constructions are reported unconditionally**, whatever they show. B is never used to
+   support a claim A does not support; A is never quietly dropped if B looks better.
+4. **A coarse null is not a model result.** If certification returns infeasible or no material
+   gain, it may **not** be reported as "QLoRA did not certify" without stating that the design
+   admitted ~two usable abstention thresholds per system. Grid starvation at n=1396 is a
+   property of the design, not of the model.
+
+## 8. Still a decision, not invented here
 
 The **weights** (δ/3 vs QA-weighted) and **which construction is primary** are Gate-0 freezes
 that change the headline guarantee, so they require the same independent review as any evaluation

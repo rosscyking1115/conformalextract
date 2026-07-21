@@ -362,8 +362,9 @@ def development_gate_command(
     """
 
     import hashlib
+    import math
 
-    from conformalextract.certification import base_risk_feasibility
+    from conformalextract.certification import base_risk_feasibility, minimum_abstention
     from conformalextract.contracts import Argument, EventFrame, Span
     from conformalextract.development_gate import CONFIDENCE_CANDIDATES, document_loss
     from conformalextract.predictions import (
@@ -410,8 +411,6 @@ def development_gate_command(
             )
         ]
 
-    pooled_scores: dict[str, list[float]] = {c: [] for c in CONFIDENCE_CANDIDATES}
-    pooled_losses: list[float] = []
     access_requests: list[LabelAccessRequest] = []
     per_system: dict[str, dict[str, object]] = {}
 
@@ -430,11 +429,11 @@ def development_gate_command(
             document_loss(gold_frames(instances[p.document_id]), p)
             for p in development_predictions
         ]
-        for p, loss in zip(development_predictions, losses, strict=True):
-            pooled_losses.append(loss)
+        scores_by_candidate: dict[str, list[float]] = {c: [] for c in CONFIDENCE_CANDIDATES}
+        for p in development_predictions:
             candidates = confidence_by_document.get(p.document_id)
             for candidate in CONFIDENCE_CANDIDATES:
-                pooled_scores[candidate].append(
+                scores_by_candidate[candidate].append(
                     candidates[candidate] if candidates is not None else float("-inf")
                 )
             access_requests.append(
@@ -446,31 +445,47 @@ def development_gate_command(
                     purpose=LabelAccessPurpose.DEVELOPMENT_SELECTION,
                 )
             )
+        # Per-system selection (reviewer Phase-A ruling 1a): the confidence score is part of
+        # each system's own selective policy, so each system freezes its own candidate. A
+        # pooled ranking mixes raw logprobs across systems whose scales differ by ~2.4 nats
+        # and corresponds to no deployable policy.
+        selection = select_confidence_candidate(
+            scores_by_candidate=scores_by_candidate, development_losses=losses
+        )
         risk = base_risk_feasibility(losses, alpha=alpha, acceptance_floor=acceptance_floor)
+        # Two-directional robustness: the committed verdict uses the Hoeffding UPPER bound,
+        # which inflates risk and so makes near_vacuous MORE likely -- the anti-conservative
+        # direction for declaring a system hopeless. Re-check at the LOWER bound, i.e. the
+        # reading most favourable to the system.
+        radius = math.sqrt(math.log(2.0 / 0.05) / (2.0 * len(losses)))
+        favourable_risk = max(0.0, risk.base_risk - radius)
+        favourable_max_acceptance = 1.0 - minimum_abstention(
+            base_risk=favourable_risk, alpha=alpha
+        )
         per_system[system_id] = {
             "n_documents": len(development_predictions),
+            "selected_candidate": selection.selected,
+            "auc_by_candidate": selection.auc_by_candidate,
             "base_risk": risk.base_risk,
             "base_risk_upper": risk.base_risk_upper,
             "minimum_abstention": risk.minimum_abstention,
             "max_feasible_acceptance": risk.max_feasible_acceptance,
             "floor_reachable": risk.floor_reachable,
             "verdict": risk.verdict,
+            "favourable_bound_check": {
+                "base_risk_lower": favourable_risk,
+                "max_feasible_acceptance": favourable_max_acceptance,
+                "floor_reachable": favourable_max_acceptance >= acceptance_floor,
+            },
         }
 
     label_access = build_label_access_log(access_requests)
     if not label_access.verify():
         raise RuntimeError("development label-access log failed to verify")
-    pooled_selection = select_confidence_candidate(
-        scores_by_candidate=pooled_scores, development_losses=pooled_losses
-    )
     result = {
         "alpha": alpha,
         "acceptance_floor": acceptance_floor,
-        "pooled_selection": {
-            "selected": pooled_selection.selected,
-            "auc_by_candidate": pooled_selection.auc_by_candidate,
-            "n_pooled_documents": len(pooled_losses),
-        },
+        "selection_scope": "per_system",
         "per_system": per_system,
         "label_access_head_hash": label_access.head_hash,
         "label_access_entries": len(label_access.entries),
@@ -485,6 +500,9 @@ def build_grid_command(
     predictions_dir: Annotated[Path, typer.Option()] = Path("data/private/plan2/predictions"),
     split_manifest: Annotated[Path, typer.Option()] = Path(
         "manifests/plan2/split_manifest.json"
+    ),
+    development_gate: Annotated[Path, typer.Option()] = Path(
+        "evidence/plan2/development_gate_summary.json"
     ),
     delta: Annotated[float, typer.Option()] = 0.05,  # ADR 0007 (certification.FROZEN_DELTA)
     acceptance_floor: Annotated[float, typer.Option()] = 0.20,  # ADR 0007
@@ -507,20 +525,27 @@ def build_grid_command(
     grid_size = theorem_max_grid_size(
         n_groups=n_certification_groups, delta=delta, acceptance_floor=acceptance_floor
     )
+    # Each system's own frozen candidate (reviewer Phase-A ruling 1a): the score is part of
+    # that system's selective policy, so its grid is built from the score it actually deploys.
+    gate = json.loads(development_gate.read_text(encoding="utf-8"))
+    if gate.get("selection_scope") != "per_system":
+        raise RuntimeError(
+            "development gate must record per-system selection before grids are built"
+        )
 
     grids: dict[str, object] = {}
     for system_id in ("zs", "fs", "qa"):
+        candidate = str(gate["per_system"][system_id]["selected_candidate"])
         raw_records = read_prediction_jsonl(predictions_dir / f"{system_id}.v1.jsonl")
-        # Frozen candidate = "minimum" (ADR 0007). Failures carry no candidates -> -inf.
         development_scores: list[float] = []
         for record in raw_records:
             if record["role"] != "development":
                 continue
             candidates = record.get("confidence_candidates")
             if isinstance(candidates, dict):
-                development_scores.append(float(candidates["minimum"]))
+                development_scores.append(float(candidates[candidate]))
             else:
-                development_scores.append(float("-inf"))
+                development_scores.append(float("-inf"))  # failures: worst-confidence treatment
         grid = build_threshold_grid(
             system_id,
             development_scores,
@@ -530,6 +555,7 @@ def build_grid_command(
             acceptance_floor=acceptance_floor,
         )
         grids[system_id] = {
+            "confidence_candidate": candidate,
             "grid_hash": grid.grid_hash,
             "requested_grid_size": grid.requested_grid_size,
             "realized_certifiable_size": grid.realized_certifiable_size,
@@ -540,7 +566,6 @@ def build_grid_command(
         }
 
     result = {
-        "confidence_candidate": "minimum",
         "delta": delta,
         "acceptance_floor": acceptance_floor,
         "n_certification_groups": n_certification_groups,

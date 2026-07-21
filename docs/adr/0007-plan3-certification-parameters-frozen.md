@@ -19,40 +19,57 @@ Freeze the following for all of Plan 3 certification:
 | acceptance floor | **0.20** | Plan 3 §21 planning default |
 | material `CA` gain (H1/H2) | **0.05** | Plan 3 §21 planning default |
 | bootstrap replicates | **2,000** | Plan 3 §21 planning default |
-| **primary confidence candidate** | **`minimum`** (min transition log-probability) | Computed below — was NOT decided in advance |
+| **primary confidence candidate** | **per system: ZS `mean`, FS `tenth_percentile`, QA `mean`** | Computed below — was NOT decided in advance |
+
+> **Amended 2026-07-21 after independent review** (`evidence/plan3/reviewer_record.phase-a.json`,
+> ruling 1a = REVISE). The first version of this ADR froze a single **pooled** candidate
+> (`minimum`). That was wrong and is superseded; see §"Why per-system, not pooled" below.
 
 All six were listed only as "planning defaults... before certification" in the accepted plan;
 none were exercised against real evidence until this ADR. The confidence candidate specifically
 was not a default at all — three predeclared candidates (`mean`, `tenth_percentile`, `minimum`)
 existed, and which one is primary was left open pending development-split evidence.
 
-## How the confidence candidate was chosen — and why pooled, not per-system
+## How the confidence candidate was chosen — and why per-system, not pooled
 
 Command: `uv run conformalextract development-gate`. Reproducible from
 `evidence/plan2/development_gate_summary.json`.
 
-**Selection is pooled across ZS+FS+QA development documents into one choice, not selected
-separately per system.** This mirrors the fairness rule ADR 0006 established for the extraction
-policy: apply one rule uniformly, don't let each system pick its own best-looking definition.
-The plan's own text supports this reading — "primary confidence score" is listed singular
-alongside `alpha`/`delta`/floor as frozen-by-Gate-0 (plan intro), while §5.4 has each system
-build its own **threshold grid** from quantiles of that *same* score. One score definition;
-per-system thresholds on it.
+Method: `selection.select_confidence_candidate` — lowest development risk-coverage AUC (accept
+high-score-first; lower AUC is better) — run **separately for each system** on its own 933
+development documents:
 
-Method: `selection.select_confidence_candidate` — lowest grouped development risk-coverage AUC
-(accept high-score-first; lower AUC is better) — run once on 2,799 pooled documents (933 × 3
-systems):
+| System | mean | tenth_percentile | minimum | **frozen** |
+|---|---|---|---|---|
+| ZS | **0.9888** | 0.9889 | 0.9920 | `mean` |
+| FS | 0.9531 | **0.9467** | 0.9524 | `tenth_percentile` |
+| QA | **0.4401** | 0.4508 | 0.4663 | `mean` |
 
-| Candidate | Pooled risk-coverage AUC |
-|---|---|
-| mean | 0.7347 |
-| tenth_percentile | 0.8652 |
-| **minimum** | **0.6854** (selected) |
+### Why per-system, not pooled (supersedes the original decision)
 
-**`minimum`** — the worst (lowest) transition log-probability among a document's generated
-tokens — is the frozen primary confidence score. Intuitively: a document is only as trustworthy
-as its single worst-generated token: one confidently-wrong token anywhere in the completion is
-enough to make the whole answer suspect, which the minimum captures and the mean can dilute.
+The first version of this ADR pooled all 2,799 development documents into one AUC and froze
+`minimum` (pooled AUC 0.6854). Independent review ruled that **REVISE**, and the reasoning is
+correct:
+
+- **Pooling imposed a strictly worse score on the only system that can certify.** QA's own AUC
+  for `minimum` is 0.4663 against 0.4401 for `mean` — the pooled choice handicaps QA. The
+  direction is toward the null (it makes H1/H2 *harder*, not easier), so this was a power loss
+  rather than a bias, but it is still a defect.
+- **The pooled object is not well-defined.** It ranks documents from three systems in a single
+  risk-coverage curve using raw log-probabilities whose scales differ materially between systems
+  (medians for `minimum`: QA −0.73, ZS −0.99, FS −3.18 — a ~2.4-nat spread). The pooled ranking
+  therefore partly sorts by *which system produced the document*, and corresponds to no policy
+  any single system could deploy.
+- **The ADR 0006 analogy was misapplied.** ADR 0006's uniformity governs a **harness**
+  transformation, where letting each arm choose its own parser would hand one arm a parsing
+  advantage. The confidence score is not harness — it is a component of each system's own
+  selective policy, exactly like its threshold.
+- **§5.3 does not compel pooling.** "Use exactly the score frozen by Gate 0 … candidate score
+  invention ends before certification" compels *freezing* and a tested *orientation*; a
+  per-system choice frozen at Gate 0 satisfies it identically.
+
+Each system's score is frozen here, before any certification label opens, and its §5.4 threshold
+grid is built from quantiles of the score it actually deploys.
 
 ## Base-risk feasibility at `alpha=0.20`, floor `0.20` (real development-split evidence)
 
@@ -88,6 +105,24 @@ this bound). This is base-risk *feasibility* only — a population-level upper b
 selective policy could achieve, not a claim that a specific finite-sample policy will hit it.
 Finite-sample certification against sealed certification-split data determines that.
 
+### Two-directional robustness (added at reviewer request)
+
+The verdicts above use the Hoeffding **upper** bound on base risk. That inflates risk, which makes
+`near_vacuous` **more** likely — the *anti-conservative* direction for declaring two systems
+hopeless. So the check is re-run in the direction most favourable to each system (the lower
+bound, `base_risk − radius`), recorded as `favourable_bound_check` in the gate summary:
+
+| System | base risk (point) | max acceptance at the *favourable* bound | floor 0.20 reachable? |
+|---|---|---|---|
+| ZS | 0.9927 | 0.0647 | **no** |
+| FS | 0.9586 | 0.1073 | **no** |
+| QA | 0.5834 | 0.5763 | yes |
+
+**ZS and FS remain below the acceptance floor even under the reading most generous to them**, so
+the near-vacuous verdict is stable under point, lower and upper bounds. This matters because the
+verdict is load-bearing for the predicted H1/H2 shape; it is not an artefact of choosing a
+conservative bound.
+
 ## What this predicts, and what it does not
 
 If certification holds this pattern, `certification.compare_certified_acceptance`'s
@@ -104,9 +139,14 @@ certification remains a first-class publishable outcome.
 - These six values are now frozen inputs to the certification preflight (§3.2) and the
   threshold-grid builder (§5.4). Changing any of them after certification labels open would
   itself require an independent review, per the general evaluation-change rule.
-- `minimum` becomes the confidence field every `PredictionRecord` carries forward from
-  `predictions.parse_arm` for certification purposes (the other two candidates remain in the
-  source prediction artifacts for reference, never discarded).
+- Each system carries forward **its own** frozen candidate (ZS `mean`, FS `tenth_percentile`,
+  QA `mean`) from `predictions.parse_arm` for certification purposes; the other candidates remain
+  in the source prediction artifacts for reference, never discarded. `build-grid` reads the
+  frozen candidate per system from the development-gate summary and refuses to run if that
+  summary does not record `selection_scope: per_system`.
+- **The confidence scores are computed over a wider token span than the parser accepts** — see
+  `docs/adr/0008-confidence-span-mismatch.md`. That is a disclosed, unfixable-at-this-budget
+  residual, and it bounds what H2 may claim.
 - Development gold access for this freeze is logged: `label_access_head_hash
   c1b3e5a2…`, 2,799 entries, `LabelAccessPurpose.DEVELOPMENT_SELECTION`, verified.
   Certification/final/shift gold was not read.

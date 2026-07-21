@@ -1,60 +1,44 @@
 {
   "acceptance_floor": 0.2,
-  "confidence_candidate": "minimum",
-  "delta": 0.05,
+  "delta": 0.0166666666666667,
   "grids": {
     "fs": {
       "certifiable_thresholds": [
         "-inf",
-        -3.710304021835,
-        -3.551423523161,
-        -3.388250986735,
-        -3.255770683289,
-        -3.087375455432,
-        -2.894894440969,
-        -2.686612500085,
-        -1.346848673291
+        -0.005075985954,
+        -0.001631792382
       ],
-      "grid_hash": "2b8ee6c2a889d11cee9b9a59b949444ad5da232e2ccde7b74fc58a8dba8e3905",
+      "confidence_candidate": "tenth_percentile",
+      "grid_hash": "0b74704acfa3d27eeb7eb719ac7586c09c769a64e28615a0f385888ec9f98b5a",
       "non_finite_scores": 4,
-      "realized_certifiable_size": 9,
-      "requested_grid_size": 9
+      "realized_certifiable_size": 3,
+      "requested_grid_size": 3
     },
     "qa": {
       "certifiable_thresholds": [
         "-inf",
-        -1.144103884697,
-        -0.995069755448,
-        -0.865717252096,
-        -0.7738301754,
-        -0.697357250584,
-        -0.636413653692,
-        -0.54436662462,
-        -0.434575302733
+        -0.069479746325,
+        -0.045326133148
       ],
-      "grid_hash": "9870ae7967bd8b8046ccd4fc3f322a717e42a0d7dc6e699c55cabae28ce50f55",
+      "confidence_candidate": "mean",
+      "grid_hash": "676f0e04b133d74ca3f77cba1cb5a68878774b9f4576f5be8bf14b56a28d8d6d",
       "non_finite_scores": 4,
-      "realized_certifiable_size": 9,
-      "requested_grid_size": 9
+      "realized_certifiable_size": 3,
+      "requested_grid_size": 3
     },
     "zs": {
       "certifiable_thresholds": [
         "-inf",
-        -1.169683549139,
-        -1.086886776818,
-        -1.043864448865,
-        -1.008302582635,
-        -0.970371286074,
-        -0.925217012564,
-        -0.885644634565,
-        -0.841632737054
+        -0.1007059922,
+        -0.083505230172
       ],
-      "grid_hash": "a821eff5d3d88c863c86c3c0965140e5882e7b03efc2d8f018ce7f2cd7a65b81",
+      "confidence_candidate": "mean",
+      "grid_hash": "5535b186c3d9a6b9641e8220dccb16520d7dfd44cfbbbc71a2880cbc21680ca1",
       "non_finite_scores": 4,
-      "realized_certifiable_size": 9,
-      "requested_grid_size": 9
+      "realized_certifiable_size": 3,
+      "requested_grid_size": 3
     }
   },
   "n_certification_groups": 1396,
-  "theorem_max_grid_size": 9
+  "theorem_max_grid_size": 3
 }
