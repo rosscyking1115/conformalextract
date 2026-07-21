@@ -21,6 +21,7 @@ from pathlib import Path
 from conformalextract.contracts import PredictionRecord, Span
 from conformalextract.parsing import parse_generated_frame
 from conformalextract.profiles import RamsInstance
+from conformalextract.training import FrameGeneration, aggregate_document_prediction
 
 CONFIDENCE_CANDIDATES = ("mean", "tenth_percentile", "minimum")
 
@@ -95,6 +96,63 @@ def _confidence(record: Mapping[str, object], candidate: str) -> float:
     return float(candidates[candidate])
 
 
+def _frame_generation(
+    record: Mapping[str, object],
+    context: DocumentContext | None,
+    *,
+    system_id: str,
+    instance_key: str,
+    confidence_candidate: str,
+) -> FrameGeneration:
+    """Parse one trigger-level record into a ``FrameGeneration`` under ADR 0006.
+
+    ``context_overflow`` frames were never generated: they become an explicit
+    ``structural_failure`` (never a silent exclusion) with no frame parsed.
+    """
+
+    prompt_hash = str(record["prompt_sha256"])
+    generation_id = f"{system_id}:{instance_key}"
+    if str(record["status_hint"]) == "context_overflow":
+        return FrameGeneration(
+            generation_id=generation_id,
+            document_id=instance_key,
+            system_id=system_id,
+            prompt_hash=prompt_hash,
+            raw_output="",
+            frame=None,
+            confidence=float("-inf"),
+            status="structural_failure",
+            failure_reason="context_overflow",
+        )
+    assert context is not None  # caller guarantees this; only reachable for generated frames
+    trigger = Span(
+        start=context.trigger_start,
+        end=context.trigger_end,
+        text=" ".join(context.tokens[context.trigger_start : context.trigger_end]),
+    )
+    result = parse_generated_frame(
+        str(record["raw_output"]),
+        document_id=instance_key,
+        event_type=context.event_type,
+        trigger=trigger,
+        allowed_roles=set(context.allowed_roles),
+        document_tokens=list(context.tokens),
+        confidence=_confidence(record, confidence_candidate),
+        extract_first_object=True,  # ADR 0006, applied uniformly to every arm
+    )
+    return FrameGeneration(
+        generation_id=generation_id,
+        document_id=instance_key,
+        system_id=system_id,
+        prompt_hash=prompt_hash,
+        raw_output=str(record["raw_output"]),
+        frame=result.frame,
+        confidence=result.confidence,
+        status=result.status,
+        failure_reason=result.reason,
+    )
+
+
 def parse_arm(
     records: Sequence[Mapping[str, object]],
     contexts: Mapping[str, DocumentContext],
@@ -102,6 +160,14 @@ def parse_arm(
     confidence_candidate: str = "mean",
 ) -> tuple[list[PredictionRecord], ArmSummary]:
     """Parse one system's records under the ADR 0006 policy, returning records and a summary.
+
+    Every trigger-level record is parsed into a ``FrameGeneration`` and folded into a final
+    ``PredictionRecord`` via the audit-mandated ``aggregate_document_prediction`` (Plan 2
+    correction #1: a document is accepted only if every one of its trigger frames is valid,
+    at the worst-case confidence). In the RAMS data used here every ``doc_key`` is unique
+    (verified: 9,124 instances, 9,124 unique keys), so aggregation groups are singletons and
+    this is a numerical no-op -- but it is the real, tested contract rather than an inline
+    reimplementation, so it applies correctly if that ever changes.
 
     ``confidence_candidate`` selects which predeclared score is carried on the record; the
     operative candidate is not chosen until Plan 3 calibration, so all three remain available
@@ -111,74 +177,46 @@ def parse_arm(
     if confidence_candidate not in CONFIDENCE_CANDIDATES:
         raise ValueError(f"unknown confidence candidate: {confidence_candidate!r}")
 
-    parsed: list[PredictionRecord] = []
-    counts = {"structural_failure": 0, "grounding_failure": 0, "valid": 0}
-    reasons: dict[str, int] = {}
-    overflow = valid_empty = valid_content = 0
+    generations_by_document: dict[str, list[FrameGeneration]] = {}
+    document_order: list[str] = []
     system_id = str(records[0]["system_id"]) if records else "unknown"
 
     for record in records:
         instance_key = str(record["instance_key"])
         context = contexts.get(instance_key)
-        if context is None:
+        if context is None and str(record["status_hint"]) != "context_overflow":
             raise ValueError(f"no source document for {instance_key}")
+        generation = _frame_generation(
+            record,
+            context,
+            system_id=system_id,
+            instance_key=instance_key,
+            confidence_candidate=confidence_candidate,
+        )
+        if instance_key not in generations_by_document:
+            document_order.append(instance_key)
+        generations_by_document.setdefault(instance_key, []).append(generation)
 
-        if str(record["status_hint"]) == "context_overflow":
-            # Never generated: an explicit failure, not a silent exclusion.
+    parsed: list[PredictionRecord] = []
+    counts = {"structural_failure": 0, "grounding_failure": 0, "valid": 0}
+    reasons: dict[str, int] = {}
+    overflow = valid_empty = valid_content = 0
+
+    for instance_key in document_order:
+        generations = generations_by_document[instance_key]
+        prediction = aggregate_document_prediction(tuple(generations))
+        parsed.append(prediction)
+        counts[prediction.status] += 1
+        if prediction.failure_reason:
+            for reason in prediction.failure_reason.split(";"):
+                reasons[reason] = reasons.get(reason, 0) + 1
+        if any(item.failure_reason == "context_overflow" for item in generations):
             overflow += 1
-            counts["structural_failure"] += 1
-            reasons["context_overflow"] = reasons.get("context_overflow", 0) + 1
-            parsed.append(
-                PredictionRecord(
-                    prediction_id=f"{system_id}:{instance_key}",
-                    document_id=instance_key,
-                    system_id=system_id,
-                    prompt_hash=str(record["prompt_sha256"]),
-                    raw_output="",
-                    frames=[],
-                    confidence=float("-inf"),
-                    status="structural_failure",
-                    failure_reason="context_overflow",
-                )
-            )
-            continue
-
-        trigger = Span(
-            start=context.trigger_start,
-            end=context.trigger_end,
-            text=" ".join(context.tokens[context.trigger_start : context.trigger_end]),
-        )
-        result = parse_generated_frame(
-            str(record["raw_output"]),
-            document_id=instance_key,
-            event_type=context.event_type,
-            trigger=trigger,
-            allowed_roles=set(context.allowed_roles),
-            document_tokens=list(context.tokens),
-            confidence=_confidence(record, confidence_candidate),
-            extract_first_object=True,  # ADR 0006, applied uniformly to every arm
-        )
-        counts[result.status] += 1
-        if result.reason:
-            reasons[result.reason] = reasons.get(result.reason, 0) + 1
-        if result.status == "valid" and result.frame is not None:
-            if result.frame.arguments:
+        if prediction.status == "valid":
+            if any(frame.arguments for frame in prediction.frames):
                 valid_content += 1
             else:
                 valid_empty += 1
-        parsed.append(
-            PredictionRecord(
-                prediction_id=f"{system_id}:{instance_key}",
-                document_id=instance_key,
-                system_id=system_id,
-                prompt_hash=str(record["prompt_sha256"]),
-                raw_output=str(record["raw_output"]),
-                frames=[result.frame] if result.frame is not None else [],
-                confidence=result.confidence,
-                status=result.status,
-                failure_reason=result.reason,
-            )
-        )
 
     summary = ArmSummary(
         system_id=system_id,

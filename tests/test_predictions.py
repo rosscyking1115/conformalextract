@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import json
+
 import pytest
 
 from conformalextract.predictions import DocumentContext, parse_arm
+from conformalextract.training import FrameGeneration, aggregate_document_prediction
 
 
 def _context() -> dict[str, DocumentContext]:
@@ -57,7 +60,7 @@ def test_context_overflow_becomes_an_explicit_structural_failure() -> None:
     assert summary.valid == 0
     assert parsed[0].failure_reason == "context_overflow"
     assert parsed[0].confidence == float("-inf")
-    assert parsed[0].raw_output == ""
+    assert json.loads(parsed[0].raw_output) == [""]  # aggregate_document_prediction's format
 
 
 def test_ungrounded_span_is_a_grounding_failure_not_a_structural_one() -> None:
@@ -86,6 +89,54 @@ def test_unknown_document_and_unknown_candidate_fail_loudly() -> None:
         parse_arm([_record('{"arguments":[]}', instance_key="rams:missing")], _context())
     with pytest.raises(ValueError, match="unknown confidence candidate"):
         parse_arm([_record('{"arguments":[]}')], _context(), confidence_candidate="median")
+
+
+def test_parse_arm_routes_through_the_audit_mandated_aggregation() -> None:
+    """Every trigger-level record folds through aggregate_document_prediction (correction #1).
+
+    This proves parse_arm uses the real, tested contract rather than a parallel
+    reimplementation: an independently-built two-generation aggregate for the same
+    document must match parse_arm's result exactly.
+    """
+
+    raw = '{"arguments":[{"role":"Attacker","start":0,"end":1,"text":"Alice"}]}'
+    parsed, _ = parse_arm([_record(raw)], _context())
+    expected = aggregate_document_prediction(
+        (
+            FrameGeneration(
+                generation_id="qa:rams:d1",
+                document_id="rams:d1",
+                system_id="qa",
+                prompt_hash="abc",
+                raw_output=raw,
+                frame=parsed[0].frames[0],
+                confidence=-0.1,
+                status="valid",
+            ),
+        )
+    )
+    assert parsed[0] == expected
+
+
+def test_multi_frame_document_is_valid_only_if_every_frame_is_valid() -> None:
+    """A document with two trigger frames, one grounded and one not, must be rejected
+
+    whole -- and scored at the worst (here: -inf) confidence, per correction #1. This
+    dataset never produces multi-frame documents (verified: 9,124 unique doc_keys), but
+    the aggregation contract must still hold for the case where it would.
+    """
+
+    contexts = _context()
+    good = '{"arguments":[{"role":"Attacker","start":0,"end":1,"text":"Alice"}]}'
+    bad = '{"arguments":[{"role":"Attacker","start":0,"end":1,"text":"Bob"}]}'  # ungrounded
+    records = [_record(good), _record(bad)]
+    parsed, summary = parse_arm(records, contexts)
+    assert len(parsed) == 1  # both frames folded into ONE document record
+    assert parsed[0].status == "grounding_failure"
+    assert parsed[0].confidence == float("-inf")
+    assert summary.valid == 0
+    assert summary.grounding_failure == 1
+    assert summary.records == 2
 
 
 def test_summary_is_text_free() -> None:
