@@ -294,7 +294,6 @@ for command_name in (
     "train",
     "generate-predictions",
     "freeze-systems",
-    "certify",
     "evaluate-final",
     "evaluate-shift",
     "render-report",
@@ -575,6 +574,204 @@ def build_grid_command(
     grid_out.parent.mkdir(parents=True, exist_ok=True)
     grid_out.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     typer.echo(json.dumps({"grid_out": str(grid_out), **result}, sort_keys=True))
+
+
+@app.command("certify")
+def certify_command(
+    predictions_dir: Annotated[Path, typer.Option()] = Path("data/private/plan2/predictions"),
+    rams_archive: Annotated[Path, typer.Option()] = Path("data/raw/rams/RAMS_1.0c.tar.gz"),
+    role_map: Annotated[Path, typer.Option()] = Path("data/private/splits/rams_roles.jsonl"),
+    grids: Annotated[Path, typer.Option()] = Path("evidence/plan2/threshold_grids.json"),
+    development_gate: Annotated[Path, typer.Option()] = Path(
+        "evidence/plan2/development_gate_summary.json"
+    ),
+    aggregation_adr: Annotated[Path, typer.Option()] = Path(
+        "docs/adr/0009-within-group-aggregation.md"
+    ),
+    result_out: Annotated[Path, typer.Option()] = Path("evidence/plan3/certification_result.json"),
+    i_have_reviewer_approval: Annotated[
+        bool,
+        typer.Option(
+            "--i-have-reviewer-approval",
+            help="Required. Confirms ADR 0009 has an independent reviewer PASS.",
+        ),
+    ] = False,
+) -> None:
+    """Open the sealed certification split ONCE and write the immutable §7.4 certificate.
+
+    This is the only irreversible command in Plan 3. It refuses to run unless ADR 0009
+    (within-group aggregation) records an accepted status **and** the operator passes
+    ``--i-have-reviewer-approval`` -- the aggregation rule materially determines the
+    certificate, so it may not be chosen by code alone.
+    """
+
+    import hashlib
+
+    from conformalextract.certification import (
+        FROZEN_ACCEPTANCE_FLOOR,
+        FROZEN_ALPHA,
+        FROZEN_DELTA,
+        FROZEN_MATERIAL_GAIN,
+    )
+    from conformalextract.certification_run import (
+        aggregate_to_groups,
+        build_certification_access_log,
+        certification_artifact,
+        run_certification,
+    )
+    from conformalextract.contracts import Argument, EventFrame, Span
+    from conformalextract.development_gate import document_loss
+    from conformalextract.predictions import (
+        build_document_contexts,
+        parse_arm,
+        read_prediction_jsonl,
+    )
+    from conformalextract.profiles import RamsInstance, read_ontology, read_rams_instances
+
+    # --- Gate: the aggregation rule must be reviewed before sealed labels open -----------
+    adr_text = aggregation_adr.read_text(encoding="utf-8")
+    adr_accepted = "- Status: accepted" in adr_text
+    if not (adr_accepted and i_have_reviewer_approval):
+        typer.echo(
+            json.dumps(
+                {
+                    "status": "refused",
+                    "reason": "ADR 0009 (within-group aggregation) is not cleared for execution",
+                    "adr_status_accepted": adr_accepted,
+                    "operator_flag_passed": i_have_reviewer_approval,
+                    "sealed_labels_opened": False,
+                },
+                sort_keys=True,
+            )
+        )
+        raise typer.Exit(code=3)
+
+    gate = json.loads(development_gate.read_text(encoding="utf-8"))
+    grid_data = json.loads(grids.read_text(encoding="utf-8"))
+    delta = float(grid_data["delta"])
+    allocation = {system_id: delta for system_id in ("zs", "fs", "qa")}
+    if abs(sum(allocation.values()) - FROZEN_DELTA) > 1e-9:
+        raise RuntimeError(
+            f"grids were built at delta={delta}; the three-way split must exhaust "
+            f"delta={FROZEN_DELTA}. Rebuild grids at delta/3 before certifying."
+        )
+
+    instances = {i.instance_key: i for i in read_rams_instances(rams_archive)}
+    contexts = build_document_contexts(list(instances.values()), read_ontology(rams_archive))
+    groups: dict[str, str] = {}
+    for line in role_map.read_text(encoding="utf-8").splitlines():
+        record = json.loads(line)
+        if record["role"] == "certification":
+            groups[str(record["document_id"])] = str(record["group_id"])
+
+    def gold_frames(instance: RamsInstance) -> list[EventFrame]:
+        tokens = instance.tokens
+        return [
+            EventFrame(
+                document_id=instance.instance_key,
+                event_type=instance.event_type,
+                trigger=Span(
+                    start=instance.trigger_start,
+                    end=instance.trigger_end,
+                    text=" ".join(tokens[instance.trigger_start : instance.trigger_end]),
+                ),
+                arguments=[
+                    Argument(
+                        role=argument.role,
+                        span=Span(
+                            start=argument.start,
+                            end=argument.end,
+                            text=" ".join(tokens[argument.start : argument.end]),
+                        ),
+                    )
+                    for argument in instance.arguments
+                ],
+            )
+        ]
+
+    access_log = build_certification_access_log(sorted(groups))  # THE sealed read, audited
+    rows_by_system, thresholds_by_system, candidates_by_system = {}, {}, {}
+    for system_id in ("zs", "fs", "qa"):
+        candidate = str(gate["per_system"][system_id]["selected_candidate"])
+        raw_records = read_prediction_jsonl(predictions_dir / f"{system_id}.v1.jsonl")
+        parsed, _ = parse_arm(raw_records, contexts, confidence_candidate=candidate)
+        confidence: dict[object, object] = {
+            r["instance_key"]: r["confidence_candidates"] for r in raw_records
+        }
+
+        def score_of(
+            document_id: str,
+            candidate: str = candidate,
+            confidence: dict[object, object] = confidence,
+        ) -> float:
+            candidates = confidence.get(document_id)
+            # Failures carry no candidates: frozen worst-confidence treatment (plan §5.3).
+            if isinstance(candidates, dict):
+                return float(candidates[candidate])
+            return float("-inf")
+
+        certification_predictions = [p for p in parsed if p.document_id in groups]
+        rows_by_system[system_id] = aggregate_to_groups(
+            document_ids=[p.document_id for p in certification_predictions],
+            group_by_document=groups,
+            score_by_document={
+                p.document_id: score_of(p.document_id) for p in certification_predictions
+            },
+            valid_by_document={
+                p.document_id: p.status == "valid" for p in certification_predictions
+            },
+            loss_by_document={
+                p.document_id: document_loss(gold_frames(instances[p.document_id]), p)
+                for p in certification_predictions
+            },
+        )
+        thresholds_by_system[system_id] = [
+            float("-inf") if t == "-inf" else float(t)
+            for t in grid_data["grids"][system_id]["certifiable_thresholds"]
+        ]
+        candidates_by_system[system_id] = candidate
+
+    run = run_certification(
+        rows_by_system=rows_by_system,
+        thresholds_by_system=thresholds_by_system,
+        candidates_by_system=candidates_by_system,
+        delta_allocation=allocation,
+        access_log=access_log,
+        alpha=FROZEN_ALPHA,
+        delta=FROZEN_DELTA,
+        acceptance_floor=FROZEN_ACCEPTANCE_FLOOR,
+        material_gain=FROZEN_MATERIAL_GAIN,
+    )
+    artifact = certification_artifact(
+        run,
+        provenance={
+            "alpha": FROZEN_ALPHA,
+            "delta": FROZEN_DELTA,
+            "acceptance_floor": FROZEN_ACCEPTANCE_FLOOR,
+            "material_gain": FROZEN_MATERIAL_GAIN,
+            "delta_allocation": allocation,
+            "primary_construction": "scorc_union_bound",
+            "grid_hashes": {s: grid_data["grids"][s]["grid_hash"] for s in ("zs", "fs", "qa")},
+            "n_certification_groups": len(rows_by_system["qa"]),
+        },
+    )
+    if result_out.exists():
+        raise RuntimeError(f"certification result already exists and is immutable: {result_out}")
+    result_out.parent.mkdir(parents=True, exist_ok=True)
+    payload = json.dumps(artifact, indent=2, sort_keys=True) + "\n"
+    result_out.write_text(payload, encoding="utf-8")
+    typer.echo(
+        json.dumps(
+            {
+                "result": str(result_out),
+                "sha256": hashlib.sha256(payload.encode()).hexdigest(),
+                "h1": run.h1.outcome,
+                "h2": run.h2.outcome,
+                "collapsed": run.hypotheses_collapsed,
+            },
+            sort_keys=True,
+        )
+    )
 
 
 @app.command("hash-file")
