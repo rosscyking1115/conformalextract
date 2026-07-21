@@ -294,7 +294,6 @@ for command_name in (
     "train",
     "generate-predictions",
     "freeze-systems",
-    "build-grid",
     "certify",
     "evaluate-final",
     "evaluate-shift",
@@ -479,6 +478,78 @@ def development_gate_command(
     summary_out.parent.mkdir(parents=True, exist_ok=True)
     summary_out.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     typer.echo(json.dumps({"summary": str(summary_out), **result}, sort_keys=True))
+
+
+@app.command("build-grid")
+def build_grid_command(
+    predictions_dir: Annotated[Path, typer.Option()] = Path("data/private/plan2/predictions"),
+    split_manifest: Annotated[Path, typer.Option()] = Path(
+        "manifests/plan2/split_manifest.json"
+    ),
+    delta: Annotated[float, typer.Option()] = 0.05,  # ADR 0007 (certification.FROZEN_DELTA)
+    acceptance_floor: Annotated[float, typer.Option()] = 0.20,  # ADR 0007
+    grid_out: Annotated[Path, typer.Option()] = Path("evidence/plan2/threshold_grids.json"),
+) -> None:
+    """Build and commit each system's §5.4 threshold grid from development scores only.
+
+    Development-only (plan §13.1): reads the frozen ``minimum`` confidence candidate (ADR 0007)
+    for each system's development-split documents, builds a theorem-sized quantile grid plus
+    boundary policies, and writes committable grid hashes. No certification/final/shift label
+    is touched; grid size is the theorem-eligible maximum for the certification split's
+    independent-group count, a feasibility choice not a performance one.
+    """
+
+    from conformalextract.predictions import read_prediction_jsonl
+    from conformalextract.threshold_grid import build_threshold_grid, theorem_max_grid_size
+
+    split = json.loads(split_manifest.read_text(encoding="utf-8"))
+    n_certification_groups = int(split["role_group_counts"]["certification"])
+    grid_size = theorem_max_grid_size(
+        n_groups=n_certification_groups, delta=delta, acceptance_floor=acceptance_floor
+    )
+
+    grids: dict[str, object] = {}
+    for system_id in ("zs", "fs", "qa"):
+        raw_records = read_prediction_jsonl(predictions_dir / f"{system_id}.v1.jsonl")
+        # Frozen candidate = "minimum" (ADR 0007). Failures carry no candidates -> -inf.
+        development_scores: list[float] = []
+        for record in raw_records:
+            if record["role"] != "development":
+                continue
+            candidates = record.get("confidence_candidates")
+            if isinstance(candidates, dict):
+                development_scores.append(float(candidates["minimum"]))
+            else:
+                development_scores.append(float("-inf"))
+        grid = build_threshold_grid(
+            system_id,
+            development_scores,
+            grid_size=grid_size,
+            n_groups=n_certification_groups,
+            delta=delta,
+            acceptance_floor=acceptance_floor,
+        )
+        grids[system_id] = {
+            "grid_hash": grid.grid_hash,
+            "requested_grid_size": grid.requested_grid_size,
+            "realized_certifiable_size": grid.realized_certifiable_size,
+            "non_finite_scores": grid.non_finite_scores,
+            "certifiable_thresholds": [
+                "-inf" if t == float("-inf") else t for t in grid.certifiable_thresholds()
+            ],
+        }
+
+    result = {
+        "confidence_candidate": "minimum",
+        "delta": delta,
+        "acceptance_floor": acceptance_floor,
+        "n_certification_groups": n_certification_groups,
+        "theorem_max_grid_size": grid_size,
+        "grids": grids,
+    }
+    grid_out.parent.mkdir(parents=True, exist_ok=True)
+    grid_out.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    typer.echo(json.dumps({"grid_out": str(grid_out), **result}, sort_keys=True))
 
 
 @app.command("hash-file")
