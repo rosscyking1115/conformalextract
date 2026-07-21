@@ -1,0 +1,44 @@
+{
+  "acceptance_floor": 0.2,
+  "alpha": 0.2,
+  "label_access_entries": 2799,
+  "label_access_head_hash": "c1b3e5a2572c5d1d408a6fa77f53155c23dd7472563c2384085a7e728e8459b0",
+  "per_system": {
+    "fs": {
+      "base_risk": 0.9586255295258511,
+      "base_risk_upper": 1.0,
+      "floor_reachable": false,
+      "max_feasible_acceptance": 0.0,
+      "minimum_abstention": 1.0,
+      "n_documents": 933,
+      "verdict": "near_vacuous"
+    },
+    "qa": {
+      "base_risk": 0.5834260535225165,
+      "base_risk_upper": 0.6278883010422841,
+      "floor_reachable": true,
+      "max_feasible_acceptance": 0.4651396236971449,
+      "minimum_abstention": 0.5348603763028551,
+      "n_documents": 933,
+      "verdict": "marginal"
+    },
+    "zs": {
+      "base_risk": 0.9927116827438371,
+      "base_risk_upper": 1.0,
+      "floor_reachable": false,
+      "max_feasible_acceptance": 0.0,
+      "minimum_abstention": 1.0,
+      "n_documents": 933,
+      "verdict": "near_vacuous"
+    }
+  },
+  "pooled_selection": {
+    "auc_by_candidate": {
+      "mean": 0.7346584849334626,
+      "minimum": 0.6854425394517378,
+      "tenth_percentile": 0.8652336908576801
+    },
+    "n_pooled_documents": 2799,
+    "selected": "minimum"
+  }
+}

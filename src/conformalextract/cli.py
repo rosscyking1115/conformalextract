@@ -341,6 +341,146 @@ def parse_predictions_command(
     typer.echo(json.dumps({"summary": str(summary_out), "systems": summaries}, sort_keys=True))
 
 
+@app.command("development-gate")
+def development_gate_command(
+    predictions_dir: Annotated[Path, typer.Option()] = Path("data/private/plan2/predictions"),
+    rams_archive: Annotated[Path, typer.Option()] = Path("data/raw/rams/RAMS_1.0c.tar.gz"),
+    alpha: Annotated[float, typer.Option()] = 0.20,
+    acceptance_floor: Annotated[float, typer.Option()] = 0.20,
+    summary_out: Annotated[Path, typer.Option()] = Path(
+        "evidence/plan2/development_gate_summary.json"
+    ),
+) -> None:
+    """Select the primary confidence candidate and check base-risk feasibility (Plan 3 Gate 0).
+
+    Pools ZS/FS/QA development documents into ONE risk-coverage AUC selection (the same
+    fairness rule ADR 0006 established for the extraction policy: one rule applied uniformly,
+    not each system picking its own best-looking score), then reports each system's
+    development-split base-risk feasibility at the given alpha/floor. Development gold is not
+    sealed but every read is still purpose-authorized and hash-chained
+    (``LabelAccessPurpose.DEVELOPMENT_SELECTION``); certification/final/shift gold is never
+    reachable from this command.
+    """
+
+    import hashlib
+
+    from conformalextract.certification import base_risk_feasibility
+    from conformalextract.contracts import Argument, EventFrame, Span
+    from conformalextract.development_gate import CONFIDENCE_CANDIDATES, document_loss
+    from conformalextract.predictions import (
+        build_document_contexts,
+        parse_arm,
+        read_prediction_jsonl,
+    )
+    from conformalextract.profiles import RamsInstance, read_ontology, read_rams_instances
+    from conformalextract.selection import select_confidence_candidate
+    from conformalextract.training import (
+        LabelAccessPurpose,
+        LabelAccessRequest,
+        build_label_access_log,
+    )
+
+    instances = {
+        instance.instance_key: instance for instance in read_rams_instances(rams_archive)
+    }
+    contexts = build_document_contexts(list(instances.values()), read_ontology(rams_archive))
+
+    def gold_frames(instance: RamsInstance) -> list[EventFrame]:
+        tokens = instance.tokens
+        arguments = [
+            Argument(
+                role=argument.role,
+                span=Span(
+                    start=argument.start,
+                    end=argument.end,
+                    text=" ".join(tokens[argument.start : argument.end]),
+                ),
+            )
+            for argument in instance.arguments
+        ]
+        return [
+            EventFrame(
+                document_id=instance.instance_key,
+                event_type=instance.event_type,
+                trigger=Span(
+                    start=instance.trigger_start,
+                    end=instance.trigger_end,
+                    text=" ".join(tokens[instance.trigger_start : instance.trigger_end]),
+                ),
+                arguments=arguments,
+            )
+        ]
+
+    pooled_scores: dict[str, list[float]] = {c: [] for c in CONFIDENCE_CANDIDATES}
+    pooled_losses: list[float] = []
+    access_requests: list[LabelAccessRequest] = []
+    per_system: dict[str, dict[str, object]] = {}
+
+    for system_id in ("zs", "fs", "qa"):
+        raw_records = read_prediction_jsonl(predictions_dir / f"{system_id}.v1.jsonl")
+        parsed, _ = parse_arm(raw_records, contexts)
+        role_by_document = {r["instance_key"]: r["role"] for r in raw_records}
+        confidence_by_document: dict[object, dict[str, float] | None] = {
+            r["instance_key"]: r["confidence_candidates"]  # type: ignore[misc]
+            for r in raw_records
+        }
+        development_predictions = [
+            p for p in parsed if role_by_document.get(p.document_id) == "development"
+        ]
+        losses = [
+            document_loss(gold_frames(instances[p.document_id]), p)
+            for p in development_predictions
+        ]
+        for p, loss in zip(development_predictions, losses, strict=True):
+            pooled_losses.append(loss)
+            candidates = confidence_by_document.get(p.document_id)
+            for candidate in CONFIDENCE_CANDIDATES:
+                pooled_scores[candidate].append(
+                    candidates[candidate] if candidates is not None else float("-inf")
+                )
+            access_requests.append(
+                LabelAccessRequest(
+                    data_role="development",
+                    document_id_hash=hashlib.sha256(
+                        f"{system_id}:{p.document_id}".encode()
+                    ).hexdigest(),
+                    purpose=LabelAccessPurpose.DEVELOPMENT_SELECTION,
+                )
+            )
+        risk = base_risk_feasibility(losses, alpha=alpha, acceptance_floor=acceptance_floor)
+        per_system[system_id] = {
+            "n_documents": len(development_predictions),
+            "base_risk": risk.base_risk,
+            "base_risk_upper": risk.base_risk_upper,
+            "minimum_abstention": risk.minimum_abstention,
+            "max_feasible_acceptance": risk.max_feasible_acceptance,
+            "floor_reachable": risk.floor_reachable,
+            "verdict": risk.verdict,
+        }
+
+    label_access = build_label_access_log(access_requests)
+    if not label_access.verify():
+        raise RuntimeError("development label-access log failed to verify")
+    pooled_selection = select_confidence_candidate(
+        scores_by_candidate=pooled_scores, development_losses=pooled_losses
+    )
+    result = {
+        "alpha": alpha,
+        "acceptance_floor": acceptance_floor,
+        "pooled_selection": {
+            "selected": pooled_selection.selected,
+            "auc_by_candidate": pooled_selection.auc_by_candidate,
+            "n_pooled_documents": len(pooled_losses),
+        },
+        "per_system": per_system,
+        "label_access_head_hash": label_access.head_hash,
+        "label_access_entries": len(label_access.entries),
+    }
+    summary_out.parent.mkdir(parents=True, exist_ok=True)
+    summary_out.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    typer.echo(json.dumps({"summary": str(summary_out), **result}, sort_keys=True))
+
+
 @app.command("hash-file")
 def hash_file(path: Path) -> None:
     """Print a local artifact SHA-256 without reading it into a report."""
