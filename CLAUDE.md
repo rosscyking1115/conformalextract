@@ -25,8 +25,12 @@ uv run conformalextract --help   # CLI seams (build-profiles, prepare-data, free
 
 ## Conventions
 - Gated doctrine: four sequential plans (Plan N+1 starts only after Plan N's independent reviewer PASS);
-  in-repo plan docs live in `docs/plan2/`, `docs/plan3/`, `docs/gate0/`, with a `docs/adr/000X` per
-  material decision. Nothing is a claim until it traces to committed evidence.
+  in-repo plan docs live in `docs/plan2/`, `docs/plan3/`, `docs/gate0/`, `docs/plan4/`, with a
+  `docs/adr/000X` per material decision. Nothing is a claim until it traces to committed evidence.
+- **The four accepted plans are in-repo**, one per gate directory as `accepted-plan.md`
+  (`docs/gate0/`=Plan 1 … `docs/plan4/`=Plan 4). A bare `§N.M` in the docs means Plan 3 unless the
+  text names another. Read the section before relying on a paraphrase of it — the repo's gloss on
+  §6.3 was stricter than §6.3 actually is, and an ADR was written against the gloss.
 - **Paid execution ($25 aggregate cap) needs explicit Ross approval, every time.** Budget ceilings in a
   plan are not spending permission. R0→R1→R2 order enforced by `TrainingRunLedger`.
 - Changes to evaluation, label access, certification, or release policy require an **independent review**.

@@ -185,8 +185,10 @@ reported as two independent confirmatory comparisons. There is one finding, not 
   parsed-output parity).
 - **α = 0.20 with a 20% floor is a deployment threshold, not a natural constant** — it is the
   operating point this project committed to before opening any sealed label (ADR 0007), and it
-  stays the headline target; §6.3's discipline is that it is not relaxed after seeing the result.
-  That discipline is about *certifying* elsewhere, not about *looking* elsewhere. The whole
+  stays the headline target. [§6.3 of the accepted plan](accepted-plan.md) is narrower than it is
+  often paraphrased: it explicitly permits a sweep "reported as **secondary feasibility analysis**
+  with simultaneous correction or clearly descriptive status", and forbids the headline changing
+  *because* a neighbouring target certifies more systems. This is the descriptive branch. The whole
   frontier is now published rather than described: `evidence/plan3/alpha_frontier.json`
   (`uv run conformalextract alpha-frontier`, ADR 0011) reports the oracle risk–coverage curve
   read at every α, and no certificate is issued at any of them.

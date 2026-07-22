@@ -20,7 +20,30 @@ nothing costs money.
 
 ## 1. Why the α-sweep is not a relaxation of α
 
-Plan §6.3 forbids relaxing the headline target after seeing the result. This ADR does not relax it:
+> **Amended 2026-07-22, after the accepted plan was brought into the repo.** This ADR was written
+> against the repo's *paraphrase* of §6.3 ("the headline target must not be relaxed after seeing
+> this"), because the accepted plan was not in the repo — a limitation the independent reviewer
+> flagged as constraining their ruling. The plan is now at
+> [`docs/plan3/accepted-plan.md`](../plan3/accepted-plan.md), and its §6.3 reads:
+>
+> > "The single frozen `alpha` is confirmatory. A small, predeclared sweep—such as `0.10`,
+> > `0.20`, `0.30` if Gate 0 supports it—may be reported as **secondary feasibility analysis**
+> > with simultaneous correction or clearly descriptive status. The headline target never changes
+> > because a neighbouring target certifies more systems."
+>
+> The paraphrase was **stricter than the plan**. §6.3 explicitly contemplates a sweep and permits
+> it under either of two branches; the actual prohibition is *motivational* — the headline must not
+> change **because** a neighbour certifies better. This work takes the **clearly descriptive**
+> branch: both artifacts carry `diagnostic_only: true` / `certifies_nothing: true`, no certificate
+> is issued at any α, and the headline stays 0.20.
+>
+> **Two honest departures from §6.3's wording, neither of which the permission depends on.** The
+> sweep it contemplates is *small and predeclared* (0.10/0.20/0.30); ours is post-hoc and full
+> range. That is why the descriptive branch is the operative one — the "simultaneous correction"
+> branch would require the multiplicity accounting a predeclared sweep gets, and this curve
+> deliberately computes no bound at all. Nothing here should be read as pre-registered.
+
+Plan §6.3 governs relaxing the headline target after seeing the result. This ADR does not relax it:
 α = 0.20 remains the frozen target (ADR 0007) and **no certificate is issued at any other α**.
 
 The reason a sweep is safe here is structural, not a matter of care. The oracle risk–coverage curve
@@ -192,14 +215,34 @@ Both were found by the independent review of this ADR
 (`evidence/plan3/reviewer_record.reanalysis.json`). Recording them is the point: an
 acknowledged defect that is not written down is a defect that returns.
 
-- **`claims.py` treats untracked evidence as resolved.** `unresolved_evidence` checks
-  `Path.exists()`, not whether the path is git-tracked, and `publishable()` ignores `verified_by`
-  entirely. So a claim citing an uncommitted artifact passes `verify-claims`, and a claim whose
-  `verified_by` says "pending review" still counts as publishable. **Not fixed here**, on the
-  reviewer's ruling: changing `publishable()` silently re-classifies all fourteen existing claims,
-  which is a release-policy change and needs its own independent review rather than a ride-along on
-  a re-analysis commit. The concrete exposure is closed for now because the three new claims cite
-  committed artifacts and name this review in `verified_by`.
+- **`claims.py` treated untracked evidence as resolved.** `unresolved_evidence` checked
+  `Path.exists()`, not whether the path is git-tracked, and `publishable()` ignored `verified_by`
+  entirely. So a claim citing an uncommitted artifact passed `verify-claims`, and a claim whose
+  `verified_by` said "pending review" still counted as publishable.
+
+  **Now fixed, in two deliberately different scopes** (see §7 below for why they are not the same
+  kind of change):
+  - `untracked_evidence` runs `git ls-files` and reports evidence that exists locally but is not
+    committed. An uncommitted artifact resolves perfectly on the machine that produced it and not
+    at all for a reader, so a claim resting on one is unsupported the moment it is published.
+    `verify_ledger` now fails closed when tracked status cannot be determined at all — "I could
+    not tell whether the evidence is committed" is not a pass for a publication gate — with an
+    explicit `require_tracked=False` for deliberately verifying outside a checkout.
+  - A claim may not hold a public surface while its own `verified_by` reports verification
+    pending. Enforced at construction, like the other claim rules, so it cannot be bypassed by
+    calling `publishable()` directly.
+
+  **This is narrower than re-defining `publishable()`, on purpose.** The reviewer's warning was
+  that changing what `publishable()` means silently re-classifies all fourteen existing claims.
+  It does — so that is not what was done. The pending-verification rule targets exactly the harm
+  named and re-classifies nothing: all twelve currently-publishable claims already record a
+  completed verification, and the two carrying `pending` wording hold no surfaces. Verified by
+  running it: 14 claims, 12 publishable, before and after.
+
+  Still open, and deliberately: `verified_by` remains free text, so the rule reads wording rather
+  than structure. The fuller fix is a typed field — a reviewer-record path plus a verdict, checked
+  for existence like `evidence` — which would re-classify existing claims and therefore belongs to
+  its own review, not this one.
 - **The `--roles` sealed-split hole was not unique to the new commands.** `risk-coverage-diagnostic`
   carried it too and would have opened `final` the same way. That one **is** fixed here, because
   the guard is restrictive only and provably behaviour-preserving: after adding it,
@@ -207,6 +250,20 @@ acknowledged defect that is not written down is a defect that returns.
   byte-identically. `tests/test_reanalysis.py::test_every_split_reading_command_refuses_a_sealed_role`
   discovers the command list by introspecting the Typer app for commands that declare a `roles`
   option, so a **new** unguarded command fails it rather than passing silently.
+
+## 7. The accepted plans are now in the repo
+
+All four accepted plans are committed, one per gate directory as `accepted-plan.md`
+(`docs/gate0/`=Plan 1, `docs/plan2/`, `docs/plan3/`, `docs/plan4/`), copied byte-identically from
+`_pmo/assistant/plans/conformalextract/`. Until now the repo cited roughly twenty distinct `§N.M`
+sections it did not contain, and the ADR 0011 reviewer flagged that as limiting what they could
+rule on — correctly, as §1's amendment shows: the repo's gloss on §6.3 was **stricter than §6.3**,
+and this ADR was originally argued against the gloss.
+
+They are historical records. An accepted plan is amended by appended, dated note — never rewritten
+to match what was actually built. `tests/test_doc_references.py` excludes them from its
+resolve-every-named-test check for that reason: a plan naming a test is issuing an instruction
+about work not yet done, not asserting a guarantee that currently holds.
 
 ### Deliberate duplication, recorded
 

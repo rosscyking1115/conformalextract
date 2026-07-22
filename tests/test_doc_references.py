@@ -25,10 +25,24 @@ TESTS = ROOT / "tests"
 IDENTIFIER = re.compile(r"test_[a-z0-9_]+")
 
 
+#: Forward-looking documents are excluded, because the premise does not hold for them. An ADR or
+#: a result document naming a test is asserting that a guarantee is currently held, which is
+#: checkable. An accepted plan naming one is issuing an instruction about work not yet done -- the
+#: Plan 1 plan sketches a `tests/` tree (`test_grounding.py`, `test_metrics.py`, `test_splits.py`)
+#: from before any code existed, and the files were ultimately named differently. Requiring those
+#: to resolve would force either dead files or edits to an accepted plan, and an accepted plan is
+#: a historical record: it is amended by appended note, never rewritten to match what happened.
+FORWARD_LOOKING = ("accepted-plan.md",)
+
+
 def _documentation_files() -> list[Path]:
     files = sorted(ROOT.joinpath("docs").rglob("*.md"))
     files += [ROOT / "CLAUDE.md", ROOT / "REVIEW.md", ROOT / "README.md"]
-    return [path for path in files if path.exists()]
+    return [
+        path
+        for path in files
+        if path.exists() and not path.name.endswith(FORWARD_LOOKING)
+    ]
 
 
 def _known_identifiers() -> set[str]:
