@@ -70,6 +70,67 @@ survives. It is simply not sufficient for a *certified selective* guarantee at t
 well-formed and grounded is a much weaker property than being *correct*, and the certificate
 scores correctness.
 
+### Grounding and certifiability are orthogonal here — measured, not asserted
+
+That last sentence was an interpretation when this document was first written. It is now a
+measurement: `uv run conformalextract loss-decomposition` →
+`evidence/plan3/loss_decomposition.json` (ADR 0011, $0, no new sealed access). Document loss splits
+into four channels; the group-level contributions sum exactly to the certified quantity in the
+table above, so this decomposes the certificate itself rather than a proxy for it.
+
+| Certification split | QA | FS | ZS |
+|---|---|---|---|
+| structural failure (forced loss 1.0) | 0.7% | 0.4% | 2.3% |
+| grounding failure (forced loss 1.0) | 4.1% | 32.3% | 58.0% |
+| valid but contentless | 4.9% | 31.4% | 0.5% |
+| **valid and content-bearing** | **90.3%** | **35.9%** | **39.3%** |
+| mean loss *within* the content-bearing channel | **0.579** | 0.947 | 0.986 |
+| group-level loss contributed by that channel | **0.530** / 0.607 | 0.354 / 0.958 | 0.404 / 0.992 |
+
+The 16× grounding separation lives in the first three rows. The certificate scores the fourth.
+**87% of QA's remaining loss (0.530 of 0.607) is grounded, well-formed, content-bearing output
+that is simply wrong** — the coreference and entity-selection errors ADR 0007 catalogued
+(`victim = "she"` for `"Mrs. Clinton"`).
+
+The counterfactual states it directly. Give each system a **grounding oracle** — drop every
+document outside the content-bearing channel, so the system is scored as though it never emitted
+a structural failure, an ungrounded span or an empty frame, and measure coverage against that
+restricted population:
+
+| System | max acceptance at α = 0.20 | under the grounding oracle | movement | restricted mean loss |
+|---|---|---|---|---|
+| QA | 0.0201 | 0.0374 | +0.017 | 0.582 |
+| FS | 0.0000 | 0.0000 | **+0.0000** | **0.951** |
+| ZS | 0.0000 | 0.0000 | **+0.0000** | **0.984** |
+
+**Removing 58% of ZS's documents' worth of grounding failure, and 32% of FS's, moves the
+certifiable frontier by exactly nothing.** QA's frontier moves by 1.7 points and remains 5× short
+of the 0.20 floor.
+
+**The baselines' result does not depend on the counterfactual being fair, and it should not be
+argued that way.** The restriction is *not* uniformly generous — dropping a low-loss member raises
+a group's mean loss, and 24 FS groups and 21 QA groups do score worse under it — and a different
+counterfactual (a correctness oracle) would move the baselines off zero. What carries the claim is
+arithmetic. With losses in [0,1], accepting a fraction `c` at risk `α` requires a population mean
+loss of at most `α·c + (1−c)` = **0.84** at `c = α = 0.20`, because the best achievable mean over
+the best `c` fraction is `(μ − (1−c))/c`. ZS (0.984) and FS (0.951) exceed that ceiling on their
+restricted populations, so **no selection rule of any kind** — oracle, certified, or otherwise —
+reaches the floor for them. QA sits below the ceiling at 0.582, so for QA the ceiling is silent
+and the measured curve is what leaves it short. Both readings are recorded as
+`excluded_by_ceiling` and `groups_worsened_by_restriction` in the artifact.
+
+So the QLoRA adapter's principal learned behaviour — grounding fidelity — is **orthogonal to the
+property the certificate measures**. A 16× grounding gain bought no certifiable coverage. This is
+the finding that does not appear in the prior work: 2606.29054 tests neither event-argument
+extraction nor the grounding/correctness distinction. Its one extraction task (JSON-Extract,
+μ = 0.033) is a much easier regime than this one — a different task under a different metric, so
+the comparison marks out a new operating regime rather than contradicting their measurement.
+
+Caveats that travel with this: conditional coverage under the grounding oracle is **not** a
+deployable acceptance rate — the restricted population differs per system, so those numbers are
+not comparable across systems and support only the within-system question "does closing the
+grounding gap reach the floor?". The decomposition selects no threshold and certifies nothing.
+
 ### The process failure: this was predictable at Phase A, for $0 (correction C2)
 
 **The pre-registered prediction was directionally right and quantitatively wrong**, and the reason
@@ -122,9 +183,33 @@ reported as two independent confirmatory comparisons. There is one finding, not 
   so the document-level reading a reader will naturally take is not misleading here (amendment A2).
 - Scoped to the frozen vLLM 4-bit serving stack; portability is not established (probe: 86.3%
   parsed-output parity).
-- α = 0.20 with a 20% floor is one operating point. This result says nothing about whether a
-  laxer target would certify — and per §6.3 the headline target **must not** be relaxed after
-  seeing this.
+- **α = 0.20 with a 20% floor is a deployment threshold, not a natural constant** — it is the
+  operating point this project committed to before opening any sealed label (ADR 0007), and it
+  stays the headline target; §6.3's discipline is that it is not relaxed after seeing the result.
+  That discipline is about *certifying* elsewhere, not about *looking* elsewhere. The whole
+  frontier is now published rather than described: `evidence/plan3/alpha_frontier.json`
+  (`uv run conformalextract alpha-frontier`, ADR 0011) reports the oracle risk–coverage curve
+  read at every α, and no certificate is issued at any of them.
+
+  | System | α at which the 20% floor first becomes oracle-reachable (certification split) |
+  |---|---|
+  | **QA** | **0.406** |
+  | FS | 0.930 |
+  | ZS | 0.981 |
+
+  Read that as the answer to "you picked the one α where it fails": you did not need to pick.
+  The curve is an oracle **upper** bound on what any threshold rule could achieve, so below
+  α ≈ 0.406 **no** certificate at any threshold could have cleared the floor for the best system —
+  the entire range is ruled out without a certificate being computed anywhere in it.
+
+  **The crossing is a necessary condition, not a sufficient one, and must never be read as an α
+  that would work.** It carries no finite-sample penalty, no grid and no multiplicity correction.
+  A certificate at α ≈ 0.406 would still not issue: at the ~280 groups a 20% acceptance implies,
+  the Hoeffding radius alone is 0.086 at the per-system allocation δ/3 and 0.103 under the
+  family-wide Bonferroni δ/(2·9), so the risk upper bound would land at roughly 0.49–0.51 — over
+  the target it was being measured against, before any other bound is applied. The curve rules
+  operating points **out**. It never rules one in, and no claim from this project may use it in
+  that direction.
 
 ## What may and may not be claimed (fixed at review)
 
@@ -137,14 +222,22 @@ reported as two independent confirmatory comparisons. There is one finding, not 
   certificate scores correctness.
 - **One** finding, not two (H1/H2 collapsed).
 - The oracle risk–coverage diagnostic, as evidence the failure is capability rather than method.
+- **(ADR 0011)** The α-frontier, stated as: below α ≈ 0.406 no certificate at any threshold could
+  have cleared the 20% floor for the best system. It is an oracle upper bound and may only be used
+  in that ruling-out direction — never to suggest what *would* certify above it.
+- **(ADR 0011)** Grounding ⊥ certifiability: a ~16× grounding gain moved the certifiable frontier
+  by +0.017 for QA and by 0.000 for both baselines, with 87% of QA's residual loss in grounded,
+  content-bearing output. Reported with the restricted-population caveat attached.
 
 **Forbidden — in both directions:**
 
 | Overclaiming the null | Overclaiming the positive |
 |---|---|
 | "QLoRA doesn't work" | 95.7% in an abstract, CV line or slide that can be quoted **without the null attached** |
-| Any hint that a laxer α would certify | Any QA-over-baseline **certified margin** (none exists) |
+| Any hint that a laxer α would certify — the frontier rules α values **out**, it never rules one in | Any QA-over-baseline **certified margin** (none exists) |
 | Generalising past the frozen vLLM 4-bit stack (86.3% parity) or past in-domain RAMS | Calling grounding validity "accuracy" |
+| Presenting the α-frontier or the grounding oracle as a certificate — both are oracle diagnostics that select no threshold | Quoting grounding-oracle coverage as a deployable acceptance rate, or comparing it across systems |
+| Claiming we discovered that CRC cannot certify extraction — that is 2606.29054's result, not ours | Claiming μ ≈ 0.60 replicates their extraction base risk, or that it refutes it — their JSON-Extract 0.033 is a different task under a different metric, so ours marks out a harder regime and settles nothing about their number |
 
 ## Status
 
