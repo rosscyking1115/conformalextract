@@ -296,10 +296,13 @@ class RiskCoverageFrontier:
         return self.max_acceptance_within_alpha >= self.acceptance_floor
 
 
-def risk_coverage_frontier(
-    rows: Sequence[GroupRow], *, alpha: float, acceptance_floor: float
-) -> RiskCoverageFrontier:
-    """Compute the oracle frontier over group rows (accept best-scoring first)."""
+def _curve_arrays(rows: Sequence[GroupRow]) -> tuple[np.ndarray, np.ndarray, int, int]:
+    """Shared oracle sweep: sort eligible rows best-score-first, return coverage and risk.
+
+    Both ``risk_coverage_frontier`` and ``risk_coverage_curve`` read the same arrays from
+    here, so the single-alpha frontier and the alpha-free curve cannot drift apart -- the
+    frontier is definitionally the curve read at one height (ADR 0011).
+    """
 
     eligible = sorted(
         (row for row in rows if row.all_valid and np.isfinite(row.score)),
@@ -307,18 +310,30 @@ def risk_coverage_frontier(
     )
     total = len(rows)
     if not eligible or total == 0:
+        empty = np.asarray([], dtype=np.float64)
+        return empty, empty, len(eligible), total
+    losses = np.asarray([row.loss for row in eligible], dtype=np.float64)
+    running_risk = np.cumsum(losses) / np.arange(1, len(losses) + 1)
+    # Acceptance is over ALL groups, so ineligible groups correctly dilute achievable coverage.
+    coverage = np.arange(1, len(losses) + 1) / total
+    return coverage, running_risk, len(eligible), total
+
+
+def risk_coverage_frontier(
+    rows: Sequence[GroupRow], *, alpha: float, acceptance_floor: float
+) -> RiskCoverageFrontier:
+    """Compute the oracle frontier over group rows (accept best-scoring first)."""
+
+    coverage, running_risk, eligible_groups, total = _curve_arrays(rows)
+    if coverage.size == 0:
         return RiskCoverageFrontier(
-            eligible_groups=len(eligible),
+            eligible_groups=eligible_groups,
             total_groups=total,
             risk_at_floor_acceptance=None,
             max_acceptance_within_alpha=0.0,
             alpha=alpha,
             acceptance_floor=acceptance_floor,
         )
-    losses = np.asarray([row.loss for row in eligible], dtype=np.float64)
-    running_risk = np.cumsum(losses) / np.arange(1, len(losses) + 1)
-    # Acceptance is over ALL groups, so ineligible groups correctly dilute achievable coverage.
-    coverage = np.arange(1, len(losses) + 1) / total
     within = np.flatnonzero(running_risk <= alpha)
     at_floor = (
         float(running_risk[int(np.argmin(np.abs(coverage - acceptance_floor)))])
@@ -326,12 +341,71 @@ def risk_coverage_frontier(
         else None
     )
     return RiskCoverageFrontier(
-        eligible_groups=len(eligible),
+        eligible_groups=eligible_groups,
         total_groups=total,
         risk_at_floor_acceptance=at_floor,
         max_acceptance_within_alpha=float(coverage[within[-1]]) if within.size else 0.0,
         alpha=alpha,
         acceptance_floor=acceptance_floor,
+    )
+
+
+@dataclass(frozen=True)
+class RiskCoverageCurve:
+    """The whole oracle risk-coverage curve -- the object the frontier reads at one alpha.
+
+    The curve carries **no** alpha: sorting by score and taking the running mean loss of the
+    best-scoring prefix produces one fixed object, and ``max_acceptance_within(alpha)`` is
+    simply that object read at height alpha. A sweep over alpha therefore introduces no new
+    statistic, no new selection and no new multiplicity -- which is exactly why it can be
+    reported without relaxing the frozen target or issuing a certificate anywhere.
+
+    It is a DIAGNOSTIC, on the same terms as ``RiskCoverageFrontier``: it applies no
+    finite-sample penalty, no grid and no multiplicity correction, selects no threshold and
+    certifies nothing. Because it is an oracle *upper bound* on what any threshold rule could
+    achieve, an acceptance floor that is unreachable on this curve at some alpha is unreachable
+    by any certificate at that alpha -- the direction that lets it rule alpha values out.
+    """
+
+    coverage: tuple[float, ...]
+    running_risk: tuple[float, ...]
+    eligible_groups: int
+    total_groups: int
+
+    def max_acceptance_within(self, alpha: float) -> float:
+        """Largest oracle-reachable coverage whose running risk stays within ``alpha``."""
+
+        if not self.running_risk:
+            return 0.0
+        risk = np.asarray(self.running_risk, dtype=np.float64)
+        within = np.flatnonzero(risk <= alpha)
+        return float(self.coverage[int(within[-1])]) if within.size else 0.0
+
+    def alpha_star(self, coverage_target: float) -> float | None:
+        """Smallest alpha at which ``coverage_target`` is oracle-reachable; None if never.
+
+        This is ``min{running_risk[i] : coverage[i] >= coverage_target}``, which inverts
+        ``max_acceptance_within`` exactly and stays correct where the curve is non-monotone
+        (a later, cheaper prefix can beat an earlier one).
+        """
+
+        if not self.coverage:
+            return None
+        coverage = np.asarray(self.coverage, dtype=np.float64)
+        risk = np.asarray(self.running_risk, dtype=np.float64)
+        reachable = np.flatnonzero(coverage >= coverage_target)
+        return float(np.min(risk[reachable])) if reachable.size else None
+
+
+def risk_coverage_curve(rows: Sequence[GroupRow]) -> RiskCoverageCurve:
+    """Compute the alpha-free oracle risk-coverage curve over group rows."""
+
+    coverage, running_risk, eligible_groups, total = _curve_arrays(rows)
+    return RiskCoverageCurve(
+        coverage=tuple(float(c) for c in coverage),
+        running_risk=tuple(float(r) for r in running_risk),
+        eligible_groups=eligible_groups,
+        total_groups=total,
     )
 
 

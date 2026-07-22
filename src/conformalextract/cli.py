@@ -4,9 +4,17 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated, Any
 
 import typer
+
+if TYPE_CHECKING:  # annotation-only; the commands keep their lazy runtime imports
+    from collections.abc import Callable, Mapping
+
+    from conformalextract.contracts import EventFrame
+    from conformalextract.predictions import DocumentContext
+    from conformalextract.profiles import RamsInstance
+    from conformalextract.reanalysis import SplitSystemData
 
 app = typer.Typer(no_args_is_help=True, help="Evidence-first selective extraction research CLI.")
 
@@ -371,7 +379,7 @@ def development_gate_command(
         parse_arm,
         read_prediction_jsonl,
     )
-    from conformalextract.profiles import RamsInstance, read_ontology, read_rams_instances
+    from conformalextract.profiles import read_ontology, read_rams_instances
     from conformalextract.selection import select_confidence_candidate
     from conformalextract.training import (
         LabelAccessPurpose,
@@ -626,7 +634,7 @@ def certify_command(
         parse_arm,
         read_prediction_jsonl,
     )
-    from conformalextract.profiles import RamsInstance, read_ontology, read_rams_instances
+    from conformalextract.profiles import read_ontology, read_rams_instances
 
     # --- Gate: the aggregation rule must be reviewed before sealed labels open -----------
     adr_text = aggregation_adr.read_text(encoding="utf-8")
@@ -815,7 +823,8 @@ def risk_coverage_diagnostic_command(
         parse_arm,
         read_prediction_jsonl,
     )
-    from conformalextract.profiles import RamsInstance, read_ontology, read_rams_instances
+    from conformalextract.profiles import read_ontology, read_rams_instances
+    from conformalextract.reanalysis import assert_reanalysis_role
 
     gate = json.loads(development_gate.read_text(encoding="utf-8"))
     instances = {i.instance_key: i for i in read_rams_instances(rams_archive)}
@@ -845,6 +854,13 @@ def risk_coverage_diagnostic_command(
             )
         ]
 
+    # This command carried the same sealed-split hole ADR 0011's review found in alpha-frontier:
+    # `--roles final` would have opened the sealed split. Guarding is restrictive only -- the
+    # permitted roles, and therefore the committed artifact, are unchanged (reviewer ruling P5).
+    requested_roles = [r.strip() for r in roles.split(",") if r.strip()]
+    for split_role in requested_roles:
+        assert_reanalysis_role(split_role)
+
     result: dict[str, object] = {
         "diagnostic_only": True,
         "certifies_nothing": True,
@@ -852,7 +868,7 @@ def risk_coverage_diagnostic_command(
         "acceptance_floor": FROZEN_ACCEPTANCE_FLOOR,
         "splits": {},
     }
-    for split_role in [r.strip() for r in roles.split(",") if r.strip()]:
+    for split_role in requested_roles:
         groups = {
             str(a["document_id"]): str(a["group_id"])
             for a in assignments
@@ -904,6 +920,220 @@ def risk_coverage_diagnostic_command(
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     typer.echo(json.dumps({"out": str(out), **result}, sort_keys=True))
+
+
+def _reanalysis_inputs(
+    rams_archive: Path, role_map: Path, development_gate: Path
+) -> tuple[
+    dict[str, RamsInstance],
+    Mapping[str, DocumentContext],
+    list[dict[str, Any]],
+    Callable[[RamsInstance], list[EventFrame]],
+    dict[str, Any],
+]:
+    """Load the RAMS views the ADR 0011 re-analysis commands share.
+
+    Both commands must see exactly the same instances, contexts, role assignments and gold
+    frames as ``risk-coverage-diagnostic``, or the three artifacts could disagree about what a
+    document's loss is. Loading once, here, is what makes that structural.
+    """
+
+    # EventFrame is constructed at runtime here, not merely annotated -- the TYPE_CHECKING
+    # block at the top of this module covers annotations only.
+    from conformalextract.contracts import Argument, EventFrame, Span
+    from conformalextract.predictions import build_document_contexts
+    from conformalextract.profiles import read_ontology, read_rams_instances
+
+    gate = json.loads(development_gate.read_text(encoding="utf-8"))
+    instances = {i.instance_key: i for i in read_rams_instances(rams_archive)}
+    contexts = build_document_contexts(list(instances.values()), read_ontology(rams_archive))
+    assignments = [json.loads(line) for line in role_map.read_text(encoding="utf-8").splitlines()]
+
+    def gold_frames(instance: RamsInstance) -> list[EventFrame]:
+        tokens = instance.tokens
+        return [
+            EventFrame(
+                document_id=instance.instance_key,
+                event_type=instance.event_type,
+                trigger=Span(
+                    start=instance.trigger_start,
+                    end=instance.trigger_end,
+                    text=" ".join(tokens[instance.trigger_start : instance.trigger_end]),
+                ),
+                arguments=[
+                    Argument(
+                        role=a.role,
+                        span=Span(
+                            start=a.start, end=a.end, text=" ".join(tokens[a.start : a.end])
+                        ),
+                    )
+                    for a in instance.arguments
+                ],
+            )
+        ]
+
+    return instances, contexts, assignments, gold_frames, gate
+
+
+def _load_reanalysis_splits(
+    *,
+    roles: str,
+    predictions_dir: Path,
+    rams_archive: Path,
+    role_map: Path,
+    development_gate: Path,
+) -> tuple[dict[str, dict[str, SplitSystemData]], dict[str, object]]:
+    """Build per-split, per-system re-analysis data and the certification access disclosure."""
+
+    from conformalextract.reanalysis import (
+        SYSTEM_IDS,
+        access_block,
+        assert_reanalysis_role,
+        certification_access_for,
+        load_split_system_data,
+    )
+
+    # Refuse an unauthorised --roles value before ANY file is opened. A sealed split must not
+    # be read and then disclosed as unread; it must not be read (reviewer ruling R1).
+    requested = [r.strip() for r in roles.split(",") if r.strip()]
+    for split_role in requested:
+        assert_reanalysis_role(split_role)
+
+    instances, contexts, assignments, gold_frames, gate = _reanalysis_inputs(
+        rams_archive, role_map, development_gate
+    )
+    data_by_split: dict[str, dict[str, SplitSystemData]] = {}
+    certification_documents: set[str] = set()
+    for split_role in requested:
+        groups = {
+            str(a["document_id"]): str(a["group_id"])
+            for a in assignments
+            if a["role"] == split_role
+        }
+        per_system: dict[str, SplitSystemData] = {}
+        for system_id in SYSTEM_IDS:
+            data = load_split_system_data(
+                split_role=split_role,
+                system_id=system_id,
+                confidence_candidate=str(gate["per_system"][system_id]["selected_candidate"]),
+                predictions_path=predictions_dir / f"{system_id}.v1.jsonl",
+                contexts=contexts,
+                instances=instances,
+                group_by_document=groups,
+                gold_frames=gold_frames,
+            )
+            per_system[system_id] = data
+            if split_role == "certification":
+                certification_documents.update(data.loss_by_document)
+        data_by_split[split_role] = per_system
+    log = certification_access_for(
+        "certification" if certification_documents else "development",
+        sorted(certification_documents),
+    )
+    return data_by_split, access_block(log)
+
+
+@app.command("alpha-frontier")
+def alpha_frontier_command(
+    predictions_dir: Annotated[Path, typer.Option()] = Path("data/private/plan2/predictions"),
+    rams_archive: Annotated[Path, typer.Option()] = Path("data/raw/rams/RAMS_1.0c.tar.gz"),
+    role_map: Annotated[Path, typer.Option()] = Path("data/private/splits/rams_roles.jsonl"),
+    development_gate: Annotated[Path, typer.Option()] = Path(
+        "evidence/plan2/development_gate_summary.json"
+    ),
+    roles: Annotated[str, typer.Option(help="Comma-separated split roles.")] = (
+        "development,certification"
+    ),
+    curve_points: Annotated[int, typer.Option(help="Down-sampled curve points per system.")] = 200,
+    out: Annotated[Path, typer.Option()] = Path("evidence/plan3/alpha_frontier.json"),
+) -> None:
+    """The whole oracle risk-coverage curve, read at many alpha — DIAGNOSTIC, certifies nothing.
+
+    The single-alpha certification result reports one height on a curve; this reports the curve.
+    Because the curve carries no alpha, sweeping it introduces no new statistic, no threshold
+    selection and no multiplicity — and because it is an oracle UPPER bound, an acceptance floor
+    unreachable here at some alpha is unreachable by any certificate at that alpha. That is the
+    only direction it is used in. The frozen headline target stays 0.20 (plan section 6.3) and no
+    certificate is issued anywhere on the curve.
+    """
+
+    from conformalextract.certification import FROZEN_ACCEPTANCE_FLOOR, FROZEN_ALPHA
+    from conformalextract.certification_run import risk_coverage_curve
+    from conformalextract.reanalysis import alpha_frontier_artifact, write_artifact
+
+    data_by_split, access = _load_reanalysis_splits(
+        roles=roles,
+        predictions_dir=predictions_dir,
+        rams_archive=rams_archive,
+        role_map=role_map,
+        development_gate=development_gate,
+    )
+    artifact = alpha_frontier_artifact(
+        data_by_split,
+        alpha_grid=[round(0.05 * i, 2) for i in range(1, 21)],
+        coverage_grid=[0.05, 0.10, 0.20, 0.30, 0.50],
+        frozen_alpha=FROZEN_ALPHA,
+        acceptance_floor=FROZEN_ACCEPTANCE_FLOOR,
+        curve_points=curve_points,
+        access=access,
+    )
+    write_artifact(artifact, out)
+    # Echo the headline the curve exists to produce: the alpha at which the frozen floor first
+    # becomes oracle-reachable, per system. Read off the data, not re-indexed out of the artifact.
+    headline = {
+        split: {
+            system: risk_coverage_curve(data.rows).alpha_star(FROZEN_ACCEPTANCE_FLOOR)
+            for system, data in systems.items()
+        }
+        for split, systems in data_by_split.items()
+    }
+    typer.echo(json.dumps({"out": str(out), "alpha_star_at_floor": headline}, sort_keys=True))
+
+
+@app.command("loss-decomposition")
+def loss_decomposition_command(
+    predictions_dir: Annotated[Path, typer.Option()] = Path("data/private/plan2/predictions"),
+    rams_archive: Annotated[Path, typer.Option()] = Path("data/raw/rams/RAMS_1.0c.tar.gz"),
+    role_map: Annotated[Path, typer.Option()] = Path("data/private/splits/rams_roles.jsonl"),
+    development_gate: Annotated[Path, typer.Option()] = Path(
+        "evidence/plan2/development_gate_summary.json"
+    ),
+    roles: Annotated[str, typer.Option(help="Comma-separated split roles.")] = (
+        "development,certification"
+    ),
+    out: Annotated[Path, typer.Option()] = Path("evidence/plan3/loss_decomposition.json"),
+) -> None:
+    """Loss split by channel + the grounding-oracle counterfactual — DIAGNOSTIC, certifies nothing.
+
+    Answers why a ~16x grounding separation moved the certified result by nothing: the grounding
+    gain lives in the three channels that almost always lose — the two non-valid statuses, which
+    are forced to loss 1.0, plus contentless-but-valid output, which is scored normally and
+    simply loses most of the time — while the certificate scores the fourth.
+    The counterfactual removes each system's grounding deficit outright, measuring coverage
+    against the restricted population — which is NOT uniformly generous, so it does not carry the
+    conclusion on its own. For the baselines that is carried by an arithmetic ceiling: a population
+    whose mean loss exceeds alpha*c + (1-c) cannot reach coverage c at risk alpha under any
+    selection rule at all.
+    """
+
+    from conformalextract.certification import FROZEN_ACCEPTANCE_FLOOR, FROZEN_ALPHA
+    from conformalextract.reanalysis import loss_decomposition_artifact, write_artifact
+
+    data_by_split, access = _load_reanalysis_splits(
+        roles=roles,
+        predictions_dir=predictions_dir,
+        rams_archive=rams_archive,
+        role_map=role_map,
+        development_gate=development_gate,
+    )
+    artifact = loss_decomposition_artifact(
+        data_by_split,
+        alpha=FROZEN_ALPHA,
+        acceptance_floor=FROZEN_ACCEPTANCE_FLOOR,
+        access=access,
+    )
+    write_artifact(artifact, out)
+    typer.echo(json.dumps({"out": str(out)}, sort_keys=True))
 
 
 @app.command("verify-claims")
