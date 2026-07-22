@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 from collections.abc import Sequence
 from enum import StrEnum
 from pathlib import Path
@@ -21,6 +22,15 @@ from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_vali
 
 NonEmpty = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 CLAIM_ID = re.compile(r"^CX-[A-Z0-9]+(-[A-Z0-9]+)*$")
+
+#: A ``verified_by`` that says verification has not happened yet. A claim may hold one -- that is
+#: how future work is registered honestly -- but not while also naming a public surface. Before
+#: this rule, `publishable()` looked only at `surfaces`, so a claim reading "pending independent
+#: review" counted as publishable (ADR 0011 section 6; found by the ADR 0011 reviewer).
+PENDING_VERIFICATION = re.compile(
+    r"\b(pending|awaiting|not yet|to be (determined|confirmed|verified)|tbd|tbc)\b",
+    flags=re.IGNORECASE,
+)
 
 
 class ClaimStatus(StrEnum):
@@ -108,6 +118,15 @@ class Claim(BaseModel):
                 f"{self.claim_id}: public claims must carry the limitations that travel with them"
             )
 
+        # ... and a claim whose own verification record says it has not been verified yet is not
+        # publishable, whatever its status says. Registering future work with a `pending`
+        # verified_by stays legitimate; pairing it with a public surface does not.
+        if self.surfaces and PENDING_VERIFICATION.search(self.verified_by):
+            raise ValueError(
+                f"{self.claim_id}: verified_by reports verification still pending "
+                f"({self.verified_by!r}); remove surfaces or record the completed verification"
+            )
+
         for pattern, reason in FORBIDDEN_WORDINGS:
             if re.search(pattern, self.wording, flags=re.IGNORECASE):
                 raise ValueError(f"{self.claim_id}: forbidden wording — {reason}")
@@ -138,6 +157,36 @@ class ClaimLedger(BaseModel):
         return tuple(claim for claim in self.claims if surface in claim.surfaces)
 
 
+def _reference_path(reference: str) -> str:
+    """Strip the optional ``#anchor`` suffix naming a table or field."""
+
+    return reference.split("#", maxsplit=1)[0]
+
+
+def tracked_paths(root: Path) -> frozenset[str] | None:
+    """Every git-tracked path under ``root``, or None if that cannot be determined.
+
+    Returning None rather than an empty set matters: "no tracked files" and "cannot tell" must
+    not look the same to the caller, or an export outside a git checkout would silently report
+    every claim's evidence as untracked.
+    """
+
+    try:
+        completed = subprocess.run(
+            ["git", "ls-files", "-z"],
+            cwd=root,
+            capture_output=True,
+            check=False,
+            timeout=60,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if completed.returncode != 0:
+        return None
+    output = completed.stdout.decode("utf-8", errors="replace")
+    return frozenset(entry for entry in output.split("\0") if entry)
+
+
 def unresolved_evidence(ledger: ClaimLedger, *, root: Path) -> dict[str, list[str]]:
     """Every evidence path that does not exist, per claim.
 
@@ -150,24 +199,64 @@ def unresolved_evidence(ledger: ClaimLedger, *, root: Path) -> dict[str, list[st
         absent = [
             reference
             for reference in claim.evidence
-            if not (root / reference.split("#", maxsplit=1)[0]).exists()
+            if not (root / _reference_path(reference)).exists()
         ]
         if absent:
             missing[claim.claim_id] = absent
     return missing
 
 
+def untracked_evidence(ledger: ClaimLedger, *, root: Path) -> dict[str, list[str]]:
+    """Every evidence path that exists on disk but is not committed, per claim.
+
+    ``unresolved_evidence`` asks whether a file is *there*; this asks whether anyone else will
+    ever see it. An uncommitted artifact resolves perfectly on the machine that produced it and
+    not at all for a reader, so a claim resting on one is unsupported the moment it is published
+    -- which the existence check alone cannot detect (ADR 0011 section 6).
+
+    Returns an empty mapping when tracked status cannot be determined; ``verify_ledger`` reports
+    that condition separately rather than reading it as "all clear".
+    """
+
+    tracked = tracked_paths(root)
+    if tracked is None:
+        return {}
+    untracked: dict[str, list[str]] = {}
+    for claim in ledger.claims:
+        absent = [
+            reference
+            for reference in claim.evidence
+            # git reports POSIX separators; normalise so this works on Windows too.
+            if _reference_path(reference).replace("\\", "/") not in tracked
+            and (root / _reference_path(reference)).exists()
+        ]
+        if absent:
+            untracked[claim.claim_id] = absent
+    return untracked
+
+
 def load_ledger(path: Path) -> ClaimLedger:
     return ClaimLedger.model_validate_json(path.read_text(encoding="utf-8"))
 
 
-def verify_ledger(ledger: ClaimLedger, *, root: Path) -> dict[str, object]:
-    """Full ledger verification; ``ok`` is False if anything would block publication."""
+def verify_ledger(
+    ledger: ClaimLedger, *, root: Path, require_tracked: bool = True
+) -> dict[str, object]:
+    """Full ledger verification; ``ok`` is False if anything would block publication.
+
+    ``require_tracked`` fails the check when git-tracked status cannot be determined at all.
+    That is deliberately fail-closed: this is a publication gate, and "I could not tell whether
+    the evidence is committed" is not a pass. Set it False only when verifying a ledger outside
+    a git checkout on purpose.
+    """
 
     missing = unresolved_evidence(ledger, root=root)
+    untracked = untracked_evidence(ledger, root=root)
+    tracking_known = tracked_paths(root) is not None
     by_status: dict[str, int] = {}
     for claim in ledger.claims:
         by_status[claim.status.value] = by_status.get(claim.status.value, 0) + 1
+    ok = not missing and not untracked and (tracking_known or not require_tracked)
     return {
         "ledger_id": ledger.ledger_id,
         "analysis_id": ledger.analysis_id,
@@ -175,7 +264,9 @@ def verify_ledger(ledger: ClaimLedger, *, root: Path) -> dict[str, object]:
         "publishable": len(ledger.publishable()),
         "by_status": dict(sorted(by_status.items())),
         "unresolved_evidence": missing,
-        "ok": not missing,
+        "untracked_evidence": untracked,
+        "tracking_verifiable": tracking_known,
+        "ok": ok,
     }
 
 

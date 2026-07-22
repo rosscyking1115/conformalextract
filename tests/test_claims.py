@@ -143,3 +143,101 @@ def test_render_surface_emits_approved_wording_with_limitations() -> None:
     rendered = render_surface(load_ledger(LEDGER), "README")
     assert "[CX-H1-PRIMARY]" in rendered
     assert "_Limitation:_" in rendered
+
+
+# --- ADR 0011 section 6: the two publication-gate defects the reviewer found ------------
+
+
+def test_a_claim_pending_verification_may_not_hold_a_public_surface() -> None:
+    """The exact hole: `publishable()` read only `surfaces`, ignoring `verified_by`."""
+
+    for pending in (
+        "pending independent review of ADR 0011",
+        "awaiting the Plan 4 verification matrix",
+        "not yet reviewed",
+        "TBD",
+    ):
+        with pytest.raises(ValidationError, match="verification still pending"):
+            _claim(verified_by=pending, surfaces=("report",))
+
+
+def test_pending_verification_stays_legal_without_a_public_surface() -> None:
+    """Registering future work honestly must remain possible -- that is what `planned` is for."""
+
+    claim = _claim(
+        status=ClaimStatus.PLANNED,
+        verified_by="pending Plan 4 verification matrix",
+        surfaces=(),
+    )
+    assert claim.surfaces == ()
+
+
+def test_a_completed_verification_is_not_mistaken_for_a_pending_one() -> None:
+    """The rule must not fire on a record that describes a finished review."""
+
+    claim = _claim(
+        verified_by=(
+            "evidence/plan3/reviewer_record.reanalysis.json (independent review, 2026-07-22)"
+        ),
+        surfaces=("report",),
+    )
+    assert claim.surfaces == ("report",)
+
+
+def test_evidence_that_exists_but_is_uncommitted_does_not_count_as_resolved(
+    tmp_path: Path,
+) -> None:
+    """`Path.exists()` passes for a file only the producing machine can see."""
+
+    import subprocess
+
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    (tmp_path / "tracked.md").write_text("committed evidence\n", encoding="utf-8")
+    subprocess.run(["git", "add", "tracked.md"], cwd=tmp_path, check=True)
+    subprocess.run(
+        ["git", "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "e"],
+        cwd=tmp_path,
+        check=True,
+    )
+    (tmp_path / "untracked.md").write_text("local only\n", encoding="utf-8")
+
+    ledger = ClaimLedger(
+        ledger_id="l",
+        analysis_id="a",
+        claims=(
+            _claim(claim_id="CX-TRACKED-01", evidence=("tracked.md",)),
+            _claim(claim_id="CX-UNTRACKED-01", evidence=("untracked.md",)),
+        ),
+    )
+    # The old check saw both as fine, because both exist.
+    assert unresolved_evidence(ledger, root=tmp_path) == {}
+
+    report = verify_ledger(ledger, root=tmp_path)
+    assert report["untracked_evidence"] == {"CX-UNTRACKED-01": ["untracked.md"]}
+    assert report["tracking_verifiable"] is True
+    assert report["ok"] is False
+
+
+def test_undeterminable_tracking_fails_closed(tmp_path: Path) -> None:
+    """A publication gate must not pass because it could not tell."""
+
+    (tmp_path / "evidence.md").write_text("x\n", encoding="utf-8")
+    ledger = ClaimLedger(
+        ledger_id="l",
+        analysis_id="a",
+        claims=(_claim(evidence=("evidence.md",)),),
+    )
+    report = verify_ledger(ledger, root=tmp_path)  # tmp_path is not a git repository
+    assert report["tracking_verifiable"] is False
+    assert report["ok"] is False
+    # ... and it can be waived deliberately, but only deliberately.
+    assert verify_ledger(ledger, root=tmp_path, require_tracked=False)["ok"] is True
+
+
+def test_the_committed_ledger_evidence_is_all_tracked() -> None:
+    """Every claim in the real ledger must rest on evidence a reader can actually fetch."""
+
+    report = verify_ledger(load_ledger(LEDGER), root=ROOT)
+    assert report["untracked_evidence"] == {}
+    assert report["tracking_verifiable"] is True
+    assert report["ok"] is True
