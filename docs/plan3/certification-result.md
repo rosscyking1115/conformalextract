@@ -185,10 +185,13 @@ reported as two independent confirmatory comparisons. There is one finding, not 
   parsed-output parity).
 - **α = 0.20 with a 20% floor is a deployment threshold, not a natural constant** — it is the
   operating point this project committed to before opening any sealed label (ADR 0007), and it
-  stays the headline target. [§6.3 of the accepted plan](accepted-plan.md) is narrower than it is
-  often paraphrased: it explicitly permits a sweep "reported as **secondary feasibility analysis**
-  with simultaneous correction or clearly descriptive status", and forbids the headline changing
-  *because* a neighbouring target certifies more systems. This is the descriptive branch. The whole
+  stays the headline target, and [§6.2 of the accepted plan](accepted-plan.md) binds tightly here:
+  for the "all systems far above `alpha`" branch — this one — it says *do not relax `alpha` after
+  seeing certification*. Nothing below relaxes it. What licenses publishing the curve is §9.1:
+  *"An infeasible system remains infeasible; its descriptive risk–coverage curve may be plotted but
+  no test threshold is selected."* All three are infeasible and no threshold is selected. (§9.1 sits
+  under the final-evaluation stage ADR 0010 descoped, so this is a read-across; the conditions are
+  met literally but the section's own stage was never run.) The whole
   frontier is now published rather than described: `evidence/plan3/alpha_frontier.json`
   (`uv run conformalextract alpha-frontier`, ADR 0011) reports the oracle risk–coverage curve
   read at every α, and no certificate is issued at any of them.

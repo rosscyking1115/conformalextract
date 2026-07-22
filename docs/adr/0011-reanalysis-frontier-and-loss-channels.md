@@ -20,28 +20,44 @@ nothing costs money.
 
 ## 1. Why the α-sweep is not a relaxation of α
 
-> **Amended 2026-07-22, after the accepted plan was brought into the repo.** This ADR was written
-> against the repo's *paraphrase* of §6.3 ("the headline target must not be relaxed after seeing
-> this"), because the accepted plan was not in the repo — a limitation the independent reviewer
-> flagged as constraining their ruling. The plan is now at
-> [`docs/plan3/accepted-plan.md`](../plan3/accepted-plan.md), and its §6.3 reads:
+> **Amended twice on 2026-07-22.** The first amendment, written when the accepted plan was
+> brought into the repo ([`docs/plan3/accepted-plan.md`](../plan3/accepted-plan.md)), claimed the
+> repo's gloss — "the headline target must not be relaxed after seeing this" — was *stricter than
+> the plan*, on the grounds that §6.3 permits a sweep. **That was wrong, and it is the error most
+> worth recording here**, because it would have travelled into a write-up as "the constraint was
+> weaker than we thought".
 >
-> > "The single frozen `alpha` is confirmatory. A small, predeclared sweep—such as `0.10`,
-> > `0.20`, `0.30` if Gate 0 supports it—may be reported as **secondary feasibility analysis**
-> > with simultaneous correction or clearly descriptive status. The headline target never changes
-> > because a neighbouring target certifies more systems."
+> The gloss is not a rendering of §6.3 at all. It is a faithful rendering of **§6.2's fourth
+> bullet**: *"all systems far above `alpha`: expect heavy abstention or infeasibility; do not
+> relax `alpha` after seeing certification."* That is unambiguously this project's branch —
+> group losses 0.9923 / 0.9580 / 0.6071 against α = 0.20. **The binding constraint is exactly as
+> strict as the repo assumed it was.**
 >
-> The paraphrase was **stricter than the plan**. §6.3 explicitly contemplates a sweep and permits
-> it under either of two branches; the actual prohibition is *motivational* — the headline must not
-> change **because** a neighbour certifies better. This work takes the **clearly descriptive**
-> branch: both artifacts carry `diagnostic_only: true` / `certifies_nothing: true`, no certificate
-> is issued at any α, and the headline stays 0.20.
+> **The licence for this object is §9.1, and it names it:** *"An infeasible system remains
+> infeasible; its descriptive risk–coverage curve may be plotted but no test threshold is
+> selected."* All three systems are infeasible and no threshold is selected, so the conditions
+> are met literally. **Disclosed read-across:** §9.1 sits under §9, the final in-domain stage that
+> ADR 0010 descoped. The permission is therefore being read across from a stage that was never
+> run, rather than applied in its own context. It is the closest textual licence in the plan and
+> the fit is exact, but it is a read-across and should not be cited as though §9 had executed.
 >
-> **Two honest departures from §6.3's wording, neither of which the permission depends on.** The
-> sweep it contemplates is *small and predeclared* (0.10/0.20/0.30); ours is post-hoc and full
-> range. That is why the descriptive branch is the operative one — the "simultaneous correction"
-> branch would require the multiplicity accounting a predeclared sweep gets, and this curve
-> deliberately computes no bound at all. Nothing here should be read as pre-registered.
+> **§6.3 does permit a sweep, but not this one, and the earlier reading was too convenient.**
+> Its "small, predeclared" modifies the sweep, and both status branches attach to it; taking the
+> weaker branch while dropping the modifiers is not a reading the sentence supports. Ours is
+> post-hoc and full-range. There is a *purposive* argument — "small" and "predeclared" are guards
+> against selecting a favourable point, and publishing the **entire** range discharges that hazard
+> more completely than three chosen points do — but it is purposive, not textual, and is labelled
+> as such rather than leaned on.
+>
+> **§8.5 "No post-hoc rescue" has to be engaged, not passed over.** Its list of forbidden rescues
+> includes *"reporting only empirical rather than certified acceptance"*, which in surface form is
+> close to what an α-frontier does, and its escape clause is stricter than §6.3's — "predeclared
+> **and** multiplicity-aware", where §6.3 offers correction **or** descriptive status. The reason
+> it does not bind: §8.5 forbids rescuing a *failed hypothesis*, and every item in its list makes a
+> negative result look better. This frontier does the opposite — it broadens the null from one
+> operating point to a range, and §8.5's own limiting condition, that such analyses "cannot change
+> the primary conclusion", is met exactly. Nothing here alters H1/H2, which remain
+> `both_infeasible` at the frozen target.
 
 Plan §6.3 governs relaxing the headline target after seeing the result. This ADR does not relax it:
 α = 0.20 remains the frozen target (ADR 0007) and **no certificate is issued at any other α**.
@@ -239,10 +255,30 @@ acknowledged defect that is not written down is a defect that returns.
   completed verification, and the two carrying `pending` wording hold no surfaces. Verified by
   running it: 14 claims, 12 publishable, before and after.
 
+  **The pending rule is a regression tripwire, not a verification gate, and the name must not be
+  read as evidence the hole is closed.** Measured against 18 strings that genuinely describe
+  pending verification, it catches 7 and **misses 11** — including "under review", "in progress",
+  "unreviewed", "no reviewer yet", "self-assessed by the implementer" and "verification
+  outstanding". An unverified claim can still be published; only the specific literal regression is
+  caught.
+
+  It is anchored to the leading token after measurement showed the unanchored form was close to
+  inverted: it blocked "independent review complete; no items **pending**" and "review closed;
+  nothing **awaiting** sign-off" while passing most genuine cases. That is worse than useless — it
+  applied pressure toward vagueness in exactly the field the honesty doctrine depends on, blocking
+  a detailed provenance record while passing the word "reviewed". The anchored form has zero false
+  positives across the same corpus. **Lesson: a substance-blind rule must be measured on realistic
+  inputs before shipping; this one's flaw was not visible from reading the pattern.**
+
   Still open, and deliberately: `verified_by` remains free text, so the rule reads wording rather
   than structure. The fuller fix is a typed field — a reviewer-record path plus a verdict, checked
   for existence like `evidence` — which would re-classify existing claims and therefore belongs to
   its own review, not this one.
+
+  One precision on the tracked check: `git ls-files` reads the **index**, so a staged-but-
+  uncommitted file counts as tracked. That is one step weaker than "a reader can fetch it".
+  Tracked is the right condition for this gate — an untracked file is certainly unpublishable —
+  but it does not establish that evidence has been pushed anywhere.
 - **The `--roles` sealed-split hole was not unique to the new commands.** `risk-coverage-diagnostic`
   carried it too and would have opened `final` the same way. That one **is** fixed here, because
   the guard is restrictive only and provably behaviour-preserving: after adding it,

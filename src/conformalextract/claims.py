@@ -23,12 +23,22 @@ from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_vali
 NonEmpty = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 CLAIM_ID = re.compile(r"^CX-[A-Z0-9]+(-[A-Z0-9]+)*$")
 
-#: A ``verified_by`` that says verification has not happened yet. A claim may hold one -- that is
-#: how future work is registered honestly -- but not while also naming a public surface. Before
-#: this rule, `publishable()` looked only at `surfaces`, so a claim reading "pending independent
-#: review" counted as publishable (ADR 0011 section 6; found by the ADR 0011 reviewer).
-PENDING_VERIFICATION = re.compile(
-    r"\b(pending|awaiting|not yet|to be (determined|confirmed|verified)|tbd|tbc)\b",
+#: A **regression tripwire, not a verification gate.** It catches the specific regression the
+#: ADR 0011 reviewer found -- a claim reading "pending independent review" reaching a public
+#: surface, because `publishable()` looked only at `surfaces` -- and very little else.
+#:
+#: Measured, not assumed: against 18 strings that genuinely describe pending verification it
+#: misses 11, including "under review", "in progress", "unreviewed", "self-assessed by the
+#: implementer" and "verification outstanding". Do not read the constant's name as evidence that
+#: unverified claims cannot be published; they can (ADR 0011 section 6 records this).
+#:
+#: Anchored to the leading token deliberately. An unanchored version matched "independent review
+#: complete; no items **pending**" and "review closed; nothing **awaiting** sign-off" -- i.e. it
+#: penalised writing a detailed provenance record and rewarded writing "reviewed". A rule that
+#: applies pressure toward vagueness in the field the honesty doctrine depends on is worse than
+#: no rule. The anchored form has zero false positives across the same corpus.
+PENDING_VERIFICATION_TRIPWIRE = re.compile(
+    r"^\s*(pending|awaiting|unreviewed|provisional|tbd|tbc|not yet)\b",
     flags=re.IGNORECASE,
 )
 
@@ -118,10 +128,11 @@ class Claim(BaseModel):
                 f"{self.claim_id}: public claims must carry the limitations that travel with them"
             )
 
-        # ... and a claim whose own verification record says it has not been verified yet is not
-        # publishable, whatever its status says. Registering future work with a `pending`
-        # verified_by stays legitimate; pairing it with a public surface does not.
-        if self.surfaces and PENDING_VERIFICATION.search(self.verified_by):
+        # ... and a claim whose own verification record OPENS by saying it has not been verified
+        # yet is not publishable, whatever its status says. Registering future work with a
+        # `pending` verified_by stays legitimate; pairing it with a public surface does not.
+        # This is a tripwire, not a gate -- see PENDING_VERIFICATION_TRIPWIRE for what it misses.
+        if self.surfaces and PENDING_VERIFICATION_TRIPWIRE.search(self.verified_by):
             raise ValueError(
                 f"{self.claim_id}: verified_by reports verification still pending "
                 f"({self.verified_by!r}); remove surfaces or record the completed verification"
@@ -166,6 +177,12 @@ def _reference_path(reference: str) -> str:
 def tracked_paths(root: Path) -> frozenset[str] | None:
     """Every git-tracked path under ``root``, or None if that cannot be determined.
 
+    **Tracked, not committed.** ``git ls-files`` reads the index, so a staged-but-uncommitted
+    file counts as tracked here. That is one step weaker than "a reader can fetch it" and the
+    difference is worth keeping straight -- staging is a local act too. Tracked is the right
+    check for this gate (an untracked file is certainly unpublishable), but it does not by itself
+    establish that the evidence has been pushed anywhere.
+
     Returning None rather than an empty set matters: "no tracked files" and "cannot tell" must
     not look the same to the caller, or an export outside a git checkout would silently report
     every claim's evidence as untracked.
@@ -207,12 +224,13 @@ def unresolved_evidence(ledger: ClaimLedger, *, root: Path) -> dict[str, list[st
 
 
 def untracked_evidence(ledger: ClaimLedger, *, root: Path) -> dict[str, list[str]]:
-    """Every evidence path that exists on disk but is not committed, per claim.
+    """Every evidence path that exists on disk but is not tracked by git, per claim.
 
     ``unresolved_evidence`` asks whether a file is *there*; this asks whether anyone else will
-    ever see it. An uncommitted artifact resolves perfectly on the machine that produced it and
+    ever see it. An untracked artifact resolves perfectly on the machine that produced it and
     not at all for a reader, so a claim resting on one is unsupported the moment it is published
-    -- which the existence check alone cannot detect (ADR 0011 section 6).
+    -- which the existence check alone cannot detect (ADR 0011 section 6). Tracked is a weaker
+    condition than committed-and-pushed; see ``tracked_paths``.
 
     Returns an empty mapping when tracked status cannot be determined; ``verify_ledger`` reports
     that condition separately rather than reading it as "all clear".

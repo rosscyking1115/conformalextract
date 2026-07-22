@@ -241,3 +241,39 @@ def test_the_committed_ledger_evidence_is_all_tracked() -> None:
     assert report["untracked_evidence"] == {}
     assert report["tracking_verifiable"] is True
     assert report["ok"] is True
+
+
+def test_the_pending_tripwire_is_documented_as_leaky_not_assumed_tight() -> None:
+    """It is a regression tripwire, not a verification gate. Pin what it MISSES.
+
+    If someone later tightens it, this test fails and they must decide deliberately whether the
+    new coverage is worth the false-positive risk that made the unanchored version harmful.
+    Recording the leak in the suite -- not only in a docstring -- is what stops the constant's
+    name being read as a guarantee (ADR 0011 section 6).
+    """
+
+    from conformalextract.claims import PENDING_VERIFICATION_TRIPWIRE
+
+    missed = [
+        "under review",
+        "in progress",
+        "currently unreviewed",  # only a LEADING 'unreviewed' is caught, and this is not one
+        "no reviewer yet",
+        "self-assessed by the implementer",
+        "verification outstanding",
+        "review not started",
+        "claimed but unchecked",
+    ]
+    for wording in missed:
+        assert not PENDING_VERIFICATION_TRIPWIRE.search(wording), (
+            f"{wording!r} is now caught; the tripwire's documented coverage has changed"
+        )
+
+    # ... and the harmful direction stays closed: a detailed record of COMPLETED verification
+    # must never be blocked, or the rule pressures authors toward vague provenance.
+    for wording in (
+        "independent review complete; no items pending",
+        "independent review closed; nothing awaiting sign-off",
+        "PASS after corrections; no outstanding items",
+    ):
+        assert not PENDING_VERIFICATION_TRIPWIRE.search(wording)
