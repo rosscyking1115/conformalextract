@@ -38,7 +38,34 @@ Method choice — NO CHANGE: 2606.08517 (joint finite-sample certificate) stays 
 
 **Validation-suite addition:** add the negative control the frontier papers use (naive max-raw-acceptance threshold selection violates `α`, certified selector does not) + Monte Carlo over both a VALID regime (`μ<α`) and a deliberately-INVALID regime (`μ>α`, impossibility bound forces abstention), reporting test-violation counts vs the `δ` budget.
 
-**Free pre-paid-run diagnostic (do this FIRST):** the LLM-certification paper 2606.29054 (our exact task setting) gives a closed-form feasibility bound: if base risk `μ>α`, *any* valid method must abstain on `≥(μ−α)/(1−α)`, and it measured document-level extraction base risks **~0.48–0.55**. At the plan's default `α=0.20`, certified acceptance is forced **near-zero regardless of whether QLoRA beats ZS/FS** — the core question could be unanswerable at that α. Compute the base-risk band on development data (plan §6.1 already specifies this) and pick `α` from it *before* committing GPU spend. The shift arm is confirmed **uncertifiable** (2606.29054: 60–71% exchangeability violations under shift) — report shift as descriptive/negative, which the plan already does (§2.4/§10).
+**Free pre-paid-run diagnostic (do this FIRST):** the LLM-certification paper 2606.29054 gives a closed-form feasibility bound: if base risk `μ>α`, *any* valid method must abstain on `≥(μ−α)/(1−α)`. At the plan's default `α=0.20`, a task whose base risk sits near 0.5 forces certified acceptance **near-zero regardless of whether QLoRA beats ZS/FS**. Compute the base-risk band on development data (plan §6.1 already specifies this) and pick `α` from it *before* committing GPU spend.
+
+> **Correction (2026-07-22).** This paragraph originally described 2606.29054 as "our exact task
+> setting" and attributed base risks of "~0.48–0.55" to **document-level extraction**. Both are
+> wrong, and the error mattered — it made our own μ look like a reproduction of theirs. Verified
+> against Table 3 of `arxiv.org/html/2606.29054v1` (accessed 2026-07-22, HTML rendering, not the
+> PDF): the paper evaluates four tasks over eight datasets — NER (CoNLL 0.356, Few-NERD 0.540,
+> WNUT 0.480), QA (TriviaQA 0.441, NQ Open 0.804), classification (MMLU-STEM 0.516,
+> MMLU-Humanities 0.333) and structured extraction (**JSON-Extract 0.033**). The 0.48–0.55 band is
+> two NER datasets and one MMLU subset. **It evaluates no event-argument extraction, no RAMS and
+> no WikiEvents.** Its only extraction task sits at μ = 0.033, a far easier regime than the
+> μ ≈ 0.60 we measure on grounded span-exact EAE. That is a *different* task under a *different*
+> metric, so it marks out a new regime rather than contradicting their measurement — an earlier
+> version of this correction overstated it as a contradiction. **μ ≈ 0.60 is ConformalExtract's
+> own measurement** (`evidence/plan3/loss_decomposition.json`,
+> `evidence/plan3/certification_result.json`), not a figure inherited from this paper.
+>
+> The same paragraph reported "60–71% exchangeability violations under shift". The paper reports
+> static CRC violating **71% (10/14)** of configurations, with **ACI reducing this to 21% (3/14)**.
+> The range itself was defensible across their shift regimes; the material omission was ACI, which
+> made shift look more hopeless than they report. The shift arm is descoped anyway
+> (`docs/adr/0010-descope-final-and-shift.md`), but the citation should be accurate.
+>
+> The paper also reports certification becoming practical only at **α = 0.30–0.40** (at α = 0.40:
+> 47% of NER, 40% of QA, 60% of CLS configurations certify). Those are *achieved certifications*;
+> our α ≈ 0.406 floor crossing (`evidence/plan3/alpha_frontier.json`) is an *oracle necessary
+> condition* and a weaker object. The two are not directly comparable and must not be juxtaposed
+> to imply an α at which this task would certify.
 
 ### B. Budget QLoRA reproducible training
 Verdict: **frozen hyperparameters are well-aligned with first-party guidance — no training-config change; add pre-flight checks + an env lockfile.**
@@ -89,7 +116,7 @@ Release practice (Part 2): adapter-without-base-weights is the normal supported 
 
 **Decision 1 — Is the paid run affordable/feasible?** → YES. (C) ~$6–15 for all 3 systems on 1× L4 ($0.80/hr) with vLLM; R0 unlikely infeasible. (B) training config sound; no hyperparameter change. The forecast structure is right; its measured input should come from a vLLM benchmark on L4.
 
-**Decision 2 — Will a paid run actually yield a VALID, non-vacuous certificate?** → NOT YET ESTABLISHED — the real gate. (A) method choice correct, but (i) the SCoRC δ-ledger may be incomplete (missing the two Chernoff accepted-count tails) and the selector↔plan objective mismatch must be reconciled — both are theorem-to-code items to resolve before any "certified" claim; (ii) a FREE base-risk feasibility check may show the certificate is near-vacuous at α=0.20 because document-level base risk is ~0.48–0.55 (2606.29054). (D) metric must be per-dataset native (RAMS span-exact vs WikiEvents head+coref), not blended.
+**Decision 2 — Will a paid run actually yield a VALID, non-vacuous certificate?** → NOT YET ESTABLISHED — the real gate. (A) method choice correct, but (i) the SCoRC δ-ledger may be incomplete (missing the two Chernoff accepted-count tails) and the selector↔plan objective mismatch must be reconciled — both are theorem-to-code items to resolve before any "certified" claim; (ii) a FREE base-risk feasibility check may show the certificate is near-vacuous at α=0.20 if base risk lands near 0.5 — the level 2606.29054 measures on its *hardest* tasks (Few-NERD 0.540, MMLU-STEM 0.516, WNUT 0.480; **not** on extraction, where its JSON-Extract task sits at 0.033). See the correction under cluster A: that paper measures no event-argument extraction, and our μ ≈ 0.60 is our own measurement. (D) metric must be per-dataset native (RAMS span-exact vs WikiEvents head+coref), not blended.
 
 **Decision 3 — Experiment framing.** (D) primary shift should be held-out-schema within one dataset, not lossy cross-dataset; (A) shift is uncertifiable (report descriptive/negative — already in plan).
 
@@ -118,6 +145,14 @@ Actioned in this repo now (no spend, no approval needed): findings recorded here
 ---
 
 ## Source log
+
+> **Refereeing status (added 2026-07-22).** The three papers this project's method rests on —
+> **2606.08517** (the primary certificate), **2606.29054** (the impossibility bound and base-risk
+> feasibility test) and **2604.01502** (the conservative non-monotone audit) — are all
+> **unrefereed June-2026 arXiv preprints**. Their theorems are used here as stated and were
+> checked line-by-line against our implementation (`docs/plan3/theorem-to-code-*.md`), but they
+> carry no peer-review warrant. Any write-up must say so.
+
 <!-- URL | what it establishes | access date | primary? -->
 | Source | Establishes | Accessed | Primary |
 |---|---|---|---|
@@ -131,7 +166,7 @@ Actioned in this repo now (no spend, no approval needed): findings recorded here
 | https://arxiv.org/abs/2208.02814 | Conformal Risk Control — monotone bounded-loss E[L]≤α, tight O(1/n) | 2026-07-18 | yes |
 | https://arxiv.org/html/2606.08517v1 | Joint finite-sample certificate (PRIMARY): EB ratio + CP + 2 Chernoff + utility; n≥32log(32m/δ)/π_min; argmax-U_LCB | 2026-07-18 | yes |
 | https://arxiv.org/html/2604.01502v2 | Non-monotone CRC: union+Hoeffding grid, α'=α−D(m,n) — formalizes the conservative audit | 2026-07-18 | yes |
-| https://arxiv.org/html/2606.29054v1 | When Can CRC Certify LLM Outputs (our task): impossibility (μ−α)/(1−α); doc-level μ≈0.48–0.55; shift breaks exchangeability 60–71% | 2026-07-18 | yes |
+| https://arxiv.org/html/2606.29054v1 | When Can CRC Certify LLM Outputs — impossibility bound (μ−α)/(1−α); Table 3 per-dataset μ (NER 0.356/0.540/0.480, QA 0.441/0.804, MMLU 0.516/0.333, **JSON-Extract 0.033**); no EAE/RAMS/WikiEvents; α=0.30–0.40 unlocks practical certification; static CRC violates 71% of configs under shift, ACI 21% | 2026-07-18; **re-verified 2026-07-22** | yes |
 | https://arxiv.org/abs/2411.05895 | LLM ZS≪supervised EAE: GPT-4o ZS Arg-C 35.7 RAMS / 23.4 WikiEvents | 2026-07-18 | yes |
 | https://aclanthology.org/2021.naacl-main.69/ | BART-Gen + WikiEvents; Head/Coref F1 protocol | 2026-07-18 | yes |
 | https://nlp.jhu.edu/rams/ | RAMS official: v1.0c span-exact scorer; creators don't own source text (annotations CC-BY-SA-4.0) | 2026-07-18 | yes |
