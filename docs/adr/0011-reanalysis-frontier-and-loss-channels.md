@@ -204,8 +204,9 @@ acknowledged defect that is not written down is a defect that returns.
   carried it too and would have opened `final` the same way. That one **is** fixed here, because
   the guard is restrictive only and provably behaviour-preserving: after adding it,
   `risk-coverage-diagnostic` regenerates `evidence/plan3/risk_coverage_diagnostic.json`
-  byte-identically. `tests/test_reanalysis.py::test_every_split_reading_command_is_behind_the_guard`
-  now fails if any role-reading command is added without the guard.
+  byte-identically. `tests/test_reanalysis.py::test_every_split_reading_command_refuses_a_sealed_role`
+  discovers the command list by introspecting the Typer app for commands that declare a `roles`
+  option, so a **new** unguarded command fails it rather than passing silently.
 
 ### Deliberate duplication, recorded
 

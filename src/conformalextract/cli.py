@@ -826,6 +826,15 @@ def risk_coverage_diagnostic_command(
     from conformalextract.profiles import read_ontology, read_rams_instances
     from conformalextract.reanalysis import assert_reanalysis_role
 
+    # This command carried the same sealed-split hole ADR 0011's review found in alpha-frontier:
+    # `--roles final` would have opened the sealed split. Guarding is restrictive only -- the
+    # permitted roles, and therefore the committed artifact, are unchanged (reviewer ruling P5).
+    # Placed before any input is opened, so all three role-reading commands hold the identical
+    # property: no unauthorised split is ever read, not merely never scored.
+    requested_roles = [r.strip() for r in roles.split(",") if r.strip()]
+    for split_role in requested_roles:
+        assert_reanalysis_role(split_role)
+
     gate = json.loads(development_gate.read_text(encoding="utf-8"))
     instances = {i.instance_key: i for i in read_rams_instances(rams_archive)}
     contexts = build_document_contexts(list(instances.values()), read_ontology(rams_archive))
@@ -853,13 +862,6 @@ def risk_coverage_diagnostic_command(
                 ],
             )
         ]
-
-    # This command carried the same sealed-split hole ADR 0011's review found in alpha-frontier:
-    # `--roles final` would have opened the sealed split. Guarding is restrictive only -- the
-    # permitted roles, and therefore the committed artifact, are unchanged (reviewer ruling P5).
-    requested_roles = [r.strip() for r in roles.split(",") if r.strip()]
-    for split_role in requested_roles:
-        assert_reanalysis_role(split_role)
 
     result: dict[str, object] = {
         "diagnostic_only": True,

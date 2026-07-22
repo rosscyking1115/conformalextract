@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import typing
 from pathlib import Path
 
 import pytest
@@ -381,18 +382,58 @@ def test_an_unauthorised_role_cannot_be_disclosed_as_no_access() -> None:
             certification_access_for(role, ["d1"])
 
 
-@pytest.mark.parametrize(
-    "command", ["risk-coverage-diagnostic", "alpha-frontier", "loss-decomposition"]
-)
+def _role_reading_commands() -> list[str]:
+    """Every CLI command taking a split-role LIST, discovered rather than listed.
+
+    A hardcoded list would let a NEW unguarded command pass silently until someone remembered
+    to extend it -- which is the failure this guard exists to prevent, one level up.
+
+    Selected on the annotation, not the parameter name: ``build-profiles`` and
+    ``freeze-demonstrations`` also take ``--roles``, but theirs is a ``Path`` to a role-map
+    file, not a comma-separated list of splits to open. Matching on the name alone pulls them
+    in and the sealed-role test becomes a test that a filename does not exist.
+    """
+
+    import inspect
+
+    from conformalextract.cli import app
+
+    names = []
+    for command in app.registered_commands:
+        callback = command.callback
+        if callback is None:  # pragma: no cover - every command here has one
+            continue
+        # eval_str resolves the annotation to an object: cli.py uses postponed annotations, so
+        # without it every annotation is a string and the type test silently matches nothing.
+        parameter = inspect.signature(callback, eval_str=True).parameters.get("roles")
+        if parameter is None:
+            continue
+        # Annotated[str, typer.Option(...)] -> the split-role list; Annotated[Path, ...] -> a file.
+        annotation = typing.get_args(parameter.annotation)
+        if annotation and annotation[0] is str:
+            names.append(command.name or callback.__name__.replace("_", "-"))
+    return names
+
+
+def test_the_role_reading_commands_are_discovered() -> None:
+    """Guard the guard: if discovery silently returns nothing, the tests below prove nothing."""
+
+    discovered = set(_role_reading_commands())
+    assert discovered == {"risk-coverage-diagnostic", "alpha-frontier", "loss-decomposition"}, (
+        "a command taking a split-role list appeared or vanished; if it is new it must be "
+        "guarded, and if it is a Path-typed --roles it must not be selected here"
+    )
+
+
+@pytest.mark.parametrize("command", _role_reading_commands())
 @pytest.mark.parametrize("sealed", ["final", "shift"])
 def test_every_split_reading_command_refuses_a_sealed_role(command: str, sealed: str) -> None:
     """Driven end-to-end through the CLI, so delegation to a guarded helper still counts.
 
-    ``risk-coverage-diagnostic`` predates ADR 0011 and carried the same hole; it is included
-    here because the guarantee has to hold for every command that accepts ``--roles``, not just
-    the new ones. These run without the private RAMS archive or predictions present: the guard
-    is supposed to fire before any input is opened, so the run must fail with SealedRoleError
-    rather than a missing-file error.
+    ``risk-coverage-diagnostic`` predates ADR 0011 and carried the same hole; the guarantee has
+    to hold for every command that accepts ``--roles``, not just the new ones, which is why the
+    list is introspected. These run without the private RAMS archive or predictions present, so
+    a pass means the guard fired rather than a missing-file error being mistaken for a refusal.
     """
 
     from typer.testing import CliRunner
@@ -405,9 +446,7 @@ def test_every_split_reading_command_refuses_a_sealed_role(command: str, sealed:
     assert sealed in str(result.exception)
 
 
-@pytest.mark.parametrize(
-    "command", ["risk-coverage-diagnostic", "alpha-frontier", "loss-decomposition"]
-)
+@pytest.mark.parametrize("command", _role_reading_commands())
 def test_a_sealed_role_is_refused_even_when_paired_with_a_permitted_one(command: str) -> None:
     """`--roles development,final` must not process development and then stop."""
 
