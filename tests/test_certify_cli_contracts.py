@@ -14,18 +14,29 @@ def _certify_block() -> str:
 def test_certify_refuses_until_the_aggregation_adr_is_accepted() -> None:
     """The sealed split must not open while the rule that shapes the certificate is unreviewed."""
     block = _certify_block()
-    assert '"- Status: accepted" in adr_text' in block
+    # Accepted status is read from the ADR's own Status line (emphasis-tolerant) AND must be
+    # backed by the reviewer record; the operator flag is required on top of both.
+    assert 'line.startswith("- Status:")' in block
+    assert '"reviewer_record.adr-0009.json" in adr_text' in block
     assert "i_have_reviewer_approval" in block
-    assert 'if not (adr_accepted and i_have_reviewer_approval):' in block
+    assert "if not (adr_accepted and i_have_reviewer_approval):" in block
     assert '"sealed_labels_opened": False' in block
     assert "raise typer.Exit(code=3)" in block
 
 
-def test_adr_0009_is_still_proposed_so_the_gate_is_currently_closed() -> None:
-    """Guards against the ADR being flipped to accepted without a reviewer record."""
+def test_adr_0009_is_accepted_only_alongside_its_reviewer_record() -> None:
+    """The ADR may only be `accepted` if the reviewer record backing it exists.
+
+    Replaces the earlier assertion that it stays `proposed`: the flip is now deliberate and
+    reviewed, but it must never be flippable without the evidence file that authorises it.
+    """
     text = ADR_0009.read_text(encoding="utf-8")
-    assert "- Status: **proposed" in text
-    assert "requires independent review" in text
+    record = ROOT / "evidence" / "plan3" / "reviewer_record.adr-0009.json"
+    if "- Status: **accepted" in text:
+        assert record.exists(), "ADR 0009 cannot be accepted without its reviewer record"
+        assert "reviewer_record.adr-0009.json" in text
+    else:
+        assert "- Status: **proposed" in text
 
 
 def test_certify_reads_only_the_certification_role() -> None:

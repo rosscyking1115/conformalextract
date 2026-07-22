@@ -630,7 +630,14 @@ def certify_command(
 
     # --- Gate: the aggregation rule must be reviewed before sealed labels open -----------
     adr_text = aggregation_adr.read_text(encoding="utf-8")
-    adr_accepted = "- Status: accepted" in adr_text
+    # Tolerate markdown emphasis around the status word ("- Status: **accepted**"), but still
+    # require an explicit accepted marker plus the reviewer record that authorises it.
+    adr_status_line = next(
+        (line for line in adr_text.splitlines() if line.startswith("- Status:")), ""
+    )
+    adr_accepted = "accepted" in adr_status_line.replace("*", "").lower() and (
+        "reviewer_record.adr-0009.json" in adr_text
+    )
     if not (adr_accepted and i_have_reviewer_approval):
         typer.echo(
             json.dumps(

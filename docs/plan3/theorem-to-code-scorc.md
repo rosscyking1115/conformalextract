@@ -78,6 +78,42 @@ implementation does exactly what our code does.
     max over `Ĝ`. If §8.1's `CA_s` (max acceptance-LCB) is the headline, the certifier must also
     expose `max_{Ĝ} acceptance_LCB`. Decide and make plan ↔ code ↔ reported-number consistent.
 
+## Exchangeability vs independence for a size-dependent group aggregate (ADR 0009, A3)
+
+Settled here at the reviewer's instruction, because ADR 0009's group score is a **minimum over a
+variable-size cluster** and is therefore size-dependent. Measured on development:
+`corr(size, min-score) = −0.3527`, monotone in size (median min-score −0.0574 at size 1 →
+−0.1079 at size 7+). A minimum over more draws is stochastically lower, so a uniform threshold
+preferentially accepts small groups.
+
+**What the theorem actually requires.** Algorithm 1's three computed bounds are empirical-Bernstein
+(Maurer–Pontil) on `Z = A(L−α)`, Clopper–Pearson on the accepted count, and Maurer–Pontil on
+utility. Each is stated for **i.i.d. draws** of bounded variables — Clopper–Pearson in particular
+needs the accepted count to be Binomial, which fails under per-unit heterogeneous accept
+probabilities (it would be Poisson-binomial).
+
+**Why the size-dependence does not violate this.** The i.i.d. requirement is over *draws of
+groups from the population of source-document clusters*. Group size is an **attribute of the
+draw**, not a source of cross-unit heterogeneity: each certification row is one i.i.d. draw of a
+cluster, carrying whatever size that cluster has. Accept is a deterministic function of the draw,
+so the accept indicators are i.i.d. Bernoulli(`p_acc`) with `p_acc` the acceptance probability
+**marginalised over the population size distribution** — Binomial, and Clopper–Pearson is exact.
+Likewise `Z_i` are i.i.d. as deterministic functions of i.i.d. draws, so Maurer–Pontil applies.
+The size-conditional variation is population structure, not a sampling violation.
+
+**Conclusion: independence + bounded loss + identical marginal distribution over draws is what is
+needed, and it holds.** A size-dependent aggregate is inside scope.
+
+**Two consequences that must nonetheless be reported** (they are scope statements, not defects):
+
+1. **The accepted set skews small-group.** The certificate is still valid, but the accepted
+   population is not a uniform sample of the group population. The artifact emits the accepted
+   set's size distribution so this is visible rather than inferred.
+2. **The guarantee is scoped to the natural group-size mixture of this corpus.** It is a statement
+   about exchangeable deployment units drawn from a population with *this* clustering structure.
+   A deployment whose near-duplicate structure differs — more or fewer large clusters — is outside
+   the scope, in the same way as any other distribution shift.
+
 ## Recommended validation additions (from the frontier check)
 
 Mirror 2606.29054 / 2512.12844 practice: Monte Carlo over resplits in a VALID (`μ<α`) and a

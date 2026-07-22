@@ -10,7 +10,9 @@ from conformalextract.certification_run import (
     certification_artifact,
     certify_system,
     group_accepted,
+    loss_summaries,
     run_certification,
+    size_distribution,
 )
 
 # --- ADR 0009 group aggregation ------------------------------------------------------
@@ -204,6 +206,53 @@ def test_delta_allocation_must_exhaust_delta() -> None:
             acceptance_floor=0.20,
             material_gain=0.05,
         )
+
+
+def test_artifact_reports_unweighted_and_size_weighted_loss(  # A2
+) -> None:
+    """The certificate bounds the unweighted quantity; readers hear the size-weighted one."""
+    rows = [
+        GroupRow(group_id="g1", score=0.0, all_valid=True, loss=1.0, document_count=1),
+        GroupRow(group_id="g2", score=0.0, all_valid=True, loss=0.0, document_count=9),
+    ]
+    summary = loss_summaries(rows)
+    assert summary["unweighted_mean_loss"] == pytest.approx(0.5)  # (1.0 + 0.0) / 2
+    assert summary["size_weighted_mean_loss"] == pytest.approx(0.1)  # (1*1 + 9*0) / 10
+    assert summary["gap"] == pytest.approx(0.4)
+
+
+def test_size_distribution_buckets_groups(  # A3
+) -> None:
+    rows = [
+        GroupRow(group_id=f"g{i}", score=0.0, all_valid=True, loss=0.0, document_count=size)
+        for i, size in enumerate([1, 1, 2, 3, 5, 9])
+    ]
+    assert size_distribution(rows) == {"1": 2, "2-3": 2, "4-6": 1, "7+": 1}
+
+
+def test_groups_with_an_invalid_member_cap_acceptance_before_thresholding(  # A4
+) -> None:
+    rows = _rows(2000, loss=0.0)
+    rows[0] = GroupRow(
+        group_id=rows[0].group_id, score=0.0, all_valid=False, loss=0.0, document_count=2
+    )
+    run = run_certification(
+        rows_by_system={"qa": rows, "zs": rows, "fs": rows},
+        thresholds_by_system={s: [float("-inf")] for s in ("qa", "zs", "fs")},
+        candidates_by_system={s: "mean" for s in ("qa", "zs", "fs")},
+        delta_allocation={s: 0.05 / 3 for s in ("qa", "zs", "fs")},
+        access_log=build_certification_access_log(["d1"]),
+        alpha=0.20,
+        delta=0.05,
+        acceptance_floor=0.20,
+        material_gain=0.05,
+    )
+    artifact = certification_artifact(run, provenance={})
+    qa = artifact["systems"]["qa"]  # type: ignore[index]
+    assert qa["never_acceptable_groups"] == 1
+    assert qa["acceptance_ceiling"] == pytest.approx(1999 / 2000)
+    # A feasible system also reports the size mix of what it actually accepted.
+    assert qa["accepted_size_distribution"] is not None
 
 
 def test_artifact_is_text_free_and_records_zero_final_shift_reads() -> None:

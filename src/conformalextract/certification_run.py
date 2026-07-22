@@ -231,6 +231,46 @@ def conservative_system_view(
     )
 
 
+def _size_bucket(size: int) -> str:
+    if size == 1:
+        return "1"
+    if size <= 3:
+        return "2-3"
+    if size <= 6:
+        return "4-6"
+    return "7+"
+
+
+def size_distribution(rows: Sequence[GroupRow]) -> dict[str, int]:
+    """Group-size histogram, so a size-skewed accepted set is visible not inferred (A3)."""
+
+    counts: dict[str, int] = {"1": 0, "2-3": 0, "4-6": 0, "7+": 0}
+    for row in rows:
+        counts[_size_bucket(row.document_count)] += 1
+    return counts
+
+
+def loss_summaries(rows: Sequence[GroupRow]) -> dict[str, float]:
+    """Unweighted mean-of-group-means and its size-weighted (document-level) counterpart.
+
+    The certificate bounds the **unweighted** quantity; a reader naturally hears the
+    size-weighted one. Emitting both lets the gap be observed on the certification split
+    rather than assumed from development (reviewer amendment A2).
+    """
+
+    if not rows:
+        return {"unweighted_mean_loss": 0.0, "size_weighted_mean_loss": 0.0, "gap": 0.0}
+    losses = np.asarray([row.loss for row in rows], dtype=np.float64)
+    weights = np.asarray([row.document_count for row in rows], dtype=np.float64)
+    unweighted = float(np.mean(losses))
+    weighted = float(np.average(losses, weights=weights))
+    return {
+        "unweighted_mean_loss": unweighted,
+        "size_weighted_mean_loss": weighted,
+        "gap": unweighted - weighted,
+    }
+
+
 @dataclass(frozen=True)
 class SystemCertification:
     system_id: str
@@ -241,6 +281,10 @@ class SystemCertification:
     conservative: CertificationResult
     certified_acceptance: float | None
     group_count: int
+    loss_summary: dict[str, float]
+    group_size_distribution: dict[str, int]
+    accepted_size_distribution: dict[str, int] | None
+    never_acceptable_groups: int
 
 
 @dataclass(frozen=True)
@@ -294,6 +338,12 @@ def run_certification(
             acceptance_floor=acceptance_floor,
             family_size=family_size,
         )
+        accepted_sizes: dict[str, int] | None = None
+        if primary.feasible and primary.selected_candidate is not None:
+            selected_threshold = float(primary.selected_candidate.rsplit("@", maxsplit=1)[1])
+            accepted_sizes = size_distribution(
+                [row for row in rows if group_accepted(row, selected_threshold)]
+            )
         systems[system_id] = SystemCertification(
             system_id=system_id,
             confidence_candidate=candidates_by_system[system_id],
@@ -303,6 +353,12 @@ def run_certification(
             conservative=conservative,
             certified_acceptance=certified_acceptance(primary),
             group_count=len(rows),
+            loss_summary=loss_summaries(rows),
+            group_size_distribution=size_distribution(rows),
+            accepted_size_distribution=accepted_sizes,
+            # Groups with an invalid member can never be accepted at ANY threshold: a hard
+            # ceiling on achievable acceptance before thresholding (reviewer amendment A4).
+            never_acceptable_groups=sum(1 for row in rows if not row.all_valid),
         )
 
     h1, h2 = compare_certified_acceptance(
@@ -350,6 +406,20 @@ def certification_artifact(
                 "primary": result_dict(certification.primary),
                 "conservative_audit": result_dict(certification.conservative),
                 "certified_acceptance": certification.certified_acceptance,
+                # A2: the certificate bounds the UNWEIGHTED quantity; a reader hears the
+                # size-weighted one. Both are emitted so the gap is observed, not assumed.
+                "loss_summary": certification.loss_summary,
+                # A3: the accepted set skews small-group (min over more draws is lower).
+                "group_size_distribution": certification.group_size_distribution,
+                "accepted_size_distribution": certification.accepted_size_distribution,
+                # A4: groups with an invalid member cap acceptance before any threshold.
+                "never_acceptable_groups": certification.never_acceptable_groups,
+                "acceptance_ceiling": (
+                    (certification.group_count - certification.never_acceptable_groups)
+                    / certification.group_count
+                    if certification.group_count
+                    else 0.0
+                ),
             }
             for system_id, certification in run.systems.items()
         },
