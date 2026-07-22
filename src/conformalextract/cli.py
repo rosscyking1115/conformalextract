@@ -906,6 +906,35 @@ def risk_coverage_diagnostic_command(
     typer.echo(json.dumps({"out": str(out), **result}, sort_keys=True))
 
 
+@app.command("verify-claims")
+def verify_claims_command(
+    ledger_path: Annotated[Path, typer.Option("--ledger")] = Path(
+        "evidence/plan4/claim_ledger.json"
+    ),
+    root: Annotated[Path, typer.Option()] = Path("."),
+    surface: Annotated[str | None, typer.Option(help="Render approved prose for one surface.")] = (
+        None
+    ),
+) -> None:
+    """Validate the Plan 4 claim ledger (§3.4) and resolve every cited evidence path.
+
+    Exits non-zero if anything would block publication: an unresolvable evidence path, a
+    `planned`/`failed` claim on a public surface, a public claim without limitations, or a
+    forbidden wording. Public prose is rendered from approved sentences, never rewritten.
+    """
+
+    from conformalextract.claims import load_ledger, render_surface, verify_ledger
+
+    ledger = load_ledger(ledger_path)  # model validation raises on any rule violation
+    report = verify_ledger(ledger, root=root)
+    if surface:
+        typer.echo(render_surface(ledger, surface))
+        return
+    typer.echo(json.dumps(report, indent=2, sort_keys=True))
+    if not report["ok"]:
+        raise typer.Exit(code=1)
+
+
 @app.command("hash-file")
 def hash_file(path: Path) -> None:
     """Print a local artifact SHA-256 without reading it into a report."""

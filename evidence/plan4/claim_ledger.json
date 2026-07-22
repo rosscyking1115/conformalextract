@@ -1,0 +1,187 @@
+{
+  "ledger_id": "cx-ledger-v1",
+  "analysis_id": "plan2prep-f3f2f7a938061a92b2cb",
+  "claims": [
+    {
+      "claim_id": "CX-H1-PRIMARY",
+      "wording": "At a target risk of 20% with 95% confidence and a 20% acceptance floor, neither the QLoRA-adapted system nor the zero-shot baseline could be certified on RAMS: both are Infeasible, so no comparison of certified acceptance between them is possible.",
+      "status": "infeasible",
+      "scope": "in-domain RAMS certification split, 1,396 source-document groups",
+      "evidence": [
+        "evidence/plan3/certification_result.json#hypotheses.h1",
+        "docs/plan3/certification-result.md"
+      ],
+      "method": "Joint finite-sample SCoRC certificate (arXiv 2606.08517 Thm 1) at alpha=0.20, delta=0.05 split three ways across systems, acceptance floor 0.20; conservative Hoeffding/Clopper-Pearson/Bonferroni audit as a descriptive cross-check.",
+      "limitations": [
+        "H1 and H2 collapse to a single test when both baselines are infeasible; this is ONE finding, not two.",
+        "No numerical difference is computed against an infeasible baseline.",
+        "Scoped to the frozen vLLM 4-bit serving stack and to in-domain RAMS."
+      ],
+      "surfaces": ["README", "report", "abstract"],
+      "verified_by": "conformalextract certify (immutable artifact, git-canonical sha256 71c0de3e); independent reviewer PASS 2026-07-22 (evidence/plan3/reviewer_record.certification.json)"
+    },
+    {
+      "claim_id": "CX-H2-SECONDARY",
+      "wording": "The secondary confirmatory comparison against the few-shot baseline is likewise Infeasible on both sides.",
+      "status": "infeasible",
+      "scope": "in-domain RAMS certification split",
+      "evidence": [
+        "evidence/plan3/certification_result.json#hypotheses.h2",
+        "docs/adr/0008-confidence-span-mismatch.md"
+      ],
+      "method": "As CX-H1-PRIMARY; few-shot arm uses the frozen tenth-percentile confidence candidate.",
+      "limitations": [
+        "Reported jointly with CX-H1-PRIMARY as one finding, never as an independent second confirmation.",
+        "A known harness defect depressed the few-shot arm's confidence score, but it could not affect this outcome: the comparison failed on the QA side, not the baseline side."
+      ],
+      "surfaces": ["report"],
+      "verified_by": "conformalextract certify; independent reviewer PASS 2026-07-22"
+    },
+    {
+      "claim_id": "CX-CAPGAP-01",
+      "wording": "The infeasibility reflects a capability gap rather than a limitation of the certification method: with an unlimited threshold grid, no finite-sample penalty and oracle threshold selection, the adapted system could accept at most 2.0% of documents at 20% empirical error, against a required 20%.",
+      "status": "verified",
+      "scope": "in-domain RAMS, oracle risk-coverage diagnostic on certification and development splits",
+      "evidence": [
+        "evidence/plan3/risk_coverage_diagnostic.json",
+        "docs/plan3/certification-result.md"
+      ],
+      "method": "Oracle risk-coverage frontier over source-document groups via certification_run.risk_coverage_frontier, using the same aggregation, eligibility, loss and score as the certifier; no threshold is selected or certified.",
+      "limitations": [
+        "A diagnostic, not a certificate: it selects no threshold and certifies nothing.",
+        "The same diagnostic on the development split gives 3.0%, so the conclusion reproduces out of sample."
+      ],
+      "surfaces": ["README", "report", "abstract"],
+      "verified_by": "conformalextract risk-coverage-diagnostic; reviewer re-derived 2.01% independently through the implementer's own aggregation, 2026-07-22"
+    },
+    {
+      "claim_id": "CX-GROUNDING-01",
+      "wording": "QLoRA adaptation produced a large improvement in grounding fidelity: 95.7% of the adapted system's outputs parse and ground to the source document, against 39.4% zero-shot and 68.1% few-shot, with ungrounded spans falling from 5,355 to 340.",
+      "status": "verified",
+      "scope": "software and in-domain extraction quality; 9,124 RAMS trigger frames per system",
+      "evidence": [
+        "evidence/plan2/prediction_parse_summary.json",
+        "docs/plan2/prediction-parse-result.md"
+      ],
+      "method": "conformalextract parse-predictions under the ADR 0006 first-object extraction policy, applied identically to all three systems; spans validated against source document tokens.",
+      "limitations": [
+        "\"Valid\" means parseable and grounded, NOT correct: a span can point at real document text and still name the wrong entity or role.",
+        "This improvement did NOT translate into a certified selective guarantee (see CX-H1-PRIMARY); it must never be reported without that null attached.",
+        "Scoped to the frozen vLLM 4-bit serving stack."
+      ],
+      "surfaces": ["README", "report"],
+      "verified_by": "conformalextract parse-predictions; reviewer reconciled the counts against an independent extraction measurement, 2026-07-21"
+    },
+    {
+      "claim_id": "CX-FEWSHOT-HARM-01",
+      "wording": "On content-bearing frames the zero-shot baseline outperformed the few-shot one (3,550 against 3,330), and the few-shot arm emitted 63 times more empty frames, indicating that the two frozen demonstrations taught the model to abstain and to continue generating rather than to extract.",
+      "status": "verified",
+      "scope": "in-domain RAMS, this demonstration set and prompt template only",
+      "evidence": [
+        "evidence/plan2/prediction_parse_summary.json",
+        "docs/plan2/prediction-parse-result.md"
+      ],
+      "method": "Content-bearing versus empty-frame breakdown required by reviewer condition C3 of ADR 0006.",
+      "limitations": [
+        "Holds for these two frozen demonstrations, this template and this model; a demonstration set without an empty-gold exemplar might not reproduce it.",
+        "A missing stop sequence contributed to the continuation behaviour but not to the empty-frame rate."
+      ],
+      "surfaces": ["report"],
+      "verified_by": "conformalextract parse-predictions; promoted from an aside to a stated result at reviewer request, 2026-07-21"
+    },
+    {
+      "claim_id": "CX-SERVING-01",
+      "wording": "The adapted system's outputs are stack-dependent: the vLLM 4-bit serving stack and the transformers training stack agree on 86.3% of frames under greedy decoding, and 40 of 41 disagreements change the predicted content.",
+      "status": "qualified",
+      "scope": "serving reproducibility; 300 train-split prompts",
+      "evidence": [
+        "evidence/plan2/development_gate_summary.json",
+        "docs/plan2/serving-equivalence-probe-result.md"
+      ],
+      "method": "Standalone transformers+peft regeneration compared against the served vLLM outputs, with prompt reproduction verified by sha256 on all 300.",
+      "limitations": [
+        "Measured on train-split frames only; the rate may differ on other splits.",
+        "Divergence is quality-neutral against gold and concentrates in low-confidence frames.",
+        "No threshold was pre-registered for this probe, so 86.3% is reported, not judged as a pass."
+      ],
+      "surfaces": ["report", "model_card"],
+      "verified_by": "job 6a5fab15 (n=300); reviewer recomputed the Wilson intervals and concentration significance, 2026-07-21"
+    },
+    {
+      "claim_id": "CX-FEASIBILITY-LESSON-01",
+      "wording": "The population base-risk ceiling is not a forecast of certifiability: it bounds what an oracle confidence score could achieve, and in this project it allowed 46.5% acceptance where the actual score delivered 2.0%. The empirical risk-coverage curve on development settles selective feasibility at no cost and without sealed data.",
+      "status": "verified",
+      "scope": "methodology",
+      "evidence": [
+        "evidence/plan3/risk_coverage_diagnostic.json",
+        "docs/plan3/certification-result.md",
+        "docs/adr/0007-plan3-certification-parameters-frozen.md"
+      ],
+      "method": "Comparison of the (1-r)/(1-alpha) population ceiling against the oracle risk-coverage frontier on the same development split.",
+      "limitations": [
+        "Recorded as a joint process failure: the ceiling was used as a forecast at three separate gates, by both the implementer and the independent reviewer, and the free check was run by neither until after the sealed split was opened."
+      ],
+      "surfaces": ["report"],
+      "verified_by": "reviewer computed the development frontier independently and required the lesson be recorded naming both parties, 2026-07-22"
+    },
+    {
+      "claim_id": "CX-SEALED-01",
+      "wording": "Certification opened the sealed split exactly once, over 3,152 documents, with a verified hash-chained access record and zero reads of the final or shift splits, which remain sealed.",
+      "status": "verified",
+      "scope": "data governance",
+      "evidence": [
+        "evidence/plan3/certification_result.json#certification_access",
+        "docs/adr/0010-descope-final-and-shift.md"
+      ],
+      "method": "Certification-only access chain that raises on any other role by construction; final and shift are structurally unreachable from the certification path.",
+      "limitations": [
+        "The final and shift splits are descoped because no selected policy exists to audit or transport, not for reasons of cost or effort; both commands are free to run."
+      ],
+      "surfaces": ["README", "report"],
+      "verified_by": "artifact field certification_access.verified; reviewer confirmed by execution, 2026-07-22"
+    },
+    {
+      "claim_id": "CX-COST-01",
+      "wording": "The entire programme of GPU work — inference benchmarking, QLoRA training, prediction generation for three systems over 27,372 frames, and serving-equivalence probes — cost approximately $19 against a $25 ceiling, and all certification and analysis ran on CPU at no cost.",
+      "status": "verified",
+      "scope": "cost and reproducibility",
+      "evidence": [
+        "docs/plan2/g2b-result.md",
+        "docs/plan2/serving-equivalence-probe-result.md"
+      ],
+      "method": "Per-job durations and flavour rates recorded in each run's evidence artifact.",
+      "limitations": [
+        "Excludes the value of free-tier and local compute.",
+        "Approximate: individual job costs are recorded exactly, the total is rounded."
+      ],
+      "surfaces": ["README", "report", "CV"],
+      "verified_by": "per-job evidence artifacts; running total maintained across the programme"
+    },
+    {
+      "claim_id": "CX-SHIFT-01",
+      "wording": "No schema-shift transfer result is claimed.",
+      "status": "planned",
+      "scope": "shift stress test",
+      "evidence": ["docs/adr/0010-descope-final-and-shift.md"],
+      "method": "Not attempted: descoped because there is no in-domain guarantee to transport.",
+      "limitations": [
+        "Never to be written as achieved or attempted-and-failed; it was not run."
+      ],
+      "surfaces": [],
+      "verified_by": "ADR 0010, accepted on reviewer instruction 2026-07-22"
+    },
+    {
+      "claim_id": "CX-REPRO-CPU-01",
+      "wording": "The certificate, result tables and diagnostics regenerate from released evidence on CPU without retraining.",
+      "status": "planned",
+      "scope": "software reproducibility",
+      "evidence": ["docs/plan3/certification-result.md"],
+      "method": "Planned Plan 4 clean-room replay (gates V6, V11).",
+      "limitations": [
+        "Not yet demonstrated in a clean-room environment; must not be stated as achieved until gate V11 passes."
+      ],
+      "surfaces": [],
+      "verified_by": "pending Plan 4 verification matrix"
+    }
+  ]
+}
