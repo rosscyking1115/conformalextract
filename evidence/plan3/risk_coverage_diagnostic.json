@@ -1,0 +1,60 @@
+{
+  "acceptance_floor": 0.2,
+  "alpha": 0.2,
+  "certifies_nothing": true,
+  "diagnostic_only": true,
+  "splits": {
+    "certification": {
+      "fs": {
+        "confidence_candidate": "tenth_percentile",
+        "eligible_groups": 712,
+        "floor_reachable": false,
+        "max_acceptance_within_alpha": 0.0,
+        "risk_at_floor_acceptance": 0.9299880525686979,
+        "total_groups": 1396
+      },
+      "qa": {
+        "confidence_candidate": "mean",
+        "eligible_groups": 1266,
+        "floor_reachable": false,
+        "max_acceptance_within_alpha": 0.02005730659025788,
+        "risk_at_floor_acceptance": 0.4053806110257721,
+        "total_groups": 1396
+      },
+      "zs": {
+        "confidence_candidate": "mean",
+        "eligible_groups": 376,
+        "floor_reachable": false,
+        "max_acceptance_within_alpha": 0.0,
+        "risk_at_floor_acceptance": 0.9825567502986857,
+        "total_groups": 1396
+      }
+    },
+    "development": {
+      "fs": {
+        "confidence_candidate": "tenth_percentile",
+        "eligible_groups": 190,
+        "floor_reachable": false,
+        "max_acceptance_within_alpha": 0.0,
+        "risk_at_floor_acceptance": 0.915,
+        "total_groups": 398
+      },
+      "qa": {
+        "confidence_candidate": "mean",
+        "eligible_groups": 361,
+        "floor_reachable": false,
+        "max_acceptance_within_alpha": 0.03015075376884422,
+        "risk_at_floor_acceptance": 0.382594246031746,
+        "total_groups": 398
+      },
+      "zs": {
+        "confidence_candidate": "mean",
+        "eligible_groups": 106,
+        "floor_reachable": false,
+        "max_acceptance_within_alpha": 0.0,
+        "risk_at_floor_acceptance": 1.0,
+        "total_groups": 398
+      }
+    }
+  }
+}

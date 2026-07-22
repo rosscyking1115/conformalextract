@@ -272,6 +272,70 @@ def loss_summaries(rows: Sequence[GroupRow]) -> dict[str, float]:
 
 
 @dataclass(frozen=True)
+class RiskCoverageFrontier:
+    """Oracle risk-coverage frontier: what ANY threshold could achieve, before any bound.
+
+    This is the diagnostic that distinguishes a capability gap from a methodological artifact.
+    It applies no finite-sample penalty, no grid, and no multiplicity correction -- it sorts by
+    score and reads the empirical risk of the best-scoring prefix. If the acceptance floor is
+    unreachable *here*, no grid refinement, delta reallocation or tighter bound can rescue it.
+
+    It is a DIAGNOSTIC only: it selects no threshold and certifies nothing (plan §7.2 forbids
+    picking the empirically best point and calling it certified).
+    """
+
+    eligible_groups: int
+    total_groups: int
+    risk_at_floor_acceptance: float | None
+    max_acceptance_within_alpha: float
+    alpha: float
+    acceptance_floor: float
+
+    @property
+    def floor_reachable(self) -> bool:
+        return self.max_acceptance_within_alpha >= self.acceptance_floor
+
+
+def risk_coverage_frontier(
+    rows: Sequence[GroupRow], *, alpha: float, acceptance_floor: float
+) -> RiskCoverageFrontier:
+    """Compute the oracle frontier over group rows (accept best-scoring first)."""
+
+    eligible = sorted(
+        (row for row in rows if row.all_valid and np.isfinite(row.score)),
+        key=lambda row: -row.score,
+    )
+    total = len(rows)
+    if not eligible or total == 0:
+        return RiskCoverageFrontier(
+            eligible_groups=len(eligible),
+            total_groups=total,
+            risk_at_floor_acceptance=None,
+            max_acceptance_within_alpha=0.0,
+            alpha=alpha,
+            acceptance_floor=acceptance_floor,
+        )
+    losses = np.asarray([row.loss for row in eligible], dtype=np.float64)
+    running_risk = np.cumsum(losses) / np.arange(1, len(losses) + 1)
+    # Acceptance is over ALL groups, so ineligible groups correctly dilute achievable coverage.
+    coverage = np.arange(1, len(losses) + 1) / total
+    within = np.flatnonzero(running_risk <= alpha)
+    at_floor = (
+        float(running_risk[int(np.argmin(np.abs(coverage - acceptance_floor)))])
+        if coverage.max() >= acceptance_floor
+        else None
+    )
+    return RiskCoverageFrontier(
+        eligible_groups=len(eligible),
+        total_groups=total,
+        risk_at_floor_acceptance=at_floor,
+        max_acceptance_within_alpha=float(coverage[within[-1]]) if within.size else 0.0,
+        alpha=alpha,
+        acceptance_floor=acceptance_floor,
+    )
+
+
+@dataclass(frozen=True)
 class SystemCertification:
     system_id: str
     confidence_candidate: str

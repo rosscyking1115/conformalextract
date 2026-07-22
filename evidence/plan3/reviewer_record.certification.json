@@ -1,0 +1,91 @@
+{
+  "schema_version": "1",
+  "_record_notice": "Independent reviewer ruling on the executed Plan 3 certification run. This review happens AFTER the irreversible step, so its question is not 'may this proceed' but 'is this result what the implementer says it is, and what may be claimed from it'. Produced by a reviewer who did not implement any of it.",
+  "review_kind": "post_execution_result_review",
+  "reviewed_commit": "f13591d",
+  "review_range": "4049cf8..f13591d",
+  "reviewer_identity": "Reviewer/QA (Claude Code, Opus 4.8) — independent; NOT the implementer.",
+  "reviewed_date": "2026-07-22",
+  "prior_records": [
+    "evidence/plan2/reviewer_record.plan2-close.json",
+    "evidence/plan3/reviewer_record.phase-a.json",
+    "evidence/plan3/reviewer_record.phase-a.v2.json",
+    "evidence/plan3/reviewer_record.adr-0009.json"
+  ],
+
+  "verdict": "PASS — the result is what the implementer says it is. The load-bearing 2.01% diagnostic reproduces exactly under independent recomputation, the run is legitimate, and the write-up neither overclaims the null nor overclaims the surviving positive. Four items require correction or broadening before publication; none changes the result.",
+
+  "external_signal": {
+    "green_command": "uv run pytest -q -> 250 passed; ruff -> All checks passed; mypy -> Success, no issues in 22 source files. Working tree clean at f13591d.",
+    "independent_recomputation": "I re-derived the certification risk-coverage curve from the frozen predictions and RAMS gold using the project's OWN certification_run.aggregate_to_groups, so the unit (source-document group), eligibility (all members structurally valid), loss (mean member loss) and score (per-system frozen candidate, minimum over members) are identical to the certifier's by construction rather than by assertion."
+  },
+
+  "challenge_1_run_legitimacy": {
+    "verdict": "CONFIRMED, not assumed",
+    "access_chain": "certification_access records documents_read 3152, final_reads 0, shift_reads 0, verified true, head_hash ff5562419c7d.... The whole certification split (3,152 documents / 1,396 groups) was read once. final and shift remain unreachable from the certification chain by construction (FORBIDDEN_ROLES verified at the ADR 0009 review).",
+    "no_threshold_reselected_after_labels": "Confirmed structurally: the artifact records selected_candidate: null and n_accepted: 0 for every system, the three thresholds per system are exactly the pre-committed grid points, and grid_hashes are carried in the artifact. The 2.01% diagnostic is explicitly computed with no threshold selected or certified (plan §7.2), and nothing derived from it is presented as a certificate.",
+    "immutability_hash_needs_its_canonicalisation_stated": "The write-up claims sha256 71c0de3e.... Hashing the file AS STORED gives 55237e5a..., which would read as tampering. Cause found and benign: the working-tree file is CRLF (244 CRLF, 0 bare LF) on Windows while git tracks it eol=lf (i/lf w/crlf). Hashing the LF-normalised bytes reproduces 71c0de3e... exactly. The hash is therefore CORRECT for the git-canonical form, but as written it cannot be verified by anyone who runs sha256sum on a Windows checkout. See correction C3.",
+    "cost": "$0, as claimed."
+  },
+
+  "challenge_2_both_infeasible_and_collapse": {
+    "verdict": "CORRECTLY DERIVED and the collapse pre-registration is HONOURED",
+    "derivation": "Every system returns status infeasible with reason no_jointly_feasible_candidate, certified_acceptance null, empirical_risk null, selected_candidate null. With no system certified, H1 (CA_QA >= CA_ZS + material_gain) and H2 (CA_QA >= CA_FS + material_gain) cannot be evaluated on either side; both correctly return both_infeasible with qa: null and baseline: null.",
+    "no_invented_difference": "Confirmed. Both hypothesis records carry null on both sides. No numerical margin is computed against an infeasible baseline, which is exactly what §8.2 and my Phase-A pre-registration forbade.",
+    "collapse_honoured": "The artifact carries collapsed_to_single_test: true and a collapse_note stating that H1 and H2 reduce to one test stated twice and must not be reported as two confirmatory comparisons. The write-up repeats it in prose ('There is one finding, not two'). This is the pre-registration I required at Phase A being applied to its own outcome — it was written before the split opened and it held afterwards."
+  },
+
+  "challenge_3_adr_0008_clean_negative": {
+    "verdict": "The reasoning is VALID, the pre-registered cap was applied correctly, but the stated version is imprecise — and the precise version is stronger.",
+    "as_stated": "The write-up argues: the contamination biased toward H2 support, H2 was not supported, therefore the contamination cannot explain a null it was pushing against. That inference is logically sound.",
+    "the_sharper_and_more_accurate_version": "The contamination's only channel was depressing CA_FS, which makes H2 easier to support. But H2 did not fail on the FS side — it failed because CA_QA is not certifiable at all. The contamination is therefore not merely 'pushed against' by this outcome; it is IRRELEVANT to it. The failure mode renders the confound moot rather than testing it and finding it immaterial.",
+    "why_this_matters": "'Clean negative' as phrased invites the reading that the contamination was examined and found not to matter. It was not examined; it was bypassed. The stronger and more defensible sentence is available and should be used. See correction C1.",
+    "cap_worked": "ADR 0008 pre-registered that 'if H2 is not supported despite this favourable-to-QA bias, that is a strong negative result and may be reported as such'. That is precisely the situation, and the cap authorises this reporting. The cap did the job it was written for."
+  },
+
+  "challenge_4_prediction_miss": {
+    "verdict": "The stated diagnosis is CORRECT but the recorded lesson is too narrow. The miss indicates something more serious about the Phase-A reasoning, and it implicates this reviewer as well as the implementer.",
+    "stated_diagnosis_is_right": "ADR 0007 predicted QA marginal with max feasible acceptance 0.465; reality gave 2.01%. The write-up attributes this to (1-r)/(1-alpha) being a population bound that assumes an ORACLE confidence score. That is correct: the bound is a necessary condition, an absolute ceiling on achievable acceptance, and it is silent about whether any real score attains it.",
+    "the_finding_the_write_up_misses": "The diagnostic that actually settles feasibility — the empirical risk-coverage curve — was computable on DEVELOPMENT data, at $0, with no sealed access, at Phase A. I computed it: on development QA's maximum acceptance at empirical risk <= 0.20 is 0.0302 (3.0%), against the 0.20 floor, with risk 0.3826 at 20% acceptance. The certification split gave 0.0201 (2.0%) and 0.4057. The infeasibility was therefore FULLY PREDICTABLE BEFORE THE IRREVERSIBLE STEP, and by a cheaper diagnostic than the one that eventually revealed it.",
+    "the_ceiling_was_used_as_a_forecast_at_three_gates": "ADR 0007's 'marginal' verdict; my Phase-A endorsement of that verdict; and most concretely my ADR 0009 review, where I computed that QA's threshold -0.045326 accepts 33.4% of groups and labelled it 'INSIDE feasible region' solely because 0.334 <= the 0.465 ceiling. I never checked the empirical risk AT that acceptance. It is far above alpha. My statement that 'a certificate there would be valid, non-vacuous and above the 0.20 floor' was unsupported, and this record corrects it.",
+    "the_lesson_that_should_be_recorded": "Not merely 'base-risk feasibility is not a forecast of certifiability', but: the empirical risk-coverage curve on development is the diagnostic that settles feasibility; it is free; and it was run by nobody — implementer or reviewer — until after the sealed split was opened. Any future plan that screens feasibility with a population ceiling must also plot the achievable curve on development before spending an irreversible resource. See correction C2.",
+    "does_this_invalidate_the_result": "No. The run is sound, the gates were procedurally correct, and the conclusion is unchanged. What it means is that the same conclusion was available earlier, more cheaply, and without opening a one-shot split."
+  },
+
+  "challenge_5_what_may_be_claimed": {
+    "permitted": [
+      "All three systems are infeasible at alpha = 0.20, delta = 0.05, acceptance floor 0.20. No certified acceptance is claimed for any system.",
+      "ONE finding, not two: H1 and H2 collapsed to a single test and must be reported as such.",
+      "The failure is a capability gap rather than a methodological artifact, supported by the oracle diagnostic — independently reproduced by this reviewer: with an infinitely fine grid, zero finite-sample penalty and oracle threshold selection, QA accepts at most 2.01% of groups at 20% empirical error, and its error at 20% acceptance is 0.4057, twice the target.",
+      "QLoRA's Plan 2 grounding result (95.7% parseable-and-grounded vs ZS 39.4% / FS 68.1%; 340 vs 5,355 ungrounded spans) MAY be reported in the same document as the null, and SHOULD be — suppressing it would itself be a distortion. It must appear with the null attached in the same passage, framed as the write-up already frames it: a large, real improvement in grounding fidelity that did not translate into a certified selective guarantee, because being well-formed and grounded is a much weaker property than being correct, and the certificate scores correctness."
+    ],
+    "would_overclaim_the_null": [
+      "'QLoRA does not work' / 'QLoRA failed' / 'fine-tuning does not help'. The measured grounding effect is large and real; what failed is certified selective risk control at this specific target with this specific confidence score on this task.",
+      "Any suggestion that a laxer alpha would certify. Correctly foreclosed by §6.3, and I verified the write-up proposes no relaxation and explicitly forbids it.",
+      "Generalising beyond the frozen vLLM 4-bit serving stack (86.3% parsed-output parity) or beyond in-domain RAMS."
+    ],
+    "would_overclaim_the_positive": [
+      "Reporting 95.7% vs 39.4%/68.1% in a section that can be quoted without the null — for example an abstract, a CV line, or a summary slide that omits the certification outcome.",
+      "Any QA-over-baseline certified margin or difference. Both hypotheses returned both_infeasible with null on both sides; no margin exists to report.",
+      "Describing the grounding number as 'accuracy' or as a certification result. It is parseable-and-grounded, which the Plan 2 close record already ruled must never be quoted as correctness."
+    ]
+  },
+
+  "next_steps_final_and_shift": {
+    "recommendation": "DESCOPE evaluate-final and evaluate-shift with a recorded ADR. Do NOT open the final or shift splits.",
+    "reasoning": "§3.3's requirement that 'exactly one policy per system is selected or marked infeasible' is satisfied — all three are marked infeasible. But evaluate-final exists to audit a SELECTED policy on a held-out split, and selected_candidate is null for every system: the command has no input and could only produce a vacuous artifact. evaluate-shift tests whether an in-domain guarantee survives schema or dataset shift; there is no in-domain guarantee to carry across. Testing the durability of a guarantee that does not exist is not a weaker experiment, it is an empty one.",
+    "on_confirming_the_null_out_of_sample": "The certification split already IS out of sample relative to development, and the null now reproduces on both (development 3.0%, certification 2.0% oracle acceptance). Opening final would add a third consistent point while consuming a one-shot resource to answer no new question. Preserve it unopened — that also keeps the option available for any future work at a different target, which a descope-with-justification does not foreclose.",
+    "framing_requirement": "The descope must be recorded as 'the precondition (a selected policy) does not exist', NOT as a budget or effort decision — both commands are $0. Framing it as resource-limited would misrepresent a principled stop as an abandoned one."
+  },
+
+  "alpha_relaxation_check": "CONFIRMED CLEAN. The write-up states that alpha = 0.20 with a 20% floor is one operating point, that the result says nothing about whether a laxer target would certify, and that per §6.3 the headline target must not be relaxed after seeing this. No softer target is proposed, computed, or hinted at anywhere in the write-up or artifact.",
+
+  "required_corrections_before_publication": {
+    "C1": "Replace the 'clean negative' sentence with the precise version: the contamination's only channel was depressing CA_FS, and H2 failed on the QA side, so the confound is irrelevant to this outcome rather than merely pushed against. Stronger and accurate.",
+    "C2": "Broaden the recorded lesson. Keep 'base-risk feasibility is not a forecast of certifiability', and add that the empirical risk-coverage curve on development settles the question at $0, gives 3.0% for QA, and was not run at any of the three gates — including by the independent reviewer, whose ADR 0009 'one viable operating point at 33.4% acceptance' conclusion was reached by comparing acceptance against the ceiling rather than checking the empirical risk at that acceptance. Record the reviewer's error alongside the implementer's; a lesson that names only one party will not transfer.",
+    "C3": "State the hash canonicalisation: sha256 71c0de3e... is over the LF-normalised (git-canonical) bytes; a Windows working copy is CRLF and hashes to 55237e5a.... Without this, an independent verifier on Windows will conclude the artifact was altered.",
+    "C4": "State that the 2.01% diagnostic is currently prose-only and not computed by committed code. For the single claim that determines how this result is reported, add a committed, re-runnable diagnostic (or emit the curve into the artifact) so a future reader can reproduce it without re-deriving from gold. I reproduced it exactly, but that should not require a reviewer."
+  },
+
+  "scope": "This ruling covers the executed certification run, its artifact, and its write-up. It authorises no spend, no Plan 4, no opening of the final or shift splits, and no publication until the four corrections land. Nothing in this review reselected a threshold, altered the artifact, or opened final or shift. To verify the load-bearing diagnostic I re-derived certification-split group losses from RAMS gold using the project's own aggregation, after the split had already been opened by the run; that read is a review action and is disclosed here rather than routed through the run's access chain."
+}

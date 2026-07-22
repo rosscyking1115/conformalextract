@@ -781,6 +781,131 @@ def certify_command(
     )
 
 
+@app.command("risk-coverage-diagnostic")
+def risk_coverage_diagnostic_command(
+    predictions_dir: Annotated[Path, typer.Option()] = Path("data/private/plan2/predictions"),
+    rams_archive: Annotated[Path, typer.Option()] = Path("data/raw/rams/RAMS_1.0c.tar.gz"),
+    role_map: Annotated[Path, typer.Option()] = Path("data/private/splits/rams_roles.jsonl"),
+    development_gate: Annotated[Path, typer.Option()] = Path(
+        "evidence/plan2/development_gate_summary.json"
+    ),
+    roles: Annotated[str, typer.Option(help="Comma-separated split roles.")] = (
+        "development,certification"
+    ),
+    out: Annotated[Path, typer.Option()] = Path("evidence/plan3/risk_coverage_diagnostic.json"),
+) -> None:
+    """Oracle risk-coverage frontier per system and split — DIAGNOSTIC, certifies nothing.
+
+    Answers the question that decides how the certification result must be reported: is
+    infeasibility a capability gap or an artifact of the grid/bounds? Applies no finite-sample
+    penalty, no grid and no multiplicity correction, so if the acceptance floor is unreachable
+    here it is unreachable by any threshold rule.
+
+    Run it on ``development`` **before** certifying: it settles feasibility at $0 with no sealed
+    access, which the base-risk ceiling `(1-r)/(1-alpha)` does not (that ceiling assumes an
+    oracle score; see ADR 0007's recorded miss).
+    """
+
+    from conformalextract.certification import FROZEN_ACCEPTANCE_FLOOR, FROZEN_ALPHA
+    from conformalextract.certification_run import aggregate_to_groups, risk_coverage_frontier
+    from conformalextract.contracts import Argument, EventFrame, Span
+    from conformalextract.development_gate import document_loss
+    from conformalextract.predictions import (
+        build_document_contexts,
+        parse_arm,
+        read_prediction_jsonl,
+    )
+    from conformalextract.profiles import RamsInstance, read_ontology, read_rams_instances
+
+    gate = json.loads(development_gate.read_text(encoding="utf-8"))
+    instances = {i.instance_key: i for i in read_rams_instances(rams_archive)}
+    contexts = build_document_contexts(list(instances.values()), read_ontology(rams_archive))
+    assignments = [json.loads(line) for line in role_map.read_text(encoding="utf-8").splitlines()]
+
+    def gold_frames(instance: RamsInstance) -> list[EventFrame]:
+        tokens = instance.tokens
+        return [
+            EventFrame(
+                document_id=instance.instance_key,
+                event_type=instance.event_type,
+                trigger=Span(
+                    start=instance.trigger_start,
+                    end=instance.trigger_end,
+                    text=" ".join(tokens[instance.trigger_start : instance.trigger_end]),
+                ),
+                arguments=[
+                    Argument(
+                        role=a.role,
+                        span=Span(
+                            start=a.start, end=a.end, text=" ".join(tokens[a.start : a.end])
+                        ),
+                    )
+                    for a in instance.arguments
+                ],
+            )
+        ]
+
+    result: dict[str, object] = {
+        "diagnostic_only": True,
+        "certifies_nothing": True,
+        "alpha": FROZEN_ALPHA,
+        "acceptance_floor": FROZEN_ACCEPTANCE_FLOOR,
+        "splits": {},
+    }
+    for split_role in [r.strip() for r in roles.split(",") if r.strip()]:
+        groups = {
+            str(a["document_id"]): str(a["group_id"])
+            for a in assignments
+            if a["role"] == split_role
+        }
+        per_system: dict[str, object] = {}
+        for system_id in ("zs", "fs", "qa"):
+            candidate = str(gate["per_system"][system_id]["selected_candidate"])
+            raw_records = read_prediction_jsonl(predictions_dir / f"{system_id}.v1.jsonl")
+            parsed, _ = parse_arm(raw_records, contexts, confidence_candidate=candidate)
+            confidence: dict[object, object] = {
+                r["instance_key"]: r["confidence_candidates"] for r in raw_records
+            }
+
+            def score_of(
+                document_id: str,
+                candidate: str = candidate,
+                confidence: dict[object, object] = confidence,
+            ) -> float:
+                candidates = confidence.get(document_id)
+                if isinstance(candidates, dict):
+                    return float(candidates[candidate])
+                return float("-inf")
+
+            selected = [p for p in parsed if p.document_id in groups]
+            rows = aggregate_to_groups(
+                document_ids=[p.document_id for p in selected],
+                group_by_document=groups,
+                score_by_document={p.document_id: score_of(p.document_id) for p in selected},
+                valid_by_document={p.document_id: p.status == "valid" for p in selected},
+                loss_by_document={
+                    p.document_id: document_loss(gold_frames(instances[p.document_id]), p)
+                    for p in selected
+                },
+            )
+            frontier = risk_coverage_frontier(
+                rows, alpha=FROZEN_ALPHA, acceptance_floor=FROZEN_ACCEPTANCE_FLOOR
+            )
+            per_system[system_id] = {
+                "confidence_candidate": candidate,
+                "eligible_groups": frontier.eligible_groups,
+                "total_groups": frontier.total_groups,
+                "risk_at_floor_acceptance": frontier.risk_at_floor_acceptance,
+                "max_acceptance_within_alpha": frontier.max_acceptance_within_alpha,
+                "floor_reachable": frontier.floor_reachable,
+            }
+        result["splits"][split_role] = per_system  # type: ignore[index]
+
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    typer.echo(json.dumps({"out": str(out), **result}, sort_keys=True))
+
+
 @app.command("hash-file")
 def hash_file(path: Path) -> None:
     """Print a local artifact SHA-256 without reading it into a report."""

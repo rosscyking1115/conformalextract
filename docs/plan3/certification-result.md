@@ -1,7 +1,14 @@
 # Plan 3 certification — result (2026-07-22)
 
 Command: `uv run conformalextract certify --i-have-reviewer-approval`
-Artifact: `evidence/plan3/certification_result.json` (immutable, sha256 `71c0de3e…`)
+Artifact: `evidence/plan3/certification_result.json` (immutable, sha256
+`71c0de3e953d758684b9bf88bef0f15ec5baa02967ac442f578f33a7f35af30f`)
+
+> **Hash canonicalisation (correction C3).** That sha256 is over the **LF-normalised,
+> git-canonical** bytes. A Windows working copy is checked out CRLF and hashes to
+> `55237e5a…`. Both are the same artifact; verify with `git show HEAD:evidence/plan3/certification_result.json | sha256sum`
+> rather than hashing the working-copy file, or an independent verifier on Windows will
+> wrongly conclude it was altered.
 Sealed certification split opened once: **3,152 documents / 1,396 groups**, access chain verified,
 `final_reads: 0`, `shift_reads: 0`. Cost: $0.
 
@@ -22,9 +29,16 @@ floor) with risk UCB 0.5157 (far over α = 0.20).
 
 ## The failure is a capability gap, not a methodological artifact
 
-This is the important question, and the answer is unambiguous. Diagnostic on the certification
-split, **with no threshold selected or certified** (plan §7.2 forbids picking the empirically
-best point and calling it certified):
+This is the important question, and the answer is unambiguous. Reproduce with:
+
+```bash
+uv run conformalextract risk-coverage-diagnostic
+```
+
+emitting `evidence/plan3/risk_coverage_diagnostic.json`. The diagnostic runs through the same
+`certification_run.aggregate_to_groups` the certifier uses, so unit, eligibility, loss and score
+are identical by construction; **no threshold is selected or certified** (plan §7.2 forbids
+picking the empirically best point and calling it certified).
 
 | System | empirical risk at 20% acceptance | max acceptance with **empirical** risk ≤ 0.20 |
 |---|---|---|
@@ -56,13 +70,39 @@ survives. It is simply not sufficient for a *certified selective* guarantee at t
 well-formed and grounded is a much weaker property than being *correct*, and the certificate
 scores correctness.
 
-**The pre-registered prediction was directionally right and quantitatively wrong, in an
-instructive way.** ADR 0007 predicted QA `marginal` (base risk 0.5834 → max feasible acceptance
-0.465) and both baselines `near_vacuous`. The baselines behaved exactly as predicted. QA did not:
-the base-risk bound `(1−r)/(1−α)` is a *population* bound that assumes an **oracle** confidence
-score, so it is necessary but nowhere near sufficient. QA's real score delivers 2.0% where the
-oracle bound allowed 46.5%. **Base-risk feasibility should not be read as a forecast of
-certifiability** — a lesson worth carrying into any future plan.
+### The process failure: this was predictable at Phase A, for $0 (correction C2)
+
+**The pre-registered prediction was directionally right and quantitatively wrong**, and the reason
+matters more than the miss. ADR 0007 predicted QA `marginal` (base risk 0.5834 → max feasible
+acceptance 0.465). The base-risk bound `(1−r)/(1−α)` is a *population* bound that assumes an
+**oracle** confidence score, so it is necessary but nowhere near sufficient.
+
+The same oracle diagnostic run on **development** — no sealed access, $0, available throughout
+Phase A — already gave the answer:
+
+| Split | QA risk at 20% acceptance | QA max acceptance at empirical risk ≤ 0.20 |
+|---|---|---|
+| **development** | **0.3826** | **3.02%** |
+| certification | 0.4054 | 2.01% |
+
+**Development already showed 3% against a 20% floor.** The infeasibility was fully knowable before
+the sealed split was ever opened, and nobody ran the check — not the implementer, and not the
+reviewer.
+
+The ceiling was used as a *forecast* at three gates, and it was wrong at all three:
+
+1. ADR 0007 calling QA `marginal`;
+2. the Phase-A review endorsing that reading;
+3. most concretely, the ADR 0009 review calling QA's 33.4%-acceptance threshold "inside the
+   feasible region" **solely because 0.334 ≤ 0.465**, without checking the empirical risk at that
+   acceptance — where it is ~0.40, twice α.
+
+This is recorded as a joint failure because a lesson naming one party does not transfer. **The
+durable form: the empirical risk–coverage curve on development settles selective feasibility, costs
+nothing, and requires no sealed data. The base-risk ceiling does not — it bounds what an oracle
+score could do, not what the actual score does.** `conformalextract risk-coverage-diagnostic` now
+exists so this check is a command, not a habit; it should be run on development *before* any
+certification is attempted.
 
 **H1 and H2 are `both_infeasible`, and the collapse pre-registration applies.** No numerical
 difference is invented against an infeasible baseline (§8.2), and the two hypotheses must not be
@@ -71,9 +111,13 @@ reported as two independent confirmatory comparisons. There is one finding, not 
 ## Caveats that remain attached
 
 - **The certificate bounds average within-group error** (ADR 0009), not absence of error.
-- **ADR 0008's confidence-span contamination stands**, but note its effect here: it biased *toward*
-  H2 support, and H2 was **not** supported. Per ADR 0008's pre-registered cap, that makes this a
-  **clean negative** — the contamination cannot explain a null it was pushing against.
+- **ADR 0008's confidence-span contamination is not merely outweighed here — it is irrelevant to
+  this outcome** (sharpened at review, correction C1). Its only channel was depressing `CA_FS`,
+  i.e. making the *baseline* look worse. H2 did not fail on the baseline side; it failed on the
+  **QA** side, because QA itself is infeasible. The confound was therefore **bypassed by the
+  failure mode**, not tested and found immaterial. "Clean negative" is right but understates it:
+  no correction to FS's score could change `both_infeasible`, because `CA_QA` is null regardless
+  of what FS does.
 - Unweighted vs size-weighted group loss agree to within 0.0002–0.0011 on the certification split,
   so the document-level reading a reader will naturally take is not misleading here (amendment A2).
 - Scoped to the frozen vLLM 4-bit serving stack; portability is not established (probe: 86.3%
@@ -82,9 +126,35 @@ reported as two independent confirmatory comparisons. There is one finding, not 
   laxer target would certify — and per §6.3 the headline target **must not** be relaxed after
   seeing this.
 
+## What may and may not be claimed (fixed at review)
+
+**Permitted:**
+
+- Report the Plan 2 grounding result (95.7% vs ZS 39.4% / FS 68.1%) **in the same document and the
+  same passage as the null** — suppressing it would be its own distortion — framed as: a large,
+  real improvement in grounding fidelity that **did not translate into a certified selective
+  guarantee**, because well-formed-and-grounded is a much weaker property than correct, and the
+  certificate scores correctness.
+- **One** finding, not two (H1/H2 collapsed).
+- The oracle risk–coverage diagnostic, as evidence the failure is capability rather than method.
+
+**Forbidden — in both directions:**
+
+| Overclaiming the null | Overclaiming the positive |
+|---|---|
+| "QLoRA doesn't work" | 95.7% in an abstract, CV line or slide that can be quoted **without the null attached** |
+| Any hint that a laxer α would certify | Any QA-over-baseline **certified margin** (none exists) |
+| Generalising past the frozen vLLM 4-bit stack (86.3% parity) or past in-domain RAMS | Calling grounding validity "accuracy" |
+
 ## Status
 
-This is a **first-class publishable negative result** under the `CLAUDE.md` honesty boundary:
+A **first-class publishable negative result** under the `CLAUDE.md` honesty boundary:
 infeasibility was a pre-declared possible outcome, the procedure was built to be able to return
-it, and it did. No certified-acceptance claim may be made for any system. The result requires
-independent review before any claim derived from it is published.
+it, and it did. No certified-acceptance claim may be made for any system.
+
+Independent post-execution review: **PASS** (`evidence/plan3/reviewer_record.certification.json`)
+— the result is what it says it is, verified by re-deriving the risk–coverage curve through the
+implementer's own aggregation. Four corrections (C1–C4) are incorporated above. Publication of any
+derived claim remains gated on those corrections and on the reviewer's stated claim boundaries.
+
+`evaluate-final` and `evaluate-shift` are **descoped** — see `docs/adr/0010-descope-final-and-shift.md`.

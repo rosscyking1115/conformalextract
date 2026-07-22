@@ -11,6 +11,7 @@ from conformalextract.certification_run import (
     certify_system,
     group_accepted,
     loss_summaries,
+    risk_coverage_frontier,
     run_certification,
     size_distribution,
 )
@@ -253,6 +254,42 @@ def test_groups_with_an_invalid_member_cap_acceptance_before_thresholding(  # A4
     assert qa["acceptance_ceiling"] == pytest.approx(1999 / 2000)
     # A feasible system also reports the size mix of what it actually accepted.
     assert qa["accepted_size_distribution"] is not None
+
+
+def test_risk_coverage_frontier_separates_capability_gap_from_artifact() -> None:
+    """The diagnostic that decides how the certification null is reported (correction C4)."""
+    # A perfectly separable system: the top half is loss-free, so the floor is reachable.
+    separable = [
+        GroupRow(group_id=f"g{i:03d}", score=float(-i), all_valid=True,
+                 loss=0.0 if i < 50 else 1.0, document_count=1)
+        for i in range(100)
+    ]
+    good = risk_coverage_frontier(separable, alpha=0.20, acceptance_floor=0.20)
+    assert good.floor_reachable is True
+    assert good.max_acceptance_within_alpha >= 0.20
+
+    # A system whose score carries no signal: risk is flat at the base rate everywhere.
+    uninformative = [
+        GroupRow(group_id=f"g{i:03d}", score=float(-i), all_valid=True,
+                 loss=1.0 if i % 2 else 0.0, document_count=1)
+        for i in range(100)
+    ]
+    bad = risk_coverage_frontier(uninformative, alpha=0.20, acceptance_floor=0.20)
+    assert bad.floor_reachable is False  # no threshold rule could rescue this
+
+
+def test_risk_coverage_frontier_counts_ineligible_groups_against_coverage() -> None:
+    """Invalid groups can never be accepted, so they must dilute achievable acceptance."""
+    rows = [GroupRow(group_id="g0", score=0.0, all_valid=True, loss=0.0, document_count=1)]
+    rows += [
+        GroupRow(group_id=f"g{i}", score=0.0, all_valid=False, loss=0.0, document_count=1)
+        for i in range(1, 10)
+    ]
+    frontier = risk_coverage_frontier(rows, alpha=0.20, acceptance_floor=0.20)
+    assert frontier.eligible_groups == 1
+    assert frontier.total_groups == 10
+    assert frontier.max_acceptance_within_alpha == pytest.approx(0.1)  # 1/10, not 1/1
+    assert frontier.floor_reachable is False
 
 
 def test_artifact_is_text_free_and_records_zero_final_shift_reads() -> None:
