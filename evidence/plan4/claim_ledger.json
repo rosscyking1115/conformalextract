@@ -158,6 +158,69 @@
       "verified_by": "per-job evidence artifacts; running total maintained across the programme"
     },
     {
+      "claim_id": "CX-GROUNDING-ORTHOGONAL-01",
+      "wording": "Grounding fidelity and certifiability are orthogonal for grounded event-argument extraction on RAMS: the QLoRA adapter's ~16x grounding gain over the baselines moved the certifiable frontier by 0.017 for itself and by 0.000 for both baselines, because 87% of its remaining loss is grounded, well-formed, content-bearing output that names the wrong entity.",
+      "status": "qualified",
+      "scope": "in-domain RAMS certification split, 1,396 source-document groups, frozen vLLM 4-bit serving stack",
+      "evidence": [
+        "evidence/plan3/loss_decomposition.json",
+        "evidence/plan3/certification_result.json#systems",
+        "docs/adr/0011-reanalysis-frontier-and-loss-channels.md",
+        "docs/plan3/certification-result.md"
+      ],
+      "method": "Document loss decomposed into four channels (structural failure, grounding failure, valid-but-contentless, valid content-bearing); group-level channel contributions sum exactly to the unweighted mean of group means the certificate bounds under ADR 0009. Counterfactual: each system re-scored over content-bearing documents only, coverage measured against the restricted population. For the baselines the conclusion rests on an arithmetic ceiling rather than the counterfactual: accepting a fraction c at risk alpha requires population mean loss at most alpha*c + (1-c) = 0.84, and their restricted mean losses are 0.984 and 0.951.",
+      "limitations": [
+        "Descriptive only: the decomposition and the grounding-oracle counterfactual select no threshold and certify nothing.",
+        "Conditional coverage under the grounding oracle is not a deployable acceptance rate and is not comparable across systems; the restricted population differs per system.",
+        "The restriction is NOT uniformly generous: it raises the loss of 24 few-shot and 21 QLoRA groups, and a correctness-oracle variant moves the baselines off zero. The baselines' result is carried by the arithmetic ceiling, not by the counterfactual.",
+        "The QLoRA system sits below that ceiling, so for it the ceiling is silent and only the measured curve leaves it short of the floor.",
+        "Scoped to in-domain RAMS under span-exact matching and to the frozen vLLM 4-bit serving stack (86.3% parsed-output parity); portability is not established.",
+        "The certificate bounds average within-group loss, not the absence of error in any document (ADR 0009)."
+      ],
+      "surfaces": ["README", "report", "abstract"],
+      "verified_by": "evidence/plan3/reviewer_record.reanalysis.json (independent review, 2026-07-22: numbers CONFIRMED by from-scratch recomputation; BLOCK on six discipline/wording items, all corrected)"
+    },
+    {
+      "claim_id": "CX-ALPHA-FRONTIER-01",
+      "wording": "On the oracle risk-coverage curve, the 20% acceptance floor first becomes reachable at a target risk of about 0.406 for the QLoRA system, 0.930 for few-shot and 0.981 for zero-shot. Across the whole range below those points no selective policy at any threshold could have cleared the floor, so the infeasibility at the frozen 0.20 target is not an artefact of that particular choice; it holds across everything up to twice it.",
+      "status": "negative",
+      "scope": "in-domain RAMS certification split, 1,396 source-document groups; oracle upper bound (the development split is reported in the same artifact and agrees, at 0.383 for the QLoRA system)",
+      "evidence": [
+        "evidence/plan3/alpha_frontier.json",
+        "evidence/plan3/risk_coverage_diagnostic.json",
+        "docs/adr/0011-reanalysis-frontier-and-loss-channels.md"
+      ],
+      "method": "The oracle risk-coverage curve carries no target risk; max acceptance at a given target is that fixed curve read at one height. No certificate is issued at any point on the curve; the frozen target of 0.20 is unchanged (ADR 0007).",
+      "limitations": [
+        "An oracle upper bound with no finite-sample penalty, no grid and no multiplicity correction: usable only to rule operating points out, never to indicate that a weaker one would certify.",
+        "The crossing is a necessary condition, not a sufficient one. A certificate at 0.406 would not issue: at the ~280 groups a 20% acceptance implies, the Hoeffding radius alone is 0.086 to 0.103 depending on allocation, putting the risk upper bound near 0.49 to 0.51.",
+        "Not comparable with the certification rates prior work reports at its own operating points, which are achieved certifications rather than oracle necessary conditions.",
+        "The verdict IS operating-point dependent above the crossing: oracle acceptance for the QLoRA system reaches 0.187 at a target risk of 0.40 and 0.316 at 0.45. The claim is that the frozen target is not a specially unlucky choice, not that no operating point behaves differently.",
+        "The frozen headline target remains 0.20 and no certificate exists at any other point.",
+        "Scoped to in-domain RAMS and the frozen vLLM 4-bit serving stack."
+      ],
+      "surfaces": ["report"],
+      "verified_by": "evidence/plan3/reviewer_record.reanalysis.json (independent review, 2026-07-22: curve-vs-committed-diagnostic equality and alpha_star inverse CONFIRMED by from-scratch reimplementation and 20,000 randomised trials)"
+    },
+    {
+      "claim_id": "CX-WIKIEVENTS-NCERT-01",
+      "wording": "A WikiEvents certification arm was withdrawn because the corpus cannot support the certificate at any operating point: the preferred method requires 1,386 independent groups and WikiEvents holds 246 source documents across all splits, while the conservative audit is available at that scale but vacuous (Hoeffding radius 0.384 at n = 20).",
+      "status": "infeasible",
+      "scope": "WikiEvents corpus size against the frozen certification parameters",
+      "evidence": [
+        "docs/adr/0011-reanalysis-frontier-and-loss-channels.md",
+        "evidence/plan3/certification_result.json#systems"
+      ],
+      "method": "certification.scorc_minimum_n(candidate_count=3, delta=delta/3, acceptance_floor=0.20) = 1,386 against document counts read from data/raw/wikievents/*.jsonl (20 dev / 20 test / 206 train); largest_scorc_grid returns 0 at every WikiEvents scale.",
+      "limitations": [
+        "A statement about corpus size against the frozen parameters, not about WikiEvents difficulty; no WikiEvents prediction was generated and no base risk was measured on it.",
+        "A descriptive base-risk arm on WikiEvents remains possible and was not attempted.",
+        "RAMS itself cleared the same precondition by only 10 groups, so this is a narrow margin rather than a wide one."
+      ],
+      "surfaces": ["report"],
+      "verified_by": "evidence/plan3/reviewer_record.reanalysis.json (independent review, 2026-07-22: sample-size arithmetic and corpus counts CONFIRMED)"
+    },
+    {
       "claim_id": "CX-SHIFT-01",
       "wording": "No schema-shift transfer result is claimed.",
       "status": "planned",
