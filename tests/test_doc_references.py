@@ -151,6 +151,12 @@ def test_every_test_named_in_the_docs_exists() -> None:
 #: written for readability. That trade is only safe while something pins the two together, and the
 #: ledger was amended three times in a single day on 2026-07-22.
 #:
+#: Meet the argument for the machinery before accepting the trade: the independent review of that
+#: hand-written README found three ledger `limitations` dropped from it, and all three were lines
+#: `render_surface` would have emitted mechanically -- including the one an earlier reviewer had
+#: said must travel with its claim. The case for generating the prose is made by the cost of not
+#: generating it. This test buys back only the citation half; a reader still buys the rest.
+#:
 #: This is the minimum enforceable half: every claim ID the README cites must resolve to a ledger
 #: entry that surfaces to README. The converse (every README-surfaced claim actually appears) is
 #: deliberately NOT asserted -- adding a surface to the ledger should not fail an unrelated commit.
