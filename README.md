@@ -19,7 +19,7 @@ independent reviewer PASSes the one before it.
 | **Plan 1** (Gate 0) | feasibility, licences, evaluator, statistics, paid smoke tests | **complete** — gates 0A–0F pass, Gate 0 decision `go`, consolidated reviewer PASS 2026-07-17 |
 | **Plan 2** | QLoRA training, prediction generation for three systems | **closed** — independent reviewer PASS 2026-07-21 (`evidence/plan2/reviewer_record.plan2-close.json`) |
 | **Plan 3** | certification against the sealed split | **executed and independently reviewed; not formally closed** — no Plan 3 close record exists |
-| **Plan 4** | verification, public release, write-up | **not started, not authorised** |
+| **Plan 4** | verification, public release, write-up | **not started** — Plan 3 has no close record, so this gate has not opened |
 
 Plan 3's certification ran once, on 2026-07-22, and returned infeasibility for all three systems.
 `evaluate-final` and `evaluate-shift` are descoped ([ADR 0010](docs/adr/0010-descope-final-and-shift.md))
@@ -28,12 +28,13 @@ re-analysis ([ADR 0011](docs/adr/0011-reanalysis-frontier-and-loss-channels.md))
 four independent passes, opening at BLOCK and closing with the publication condition lifted and no
 blocking items.
 
-**The next unit of work is the write-up**, which is not started
-([handoff](docs/plan3/HANDOFF-2026-07-22-reanalysis.md)). It is bounded by the claim list in
-[`docs/plan3/certification-result.md`](docs/plan3/certification-result.md) ("What may and may not be
-claimed"). Any public claim beyond those boundaries, any spend, opening the `final` or `shift`
-splits, and starting Plan 4 each require the owner's explicit approval; every change to evaluation,
-certification or release policy requires an independent review.
+The write-up is at first draft ([`docs/writeup/draft-2026-07-28.md`](docs/writeup/draft-2026-07-28.md)),
+independently reviewed. No venue is chosen and nothing is formatted for one. What it may claim is
+fixed by the list in [`docs/plan3/certification-result.md`](docs/plan3/certification-result.md)
+("What may and may not be claimed"), and that list is narrower than the results might suggest.
+
+Contributor and agent rules — approvals, review gates, spend — are in
+[`CONTRIBUTING.md`](CONTRIBUTING.md) and [`AGENTS.md`](AGENTS.md).
 
 ## Result
 
@@ -117,8 +118,7 @@ than described.
   enforced in code (`training.REMAINING_BUDGET_USD` = $24.7992, the $25 cap less $0.2008 of prior
   recorded spend), with a run ledger imposing R0→R1→R2 order. No single spend ledger exists and the
   figures are price×duration estimates, not billed amounts
-  ([ADR 0012](docs/adr/0012-cost-claim-evidence-correction.md)). No paid run proceeds without
-  explicit owner approval; a plan's budget ceiling is not spending permission.
+  ([ADR 0012](docs/adr/0012-cost-claim-evidence-correction.md)).
 - **Claims cannot outrun their evidence.** `conformalextract verify-claims` fails closed if a
   claim's evidence is not git-tracked, and a regression tripwire refuses a claim that holds a public
   surface while its own verification literally reads as pending. The tripwire is not a verification

@@ -1,8 +1,9 @@
 # Plan 3 — Phase A implementation notes (CPU, no labels, no GPU)
 
-Source of truth: the accepted plan at
-`C:\dev\_pmo\assistant\plans\conformalextract\conformalextract-plan3-certification-and-schema-shift-experiments.md`.
-This file only tracks the *implementation* of the unblocked Phase-A scaffolding.
+Source of truth: the accepted Plan 3, [`accepted-plan.md`](accepted-plan.md) in this directory. It
+was held in a private planning directory until all four accepted plans were brought in-repo
+(recorded in ADR 0011 §7); they are pinned to their hashes by `tests/test_doc_references.py`. This
+file only tracks the *implementation* of the unblocked Phase-A scaffolding.
 
 ## Gate status at start (2026-07-18)
 

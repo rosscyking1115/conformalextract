@@ -12,6 +12,12 @@ build/
 .env
 .env.*
 !.env.example
+# Agent/tool state. Also covered by some contributors' global gitignore; kept here so a
+# fresh clone on any machine is protected without relying on local configuration.
+.claude/
+.agents/
+.superpowers/
+.hypothesis/
 data/raw/
 data/sealed/
 data/private/

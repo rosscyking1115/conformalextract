@@ -289,9 +289,18 @@ acknowledged defect that is not written down is a defect that returns.
 
 ## 7. The accepted plans are now in the repo
 
+> **Amended 2026-07-28.** The sentence below named the private planning directory the plans were
+> copied from, as a relative filesystem path into it. The path is removed and is not restated here —
+> a note recording the removal of a string does not need to reproduce it, and the change is legible
+> in git history. The provenance claim — that the copies are byte-identical to an external
+> authoritative source — is unchanged, as is everything else in this section. Recorded in the
+> dated-note form §1 uses, rather than made silently, because this ADR was ruled on by four review
+> passes and a reader who finds a reworded sentence with no note cannot tell whether the change was
+> reviewed.
+
 All four accepted plans are committed, one per gate directory as `accepted-plan.md`
 (`docs/gate0/`=Plan 1, `docs/plan2/`, `docs/plan3/`, `docs/plan4/`), copied byte-identically from
-`_pmo/assistant/plans/conformalextract/`. Until now the repo cited roughly twenty distinct `§N.M`
+the private planning directory that held them. Until now the repo cited roughly twenty distinct `§N.M`
 sections it did not contain, and the ADR 0011 reviewer flagged that as limiting what they could
 rule on — correctly, as §1's amendment shows: the repo's gloss on §6.3 was **stricter than §6.3**,
 and this ADR was originally argued against the gloss.
