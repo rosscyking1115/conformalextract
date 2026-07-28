@@ -17,6 +17,8 @@ from pathlib import Path
 
 import pytest
 
+from conformalextract.claims import CLAIM_ID, load_ledger
+
 ROOT = Path(__file__).resolve().parents[1]
 TESTS = ROOT / "tests"
 
@@ -140,3 +142,49 @@ def test_every_test_named_in_the_docs_exists() -> None:
             f"  {name} <- {', '.join(sources)}" for name, sources in dangling.items()
         )
         pytest.fail(f"documentation names {len(dangling)} test(s) that do not exist:\n{detail}")
+
+
+#: The same lesson, one identifier class over. A claim ID printed on a public surface asserts that
+#: the ledger licenses that claim *for that surface*; if it does not, the surface is publishing on
+#: an authority it does not hold. `claims.render_surface` exists so public prose can be assembled
+#: from approved wordings instead of re-written, and the README does not use it -- it is hand-
+#: written for readability. That trade is only safe while something pins the two together, and the
+#: ledger was amended three times in a single day on 2026-07-22.
+#:
+#: This is the minimum enforceable half: every claim ID the README cites must resolve to a ledger
+#: entry that surfaces to README. The converse (every README-surfaced claim actually appears) is
+#: deliberately NOT asserted -- adding a surface to the ledger should not fail an unrelated commit.
+#:
+#: The pattern is `claims.CLAIM_ID` unanchored, NOT a re-spelling of it. The first draft of this
+#: test invented `CX-...-\d+`, which silently skipped `CX-H1-PRIMARY` and `CX-H2-SECONDARY` -- the
+#: two IDs that do not end in digits, and precisely the pair the review found mis-cited. A probe
+#: caught it; reading the pattern did not. Derive from the source of truth, never restate it.
+CLAIM_ID_IN_PROSE = re.compile(CLAIM_ID.pattern.strip("^$"))
+
+PUBLIC_PROSE_SURFACES = {"README.md": "README"}
+
+
+@pytest.mark.parametrize("filename", sorted(PUBLIC_PROSE_SURFACES))
+def test_every_claim_id_cited_in_public_prose_is_surfaced_there(filename: str) -> None:
+    """A claim ID on a surface the ledger does not grant is prose outrunning its authority."""
+
+    ledger = load_ledger(ROOT / "evidence" / "plan4" / "claim_ledger.json")
+    surface = PUBLIC_PROSE_SURFACES[filename]
+    by_id = {claim.claim_id: claim for claim in ledger.claims}
+
+    # `finditer` + group(0), not `findall`: the source pattern contains a capture group, so
+    # `findall` would return the group's contents ("-PRIMARY") rather than the whole ID.
+    text = (ROOT / filename).read_text(encoding="utf-8")
+    cited = {match.group(0) for match in CLAIM_ID_IN_PROSE.finditer(text)}
+    assert cited, f"{filename} cites no claim IDs; the regex or the document has changed"
+
+    unknown = sorted(name for name in cited if name not in by_id)
+    unsurfaced = sorted(
+        name for name in cited if name in by_id and surface not in by_id[name].surfaces
+    )
+    assert not unknown, f"{filename} cites claim IDs absent from the ledger: {unknown}"
+    assert not unsurfaced, (
+        f"{filename} cites claims the ledger does not surface to {surface!r}: {unsurfaced}. "
+        f"Either remove them from the document or add the surface in the ledger -- and a ledger "
+        f"change is a claims change, which needs its own independent review."
+    )
