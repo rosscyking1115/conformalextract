@@ -42,3 +42,40 @@ while withholding the reviews that tested them inverts the project's own argumen
 this seat's call, and it is not urgent until a public bundle is actually assembled.
 
 **Do not resolve it by editing the record.** That is the one option ruled out already.
+
+---
+
+## 2. What does the repository description say?
+
+**Raised:** 2026-07-28, by the release-hygiene check.
+**Status:** open. Currently **empty** (`gh repo view` → `"description":""`).
+
+A description is a claim about what the repository is, rendered on every search result, every
+listing, and every link preview — and it is the one public surface with no room for a caveat. This
+project does not let claims land without review, and a one-line summary of a **negative** result is
+harder to write honestly than a paragraph, because there is no space to attach the null.
+
+The trap to avoid is stating the grounding result without it. "95.7% grounded event-argument
+extraction" would be true, catastrophic, and forbidden by name in
+[`../plan3/certification-result.md`](../plan3/certification-result.md) — the claim boundaries
+require the 16× grounding gain and the null to travel in the same passage, and a description has no
+second passage.
+
+Whatever is chosen must trace to a ledger claim like any other public sentence. `CX-H1-PRIMARY`,
+`CX-CAPGAP-01` and `CX-GROUNDING-ORTHOGONAL-01` all carry the `abstract` surface, which is the
+closest existing analogue to a description; none of them is short enough as written, so the
+decision includes whether a description needs its own ledger entry rather than a compression of an
+existing one. **Not filled in now**, deliberately.
+
+## 3. What topics does the repository carry?
+
+**Raised:** 2026-07-28, by the release-hygiene check.
+**Status:** open. Currently **none**.
+
+Lower stakes than the description — topics are discovery metadata, not prose — but they are still a
+public surface and still a claim of a kind. `conformal-prediction`, `selective-prediction` and
+`event-extraction` describe the subject matter accurately. Anything implying a working system
+(`certified`, `production`) does not, and `certified` in particular is reserved by the honesty
+boundary for something this project did not achieve.
+
+Both items are gated behind Plan 4 opening, and Plan 4 has not opened.
