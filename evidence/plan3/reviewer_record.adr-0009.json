@@ -1,0 +1,70 @@
+{
+  "schema_version": "1",
+  "_record_notice": "Independent reviewer ruling on ADR 0009 (within-group aggregation for certification) — the last gate before certify opens the sealed certification split. Produced by a reviewer who did not implement any of it. No sealed label was read and nothing was spent during this review; all empirical work was done on the development split, whose gold is permitted.",
+  "review_kind": "adr_decision_review",
+  "reviewed_commit": "c104716",
+  "review_range": "60e198d..c104716",
+  "head_note": "Repository HEAD is a7bcd49. The only delta c104716..HEAD is docs/adr/0008-confidence-span-mismatch.md ('retract an unsupported inference') — neither ADR 0009 nor certification_run.py/cli.py changed — so reviewing at HEAD is equivalent for this decision.",
+  "reviewer_identity": "Reviewer/QA (Claude Code, Opus 4.8) — independent; NOT the implementer.",
+  "reviewed_date": "2026-07-21",
+
+  "verdict": "PASS on the rule. ADR 0009's decision (group score = min member confidence; group valid only if every member valid; group loss = mean member loss) is ENDORSED and should be kept. ADR 0009 MAY BE FLIPPED TO `accepted` once the four amendments below land — all are documentation-only, none changes the rule, none requires a re-run, and the test asserting `Status: proposed` should be updated in the same change.",
+
+  "external_signal": {
+    "green_command": "uv run pytest -q -> 247 passed; ruff -> All checks passed; mypy -> Success, no issues in 22 source files. Working tree clean.",
+    "structure_verified": "The certification split's group structure reproduces the ADR exactly from the committed role map (group ids only; no labels read): 3,152 documents in 1,396 groups, size histogram 684 singletons / 336 pairs / 146 triples / ... / one group of 22."
+  },
+
+  "challenge_1_mean_loss": {
+    "verdict": "Right answer, wrong reason. Keep mean loss; replace the rationale.",
+    "the_stated_reason_does_not_hold": "The ADR rejects max loss as 'double-conservative ... would understate certified acceptance for a reason unrelated to the science'. The implied premise — that max would cost too much — is falsifiable and I falsified it on development data: under max loss the group base risk is 0.7253, giving max feasible acceptance 0.3433, comfortably above the 0.20 floor. Max loss does NOT make certification infeasible. So 'double-conservative' is not the reason max should be rejected, and conservatism is not self-evidently a defect on the one component that determines whether the risk bound holds.",
+    "the_reason_that_does_hold": "Measured on development (QA, frozen candidate `mean`): corr(group size, group MAX loss) = +0.2722, while corr(group size, group MEAN loss) = -0.0190. Max loss is mechanically size-dependent — a maximum over more members is larger — so it would penalise a group for being large, which is a source artifact rather than difficulty. The ADR's own premise that group size tracks source and not difficulty is CONFIRMED for mean loss (-0.019, effectively zero) and REFUTED for max loss (+0.272). That is a principled, size-neutrality argument for mean, and it is the one the ADR should make.",
+    "the_disagreement_case_is_real_and_must_be_stated": "Min-score acceptance plus mean loss can accept a group whose members disagree: 21 correct members and one confidently-wrong member in a 22-group yields mean loss 1/22 = 0.045, far under alpha = 0.20, and the wrong member passed the score threshold by construction (acceptance is on the minimum). This is the intended semantics — 'one observation whose loss is the average behaviour over its near-duplicates' — and it is defensible, but it is currently implicit. It should be stated so a reader understands the certificate bounds average within-group error, not the absence of error."
+  },
+
+  "challenge_2_group_size_interaction": {
+    "verdict": "Real but mild; a sharper related effect found and should be disclosed.",
+    "systematic_exclusion_of_large_groups": "Weak: corr(group size, all_valid) = -0.0854. Larger groups are slightly less likely to be all-valid, which is mechanically expected (more members, more chances of one invalid). In this sample the largest groups (sizes 10, 14, 20, 38) were all all-valid, and the large-size buckets hold only 1-3 groups each, so the effect is poorly estimated at the tail rather than clearly present.",
+    "bias_direction": "If large groups were systematically excluded, the accepted population would skew small. Because group size is uncorrelated with group MEAN loss (-0.019), that skew would not materially bias the risk estimate; it would reduce coverage rather than corrupt the guarantee.",
+    "sterilised_groups_found": "9.3% of development groups (37 of 398) are unconditionally unacceptable at ANY threshold: 37 fail the all-valid condition, and 3 of those additionally carry a -inf member score (a context_overflow document with no confidence candidates), which makes the group minimum -inf. This caps achievable acceptance at 0.907 before any threshold is applied. Not fatal — the floor is 0.20 and QA's max feasible acceptance is 0.5128 — but it is a structural cap that should be disclosed and reported on the certification split rather than discovered later."
+  },
+
+  "challenge_3_one_representative": {
+    "verdict": "Rejected for the right reason, but stated in a way that invites the exact confusion the challenge raises.",
+    "the_key_fact": "n = 1,396 EITHER WAY. The theorem's independent-unit count is the group count and is identical under aggregation and under one-representative. Aggregation therefore CANNOT overstate effective sample size — the worry in the challenge is answered by construction, not by argument.",
+    "what_aggregation_actually_buys": "Lower per-unit measurement variance at identical independence. A group's loss estimated from 22 correlated near-duplicates is a better estimate of that group's loss than one arbitrary member's loss. Because members are highly correlated by construction, the variance reduction is far less than the sqrt(22) of independent draws — but it is strictly greater than nothing, and one-representative additionally makes each unit's loss a single arbitrary draw whose idiosyncrasy propagates into acceptance. Aggregation strictly dominates.",
+    "required_rewording": "The ADR's 'discards 1,756 of 3,152 certification documents — over half the split' reads as a sample-size argument and is precisely what makes a reader suspect inflated n. Replace with: same n either way; aggregation reduces per-unit measurement noise without touching independence."
+  },
+
+  "challenge_4_exchangeability": {
+    "verdict": "The strongest finding of this review. The aggregate is defensible but the scope statement is incomplete.",
+    "measurement": "corr(group size, group min-score) = -0.3527 across the 395 development groups with finite scores, and it is monotone across size bands: median min-score is -0.0574 at size 1, -0.0774 at sizes 2-3, -0.0882 at sizes 4-6, and -0.1079 at sizes 7+.",
+    "consequence": "A minimum over more draws is stochastically lower, so the group score is NOT identically distributed across group sizes. Applying one uniform threshold therefore preferentially accepts small groups: the accepted population is size-skewed, and the certification units are independent but not identically distributed.",
+    "why_it_is_probably_still_fine": "Because group size is uncorrelated with group mean loss (-0.019), the size skew in the accepted set does not materially bias the risk estimate. If the SCoRC theorem requires only independence and bounded loss, the variable-size aggregate is inside scope.",
+    "what_must_be_settled": "If the theorem requires EXCHANGEABILITY of the (score, loss) units rather than independence plus boundedness, then units whose score distribution depends on cluster size sit outside its stated scope. ADR 0009 must state which the theorem actually requires — the companion note docs/plan3/theorem-to-code-scorc.md is the place that already does theorem-to-code work — and must report the size distribution of the accepted set so the skew is visible."
+  },
+
+  "additional_finding_unweighted_vs_size_weighted": {
+    "finding": "The certificate bounds the UNWEIGHTED mean of group means: (1/|A|) * sum over accepted groups of (mean member loss). A reader will naturally hear a document-level claim, which is the SIZE-WEIGHTED quantity. These coincide only if group size is uncorrelated with group mean loss.",
+    "measured": "On development: unweighted 0.5898 versus size-weighted 0.5834, a gap of -0.0063. The certificate's quantity is slightly HIGHER than document-level risk, i.e. the difference runs in the conservative direction, and its magnitude is small relative to alpha = 0.20.",
+    "why_it_still_needs_recording": "That agreement is an empirical consequence of size being uncorrelated with mean loss on this split, not a theorem. `GroupRow` already carries `document_count`, so the certifier can emit both figures at zero cost and let the gap be OBSERVED on the certification split instead of assumed from development."
+  },
+
+  "safety_properties_verified": {
+    "certify_refuses_while_adr_proposed": "Verified by execution. With `--i-have-reviewer-approval` and without it, `certify` exits **3** and emits {\"status\": \"refused\", \"adr_status_accepted\": false, \"sealed_labels_opened\": false, \"reason\": \"ADR 0009 (within-group aggregation) is not cleared for execution\"}. Both the operator flag and the ADR `Status: accepted` check must pass; the flag alone is insufficient.",
+    "certification_access_chain": "Verified by execution. `certification_run.py` deliberately does NOT reuse `training.build_label_access_log` — that chain hard-rejects every sealed role and is the Plan 2 `sealed_reads: 0` invariant, which stays intact. It keeps a parallel chain with its own genesis permitting `certification` and only `certification`. FORBIDDEN_ROLES = {development, final, shift, train}; all four raise SealedRoleError, and a certification-only chain verifies. Opening the certification split therefore cannot become a foothold for opening final or shift. This is a genuinely good design choice, not merely a stated one.",
+    "grid_delta_mismatch_guard": "Verified present and correct: certify reads `delta` from the committed grid file, forms the three-way allocation, and raises 'grids were built at delta=X; the three-way split must exhaust delta=0.05. Rebuild grids at delta/3 before certifying.' This directly closes the carry-forward from my Phase-A record — grids built at the full delta cannot silently be certified against.",
+    "delta_allocation_sum_guard": "`abs(sum(allocation) - delta) > 1e-12` raises, protecting the union bound from a split that does not exhaust the budget."
+  },
+
+  "amendments_required_before_status_accepted": {
+    "A1": "Replace the mean-loss rationale. Drop 'double-conservative' (max loss remains feasible: group base risk 0.7253, max feasible acceptance 0.3433 > 0.20 floor) and substitute the size-neutrality argument: corr(size, max loss) = +0.2722 versus corr(size, mean loss) = -0.0190, so max would penalise groups for size — a source artifact — while mean does not. Also state explicitly that the certificate bounds average within-group error, so an accepted group may contain a confidently-wrong member diluted by its near-duplicates.",
+    "A2": "Record that the certificate bounds the unweighted mean of group means, note the measured development gap against the size-weighted document-level figure (0.5898 vs 0.5834, conservative direction), and have the certification artifact emit BOTH on the certification split using the `document_count` already carried on GroupRow.",
+    "A3": "Disclose the size-dependence of the group score (corr = -0.3527, monotone across size bands) and state explicitly whether the SCoRC theorem requires exchangeability or only independence plus bounded loss. Report the size distribution of the accepted set in the artifact.",
+    "A4": "Reword the one-representative rejection to the argument that actually holds — n = 1,396 either way, so aggregation cannot inflate effective sample size; what it buys is lower per-unit measurement variance at identical independence — and disclose the 9.3% of groups that are unconditionally unacceptable (all-valid failures, including three with a -inf member score)."
+  },
+
+  "authorization_status": "Unchanged from evidence/plan3/reviewer_record.phase-a.v2.json: authorization to run certify was GRANTED and its three pre-conditions are discharged. This review adds the ADR 0009 gate. Once A1-A4 land and ADR 0009 is flipped to `accepted` (updating the test that currently asserts `proposed`), certify may open the sealed certification split. No spend is authorised, no Plan 4 is authorised, and no claim of certified acceptance may be made until the run completes and its evidence is independently reviewed.",
+
+  "acceptance_rule": "An evaluation decision that materially determines the certificate must be reviewed against the data before it is frozen, not merely argued. This review tested every load-bearing claim in ADR 0009 on the development split and reports where the ADR's stated reasoning and the evidence diverge. The implementer may not complete this record."
+}

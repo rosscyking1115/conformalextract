@@ -1,0 +1,148 @@
+from __future__ import annotations
+
+import pytest
+
+from conformalextract.analysis_version import build_analysis_lock, certification_config_hash
+from conformalextract.certification import FROZEN_ALPHA
+
+
+def _valid_kwargs(**overrides: object) -> dict[str, object]:
+    kwargs: dict[str, object] = {
+        "prediction_manifests": {"zs": "hz", "fs": "hf", "qa": "hq"},
+        "data_group_split_hashes": {"split_assignment": "hs", "lineage": "hl"},
+        "evaluator_loss_score_hash": "he",
+        "candidate_grid_hash": "hg",
+        "delta_ledger_hash": "hd",
+        "git_commit": "abc1234",
+        "environment_hash": "henv",
+        "config_hash": certification_config_hash(),
+    }
+    kwargs.update(overrides)
+    return kwargs
+
+
+def test_build_analysis_lock_is_deterministic() -> None:
+    """§13.3: serial/parallel execution must produce identical JSON."""
+    first = build_analysis_lock(**_valid_kwargs())  # type: ignore[arg-type]
+    second = build_analysis_lock(**_valid_kwargs())  # type: ignore[arg-type]
+    assert first == second
+    assert first.analysis_id == second.analysis_id
+    assert first.status == "locked"
+
+
+def test_any_changed_input_produces_a_different_analysis_id() -> None:
+    """§13.2: any change creates a new version, so different versions never collide."""
+    base = build_analysis_lock(**_valid_kwargs())
+    changed_manifests = {"zs": "DIFFERENT", "fs": "hf", "qa": "hq"}
+    variants = [
+        build_analysis_lock(**_valid_kwargs(prediction_manifests=changed_manifests)),
+        build_analysis_lock(**_valid_kwargs(candidate_grid_hash="DIFFERENT")),
+        build_analysis_lock(**_valid_kwargs(delta_ledger_hash="DIFFERENT")),
+        build_analysis_lock(**_valid_kwargs(git_commit="DIFFERENT")),
+        build_analysis_lock(**_valid_kwargs(environment_hash="DIFFERENT")),
+        build_analysis_lock(**_valid_kwargs(config_hash="DIFFERENT")),
+    ]
+    ids = {base.analysis_id} | {variant.analysis_id for variant in variants}
+    assert len(ids) == len(variants) + 1  # every variant is genuinely distinct
+
+
+def test_missing_or_incomplete_prediction_manifests_rejected() -> None:
+    with pytest.raises(ValueError, match="exactly zs/fs/qa"):
+        build_analysis_lock(**_valid_kwargs(prediction_manifests={"zs": "hz", "fs": "hf"}))
+    with pytest.raises(ValueError, match="must be non-empty"):
+        build_analysis_lock(
+            **_valid_kwargs(prediction_manifests={"zs": "", "fs": "hf", "qa": "hq"})
+        )
+
+
+def test_empty_hash_inputs_are_rejected_not_silently_absent() -> None:
+    """An empty string must not collapse into the same hash as a missing input."""
+    for field in (
+        "evaluator_loss_score_hash",
+        "candidate_grid_hash",
+        "delta_ledger_hash",
+        "git_commit",
+        "environment_hash",
+        "config_hash",
+    ):
+        with pytest.raises(ValueError, match="non-empty"):
+            build_analysis_lock(**_valid_kwargs(**{field: ""}))
+
+
+def test_empty_data_group_split_hashes_rejected() -> None:
+    with pytest.raises(ValueError, match="data_group_split_hashes"):
+        build_analysis_lock(**_valid_kwargs(data_group_split_hashes={}))
+    with pytest.raises(ValueError, match="data_group_split_hashes"):
+        build_analysis_lock(**_valid_kwargs(data_group_split_hashes={"a": ""}))
+
+
+def test_certification_config_hash_reflects_the_adr_0007_freeze_by_default() -> None:
+    frozen = certification_config_hash()
+    drifted = certification_config_hash(alpha=0.10)
+    assert frozen != drifted
+    # Passing the frozen value explicitly reproduces the default exactly.
+    assert certification_config_hash(alpha=FROZEN_ALPHA) == frozen
+
+
+def test_confidence_candidates_are_bound_per_system_not_as_a_scalar() -> None:
+    """Reviewer Phase-A pre-condition 1: a scalar default encoded the superseded pooled choice."""
+    from conformalextract.certification import FROZEN_CONFIDENCE_CANDIDATES
+
+    assert dict(FROZEN_CONFIDENCE_CANDIDATES) == {
+        "zs": "mean",
+        "fs": "tenth_percentile",
+        "qa": "mean",
+    }
+    # The stale pooled scalar must no longer exist anywhere.
+    import conformalextract.certification as certification_module
+
+    assert not hasattr(certification_module, "FROZEN_CONFIDENCE_CANDIDATE")
+    # A different per-system assignment is a different config.
+    assert certification_config_hash() != certification_config_hash(
+        confidence_candidates={"zs": "minimum", "fs": "minimum", "qa": "minimum"}
+    )
+    # Key order must not matter.
+    assert certification_config_hash(
+        confidence_candidates={"qa": "mean", "fs": "tenth_percentile", "zs": "mean"}
+    ) == certification_config_hash()
+
+
+def test_confidence_candidates_must_cover_all_systems_with_known_values() -> None:
+    with pytest.raises(ValueError, match="exactly zs/fs/qa"):
+        certification_config_hash(confidence_candidates={"zs": "mean", "qa": "mean"})
+    with pytest.raises(ValueError, match="unknown confidence candidate"):
+        certification_config_hash(
+            confidence_candidates={"zs": "mean", "fs": "median", "qa": "mean"}
+        )
+
+
+def test_delta_allocation_binds_the_5_5_multiplicity_decision() -> None:
+    """§5.5: the cross-system split must be bound so it cannot be swapped silently."""
+    equal = {"qa": 0.05 / 3, "zs": 0.05 / 3, "fs": 0.05 / 3}
+    weighted = {"qa": 0.025, "zs": 0.0125, "fs": 0.0125}
+    assert certification_config_hash(delta_allocation=equal) != certification_config_hash(
+        delta_allocation=weighted
+    )
+    # An unbound allocation is a different config from any bound one.
+    assert certification_config_hash() != certification_config_hash(delta_allocation=equal)
+    # The primary construction is bound too (A vs B changes the headline guarantee).
+    assert certification_config_hash(
+        delta_allocation=equal, primary_construction="scorc_union_bound"
+    ) != certification_config_hash(
+        delta_allocation=equal, primary_construction="conservative_global"
+    )
+    # Key order must not matter.
+    reordered = {"fs": 0.05 / 3, "qa": 0.05 / 3, "zs": 0.05 / 3}
+    assert certification_config_hash(delta_allocation=equal) == certification_config_hash(
+        delta_allocation=reordered
+    )
+
+
+def test_delta_allocation_must_exhaust_exactly_delta() -> None:
+    """A split that under- or over-spends silently invalidates the union bound."""
+    with pytest.raises(ValueError, match="does not match delta"):
+        certification_config_hash(delta_allocation={"qa": 0.01, "zs": 0.01, "fs": 0.01})
+    with pytest.raises(ValueError, match="does not match delta"):
+        certification_config_hash(delta_allocation={"qa": 0.04, "zs": 0.04, "fs": 0.04})
+    with pytest.raises(ValueError, match="strictly positive"):
+        certification_config_hash(delta_allocation={"qa": 0.05, "zs": 0.0, "fs": 0.0})

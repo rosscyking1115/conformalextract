@@ -1,0 +1,95 @@
+{
+  "schema_version": "1",
+  "_record_notice": "Independent reviewer ruling on the Plan 3 Phase-A gate: ADR 0007 (Gate-0 parameter freeze) and the §5.5 global multiplicity allocation, plus the authorization question for running certify against the sealed certification split. Produced by a reviewer who did not implement any of it.",
+  "review_kind": "plan3_phase_a_gate",
+  "reviewed_commit": "b2ea048",
+  "review_range": "bc131ff..b2ea048",
+  "reviewer_identity": "Reviewer/QA (Claude Code, Opus 4.8) — independent; NOT the implementer.",
+  "reviewed_date": "2026-07-21",
+  "prior_records": [
+    "evidence/plan2/reviewer_record.v2.json",
+    "evidence/plan2/reviewer_record.extraction-policy.json",
+    "evidence/plan2/reviewer_record.plan2-close.json"
+  ],
+
+  "ruling_1_adr_0007": "REVISE — on the primary-confidence-candidate selection only (1a). The α/δ/floor/material-gain/bootstrap freeze is sound, the base-risk feasibility finding (1b) is VERIFIED and robust, and development gold access (1c) is CLEAN.",
+  "ruling_2_section_5_5": "ADOPT with conditions — the union-bound argument is sound, equal δ/3 is endorsed, and carrying two constructions is sound subject to three binding guards.",
+  "authorization_to_run_certify": "NOT YET. Phase A is not complete while Ruling 1(a) stands at REVISE. certify must not touch the sealed certification split until the confidence-candidate decision is re-frozen.",
+
+  "external_signal": {
+    "green_command": "uv run pytest -q -> 222 passed; ruff -> All checks passed; mypy -> Success, no issues in 21 source files. Working tree clean at b2ea048.",
+    "reproduction": "uv run conformalextract development-gate re-run to a scratch path (committed evidence untouched): output byte-identical to evidence/plan2/development_gate_summary.json.",
+    "formula_verification": "hoeffding_upper radius = sqrt(ln(2/0.05)/(2*933)) = 0.0444622; QA 0.5834260535 + 0.0444622 = 0.6278883010 — matches the committed value to 16 digits. max_feasible_acceptance = (1-r)/(1-alpha): QA (1-0.6278883)/0.8 = 0.4651396237 — exact match. Formula independently re-derived: abstained documents absorb at most 1.0 each, so accepted mean loss >= (r-(1-c))/c; setting <= alpha yields c <= (1-r)/(1-alpha). Correct."
+  },
+
+  "ruling_1_detail": {
+    "1a_pooled_vs_per_system": {
+      "verdict": "REVISE",
+      "finding": "Pooling is materially consequential, it degrades the only certifiable system, and the pooled object is not well-defined across systems.",
+      "evidence": {
+        "per_system_selection_differs": "Recomputed per-system risk-coverage AUC on the same development documents: ZS selects 'mean' (0.9888), FS selects 'tenth_percentile' (0.9467), QA selects 'mean' (0.4401). Pooling selects 'minimum' (0.6854). All three systems would choose something other than the pooled winner.",
+        "pooling_handicaps_the_only_feasible_system": "QA's AUC under the imposed 'minimum' is 0.4663 versus 0.4401 under its own choice 'mean' (lower AUC = lower selective risk = better). Pooling therefore imposes a measurably worse selective signal on the one system that can reach the acceptance floor. It handicaps toward the null rather than toward the hypothesis, so it is not a bias-toward-H1 problem — it is a power loss on the only system that matters.",
+        "scores_are_not_cross_system_comparable": "Pooling ranks 2,799 documents from three systems in ONE risk-coverage curve using raw transition logprobs. Median of the selected candidate 'minimum': QA -0.7317, ZS -0.9893, FS -3.1767. FS is displaced ~2.4 nats from QA, so the pooled ranking is partly sorting by WHICH SYSTEM a document came from, not by within-system confidence. The pooled curve corresponds to no deployable selective policy.",
+        "the_scale_gap_is_a_known_harness_artifact": "The displacement is mechanistic, not incidental — see finding 1d."
+      },
+      "why_the_implementers_two_arguments_do_not_carry": {
+        "adr_0006_analogy_misapplied": "ADR 0006's uniformity governs a HARNESS transformation (output parsing) applied to raw generations, where non-uniformity would hand one arm a parsing advantage. The confidence score is not harness — it is part of each system's own selective policy. Forcing one score across systems is not the same kind of fairness; here it demonstrably degrades QA while importing a cross-system scale artifact.",
+        "section_5_3_does_not_compel_pooling": "§5.3 reads: 'Use exactly the score frozen by Gate 0 from development-only analysis. Candidate score invention ends before certification... one declared direction must mean more acceptable.' Its force is FREEZING (no post-hoc candidate invention) and ORIENTATION, not sharing one score across systems. A per-system choice frozen at Gate 0 satisfies §5.3 exactly as well. The 'singular' reading is plausible but not compelled, and the plan does not settle it."
+      },
+      "required_change": "Re-freeze the primary confidence candidate per system on each system's own development documents (frozen at Gate 0, orientation declared, no post-certification revision), OR keep pooling only if it is re-run on a cross-system-comparable score. Record the per-system AUCs above in the ADR either way, because they show the decision is not cosmetic."
+    },
+
+    "1b_base_risk_feasibility": {
+      "verdict": "VERIFIED — accept the finding",
+      "recomputed": "Independently recomputed document losses from the frozen predictions and development gold via the audit-mandated aggregation. Committed values reproduce exactly: ZS base_risk 0.9927117, FS 0.9586255, QA 0.5834261.",
+      "loss_construction_is_correct": "document_loss returns evaluate_document(gold, frames if status=='valid' else None).loss, and evaluate_document returns loss 1.0 whenever prediction is None. So a non-valid document scores 1.0 as required. Loss distribution confirms the always-answer construction: ZS 921/933 (98.7%) at loss 1.0, FS 881/933 (94.4%), QA 307/933 (32.9%), with QA showing a genuine spread (131 at 0.0, 495 strictly between) rather than a degenerate two-point mass.",
+      "robustness_in_both_directions": "The committed verdict uses the Hoeffding UPPER bound on base risk, which inflates risk and therefore makes 'near_vacuous' MORE likely — the anti-conservative direction for a claim that two systems are hopeless. I therefore re-ran the verdict in the direction most FAVOURABLE to the systems, using the lower bound: ZS max acceptance 0.0647, FS 0.1073 — both still far below the 0.20 floor; QA 0.5763, floor reachable. The point estimates likewise give ZS 0.0091, FS 0.0517, QA 0.5207. All three verdicts are stable under point, lower-bound and upper-bound base risk. The 'structurally unanswerable at any n' claim is sound because the bound is a population statement — more data does not change the population base risk.",
+      "condition": "The ADR should record this two-directional robustness check itself rather than leaving it to the reviewer, and should note that QA's headline '>=53.5% forced abstention' is the conservative (upper-bound) figure; the point estimate is 47.9%."
+    },
+
+    "1c_development_gold_access": {
+      "verdict": "CLEAN",
+      "evidence": "Access is via LabelAccessRequest(data_role='development', purpose=LabelAccessPurpose.DEVELOPMENT_SELECTION), hash-chained through build_label_access_log; 2,799 entries (3 systems x 933 documents, keyed 'system:document' so no collision) with head hash c1b3e5a2...; the CLI raises RuntimeError if log.verify() fails. I independently confirmed the chain verifies and that a sealed role is rejected at construction ('sealed gold role certification is unreachable during training'). Development gold is explicitly permitted for this purpose by Plan 2 audit correction #5. certification/final/shift remain categorically unreachable."
+    },
+
+    "1d_new_finding_confidence_token_span": {
+      "verdict": "NEW FINDING — not in the challenge list; affects Plan 3 regardless of how 1(a) is resolved",
+      "finding": "The confidence candidates are computed over ALL generated tokens (jobs/plan2_prediction_generation.py: chosen_transition_logprobs over request_output.outputs[0].token_ids), but ADR 0006 parses only the FIRST balanced JSON object. Measured share of the raw generation that the extracted object actually occupies (median): QA 1.00, ZS 0.63, FS 0.11. FS ran to the 256-token cap on every record, so roughly 89% of the tokens scored into FS's confidence are text the parser discards — the fabricated continuation caused by the missing stop sequence. This is the mechanism behind FS's -3.18 median 'minimum'.",
+      "consequence": "The abstention signal is clean only for QA. For ZS and FS it partly scores discarded text, so it is not measuring confidence in the answer that is actually certified. This contaminates the pooled selection (1a) and would also weaken any per-system abstention on ZS/FS.",
+      "required_change": "Decide and record, before certify runs, whether the confidence candidates are recomputed over the extracted-object token span only. If they are not recomputed (a defensible $0-preserving choice, since the artifact is frozen), the limitation must be disclosed wherever ZS/FS abstention behaviour is reported, and it becomes an additional reason not to pool."
+    }
+  },
+
+  "ruling_2_detail": {
+    "union_bound_sufficiency": {
+      "verdict": "SOUND",
+      "reasoning": "If each system's certificate holds with probability >= 1 - delta_s and the family is predeclared, then all three hold SIMULTANEOUSLY with probability >= 1 - sum(delta_s) = 1 - delta. On that event every statement derived from the three certificates is valid, including max-over-systems selection and the pairwise H1/H2 comparisons — selection adds no adaptivity penalty because the guarantee is simultaneous, not selective. The note's claim is correct. Within-system adaptive argmax over the grid remains covered by Theorem 1 at delta_s, as the companion note established.",
+      "caveat_to_record": "Simultaneous validity licenses comparing the three certified BOUNDS. It does not by itself give a confidence interval on the DIFFERENCE (CA_QA - CA_ZS). H1/H2 must therefore be phrased as a comparison of certified quantities under a simultaneous guarantee, not as a certified difference."
+    },
+    "delta_allocation": {
+      "verdict": "equal δ/3 ENDORSED — do not overturn",
+      "grid_claims_verified": "largest_scorc_grid(independent_documents=1396, acceptance_floor=0.20): delta 0.05 -> 9; delta/2 0.025 -> 4; delta/3 0.0167 -> 3; delta/4 0.0125 -> 2. All four figures in the note reproduce exactly.",
+      "why_not_qa_weighted": "I tested the case for reallocating toward QA, since Ruling 1(b) establishes that ZS and FS cannot reach the floor at any n, which makes equal allocation look wasteful. It does not survive costing: QA-weighted δ/2 buys QA 4 candidates against 3 — one extra abstention threshold — while creating an allocation that could be read as tuned to help QA clear H1/H2. Under the honesty boundary that trade is not worth taking, and the note reached the same conclusion on the same grounds without pre-empting the call. Certifying QA alone at full δ (grid 9) was also considered and rejected: the baselines' certification-split certificates carry independent evidentiary value for H1 that a development-set feasibility extrapolation does not.",
+      "condition": "Because δ/3 leaves QA with three grid points of which one is -inf (~two usable abstention thresholds), the ADR must pre-commit to how a null or coarse result is interpreted — specifically that a failure to demonstrate material certified gain must NOT be reported as 'QLoRA did not certify' when the design admitted two thresholds. The theorem is grid-starved at n=1396 and that is a property of the design, not of the model."
+    },
+    "two_constructions": {
+      "verdict": "SOUND, subject to three binding guards",
+      "reasoning": "Reporting a predeclared primary (A) alongside a descriptive secondary (B) does not leak a selection provided the primary is fixed before running and both are reported unconditionally. The note's explicit refusal of max(A,B) is the correct guard.",
+      "binding_guards": [
+        "A is fixed as primary in the ADR before certify runs, and is not revisited after seeing results.",
+        "Both constructions are reported unconditionally, whatever the outcome — B is never dropped because it is unflattering, nor promoted because it is flattering.",
+        "B never supports a claim A does not support. Its finer grid is descriptive resolution only, and any headline number is A's."
+      ]
+    }
+  },
+
+  "authorization_detail": {
+    "verdict": "NOT YET — Phase A incomplete",
+    "blocking": "Ruling 1(a) REVISE. The primary confidence candidate is the input to the abstention policy that certification scores; it must be correctly frozen before any sealed-split access. Re-freezing it after seeing certification output would be exactly the post-hoc move the gated doctrine exists to prevent.",
+    "also_required_before_certify": "A recorded decision on finding 1(d) (confidence token span) — recompute over the extracted object, or disclose the contamination.",
+    "sound_and_not_blocking": "The remaining Phase-A scope is sound on inspection and on the green command: certification-split preflight (7d7e5ba, seven label-free preconditions), immutable analysis-version lock (99113bb, b2ea048), threshold grid builder (d5a170d, development-only), and the correctness fix routing prediction parsing through the audit-mandated aggregate_document_prediction (3b6b2e8) — the last of which is what makes the document-level base-risk figures in Ruling 1(b) trustworthy.",
+    "note_on_committed_grids": "evidence/plan2/threshold_grids.json was built at delta=0.05 (full budget, grid 9 per system). That is the pre-multiplicity-correction state and is consistent with §5.5 being open. Once the allocation is frozen at δ/3 the grids must be rebuilt at the per-system delta; the committed file must not be carried into certification as-is."
+  },
+
+  "scope": "This ruling covers the ADR 0007 freeze, the §5.5 allocation, and the authorization question. It does not authorise spend, sealed-label access, or Plan 4. No sealed label was opened and no money was spent in the course of this review."
+}

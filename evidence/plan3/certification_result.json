@@ -1,0 +1,244 @@
+{
+  "acceptance_floor": 0.2,
+  "alpha": 0.2,
+  "certification_access": {
+    "documents_read": 3152,
+    "final_reads": 0,
+    "head_hash": "ff5562419c7ddd543e06fdf656114a26cf79cdbf12063e906002b1024b423d9f",
+    "shift_reads": 0,
+    "verified": true
+  },
+  "delta": 0.05,
+  "delta_allocation": {
+    "fs": 0.0166666666666667,
+    "qa": 0.0166666666666667,
+    "zs": 0.0166666666666667
+  },
+  "grid_hashes": {
+    "fs": "0b74704acfa3d27eeb7eb719ac7586c09c769a64e28615a0f385888ec9f98b5a",
+    "qa": "676f0e04b133d74ca3f77cba1cb5a68878774b9f4576f5be8bf14b56a28d8d6d",
+    "zs": "5535b186c3d9a6b9641e8220dccb16520d7dfd44cfbbbc71a2880cbc21680ca1"
+  },
+  "hypotheses": {
+    "collapse_note": "Both baselines infeasible: H1 and H2 reduce to CA_QA >= material_gain and are ONE test stated twice. Must not be reported as two confirmatory comparisons (pre-registered, theorem-to-code-global-multiplicity.md section 7a).",
+    "collapsed_to_single_test": true,
+    "h1": {
+      "baseline": null,
+      "detail": "neither QA nor the baseline is certified feasible",
+      "outcome": "both_infeasible",
+      "qa": null
+    },
+    "h2": {
+      "baseline": null,
+      "detail": "neither QA nor the baseline is certified feasible",
+      "outcome": "both_infeasible",
+      "qa": null
+    }
+  },
+  "material_gain": 0.05,
+  "method": "scorc-joint-finite-grid (primary) + hoeffding-clopper-pearson-bonferroni (audit)",
+  "n_certification_groups": 1396,
+  "primary_construction": "scorc_union_bound",
+  "schema_version": "1",
+  "systems": {
+    "fs": {
+      "acceptance_ceiling": 0.5100286532951289,
+      "accepted_size_distribution": null,
+      "certified_acceptance": null,
+      "confidence_candidate": "tenth_percentile",
+      "conservative_audit": {
+        "acceptance_floor": 0.2,
+        "acceptance_lower": 0.11439418574315988,
+        "alpha": 0.2,
+        "candidate_count": 1,
+        "delta": 0.05,
+        "empirical_risk": 0.9235395189003436,
+        "feasible": false,
+        "method": "hoeffding-clopper-pearson-bonferroni",
+        "n_accepted": 194,
+        "n_total": 1396,
+        "reasons": [
+          "risk",
+          "acceptance"
+        ],
+        "risk_upper": 1.0,
+        "schema_version": "1",
+        "selected_candidate": null,
+        "status": "infeasible",
+        "theorem_minimum_n": null
+      },
+      "delta_s": 0.0166666666666667,
+      "group_count": 1396,
+      "group_size_distribution": {
+        "1": 684,
+        "2-3": 482,
+        "4-6": 171,
+        "7+": 59
+      },
+      "loss_summary": {
+        "gap": 2.568036660177686e-05,
+        "size_weighted_mean_loss": 0.9579669748610105,
+        "unweighted_mean_loss": 0.9579926552276122
+      },
+      "never_acceptable_groups": 684,
+      "primary": {
+        "acceptance_floor": 0.2,
+        "acceptance_lower": 0.46433586385282133,
+        "alpha": 0.2,
+        "candidate_count": 3,
+        "delta": 0.0166666666666667,
+        "empirical_risk": null,
+        "feasible": false,
+        "method": "scorc-joint-finite-grid",
+        "n_accepted": 0,
+        "n_total": 1396,
+        "reasons": [
+          "no_jointly_feasible_candidate"
+        ],
+        "risk_upper": 1.0,
+        "schema_version": "1",
+        "selected_candidate": null,
+        "status": "infeasible",
+        "theorem_minimum_n": 1386
+      },
+      "thresholds": [
+        "-inf",
+        -0.005075985954,
+        -0.001631792382
+      ]
+    },
+    "qa": {
+      "acceptance_ceiling": 0.9068767908309455,
+      "accepted_size_distribution": null,
+      "certified_acceptance": null,
+      "confidence_candidate": "mean",
+      "conservative_audit": {
+        "acceptance_floor": 0.2,
+        "acceptance_lower": 0.18252003803133302,
+        "alpha": 0.2,
+        "candidate_count": 1,
+        "delta": 0.05,
+        "empirical_risk": 0.4102919884169884,
+        "feasible": false,
+        "method": "hoeffding-clopper-pearson-bonferroni",
+        "n_accepted": 296,
+        "n_total": 1396,
+        "reasons": [
+          "risk",
+          "acceptance"
+        ],
+        "risk_upper": 0.5157130490277,
+        "schema_version": "1",
+        "selected_candidate": null,
+        "status": "infeasible",
+        "theorem_minimum_n": null
+      },
+      "delta_s": 0.0166666666666667,
+      "group_count": 1396,
+      "group_size_distribution": {
+        "1": 684,
+        "2-3": 482,
+        "4-6": 171,
+        "7+": 59
+      },
+      "loss_summary": {
+        "gap": -0.00019639036725616066,
+        "size_weighted_mean_loss": 0.607286127225848,
+        "unweighted_mean_loss": 0.6070897368585918
+      },
+      "never_acceptable_groups": 130,
+      "primary": {
+        "acceptance_floor": 0.2,
+        "acceptance_lower": 0.8777742662325276,
+        "alpha": 0.2,
+        "candidate_count": 3,
+        "delta": 0.0166666666666667,
+        "empirical_risk": null,
+        "feasible": false,
+        "method": "scorc-joint-finite-grid",
+        "n_accepted": 0,
+        "n_total": 1396,
+        "reasons": [
+          "no_jointly_feasible_candidate"
+        ],
+        "risk_upper": 1.0,
+        "schema_version": "1",
+        "selected_candidate": null,
+        "status": "infeasible",
+        "theorem_minimum_n": 1386
+      },
+      "thresholds": [
+        "-inf",
+        -0.069479746325,
+        -0.045326133148
+      ]
+    },
+    "zs": {
+      "acceptance_ceiling": 0.2693409742120344,
+      "accepted_size_distribution": null,
+      "certified_acceptance": null,
+      "confidence_candidate": "mean",
+      "conservative_audit": {
+        "acceptance_floor": 0.2,
+        "acceptance_lower": 0.06454799845255979,
+        "alpha": 0.2,
+        "candidate_count": 1,
+        "delta": 0.05,
+        "empirical_risk": 0.9782051282051283,
+        "feasible": false,
+        "method": "hoeffding-clopper-pearson-bonferroni",
+        "n_accepted": 117,
+        "n_total": 1396,
+        "reasons": [
+          "risk",
+          "acceptance"
+        ],
+        "risk_upper": 1.0,
+        "schema_version": "1",
+        "selected_candidate": null,
+        "status": "infeasible",
+        "theorem_minimum_n": null
+      },
+      "delta_s": 0.0166666666666667,
+      "group_count": 1396,
+      "group_size_distribution": {
+        "1": 684,
+        "2-3": 482,
+        "4-6": 171,
+        "7+": 59
+      },
+      "loss_summary": {
+        "gap": -0.0010641793928068966,
+        "size_weighted_mean_loss": 0.9933957275803723,
+        "unweighted_mean_loss": 0.9923315481875654
+      },
+      "never_acceptable_groups": 1020,
+      "primary": {
+        "acceptance_floor": 0.2,
+        "acceptance_lower": 0.23012747890238294,
+        "alpha": 0.2,
+        "candidate_count": 3,
+        "delta": 0.0166666666666667,
+        "empirical_risk": null,
+        "feasible": false,
+        "method": "scorc-joint-finite-grid",
+        "n_accepted": 0,
+        "n_total": 1396,
+        "reasons": [
+          "no_jointly_feasible_candidate"
+        ],
+        "risk_upper": 1.0,
+        "schema_version": "1",
+        "selected_candidate": null,
+        "status": "infeasible",
+        "theorem_minimum_n": 1386
+      },
+      "thresholds": [
+        "-inf",
+        -0.1007059922,
+        -0.083505230172
+      ]
+    }
+  },
+  "theorem_reference": "arXiv 2606.08517 Theorem 1 / Algorithm 1; see docs/plan3/theorem-to-code-scorc.md and theorem-to-code-global-multiplicity.md"
+}

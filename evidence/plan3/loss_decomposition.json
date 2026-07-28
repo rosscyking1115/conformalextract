@@ -1,0 +1,328 @@
+{
+  "acceptance_floor": 0.2,
+  "alpha": 0.2,
+  "certification_access": {
+    "certification_gold_read": true,
+    "documents_read": 3152,
+    "final_reads": 0,
+    "head_hash": "ff5562419c7ddd543e06fdf656114a26cf79cdbf12063e906002b1024b423d9f",
+    "shift_reads": 0,
+    "verified": true
+  },
+  "certifies_nothing": true,
+  "diagnostic_only": true,
+  "interpretation": "Document loss split into its four channels, and a counterfactual in which each system's grounding deficit is removed outright. structural_failure and grounding_failure are forced to loss 1.0; valid_empty is scored normally and is not forced (empty prediction against empty gold scores F1=1.0), it simply loses most of the time. Those three channels are where the Plan 2 grounding separation lives; valid_content_bearing is what the certificate actually measures. The grounding oracle measures coverage against the RESTRICTED population. That is NOT uniformly generous -- dropping a low-loss member raises a group's mean loss, and groups_worsened_by_restriction counts the cases -- so the conclusion does not rest on it. It rests on mean_loss_ceiling: a population whose mean loss exceeds alpha*c + (1-c) cannot reach coverage c at risk alpha under ANY selection rule. Where excluded_by_ceiling is true, arithmetic alone forbids the floor. Where it is false the ceiling is silent and the measured curve decides. Conditional coverage is not a deployable acceptance rate and is not comparable across systems. Nothing here selects a threshold or certifies anything.",
+  "schema_version": "1",
+  "splits": {
+    "certification": {
+      "fs": {
+        "channels": {
+          "grounding_failure": {
+            "document_level_contribution": 0.3229695431472081,
+            "document_share": 0.3229695431472081,
+            "documents": 1018,
+            "group_level_contribution": 0.3235966894455433,
+            "mean_loss_within_channel": 1.0
+          },
+          "structural_failure": {
+            "document_level_contribution": 0.004441624365482234,
+            "document_share": 0.004441624365482234,
+            "documents": 14,
+            "group_level_contribution": 0.002984718242597899,
+            "mean_loss_within_channel": 1.0
+          },
+          "valid_content_bearing": {
+            "document_level_contribution": 0.33962941140923375,
+            "document_share": 0.35850253807106597,
+            "documents": 1130,
+            "group_level_contribution": 0.354411607574215,
+            "mean_loss_within_channel": 0.9473556679308892
+          },
+          "valid_empty": {
+            "document_level_contribution": 0.2909263959390863,
+            "document_share": 0.31408629441624364,
+            "documents": 990,
+            "group_level_contribution": 0.276999639965256,
+            "mean_loss_within_channel": 0.9262626262626262
+          }
+        },
+        "confidence_candidate": "tenth_percentile",
+        "document_level_total_loss": 0.9579669748610103,
+        "documents": 3152,
+        "grounding_oracle": {
+          "conditional_groups": 747,
+          "conditional_max_acceptance": 0.0,
+          "excluded_by_ceiling": true,
+          "floor_reachable_unconditionally": false,
+          "floor_reachable_under_grounding_oracle": false,
+          "frontier_movement": 0.0,
+          "groups_worsened_by_restriction": 24,
+          "mean_loss_ceiling": 0.8400000000000001,
+          "restricted_mean_loss": 0.9512665173164313,
+          "unconditional_groups": 1396,
+          "unconditional_max_acceptance": 0.0
+        },
+        "group_level_total_loss": 0.9579926552276122,
+        "groups": 1396,
+        "total_gap": 2.5680366601887883e-05
+      },
+      "qa": {
+        "channels": {
+          "grounding_failure": {
+            "document_level_contribution": 0.04092639593908629,
+            "document_share": 0.04092639593908629,
+            "documents": 129,
+            "group_level_contribution": 0.03850140030297623,
+            "mean_loss_within_channel": 1.0
+          },
+          "structural_failure": {
+            "document_level_contribution": 0.006979695431472081,
+            "document_share": 0.006979695431472081,
+            "documents": 22,
+            "group_level_contribution": 0.004907186891427579,
+            "mean_loss_within_channel": 1.0
+          },
+          "valid_content_bearing": {
+            "document_level_contribution": 0.5232125231649344,
+            "document_share": 0.9032360406091371,
+            "documents": 2847,
+            "group_level_contribution": 0.5300207397143797,
+            "mean_loss_within_channel": 0.5792644443329376
+          },
+          "valid_empty": {
+            "document_level_contribution": 0.03616751269035533,
+            "document_share": 0.04885786802030457,
+            "documents": 154,
+            "group_level_contribution": 0.033660409949808234,
+            "mean_loss_within_channel": 0.7402597402597403
+          }
+        },
+        "confidence_candidate": "mean",
+        "document_level_total_loss": 0.6072861272258481,
+        "documents": 3152,
+        "grounding_oracle": {
+          "conditional_groups": 1337,
+          "conditional_max_acceptance": 0.037397157816005985,
+          "excluded_by_ceiling": false,
+          "floor_reachable_unconditionally": false,
+          "floor_reachable_under_grounding_oracle": false,
+          "frontier_movement": 0.017339851225748104,
+          "groups_worsened_by_restriction": 21,
+          "mean_loss_ceiling": 0.8400000000000001,
+          "restricted_mean_loss": 0.5817381282016927,
+          "unconditional_groups": 1396,
+          "unconditional_max_acceptance": 0.02005730659025788
+        },
+        "group_level_total_loss": 0.6070897368585918,
+        "groups": 1396,
+        "total_gap": -0.00019639036725627168
+      },
+      "zs": {
+        "channels": {
+          "grounding_failure": {
+            "document_level_contribution": 0.5796319796954315,
+            "document_share": 0.5796319796954315,
+            "documents": 1827,
+            "group_level_contribution": 0.564916884293675,
+            "mean_loss_within_channel": 1.0
+          },
+          "structural_failure": {
+            "document_level_contribution": 0.02284263959390863,
+            "document_share": 0.02284263959390863,
+            "documents": 72,
+            "group_level_contribution": 0.01927710939172257,
+            "mean_loss_within_channel": 1.0
+          },
+          "valid_content_bearing": {
+            "document_level_contribution": 0.3871140016920474,
+            "document_share": 0.39276649746192893,
+            "documents": 1238,
+            "group_level_contribution": 0.40394755276560435,
+            "mean_loss_within_channel": 0.9856085083467959
+          },
+          "valid_empty": {
+            "document_level_contribution": 0.0038071065989847717,
+            "document_share": 0.004758883248730965,
+            "documents": 15,
+            "group_level_contribution": 0.004190001736563341,
+            "mean_loss_within_channel": 0.8
+          }
+        },
+        "confidence_candidate": "mean",
+        "document_level_total_loss": 0.9933957275803723,
+        "documents": 3152,
+        "grounding_oracle": {
+          "conditional_groups": 816,
+          "conditional_max_acceptance": 0.0,
+          "excluded_by_ceiling": true,
+          "floor_reachable_unconditionally": false,
+          "floor_reachable_under_grounding_oracle": false,
+          "frontier_movement": 0.0,
+          "groups_worsened_by_restriction": 0,
+          "mean_loss_ceiling": 0.8400000000000001,
+          "restricted_mean_loss": 0.9843324482570807,
+          "unconditional_groups": 1396,
+          "unconditional_max_acceptance": 0.0
+        },
+        "group_level_total_loss": 0.9923315481875654,
+        "groups": 1396,
+        "total_gap": -0.0010641793928068966
+      }
+    },
+    "development": {
+      "fs": {
+        "channels": {
+          "grounding_failure": {
+            "document_level_contribution": 0.33440514469453375,
+            "document_share": 0.33440514469453375,
+            "documents": 312,
+            "group_level_contribution": 0.3388137953762127,
+            "mean_loss_within_channel": 1.0
+          },
+          "structural_failure": {
+            "document_level_contribution": 0.006430868167202572,
+            "document_share": 0.006430868167202572,
+            "documents": 6,
+            "group_level_contribution": 0.007398101619207147,
+            "mean_loss_within_channel": 1.0
+          },
+          "valid_content_bearing": {
+            "document_level_contribution": 0.3412621854744041,
+            "document_share": 0.36227224008574493,
+            "documents": 338,
+            "group_level_contribution": 0.3396219471067395,
+            "mean_loss_within_channel": 0.9420047900817132
+          },
+          "valid_empty": {
+            "document_level_contribution": 0.2765273311897106,
+            "document_share": 0.29689174705251875,
+            "documents": 277,
+            "group_level_contribution": 0.270173496975269,
+            "mean_loss_within_channel": 0.9314079422382672
+          }
+        },
+        "confidence_candidate": "tenth_percentile",
+        "document_level_total_loss": 0.9586255295258511,
+        "documents": 933,
+        "grounding_oracle": {
+          "conditional_groups": 213,
+          "conditional_max_acceptance": 0.0,
+          "excluded_by_ceiling": true,
+          "floor_reachable_unconditionally": false,
+          "floor_reachable_under_grounding_oracle": false,
+          "frontier_movement": 0.0,
+          "groups_worsened_by_restriction": 6,
+          "mean_loss_ceiling": 0.8400000000000001,
+          "restricted_mean_loss": 0.9389164044093621,
+          "unconditional_groups": 398,
+          "unconditional_max_acceptance": 0.0
+        },
+        "group_level_total_loss": 0.9560073410774284,
+        "groups": 398,
+        "total_gap": -0.0026181884484227647
+      },
+      "qa": {
+        "channels": {
+          "grounding_failure": {
+            "document_level_contribution": 0.03429796355841372,
+            "document_share": 0.03429796355841372,
+            "documents": 32,
+            "group_level_contribution": 0.04005643295844301,
+            "mean_loss_within_channel": 1.0
+          },
+          "structural_failure": {
+            "document_level_contribution": 0.010718113612004287,
+            "document_share": 0.010718113612004287,
+            "documents": 10,
+            "group_level_contribution": 0.01460078168620882,
+            "mean_loss_within_channel": 1.0
+          },
+          "valid_content_bearing": {
+            "document_level_contribution": 0.5083992582384865,
+            "document_share": 0.9067524115755627,
+            "documents": 846,
+            "group_level_contribution": 0.50183320100156,
+            "mean_loss_within_channel": 0.5606814514615933
+          },
+          "valid_empty": {
+            "document_level_contribution": 0.030010718113612004,
+            "document_share": 0.04823151125401929,
+            "documents": 45,
+            "group_level_contribution": 0.03326154582435989,
+            "mean_loss_within_channel": 0.6222222222222222
+          }
+        },
+        "confidence_candidate": "mean",
+        "document_level_total_loss": 0.5834260535225165,
+        "documents": 933,
+        "grounding_oracle": {
+          "conditional_groups": 375,
+          "conditional_max_acceptance": 0.042666666666666665,
+          "excluded_by_ceiling": false,
+          "floor_reachable_unconditionally": false,
+          "floor_reachable_under_grounding_oracle": false,
+          "frontier_movement": 0.012515912897822445,
+          "groups_worsened_by_restriction": 12,
+          "mean_loss_ceiling": 0.8400000000000001,
+          "restricted_mean_loss": 0.5575526744210955,
+          "unconditional_groups": 398,
+          "unconditional_max_acceptance": 0.03015075376884422
+        },
+        "group_level_total_loss": 0.5897519614705717,
+        "groups": 398,
+        "total_gap": 0.006325907948055209
+      },
+      "zs": {
+        "channels": {
+          "grounding_failure": {
+            "document_level_contribution": 0.5927116827438371,
+            "document_share": 0.5927116827438371,
+            "documents": 553,
+            "group_level_contribution": 0.5805066476912549,
+            "mean_loss_within_channel": 1.0
+          },
+          "structural_failure": {
+            "document_level_contribution": 0.01822079314040729,
+            "document_share": 0.01822079314040729,
+            "documents": 17,
+            "group_level_contribution": 0.014513356254959005,
+            "mean_loss_within_channel": 1.0
+          },
+          "valid_content_bearing": {
+            "document_level_contribution": 0.37963558413719184,
+            "document_share": 0.38692390139335475,
+            "documents": 361,
+            "group_level_contribution": 0.3976796052106817,
+            "mean_loss_within_channel": 0.981163434903047
+          },
+          "valid_empty": {
+            "document_level_contribution": 0.0021436227224008574,
+            "document_share": 0.0021436227224008574,
+            "documents": 2,
+            "group_level_contribution": 0.0026381909547738697,
+            "mean_loss_within_channel": 1.0
+          }
+        },
+        "confidence_candidate": "mean",
+        "document_level_total_loss": 0.9927116827438371,
+        "documents": 933,
+        "grounding_oracle": {
+          "conditional_groups": 225,
+          "conditional_max_acceptance": 0.0,
+          "excluded_by_ceiling": true,
+          "floor_reachable_unconditionally": false,
+          "floor_reachable_under_grounding_oracle": false,
+          "frontier_movement": 0.0,
+          "groups_worsened_by_restriction": 0,
+          "mean_loss_ceiling": 0.8400000000000001,
+          "restricted_mean_loss": 0.9793703703703704,
+          "unconditional_groups": 398,
+          "unconditional_max_acceptance": 0.0
+        },
+        "group_level_total_loss": 0.9953378001116695,
+        "groups": 398,
+        "total_gap": 0.002626117367832359
+      }
+    }
+  }
+}

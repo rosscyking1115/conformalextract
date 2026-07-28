@@ -1,0 +1,44 @@
+{
+  "acceptance_floor": 0.2,
+  "delta": 0.0166666666666667,
+  "grids": {
+    "fs": {
+      "certifiable_thresholds": [
+        "-inf",
+        -0.005075985954,
+        -0.001631792382
+      ],
+      "confidence_candidate": "tenth_percentile",
+      "grid_hash": "0b74704acfa3d27eeb7eb719ac7586c09c769a64e28615a0f385888ec9f98b5a",
+      "non_finite_scores": 4,
+      "realized_certifiable_size": 3,
+      "requested_grid_size": 3
+    },
+    "qa": {
+      "certifiable_thresholds": [
+        "-inf",
+        -0.069479746325,
+        -0.045326133148
+      ],
+      "confidence_candidate": "mean",
+      "grid_hash": "676f0e04b133d74ca3f77cba1cb5a68878774b9f4576f5be8bf14b56a28d8d6d",
+      "non_finite_scores": 4,
+      "realized_certifiable_size": 3,
+      "requested_grid_size": 3
+    },
+    "zs": {
+      "certifiable_thresholds": [
+        "-inf",
+        -0.1007059922,
+        -0.083505230172
+      ],
+      "confidence_candidate": "mean",
+      "grid_hash": "5535b186c3d9a6b9641e8220dccb16520d7dfd44cfbbbc71a2880cbc21680ca1",
+      "non_finite_scores": 4,
+      "realized_certifiable_size": 3,
+      "requested_grid_size": 3
+    }
+  },
+  "n_certification_groups": 1396,
+  "theorem_max_grid_size": 3
+}

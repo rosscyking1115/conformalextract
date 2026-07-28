@@ -1,0 +1,69 @@
+{
+  "acceptance_floor": 0.2,
+  "alpha": 0.2,
+  "label_access_entries": 2799,
+  "label_access_head_hash": "c1b3e5a2572c5d1d408a6fa77f53155c23dd7472563c2384085a7e728e8459b0",
+  "per_system": {
+    "fs": {
+      "auc_by_candidate": {
+        "mean": 0.9530959019014122,
+        "minimum": 0.9524318636869883,
+        "tenth_percentile": 0.9466627078627017
+      },
+      "base_risk": 0.9586255295258511,
+      "base_risk_upper": 1.0,
+      "favourable_bound_check": {
+        "base_risk_lower": 0.9141632820060835,
+        "floor_reachable": false,
+        "max_feasible_acceptance": 0.10729589749239565
+      },
+      "floor_reachable": false,
+      "max_feasible_acceptance": 0.0,
+      "minimum_abstention": 1.0,
+      "n_documents": 933,
+      "selected_candidate": "tenth_percentile",
+      "verdict": "near_vacuous"
+    },
+    "qa": {
+      "auc_by_candidate": {
+        "mean": 0.4401241770361072,
+        "minimum": 0.4662711827345719,
+        "tenth_percentile": 0.4507941858852217
+      },
+      "base_risk": 0.5834260535225165,
+      "base_risk_upper": 0.6278883010422841,
+      "favourable_bound_check": {
+        "base_risk_lower": 0.538963806002749,
+        "floor_reachable": true,
+        "max_feasible_acceptance": 0.5762952424965638
+      },
+      "floor_reachable": true,
+      "max_feasible_acceptance": 0.4651396236971449,
+      "minimum_abstention": 0.5348603763028551,
+      "n_documents": 933,
+      "selected_candidate": "mean",
+      "verdict": "marginal"
+    },
+    "zs": {
+      "auc_by_candidate": {
+        "mean": 0.9888477764726477,
+        "minimum": 0.9920105494864733,
+        "tenth_percentile": 0.9889132016717969
+      },
+      "base_risk": 0.9927116827438371,
+      "base_risk_upper": 1.0,
+      "favourable_bound_check": {
+        "base_risk_lower": 0.9482494352240696,
+        "floor_reachable": false,
+        "max_feasible_acceptance": 0.06468820596991298
+      },
+      "floor_reachable": false,
+      "max_feasible_acceptance": 0.0,
+      "minimum_abstention": 1.0,
+      "n_documents": 933,
+      "selected_candidate": "mean",
+      "verdict": "near_vacuous"
+    }
+  },
+  "selection_scope": "per_system"
+}
