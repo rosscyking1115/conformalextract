@@ -62,6 +62,14 @@ each metric's scope did not cover what its **name** claimed. Here a check's scop
 its **sentence** claimed. Same failure one level up — measurement versus report rather than
 measurement versus name — and in both cases the artifact passed every mechanical check it had.
 
+Its six instances are catalogued in that repo at
+`docs/findings/what-does-this-metric-return-when-nothing-happened.md`. **That document holds the
+instances; this gate holds the mechanism.** Read them together — either alone understates the
+problem, because the catalogue reads as six bugs in one harness and the gate reads as one habit in
+one seat, when it is a single failure mode that neither repository's mechanical checks could see.
+The reciprocal pointer from that catalogue back to here has not been made: that repo is closed and
+this is not the place to commit to it.
+
 Two repositories arriving at it independently is the argument that it is a real pattern rather than
 a local habit, and the reason it is written as a standing check rather than a war story. The
 general form: **a name, a metric and a verdict are all claims about scope, and none of them is

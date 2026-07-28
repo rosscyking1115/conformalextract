@@ -174,10 +174,53 @@ for the README pointing at generated or tested state wherever it can.
 
 README wording is a claims surface, so this change is routed for independent review like the others.
 
+## The path check is portable, and three repositories needed it this week
+
+Recorded as a recommendation, not an adoption. **Nothing outside this repository has been changed.**
+
+`tests/test_internal_paths.py` was built for one defect here, but the defect class is not local to
+this repository. Three instances in one week, in three repositories, all the same shape — a
+machine-local path treated as if it were durable:
+
+| Repository | Instance | Consequence |
+|---|---|---|
+| `lakehouse-capstone` | Jobs API run IDs held only under a local temp directory | blocked a C4 assessment |
+| `agent-release-gates` | a machine-local temp file recorded as the provenance of a committed evidence artefact | a published verdict was not reproducible |
+| `conformalextract` | private planning paths in tracked docs — then a hygiene report that introduced operator home paths while removing them | this report |
+
+**The test would have caught all three, and caught the third before it was committed** — which is
+not a projection: the stale-exception guard rejected an over-broad entry on its first run, and the
+untracked-file probe fails on exactly the case `git grep` could not see. That last point is what
+makes it worth porting rather than re-deriving: the two failures here were invisible to an
+index-based scan, and an index-based scan is what every one of these repositories would reach for
+first.
+
+Porting it needs three edits and no new thinking: the `ALLOWED` list (each repository's own
+legitimate quoters), `PROSE_SUFFIXES` if the repository holds other readable formats, and
+`SKIP_DIR_NAMES`. The patterns match the *shape* of an operator path rather than any username and
+should carry across unchanged.
+
+**Not adopted elsewhere by this change**, and each of those repositories would want its own
+exclusion list reasoned out rather than inherited — an exclusion copied from another repository is
+the blanket this design exists to prevent.
+
 ## Reproducing this report
 
 Every grep above is recorded inline. Re-run them after any remediation; check 3 and check 6 are the
 only two that should change verdict.
+
+## One pointer that is owed and not made
+
+`REVIEW.md` now points at `redteam-foundry`'s
+`docs/findings/what-does-this-metric-return-when-nothing-happened.md`, which catalogues six
+instances of the same failure one level down — metrics satisfied by the absence of what they
+measured, so scope did not cover what the **name** claimed, where here scope did not cover what the
+**sentence** claimed.
+
+**The reciprocal pointer, from that catalogue back to this gate, has not been made and is not this
+repository's commit.** That repo is closed. Recorded here so the debt is visible rather than
+forgotten: until it is made, a reader arriving at the catalogue sees six bugs in one harness and
+has no route to the mechanism.
 
 ## What was NOT checked
 
