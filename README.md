@@ -74,11 +74,17 @@ the claim's `limitations` field before citing it.
 once, over 3,152 documents, with a verified hash-chained access record and zero reads of the `final`
 or `shift` splits, which remain sealed.
 
-**Cost** (`CX-COST-01`). The entire programme of GPU work — inference benchmarking, QLoRA training,
-prediction generation for three systems over 27,372 frames, and serving-equivalence probes — cost
-approximately $19 against a $25 ceiling. All certification and analysis ran on CPU at no cost. The
-figure excludes the value of free-tier and local compute; individual job costs are recorded exactly
-and the total is rounded.
+**Cost** (`CX-COST-01`). The programme of GPU work — inference benchmarking, QLoRA training,
+prediction generation for three systems over 27,372 frames, and serving-equivalence probes — is
+recorded job by job and sums to between about $18.7 and $18.9 against an authorised $25 ceiling,
+each figure derived from the instance's hourly price and the job's measured duration rather than
+from a billing statement. All certification and analysis ran on CPU at no cost. The figure excludes
+the value of free-tier and local compute. There is no single spend ledger — Gate 0 has a per-job
+artifact and Plan 2's costs live in each run's brief or result document, so the total is assembled
+by a reader; one job has no per-job figure at all and is recovered by differencing the recorded
+running totals, which is what makes the total a band rather than a point. Individual figures are
+rounded as recorded, so the total is stated to one decimal place and not to the cent
+([ADR 0012](docs/adr/0012-cost-claim-evidence-correction.md)).
 
 ## How the evidence is held to account
 
@@ -105,10 +111,14 @@ than described.
   git-canonical (LF) bytes; a Windows working copy is checked out CRLF and hashes differently, and
   that correction is recorded ([`docs/plan3/certification-result.md`](docs/plan3/certification-result.md))
   rather than left as a trap for an independent verifier.
-- **Per-job cost recorded in each run's evidence artifact**, against a hard aggregate ceiling
+- **Per-job cost recorded for every job but one** — in a per-job evidence artifact for Gate 0
+  ([`evidence/gate0/hf_jobs_submission_attempts.json`](evidence/gate0/hf_jobs_submission_attempts.json)),
+  and in each run's launch brief or result document for Plan 2 — against a hard aggregate ceiling
   enforced in code (`training.REMAINING_BUDGET_USD` = $24.7992, the $25 cap less $0.2008 of prior
-  recorded spend), with a run ledger imposing R0→R1→R2 order. No paid run proceeds without explicit
-  owner approval; a plan's budget ceiling is not spending permission.
+  recorded spend), with a run ledger imposing R0→R1→R2 order. No single spend ledger exists and the
+  figures are price×duration estimates, not billed amounts
+  ([ADR 0012](docs/adr/0012-cost-claim-evidence-correction.md)). No paid run proceeds without
+  explicit owner approval; a plan's budget ceiling is not spending permission.
 - **Claims cannot outrun their evidence.** `conformalextract verify-claims` fails closed if a
   claim's evidence is not git-tracked, and a regression tripwire refuses a claim that holds a public
   surface while its own verification literally reads as pending. The tripwire is not a verification
