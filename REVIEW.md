@@ -33,6 +33,36 @@ uv run pytest -q && uv run ruff check . && uv run mypy
   load.
 - **Licence/provenance:** RAMS/WikiEvents raw text is non-redistributable — recorded and enforced.
 - **No-secrets sweep:** `.env` gitignored; no tokens/keys in tracked files.
+- **Scope-matches-sentence:** **A check's scope and its sentence must match. Before writing a
+  verdict, say which command produced it and what that command cannot see.** `git grep` and
+  `git ls-files` cannot see untracked files; a tracked scan is not a repository scan; a sample is
+  not a census; and a correction inherits the defect class it corrects unless you re-derive the
+  claim from the new evidence rather than the arithmetic already in hand. Four instances on
+  2026-07-28 — a cost total that omitted a figure recoverable from citations the same change had
+  just added; a draft asserting a citation count that a later fix made stale; a hygiene report that
+  introduced the paths it existed to remove, unseen by its own `git grep`; and the reviewer record
+  diagnosing all three, which asserted a repository-wide zero on the strength of a scan it had not
+  run. **The seat tasked with the human check is the one that failed it**, which is why the
+  operator-path half is now `tests/test_internal_paths.py` and carries a named exclusion list
+  instead of a count.
+- **No operator paths in prose:** enforced by `tests/test_internal_paths.py` over tracked **and
+  untracked** files. Exceptions are named in `ALLOWED` with the reason each cannot do its job
+  without the string, and an exception that stops matching fails the suite.
 
 **Verdict vocabulary:** PASS · PASS-WITH-NITS · BLOCK. A BLOCK escalates to the human Reviewer seat.
 For Plan 2 specifically, the independent reviewer basis is `docs/plan2/reviewer-brief.md`.
+
+## Why scope-matches-sentence is a gate and not a lesson
+
+It sits above because it fires at the *start* of a review. A lesson in a retrospective fires never.
+
+The sibling repo `redteam-foundry` reached the same gap independently in the same week, from the
+other direction: six metrics there were satisfied by the *absence* of the thing they measured, so
+each metric's scope did not cover what its **name** claimed. Here a check's scope did not cover what
+its **sentence** claimed. Same failure one level up — measurement versus report rather than
+measurement versus name — and in both cases the artifact passed every mechanical check it had.
+
+Two repositories arriving at it independently is the argument that it is a real pattern rather than
+a local habit, and the reason it is written as a standing check rather than a war story. The
+general form: **a name, a metric and a verdict are all claims about scope, and none of them is
+checked by the thing they describe.**
