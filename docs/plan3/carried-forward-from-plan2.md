@@ -208,7 +208,7 @@ here rather than in a new file, so there is one place to look.
 |---|---|---|---|
 | `reviewer_record.reanalysis.json` → `carried_to_publication_none_blocking` | P5's ADR/backlog obligation | states a risk | **untracked until now** — open |
 | `reviewer_record.release-hygiene.json` → `consequence_that_must_be_carried_forward` | the internal planning path is still in tracked files, on the plan that makes the repo public | states a risk | **untracked until now** — open, and knowingly accepted under [open decision 1](../plan4/open-release-decisions.md) |
-| `reviewer_record.plan3-close.json` → finding **N1**, rhetorical exposure of the α-frontier | states a risk | **untracked until now** — open |
+| `reviewer_record.plan3-close.json` | finding **N1** — the α-frontier's rhetorical exposure: publishing the whole curve gives a reader twenty places to land, and the defence is wording discipline rather than plan text | states a risk | **untracked until now** — open |
 
 **N1 was reported as discharged and was not.** The commit discharging B1 described R5 as the
 `withdrawn_assertions.json` registration; that was B1's own follow-on, not R5. R5 required N1 to be

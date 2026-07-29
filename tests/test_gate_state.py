@@ -187,6 +187,33 @@ def _flat(text: str) -> str:
     return " ".join(text.split())
 
 
+def _scanned_markdown() -> list[str]:
+    """The set the tripwire below actually reads. Extracted so a companion can bound IT.
+
+    It was previously inline, and `test_the_derivation_finds_something` was credited with guarding
+    it. That was false: the derivation guard bounds `_reviewer_records()` — 18 JSON files — and this
+    walk covers 63 markdown files, **with zero overlap**. If this walk went empty the tripwire would
+    pass silently and the companion would be untouched. Found by an independent reviewer measuring
+    the two sets rather than reading the docstring that claimed one guarded the other.
+    """
+
+    files: list[str] = []
+    for path in ROOT.rglob("*.md"):
+        parts = path.relative_to(ROOT).parts[:-1]
+        if any(p.startswith(".") or p in {"node_modules", "data"} for p in parts):
+            continue
+        files.append(path.relative_to(ROOT).as_posix())
+    return files
+
+
+def test_the_markdown_scan_reaches_files() -> None:
+    """Guard the tripwire's own set — not the derivation's, which is a different set entirely."""
+
+    scanned = _scanned_markdown()
+    assert len(scanned) > 30, f"markdown scan reached only {len(scanned)} files"
+    assert "README.md" in scanned
+
+
 @pytest.mark.parametrize("phrase", sorted(SUPERSEDED_ASSERTIONS))
 def test_a_superseded_gate_assertion_does_not_come_back(phrase: str) -> None:
     permitted = SUPERSEDED_ASSERTIONS[phrase]["permitted_in"]
@@ -194,14 +221,10 @@ def test_a_superseded_gate_assertion_does_not_come_back(phrase: str) -> None:
     allowed = set(permitted)
     needle = _flat(phrase)
     offenders: list[str] = []
-    for path in ROOT.rglob("*.md"):
-        parts = path.relative_to(ROOT).parts[:-1]
-        if any(p.startswith(".") or p in {"node_modules", "data"} for p in parts):
-            continue
-        relative = path.relative_to(ROOT).as_posix()
+    for relative in _scanned_markdown():
         if relative in allowed:
             continue
-        if needle in _flat(path.read_text(encoding="utf-8")):
+        if needle in _flat((ROOT / relative).read_text(encoding="utf-8")):
             offenders.append(relative)
     assert not offenders, (
         f"superseded gate-state assertion {phrase!r} "

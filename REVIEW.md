@@ -40,12 +40,23 @@ uv run pytest -q && uv run ruff check . && uv run mypy
   Elsewhere the same night, a scan whose directory change failed printed zero hits, and **a zero
   meaning "examined nothing" was indistinguishable from a zero meaning "found nothing"**.
   **The corollary that catches both: any check that can return zero must also report how many items
-  it examined**, so an empty scan cannot render identically to a clean one. Implemented here as the
-  guard-the-guard convention — every scanning test has a companion asserting the scan reached a
-  plausible number of items (`test_the_scan_finds_something_to_check`,
-  `test_the_scan_finds_files_to_check`, `test_the_derivation_finds_something`,
-  `test_the_register_is_populated_and_the_scan_reaches_files`). **A new scanning check without one
-  is incomplete.**
+  it examined**, so an empty scan cannot render identically to a clean one.
+
+  **Two guards are needed, not one, and conflating them is how B2 shipped.** A *cardinality* guard
+  bounds how many items the scan reached. A *kind* guard proves the scan looks at the right
+  population — for a filesystem walk, a live probe that plants an untracked file and asserts the
+  scan sees it. B2 was a failure of kind: the cardinality guard returned 202 and passed under the
+  broken implementation. **Every scanning gate needs the cardinality guard; a gate whose scope was
+  itself the defect needs the kind probe too** (`test_the_scan_reaches_untracked_files`, in both
+  `test_internal_paths.py` and `test_withdrawn_assertions.py`).
+
+  **The unit is the gate, not the module.** A first version of this rule claimed four modules were
+  guarded and named four companions. There are **six scanning gates across those four modules**, and
+  one companion bounded a set with *zero overlap* with the gate it was credited with guarding —
+  `test_the_derivation_finds_something` bounds 18 reviewer records; the tripwire beside it walks 63
+  markdown files. **A rule verified against the set its author could see is the defect the rule
+  describes**, which is why the enumeration is now by gate and each companion names the set it
+  bounds.
   Second half, and the reason this recurred: `tests/test_internal_paths.py` already walked the
   filesystem rather than the index, for exactly this reason, discovered a day earlier. The newer
   check did not inherit it. **A hard-won scope decision that lives in one check's implementation

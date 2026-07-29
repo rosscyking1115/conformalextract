@@ -463,5 +463,226 @@
     "what_was_in_scope": "The B1/R1-R5 discharge: docs/plan3/certification-result.md read whole and searched by meaning; the correction note's three assertions against the artifacts and the evaluator; the claim-boundaries section's integrity; the discharge quality of each of R1-R5; the completeness of Plan 2's standing_limitation against CX-SERVING-01; the accuracy of the directional finding as an independent test rather than a re-reading; the existence of carry-forward structures beyond the two in plan2-close, across every reviewer record; the correctness and safety of the _flat blockquote normalisation; and the green command.",
     "what_was_out_of_scope": "The O1 decisions themselves, which are the owner's. The Plan 4 pause. The Plan 3 close, which is a separate act by a reviewer who authored neither the remedies nor this record. The science of the certification result, which no finding here disturbs. The uncommitted working-tree changes, which are noted where they bear on a finding but are not ruled on, because a discharge is a commit.",
     "acceptance_rule": "A change to the PRIMARY result document — the one the claim boundaries live in and six claims cite as evidence — requires the independent reviewer to read that document END TO END in primary text rather than as a diff, and to search it by MEANING rather than by phrase, because the round this change discharges established that a paraphrase defeats a phrase search and that a reviewer reading a diff sees only what moved. It requires every figure the change carries to be re-derived from a primary artifact or from the code that defines it, and where a figure cannot be re-derived without crossing a discipline boundary, the reviewer must say so rather than imply verification. It requires the claim-boundary section to be checked for integrity byte-exactly rather than by reading, because a weakening can be one word. It requires every carried-forward list in every source record to be diffed against its receiving artifact, and — new, because of finding 6 — every carried item to be recorded with its DIRECTION, so that a one-way omission set is detectable without anyone having to establish intent. It requires the green command to be verified at the reviewed commit against committed blobs, not accepted from the commit message. The author of the change may not complete this record."
+  },
+
+  "discharge_pass_2026_07_29": {
+    "_notice": "Second pass by the same independent reviewer, on the discharge of the BLOCK above (B2, B3, B4) and on four new REVIEW.md rules that were not in scope of the original review. Everything above is preserved unchanged and remains the record of the original BLOCK. This pass wrote only this key. It advances no gate, closes no plan, authorises no spend, no visibility change, no description or topics, no release bundle, no publication and no sealed-label access. It does not run §12.1.",
+    "reviewed_commits": "98b4ba3 (the B2-B4 discharge, 10 files) and e852f08 (four generalised rules, 3 files), on top of 3a0917a. HEAD is e852f08.",
+    "reviewed_date": "2026-07-29",
+    "reviewer_identity": "Same independent reviewer as the record above. Not the author of 98b4ba3, e852f08, 3a0917a or a522a76. I did not fix any defect I found in this pass either.",
+
+    "verdict": "BLOCK — on ONE item, and it is the item I was asked to attack hardest. Everything else is discharged, and discharged well: B2, B3, B4, R6, R7, R8 and R9 all landed, the suite is genuinely green at HEAD, B3's repair is better than what I asked for, and the four rules are correct AS RULES. What blocks is the evidentiary claim attached to Rule 1's corollary. 'All four scanning tests have a companion asserting the scan reached a plausible number of items' is not true, in two independent ways that I verified by measurement rather than by reading: (a) `test_gate_state.py::test_the_derivation_finds_something` bounds a set with ZERO overlap with the set the module's actual scanning gate walks, so that gate can still go vacuous with every companion green; and (b) `len(_prose_files()) > 50` passes identically at 202 under the reverted `git ls-files` implementation, so the companion named as B2's countermeasure cannot see B2's defect. A rule reported wider than it holds is this repository's recurring defect one level up — in the rule written to name that defect. Narrow, cheap, and the fix makes the rule stronger rather than weaker.",
+
+    "self_reference_check_the_message_set_for_itself": {
+      "the_rule_under_test": "'A discharge must name the item it discharges and point at where it now lives. A discharge that only asserts completion is not one.'",
+      "verdict_on_the_discharge_message_against_its_own_rule": "PASSES, on every item, and I checked each against the artifact rather than against the message. B2 names the item, names the root cause (`git ls-files` scope), names the file and the renamed helper, and points at `tests/test_withdrawn_assertions.py::_prose_files`; I confirmed the helper exists, walks `rglob`, and that the docstring's scope sentence was corrected in the same change from 'tracked' to 'the filesystem'. B3 names both surfaces and I read both. B4 says 'discharged where it now lives: §E of docs/plan3/carried-forward-from-plan2.md' and §E exists with N1 named in it. Q6 names the three surfaces corrected and all three carry the supported form. R6, R2 and R8 each name their file and I found the edit in each. No item is retired by assertion alone.",
+      "one_place_it_comes_closest_to_failing": "R2. The message says 'the ADR 0007 note now records that the measurement is a different split and population from the documents it inspected' — true, and it is the material half. It does not mention that the second element R2 asked for, the COUNT, is still absent: the note says 'a handful of high-loss documents' where every other surface says 'two'. That is an omission from the discharge description rather than a false statement in it, so it does not breach the rule; it is nit N4 below.",
+      "and_one_place_the_rule_catches_the_discharge_itself": "The §E table row for N1 is malformed — see required item D2. B4's discharge points at that table as where the item now lives, and the row it points at renders wrong. The rule holds; the pointer is broken."
+    },
+
+    "green_command_at_e852f08": {
+      "pytest": "369 passed in 35.07s. The expected signal, and it is now genuinely met — I ran it myself at HEAD rather than accepting the message.",
+      "ruff": "All checks passed!",
+      "mypy": "Success: no issues found in 24 source files.",
+      "verify_claims": "ok true, 15 claims, 13 publishable, by_status {infeasible 3, negative 2, planned 2, qualified 2, verified 6}, tracking_verifiable true, both evidence maps empty. Exact.",
+      "b2_is_discharged_in_signal": "Yes. 369 passed at HEAD against 2 failed / 367 passed at a522a76. The count in the message is now the count the command returns."
+    },
+
+    "the_item_i_was_asked_to_attack_hardest": {
+      "the_claim_under_test": "REVIEW.md at e852f08: 'Implemented here as the guard-the-guard convention — every scanning test has a companion asserting the scan reached a plausible number of items (`test_the_scan_finds_something_to_check`, `test_the_scan_finds_files_to_check`, `test_the_derivation_finds_something`, `test_the_register_is_populated_and_the_scan_reaches_files`).'",
+      "method": "I did not read the four companions and judge them. For each I identified the exact set the GATE iterates, the exact set the COMPANION bounds, and then measured both, so that 'bounds the scanned set' versus 'bounds something adjacent' is a number rather than an opinion. I then asked, for each, what a silent collapse would look like and whether the companion survives it.",
+
+      "companion_1_test_the_register_is_populated_and_the_scan_reaches_files": {
+        "module": "tests/test_withdrawn_assertions.py",
+        "gate_it_guards": "test_a_withdrawn_assertion_survives_only_where_named, which iterates `_prose_files()`; and the parametrisation over `_register()`, which would silently collapse to a single skipped test if the register emptied.",
+        "does_it_bound_the_scanned_set": "YES on cardinality. `assert len(_prose_files()) > 50` calls the SAME nullary function the gate iterates — not a re-derivation, the same object. `assert _register()` bounds the other collapse route. Both dimensions that can go empty are covered.",
+        "BUT_it_does_not_bound_the_property_that_actually_failed": "MEASURED: under the reverted `git ls-files` implementation, `_prose_files()` returns 202 files. `len(...) > 50` passes. So if anyone reverted the walk to the index — which IS the B2 defect, exactly — this companion would be green, the gate would be blind to untracked files again, and nothing in the module would notice. The guard bounds CARDINALITY; B2 was a failure of SCOPE KIND, and the two are independent.",
+        "the_asymmetry_that_makes_this_sharp": "tests/test_internal_paths.py HAS the missing test: `test_the_scan_reaches_untracked_files` writes a probe file, asserts the scanner sees it, and removes it — and its docstring says in terms 'If this ever passes trivially the scanner has quietly become index-based and the whole test is theatre.' tests/test_withdrawn_assertions.py has no equivalent. The fix inherited the IMPLEMENTATION from the module that learned the lesson and did not inherit the TEST that proves the implementation is of the right kind. That is the exact 'second half' the same commit wrote down — a hard-won scope decision living in one check's implementation gets rediscovered the expensive way — recurring one level up, at the test of the scope decision, in the commit that recorded the lesson.",
+        "ruling": "WEAKER THAN CLAIMED. Sound as a cardinality guard; silent on the property whose failure produced the rule."
+      },
+
+      "companion_2_test_the_scan_finds_files_to_check": {
+        "module": "tests/test_internal_paths.py",
+        "gate_it_guards": "test_no_internal_path_outside_the_named_exceptions, via `_scan()`, which iterates `_prose_files()`.",
+        "does_it_bound_the_scanned_set": "YES, and it is the strongest of the four. Same function, `len(files) > 50`, PLUS `any(path.name == 'README.md' for path in files)` — a named-member assertion, so a walk that returned 51 junk files still fails. PLUS the separate live probe `test_the_scan_reaches_untracked_files`, which is the only place in the suite that asserts the scan's KIND rather than its size.",
+        "ruling": "AS CLAIMED, and better. This is the pattern the other three should be measured against."
+      },
+
+      "companion_3_test_the_scan_finds_something_to_check": {
+        "module": "tests/test_doc_references.py",
+        "gate_it_guards": "test_every_test_named_in_the_docs_exists, which iterates `_referenced_identifiers()` and compares against `_known_identifiers()`.",
+        "does_it_bound_the_scanned_set": "It bounds the DERIVED OUTPUT (`len(referenced) > 20`), not the input file list (`len(_documentation_files())`, currently 56, asserted nowhere). I tested whether that adjacency is exploitable rather than assuming it: MEASURED, the corpus yields 45 distinct identifiers across 56 files; if the `docs/` rglob silently returned nothing and only CLAUDE.md, REVIEW.md and README.md survived, `referenced` would be 8 and the companion FAILS. So the realistic total collapse is caught.",
+        "and_the_adjacency_is_defensible_here": "For THIS gate a scanned file containing no identifier contributes nothing, so bounding identifiers rather than files is bounding the quantity that can actually go silently empty. I record it as adequate rather than as a gap. It is nonetheless a weaker construction than companion 2's, because it relies on a distributional fact about where identifiers live (the top file alone carries 17 of 45) rather than on a structural one, and nothing pins that fact.",
+        "the_modules_second_scanning_gate_self_guards": "test_every_claim_id_cited_in_public_prose_is_surfaced_there carries `assert cited, f'{filename} cites no claim IDs...'` inline, and test_every_accepted_plan_on_disk_is_pinned guards by SET EQUALITY against a literal dict, so an empty rglob fails it. Both correct, and neither is one of the four named — which is part of the enumeration problem below.",
+        "ruling": "AS CLAIMED, with the construction weaker than companion 2's."
+      },
+
+      "companion_4_test_the_derivation_finds_something": {
+        "module": "tests/test_gate_state.py",
+        "ruling": "NOT AS CLAIMED. This is the blocking half.",
+        "what_it_bounds": "`assert len(_reviewer_records()) >= 10` and `assert _plan_one_closed_from_gate_status() is True`. `_reviewer_records()` globs `evidence/*/reviewer_record*.json`.",
+        "what_the_modules_scanning_gate_actually_walks": "test_a_superseded_gate_assertion_does_not_come_back does NOT use `_reviewer_records()`. It performs its OWN independent walk — `ROOT.rglob('*.md')` with its own inline skip condition — and collects `offenders`.",
+        "the_measurement": "The tripwire walks 63 .md files. The companion's set has 18 .json files. **Overlap: 0.** The two sets are disjoint in membership and in kind. If the tripwire's walk returned nothing — a broadened skip condition, a moved root, a pattern typo — `offenders` would be empty, the tripwire would PASS, and `test_the_derivation_finds_something` would be entirely unaffected because it never touches that walk.",
+        "the_companions_own_docstring_overstates_it_too": "'Guard the guard: a glob that matched nothing would make every assertion below vacuous.' There are TWO globs below. It bounds one of them. The docstring is where the rule's claim came from, and the docstring is wrong in the same way the rule is.",
+        "what_does_and_does_not_cover_the_gap": "test_every_permitted_exception_still_earns_its_place does NOT close it: it reads the permitted_in files directly by path and would pass unchanged if the rglob went empty. There is no cardinality assertion anywhere in tests/test_gate_state.py for the tripwire's file set.",
+        "a_second_divergence_in_the_same_place": "The tripwire's inline skip is `p.startswith('.') or p in {'node_modules','data'}` — a THIRD scope definition, different from the SKIP_DIR_NAMES frozenset that tests/test_internal_paths.py and tests/test_withdrawn_assertions.py share by copy. It skips all dot-directories (broader) but not `dist`, `build` or `htmlcov` (narrower). So the same commit that wrote 'a hard-won scope decision that lives in one check's implementation instead of a shared rule gets rediscovered the expensive way' left three implementations of the scope decision, two identical by copy-paste and one divergent, and no shared rule. Not blocking on its own; recorded because it is the same lesson unapplied in the file the rule cites."
+      },
+
+      "the_enumeration_itself_is_short": {
+        "finding": "'All four scanning tests' counts MODULES that have a companion, not scanning GATES that need one. By my enumeration there are six scanning gates across those four modules: (1) withdrawn-assertions phrase scan — guarded; (2) internal-paths scan — guarded, twice; (3) doc-references identifier scan — guarded; (4) doc-references claim-ID scan — self-guarded inline, not among the four named; (5) gate-state records derivation — guarded; (6) gate-state superseded-assertion tripwire — UNGUARDED. Five of six are covered and the rule says four of four.",
+        "why_this_is_the_rules_own_defect": "The corollary is 'any check that can return zero must also report how many items it examined.' The claim that it is already implemented was verified against the four companions — the set the author could see — rather than against the set of things that can return zero. A check reports on the set it can see; so does a claim about checks. The instance is inside the rule.",
+        "i_checked_for_a_fifth_module": "tests/test_preparation.py appeared in a naive grep for walker idioms but contains no glob and no corpus scan. The four modules are the right four modules. The under-count is of gates, not of modules."
+      },
+
+      "what_the_rule_should_say": "See required item D1. The rule is right and worth keeping; only its evidence sentence is false. The three changes that make it true are all small: add a cardinality assertion for the gate-state tripwire's own walk, add an untracked-file probe to tests/test_withdrawn_assertions.py mirroring the one tests/test_internal_paths.py already has, and restate the parenthetical as a per-gate list rather than a per-module one."
+    },
+
+    "the_rglob_rewrite_blind_spots": {
+      "gitignored_files_now_in_scope": {
+        "measured": "ZERO today. I computed the rglob set and the `git ls-files` set over the same suffix filter: 202 files each, symmetric difference EMPTY in both directions. Nothing gitignored is currently newly scanned, and nothing tracked was dropped.",
+        "but_the_skip_list_does_not_mirror_gitignore": "SKIP_DIR_NAMES omits four gitignored directory patterns whose contents carry prose suffixes: `*.egg-info/` (`SOURCES.txt`, `top_level.txt`, `entry_points.txt`), `checkpoints/`, `adapters/` (`adapter_config.json`, a vendor `README.md`) and `trackio/`. None exists in this working tree, which is why the measurement is zero. On a machine where a training run has populated `adapters/` or `trackio/`, a `trainer_state.json` recording an absolute output path would match `operator-dev-root` and fail tests/test_internal_paths.py on a file that can never publish.",
+        "the_consequence_worth_naming": "This makes the suite MACHINE-DEPENDENT in a way the index-based version was not — `git ls-files` was identical on every checkout. Green on a laptop and red on a training box, with nothing saying which is authoritative, is a new property. It is a false-POSITIVE risk rather than a blind spot, and the fix is one line: mirror the gitignored artifact directories into SKIP_DIR_NAMES. Nit N1."
+      },
+      "symlinks": {
+        "finding": "A genuine blind spot, and NOT a regression. Python is 3.12.13 here; `pathlib.Path.rglob` has signature `(self, pattern, *, case_sensitive=None)` — no `recurse_symlinks` parameter, and `**` does not descend into symlinked directories. A symlinked documentation tree would be invisible to both scanners. `git ls-files` had the same blind spot from the other direction (git records the link, not the target), so nothing was lost in the rewrite.",
+        "why_it_still_belongs_on_the_record": "Rule 1 says a check reports on the set it can see. Neither module's docstring mentions symlinks, and both docstrings are otherwise scrupulous about scope. One clause each. Nit N2."
+      },
+      "the_data_skip": {
+        "finding": "CORRECT, and hides nothing that matters. `data/` holds raw RAMS, sealed labels and predictions — all gitignored, all forbidden from publication, and its labelled artifacts carry `.jsonl`, which is not in PROSE_SUFFIXES anyway. Skipping it is not merely convenient: scanning sealed material to check for prose leaks would itself raise a label-access question, so the skip is the right call on discipline grounds as well as size.",
+        "one_latent_gap_in_how_it_is_expressed": "The skip matches a directory NAME at any depth, not a path. MEASURED: one directory in this tree already matches by name at depth — `data/raw/rams/RAMS_1.0c/data` — which is harmless because its parent is skipped anyway. But a documentation subdirectory named `docs/data/`, or `docs/*/build/`, would be silently excluded from every scan with nothing reporting it. Nobody has created one; the exposure is that nothing would say if they did. Nit N3."
+      }
+    },
+
+    "the_rest_of_the_discharge_item_by_item": {
+      "B2": "DISCHARGED. Root cause correctly identified and correctly generalised. `_prose_files()` walks `rglob`; the docstring records the mechanism precisely, including that `git add -A` tracked the file in the same commit; the module docstring's scope sentence was corrected from 'tracked' to 'the filesystem' in the same change, which was the right instinct and is exactly the scope-matches-sentence rule applied to itself. Green is now run after staging, and that immediately caught a second instance — my own record quoting the internal planning path — which is the discipline working rather than being asserted. I re-ran the green command at HEAD: 369 passed. The ALLOWED entry added for my record in tests/test_internal_paths.py is correctly reasoned (mention-not-use, same ground as the record it reports on) and I confirmed the file genuinely contains the string, so it is not a stale exemption.",
+      "B3": "DISCHARGED, and the repair is better than the one I asked for. I offered two options; the author took the harder one and went past it. certification-result.md now splits the passage into 'Signature one, the excess' and 'Signature two, the co-occurrence', states the identity inline (`fp = predictions − tp`, `fn = gold − tp`, so `fp − fn = predictions − gold`), and states what the excess CANNOT show — 'a substitution ... produces one false positive and one false negative and contributes exactly zero. The 637 is over-generation and nothing else.' Signature two then attaches wrong-role/boundary/coreference to the co-occurrence explicitly, with 'not the one above'. ADR 0007 carries the same separation in compressed form and adds the sharper consequence: the excess 'cannot be evidence for or against an entity-naming account'. I re-derived the algebra against src/conformalextract/evaluation.py and both statements are exact. The note also records that an earlier version conflated them, so a reader learns the document was wrong rather than finding a silent edit.",
+      "B4": "DISCHARGED, with one defect in the artifact it points at — see D2. §E exists, is titled 'obligations from other reviews, previously tracked nowhere', names N1, names both further structures from my Q7, gives each a direction, and states in its own voice that 'N1 was reported as discharged and was not' with the mechanism (R5 was described as B1's follow-on). Registering all three in the existing register rather than a new file is the right call and the document says why.",
+      "R6": "DISCHARGED, and correctly. The row now records BOTH corrections in sequence — R3's 'executed' error and R6's §8.5 error — and re-grounds on exactly the ground I said was available: 'a sensitivity analysis on a result that is infeasible under the lenient loss, so the harsher one cannot change the conclusion.' It adds 'Not descoped for cost — it is $0 — and if Plan 3's close review wants it, it is cheap to run', which keeps the option open rather than closing it, and is the honest posture for a predeclared §4.1 analysis. A row that now carries its own two-step correction history is stronger than one that had been right first time.",
+      "R7": "DISCHARGED, and the provenance disclosure goes beyond the ask. The supported form replaces the overstated one in the register, REVIEW.md and docs/writeup/candidate-findings.md; the §C table gains the B5 row it had omitted; and the register records that the overstated framing was SUPPLIED rather than derived, with the explicit statement that this 'is not exculpatory'. Recording provenance for a characterisation is a genuine addition to this repository's method and I endorse it. One residue: see N5 on where the disclosure could mislead.",
+      "R8": "DISCHARGED IN SUBSTANCE, DEFECTIVE IN CITATION — see D3. The verified_by now records limitations 6 and 7 and, better than asked, explains WHY they were missed ('a second carried-forward structure that no register had enumerated'). But it cites 'evidence/plan3/reviewer_record.b1-primary-document.json, finding R4', and this record has no finding R4; its items are B1-B4 and R6-R9. R4 belongs to evidence/plan4/reviewer_record.o2-o3-claims-change.json.",
+      "R9": "DISCHARGED. Both structures I found in Q7 are in §E by name with a direction and a status. The release-hygiene one is additionally annotated 'knowingly accepted under open decision 1', which is a fair and checkable disposition — it converts an undisclosed residue into a disclosed accepted risk rather than pretending it was fixed.",
+      "the_four_rules_as_rules": "Rules 2, 3 and 4 are correct, well-scoped and worth keeping, and I have no finding against any of them. Rule 3's instruction — 'when a claim rests on a decomposition, write down the identity that would refute it' — is the most transferable thing produced in this whole sequence, and preserving the one-line falsifier rather than the corrected prose is the right durable form. Rule 4 is the one this message was tested against and it holds. Rule 1 is correct as a RULE; only its evidence sentence is false."
+    },
+
+    "required_items_this_pass": {
+      "_note": "D1 is blocking. D2 and D3 are not. None requires new analysis, new evidence, a gate, a sealed-label read, §12.1 or any spend.",
+      "D1_rule_1s_coverage_claim_is_false_in_two_measured_ways": {
+        "blocking": true,
+        "file": "REVIEW.md (the claim), tests/test_gate_state.py and tests/test_withdrawn_assertions.py (the two real gaps behind it)",
+        "current": "'Implemented here as the guard-the-guard convention — every scanning test has a companion asserting the scan reached a plausible number of items (test_the_scan_finds_something_to_check, test_the_scan_finds_files_to_check, test_the_derivation_finds_something, test_the_register_is_populated_and_the_scan_reaches_files). A new scanning check without one is incomplete.'",
+        "what_is_wrong": "(i) test_the_derivation_finds_something bounds a set with ZERO measured overlap with the set tests/test_gate_state.py::test_a_superseded_gate_assertion_does_not_come_back walks (18 reviewer-record JSONs versus 63 .md files, disjoint). That tripwire has no cardinality guard anywhere, so it can pass vacuously with every named companion green. (ii) The enumeration counts modules, not gates: six scanning gates exist across those four modules and five are covered. (iii) test_the_register_is_populated_and_the_scan_reaches_files bounds cardinality only — MEASURED, a revert to `git ls-files` returns 202 files and passes `> 50`, so the companion cited as B2's countermeasure cannot detect B2's defect.",
+        "what_to_do": "Three edits, any of which can be made independently. (a) Add a cardinality guard for the gate-state tripwire's own walk — factor its `ROOT.rglob('*.md')` into a named helper and assert `len(helper()) > 20` plus a named member, in the same shape as tests/test_internal_paths.py::test_the_scan_finds_files_to_check; then correct that companion's docstring, which currently says 'every assertion below' and covers one of two. (b) Add an untracked-file probe to tests/test_withdrawn_assertions.py mirroring test_the_scan_reaches_untracked_files, so the property B2 was about is asserted in the module that failed it and not only in the module that learned it. (c) Restate the parenthetical in REVIEW.md as a claim about GATES rather than modules, or drop the 'every scanning test has one' sentence and keep only the forward-looking requirement, which is true and is the load-bearing half.",
+        "explicitly_not_asked": "Do not weaken or remove the rule. It is correct and it is the most reusable of the four. Only the sentence asserting it is already fully implemented is false."
+      },
+      "D2_the_section_E_row_for_N1_is_malformed": {
+        "blocking": false,
+        "file": "docs/plan3/carried-forward-from-plan2.md, §E table, third data row",
+        "what_is_wrong": "The table declares four columns (Source | Obligation | Direction | Status). The first two data rows have four cells. N1's row has THREE — I counted the delimiters. It renders with 'states a risk' in the Obligation column, 'untracked until now — open' in the Direction column, and Status empty. The single item B4 was raised about, in the table B4's discharge points at as where that item now lives, is the one row that renders wrong.",
+        "what_to_do": "Split the first cell: Source = `reviewer_record.plan3-close.json` → finding **N1**; Obligation = the rhetorical exposure of the α-frontier, not stated in ADR 0011 §1; Direction; Status. Nothing else in the row changes."
+      },
+      "D3_the_ledgers_provenance_citation_does_not_resolve": {
+        "blocking": false,
+        "file": "evidence/plan4/claim_ledger.json, CX-SERVING-01, verified_by",
+        "what_is_wrong": "'Limitations 6 and 7 added 2026-07-29 on independent review (evidence/plan3/reviewer_record.b1-primary-document.json, finding R4)'. That record contains no finding R4 — its required items are B1-B4 and R6-R9, and the item that asked for this sentence is R8. R4 is in evidence/plan4/reviewer_record.o2-o3-claims-change.json, which is the review that required the limitations themselves. The citation pairs one record's filename with another record's finding ID, so a reader following it finds nothing.",
+        "why_it_is_worth_a_required_item_rather_than_a_nit": "It is an identifier that must resolve, on the claim ledger, which is the artifact with the highest citation-integrity standard in this repository — and it is the exact class tests/test_doc_references.py exists for, except that check only resolves `test_*` identifiers in docs/ and has no view of finding IDs in evidence/. Nothing catches it.",
+        "what_to_do": "Either cite the record that raised R4 — 'evidence/plan4/reviewer_record.o2-o3-claims-change.json, finding R4' — or cite both with their correct roles: R4 required the limitations, R8 of evidence/plan3/reviewer_record.b1-primary-document.json required this provenance sentence."
+      }
+    },
+
+    "nits_this_pass": {
+      "N1_SKIP_DIR_NAMES_does_not_mirror_gitignore": "`*.egg-info/`, `checkpoints/`, `adapters/` and `trackio/` are gitignored but not skipped, and all four can contain `.json`, `.md` or `.txt`. Zero impact today (measured: rglob and git ls-files agree exactly at 202 files), but it makes the suite machine-dependent — a populated `adapters/` or `trackio/` could fail tests/test_internal_paths.py on a file that can never publish. One-line fix in both copies of the list.",
+      "N2_neither_scanner_docstring_mentions_symlinks": "Python 3.12's rglob does not descend into symlinked directories and offers no parameter to change that. Not a regression from `git ls-files`, but both modules are otherwise exact about scope, and Rule 1 is about exactly this.",
+      "N3_the_skip_matches_a_directory_name_at_any_depth": "A `docs/data/` or `docs/*/build/` would be silently excluded from every scan. One already matches at depth (`data/raw/rams/RAMS_1.0c/data`), harmlessly. The exposure is that nothing would report it if a documentation directory ever took one of those names.",
+      "N4_the_ADR_0007_note_still_says_a_handful_where_every_other_surface_says_two": "R2's split element landed and it was the material one. The count element did not: the note reads 'an unquantified look at a handful of high-loss documents' while certification-result.md, the ledger, the register and the withdrawn-assertions entry all say 'two development examples'. The source document is now the only surface that does not state the count. If the number inspected is genuinely unknown — defensible, since the paragraph says 'documents' and quotes two — the exact form is 'an unknown number, of which two are quoted', and that is stronger than either.",
+      "N5_the_supplied_framing_disclosure_needs_one_more_clause_to_be_safe": "The register records that the overstated directional claim was supplied by the owner and says explicitly that this 'is not exculpatory'. That is the right instinct and the right register. But as written, a later reader learns that a characterisation this repository published was owner-supplied and wrong, without learning that the owner-supplied framings elsewhere in the corpus were NOT audited by this pass. Neither I nor the change checked whether any other supplied characterisation was transcribed rather than tested. One clause saying so — that the provenance is recorded for this instance and no systematic audit of supplied framings has been done — closes it, and it is the same scope-matches-sentence discipline the document applies everywhere else.",
+      "N6_three_divergent_copies_of_the_scope_decision": "SKIP_DIR_NAMES exists identically in tests/test_internal_paths.py and tests/test_withdrawn_assertions.py by copy, and tests/test_gate_state.py's tripwire carries a third, different inline version (`p.startswith('.') or p in {'node_modules','data'}`) that skips all dot-directories but not dist/build/htmlcov. The commit that wrote 'a hard-won scope decision that lives in one check's implementation instead of a shared rule gets rediscovered the expensive way' left three implementations and no shared rule. Sharing them would also fix N1 and N3 in one place instead of three.",
+      "N7_the_gate_state_direction_for_N1_disagrees_with_the_record_that_supplied_it": "§E marks N1 'states a risk'. This record's carried_forward classified the same item CF3 as 'qualifies a reassurance' — it qualifies the α-frontier's ruling-out-only defence. Neither is obviously wrong and I do not press for a change, but a direction column whose values disagree between the register and the record that handed the item over is less useful than one that does not, and neither surface cites the other's classification. Worth one sentence in §E naming the divergence, since the direction column's whole value is that it can be compared across a set."
+    },
+
+    "carried_forward": {
+      "_why_this_key_exists": "Same reason as the pass above. Every item this pass hands to someone else, by NAME, with its DIRECTION. Three of the four state a risk and one qualifies a reassurance; stated so a later reader can see this set is not one-way and can check me the same way I checked the change.",
+      "items": [
+        {
+          "name": "DF1_rule_1_coverage_claim_and_the_two_gaps_behind_it",
+          "same_as": "discharge_pass_2026_07_29.required_items_this_pass.D1",
+          "direction": "qualifies a reassurance",
+          "what_it_qualifies": "'the guard-the-guard convention is already implemented here' — the reassurance attached to Rule 1, which is what makes a reader treat the corollary as satisfied rather than as work to do.",
+          "for": "the author of the discharging change",
+          "discharged_when": "the gate-state tripwire's own walk has a cardinality guard; tests/test_withdrawn_assertions.py has an untracked-file probe; and REVIEW.md's parenthetical claims coverage over gates rather than modules, or drops the already-implemented sentence and keeps the requirement.",
+          "blocking": true
+        },
+        {
+          "name": "DF2_section_E_N1_row_malformed",
+          "same_as": "discharge_pass_2026_07_29.required_items_this_pass.D2",
+          "direction": "states a risk",
+          "what_it_qualifies": null,
+          "for": "the author of the discharging change",
+          "discharged_when": "the N1 row in §E has four cells and renders with its Direction and Status in the right columns.",
+          "blocking": false
+        },
+        {
+          "name": "DF3_ledger_provenance_citation_does_not_resolve",
+          "same_as": "discharge_pass_2026_07_29.required_items_this_pass.D3",
+          "direction": "states a risk",
+          "what_it_qualifies": null,
+          "for": "the author of the discharging change",
+          "discharged_when": "CX-SERVING-01's verified_by cites a record that actually contains the finding ID it names.",
+          "blocking": false
+        },
+        {
+          "name": "DF4_no_audit_of_other_supplied_characterisations_has_been_done",
+          "same_as": "discharge_pass_2026_07_29.nits_this_pass.N5",
+          "direction": "qualifies a reassurance",
+          "what_it_qualifies": "the supplied-framing provenance disclosure, which tells a reader one characterisation was inherited rather than tested and is silent on whether any others were.",
+          "for": "whoever writes the Plan 3 close",
+          "discharged_when": "either the corpus's other supplied characterisations are checked, or the disclosure states in one clause that no such audit was done. The second is sufficient and is the cheap honest option.",
+          "blocking": false
+        },
+        {
+          "name": "DF5_section_12_1_still_has_not_run",
+          "same_as": "carried_forward.items.CF8_section_12_1_still_has_not_run",
+          "direction": "states a risk",
+          "what_it_qualifies": null,
+          "for": "the implementer",
+          "discharged_when": "unchanged from CF8. Repeated here only so the item is not lost between passes; this pass does not gate on it and the reword-first ordering remains correct.",
+          "blocking": false
+        }
+      ],
+      "_items_from_the_first_pass_now_closed": "CF1 (B2), CF2 (B3), CF3 (B4/R5), CF4 (R6), CF5 (R7), CF6 (R9) and CF7 (R8) are discharged by 98b4ba3, subject to D2 on CF3's landing place and D3 on CF7's citation. CF8 stays open as DF5. CF9 stands unchanged — this is still not a Plan 3 close."
+    },
+
+    "what_this_pass_does_and_does_not_do": {
+      "does": "Rules on 98b4ba3 and e852f08. Confirms the suite is genuinely green at HEAD (369 passed, verified by me, not accepted from the message), that B3's repair is exact against the evaluator, that B2's root cause was correctly identified and correctly generalised, that B4/R5 now names N1 in a register, and that R6, R7, R8 and R9 landed. Measures Rule 1's coverage claim against the actual gate-and-companion pairs and finds it false in two independent ways, with one genuinely unguarded scanning gate behind it. Answers the rglob-blind-spot question with a measurement (zero divergence today) and names the latent conditions under which it stops being zero.",
+      "does_not": "Does not close Plan 3 and is not a plan_close record. Does not discharge O1. Does not satisfy gate G1. Does not authorise a visibility change, a repository description, topics, a release bundle, publication, Plan 4 resumption, any spend, §12.1, or the opening of the final or shift splits. Does not withdraw or alter any claim. Does not re-open the owner's decisions. Does not audit any supplied characterisation other than the one already corrected — see DF4.",
+      "explicitly_not_a_finding_against_the_result": "Nothing in this pass touches the decomposition, the 87%, the certificate or the negative result. D1 is a coverage claim about tests, D2 is a table row, D3 is a citation. The discharge under review is, on the merits, the strongest work in this sequence: it took the harder of the two repairs I offered for B3, re-grounded R6 on the ground it should have had originally, and disclosed the provenance of its own error without using the disclosure as an excuse."
+    },
+
+    "reviewer_disclosures_this_pass": {
+      "files_written": "This file only, appended as a new top-level key with everything above preserved byte-for-byte. I edited no source, test, doc, ADR, ledger or other evidence artifact, and I fixed no defect I found.",
+      "verified_by_execution": [
+        "The green command at HEAD: 369 passed, ruff clean, mypy clean, verify-claims 15/13.",
+        "Set-overlap measurement between tests/test_gate_state.py's tripwire walk (63 .md files) and its companion's record glob (18 files) — overlap 0. This is what makes D1(i) a measurement rather than a reading.",
+        "The docs-collapse probe for tests/test_doc_references.py: 45 identifiers over 56 files, 8 if only the three root files survive, so the companion's `> 20` catches the total collapse.",
+        "The revert probe for tests/test_withdrawn_assertions.py: `git ls-files` returns 202 prose files, so `len(...) > 50` passes under the reverted implementation.",
+        "Symmetric difference between the rglob set and the git ls-files set over the same suffix filter: empty in both directions, 202 files each.",
+        "Directory-name scan for SKIP_DIR_NAMES matches below the root.",
+        "Delimiter count on every row of the §E table.",
+        "A full read of the required_items keys of this record, to establish that finding R4 is not in it."
+      ],
+      "verified_by_reading_the_primary_source": [
+        "tests/test_withdrawn_assertions.py, tests/test_internal_paths.py, tests/test_doc_references.py and tests/test_gate_state.py in full, gate by gate rather than by companion.",
+        "src/conformalextract/evaluation.py::evaluate_document again, to re-derive B3's identity independently of both the finding and the fix.",
+        "The committed diffs of 98b4ba3 and e852f08 in full, and the resulting REVIEW.md rules, ADR 0007 note, certification-result.md correction, §11.1 row, §E table and CX-SERVING-01 entry in their current state."
+      ],
+      "taken_on_trust": [
+        "The 637 / 4,434 / 3,797 figures, for the same reason as the first pass: recomputing them requires reading certification gold, which is sealed, and this review was instructed not to. Unchanged from the first pass and not re-opened.",
+        "The second B2-class instance the commit message cites as happening 'elsewhere the same night, in a different repository' — outside this repository and unverifiable from here. It does not carry any finding; it is offered as corroboration for a rule that stands on its local instance alone."
+      ],
+      "sealed_label_discipline": "No gold labels of any role were read in this pass. No split-reading command was run. No access chain entry is needed and none was written.",
+      "spend": "$0. No job, no GPU, no movement of the $25 aggregate cap. §12.1 not run.",
+      "conflicts": "None. I did not author 98b4ba3, e852f08, 3a0917a or a522a76."
+    },
+
+    "acceptance_rule_this_pass": "A discharge pass on a BLOCK must verify the green command at the discharging commit itself rather than accept the commit message's count, because the blocked finding was a false green claim. It must check each discharged item against the ARTIFACT it points at rather than against the description of it, because the blocked finding included an item retired by relabelling. Where the change adds a RULE asserting that a convention is already implemented, the reviewer must enumerate the things the convention should cover and measure the coverage, rather than check the implementations the rule names — because a rule verified against the set its author could see is the very defect the rule describes. And a reviewer who supplied a characterisation that the change corrected may not treat the correction as settled by the change accepting it: the correction was checked here against the data, not against my own prior wording."
   }
 }

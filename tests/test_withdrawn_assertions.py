@@ -118,10 +118,39 @@ def _prose_files() -> list[str]:
 
 
 def test_the_register_is_populated_and_the_scan_reaches_files() -> None:
-    """Guard the guard: an empty register or an empty file list passes everything below."""
+    """Guard the guard: an empty register or an empty file list passes everything below.
+
+    **This bounds cardinality only, and cardinality is not what failed.** Under the reverted
+    `git ls-files` implementation this same assertion returns 202 and passes — B2 was a failure of
+    scope *kind*, not of scan size. The test that catches it is the probe below.
+    """
 
     assert _register(), "evidence/withdrawn_assertions.json lists no assertions"
     assert len(_prose_files()) > 50
+
+
+def test_the_scan_reaches_untracked_files() -> None:
+    """The probe that would have caught B2, and did not exist when B2 shipped.
+
+    B2 was a red suite reported as green: the offending file was **untracked** when the suite ran,
+    `git ls-files` could not see it, and `git add -A` tracked it in the same commit. Switching to a
+    filesystem walk fixed the implementation — but the fix inherited the implementation **without
+    the test that proves the implementation is the right kind**. `test_internal_paths.py` had
+    carried exactly this probe since the day before.
+
+    That is the same lesson recurring one level up: a scope decision that lives in an implementation
+    rather than a shared rule gets rediscovered expensively — and here it recurred at the *test* of
+    the scope decision, inside the commit that wrote the lesson down.
+    """
+
+    probe = ROOT / "docs" / "_untracked_prose_probe.md"
+    probe.write_text("Probe file, deliberately untracked.\n", encoding="utf-8")
+    try:
+        assert "docs/_untracked_prose_probe.md" in _prose_files(), (
+            "the scan did not see an untracked file; it must walk the filesystem, not the index"
+        )
+    finally:
+        probe.unlink()
 
 
 @pytest.mark.parametrize("entry", _register(), ids=lambda e: str(e["id"]))
