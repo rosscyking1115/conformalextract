@@ -45,11 +45,23 @@ inside a candidate finding about overclaiming, corrected on independent review.
 point one way is then detectable as a signal, **without needing to establish intent**, which is
 neither knowable nor necessary.
 
+**The strongest single instance, and the one that should lead if this is ever written up.** The
+defect recurred *inside the fix for itself*. While correcting a carried-forward omission, the author
+carried a two-sentence finding onto two prose surfaces, **kept the dependent sentence and dropped
+its antecedent**, and thereby asserted something provably false — that substitution errors explain a
+false-positive excess, when the identity `fp − fn = predictions − gold` makes their contribution
+exactly zero. The author had recorded the pattern one commit earlier and was actively working on it.
+**Knowing a failure mode is not protection against it.**
+
 **What would have to be true before this could be claimed.** n = 1 project, one plan close, six
-items. The direction coding was done by the same party that made the omissions. To be a finding
-about practice rather than an anecdote it needs the pattern reproduced somewhere with independent
-coding — the sibling repositories are the obvious place, and none has been checked. **Until then
-this is a hypothesis with a worked example, and the write-up may not present it as more.**
+items. The direction coding was done by the same party that made the omissions — and the
+characterisation that first framed the pattern was *supplied by the reviewing seat rather than
+derived from the data*, then transcribed without being tested against a counter-example sitting one
+row away. That is itself worth reporting if this becomes a contribution: **a directional finding
+handed down gets less scrutiny than one derived locally.** To be a finding about practice rather
+than an anecdote it needs the pattern reproduced somewhere with independent coding — the sibling
+repositories are the obvious place, and none has been checked. **Until then this is a hypothesis
+with a worked example, and the write-up may not present it as more.**
 
 **Related, and separate.** A register built to prevent dropped obligations is only as good as its
 source enumeration, and nothing checks the enumeration. Its *absence* is visible; a register built

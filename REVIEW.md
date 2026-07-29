@@ -33,6 +33,24 @@ uv run pytest -q && uv run ruff check . && uv run mypy
   load.
 - **Licence/provenance:** RAMS/WikiEvents raw text is non-redistributable — recorded and enforced.
 - **No-secrets sweep:** `.env` gitignored; no tokens/keys in tracked files.
+- **A check reports on the set it can see, and a clean result is evidence only if the set was the
+  right one.** Not local to this repository — two instances in two days, in different repositories,
+  from different parties. Here, `test_withdrawn_assertions` scanned `git ls-files`, so the file the
+  commit was *adding* was untracked at run time and invisible; a red suite was reported as green.
+  Elsewhere the same night, a scan whose directory change failed printed zero hits, and **a zero
+  meaning "examined nothing" was indistinguishable from a zero meaning "found nothing"**.
+  **The corollary that catches both: any check that can return zero must also report how many items
+  it examined**, so an empty scan cannot render identically to a clean one. Implemented here as the
+  guard-the-guard convention — every scanning test has a companion asserting the scan reached a
+  plausible number of items (`test_the_scan_finds_something_to_check`,
+  `test_the_scan_finds_files_to_check`, `test_the_derivation_finds_something`,
+  `test_the_register_is_populated_and_the_scan_reaches_files`). **A new scanning check without one
+  is incomplete.**
+  Second half, and the reason this recurred: `tests/test_internal_paths.py` already walked the
+  filesystem rather than the index, for exactly this reason, discovered a day earlier. The newer
+  check did not inherit it. **A hard-won scope decision that lives in one check's implementation
+  instead of a shared rule gets rediscovered the expensive way** — which is why it is written here
+  rather than only in the file that learned it.
 - **Scope-matches-sentence:** **A check's scope and its sentence must match. Before writing a
   verdict, say which command produced it and what that command cannot see.** `git grep` and
   `git ls-files` cannot see untracked files; a tracked scan is not a repository scan; a sample is
@@ -55,6 +73,24 @@ uv run pytest -q && uv run ruff check . && uv run mypy
   private-planning-directory name in 31 occurrences across three. Decision 1 in
   `docs/plan4/open-release-decisions.md` accepts this knowingly. Do not "fix" it by hardcoding the
   name.
+- **The sharpest instance of selective carrying, because the author knew the pattern and was
+  working on it.** The claim ledger's version of a finding kept the antecedent — *2,003 of 2,515
+  documents show both a false positive and a false negative, consistent with substitution* — and
+  both prose surfaces **dropped that sentence while keeping the one that depended on it**, leaving
+  "wrong-role, boundary and coreference errors share that signature" attached to a signature they
+  cannot produce. **This happened inside the fix for the selective-carrying defect**, by the author
+  who had recorded the pattern one commit earlier. Knowing a failure mode is not protection against
+  it; a check is.
+  **Keep the falsifier, not the sentence.** `fp = predictions − tp` and `fn = gold − tp`, so
+  `fp − fn = predictions − gold` **identically** — a substitution yields one false positive and one
+  false negative and contributes **exactly zero** to the excess. Anyone can check that in one line,
+  and it outlives the prose it corrected. **When a claim rests on a decomposition, write down the
+  identity that would refute it.**
+- **Retiring an obligation by relabelling is worse than leaving it open.** An open item is visible;
+  a relabelled one is closed with nothing having changed. R5 required a named finding to be
+  registered; a commit message described it as a *different* item that had been done, and the
+  obligation left the list without ever being met. **A discharge must name the item it discharges
+  and point at where it now lives**, and a discharge that only asserts completion is not one.
 - **Check what a limitations list DROPPED, not just whether what it kept is true.** When a finding
   is carried forward, carry the uncomfortable half. `CX-SERVING-01` inherited both *reassuring*
   probe limitations — divergence is quality-neutral, and concentrates in low-confidence frames —
@@ -114,6 +150,13 @@ uv run pytest -q && uv run ruff check . && uv run mypy
   a reassurance"; that is false — two omissions were free-standing risk statements, and one
   qualifier travelled. An overclaim about overclaiming, in the gate recording the countermeasure.
   The bias is in **what survives**, not in what is lost.
+- **A characterisation handed down from a reviewing seat gets less scrutiny than one derived
+  locally.** The overstated directional claim above was *supplied*, not derived, and was
+  transcribed rather than tested — while its counter-example sat one row away in a table the
+  transcriber already owned. A finding that arrives already looking like a conclusion skips the
+  step that would have caught it. **Check a supplied characterisation against the data with the
+  same effort you would spend deriving it**, and record where it came from, so a later reader can
+  tell whether it was tested or inherited.
 - **Cite one source per figure. A count and its description must come from the same place.** The
   staged-release amendment argued from "four documented instances of a record drifting" — taking the
   **count** from the scope-matches-sentence gate above (four instances, none of which is drift) and

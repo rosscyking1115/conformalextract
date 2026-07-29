@@ -135,6 +135,19 @@ signal:
 > travel. Two of the dropped items are free-standing risk statements, which this table's own
 > direction column labels as such. An overclaim about overclaiming, in the document recording the
 > countermeasure. The supported form is narrower and is stated below.
+>
+> **Provenance of the error, which changes what the lesson is.** The overstated framing was
+> **supplied by the owner, not derived here** — it arrived as an instruction to record the pattern
+> in those words, and it was written down substantially as given. Recording that is not
+> exculpatory; the obligation to check a characterisation against the data does not lapse because
+> of who supplied it, and the counter-example was one row away in a table this document already
+> owned.
+>
+> **The transferable lesson is the asymmetry in scrutiny.** A directional finding handed down from
+> a reviewing seat gets *less* checking than one derived locally, because it arrives already
+> looking like a conclusion. The local derivation gets tested; the handed-down one gets
+> transcribed. That is the more useful form of this than "the author overstated it", and it is why
+> the provenance is on the record rather than left implicit.
 
 | Item | Direction | Travelled? | What it qualified |
 |---|---|---|---|
