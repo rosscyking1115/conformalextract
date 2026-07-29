@@ -51,10 +51,18 @@ a dated record — see `docs/release-check-2026-07-28.md` for the check that sur
 > `test_the_markdown_scan_matches_the_index` closes it for the markdown walk by asserting nothing
 > gitignored is included; `test_internal_paths.py` and `test_withdrawn_assertions.py` are unguarded.
 >
-> **Not being addressed, and the reason is not that it is unimportant.** Plan 4 is paused pending
-> Plan 3's close on merits; naming these is new work, and starting new work during a pause is how a
-> pause stops meaning anything. Recorded here so it is a known exposure rather than a discovery
-> waiting to happen, and so whoever resumes Plan 4 finds it already enumerated.
+> **Two of the three walks still carry a floor, and it is worse than the one that was replaced.**
+> `test_internal_paths.py` and `test_withdrawn_assertions.py` bound at `> 50` against **202** files —
+> **75% headroom**, against the 51% the floor rule was derived from. Each of the three walks now has
+> exactly one of the two guards; **none has both.**
+>
+> **The deferral rule, stated because "Plan 4 is paused" does not distinguish these from what has
+> been changed.** Three commits of test changes have landed during the pause, so the pause alone is
+> not the criterion. The criterion actually being applied: **blocking findings are fixed in the round
+> that raises them; non-blocking findings are recorded and deferred.** That fits every commit in this
+> sequence, and it is why the Q1 kind-probe was added immediately and these two floors were not.
+> Recorded here so it is a known exposure rather than a discovery waiting to happen, and so whoever
+> resumes Plan 4 finds it already enumerated.
 
 ## Live list
 

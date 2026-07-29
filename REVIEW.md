@@ -48,20 +48,27 @@ uv run pytest -q && uv run ruff check . && uv run mypy
   file is missing from the walk (catches narrowing at any scale) and that nothing gitignored is
   present (catches over-inclusion, which no probe can see). When you reach for a bound, first ask
   what independent record could be compared against instead.
-- **Overstatement in the self-critical direction is still overstatement, and nothing checks it
-  because it reads as humility.** A separate mechanism from the amplification rule below, and it
-  runs the other way: the first two instances there were findings made *stronger* than their data;
-  this is a **retraction that exceeded its evidence.**
+- **Overstatement in the self-critical direction is still overstatement, and it attracts less
+  challenge than an amplification because it reads as humility.** A separate mechanism from the
+  amplification rule below, and it runs the other way: the instances there were findings made
+  *stronger* than their data; this is a **retraction that exceeded its evidence.**
   The instance: the guard-the-guard convention was reported as an assessment "false in three ways".
   It was not. The three findings concern **coverage**; the rule itself was sound, and the reviewing
   record said so verbatim — *"Rule 1 is correct as a RULE; only its evidence sentence is false"* and
   *"do not weaken or remove the rule"*. Only the evidence sentence — that the convention was
   already implemented — was false.
-  **Why it survives where an amplification would not:** a self-critical overstatement invites no
-  challenge. Nobody audits a concession, the party it costs is the party making it, and it reads as
-  rigour. But a retraction that goes further than the data destroys a sound rule, and the cost lands
-  on whoever needed that rule later. **Concede exactly as much as the evidence requires, and no
-  more** — then say which part survives, in the same breath.
+  **Why it attracts less challenge:** the party a concession costs is the party making it, so nobody
+  else has an interest in auditing it, and it reads as rigour. A retraction that goes further than
+  the data can cost a sound rule, and that cost lands on whoever needed the rule later.
+  **Concede exactly as much as the evidence requires, and no more — then say which part survives, in
+  the same breath.**
+  **Corrected 2026-07-29, and the corrections are the point.** This bullet first said "*nothing*
+  checks it", which its own instance refutes — a reviewer checked it, which is why the instance
+  exists. It said such a retraction "*destroys*" a sound rule; here the rule survived and was
+  broadened in the same round. **Self-critical overstatement inside the rule about self-critical
+  overstatement**, twice, in the first draft. It also rests on **one** instance, against the
+  two-instance bar the next bullet sets — kept as a rule because its mechanism is argued rather than
+  induced, and flagged so a reader can discount it accordingly.
 - **A check reports on the set it can see, and a clean result is evidence only if the set was the
   right one.** Not local to this repository — two instances in two days, in different repositories,
   from different parties. Here, `test_withdrawn_assertions` scanned `git ls-files`, so the file the
@@ -209,7 +216,16 @@ uv run pytest -q && uv run ruff check . && uv run mypy
   spend deriving it**, and record where it came from, so a later reader can tell whether it was
   tested or inherited.
 
-  **Two instances, same day, same source — which is why this is a rule and not an anecdote.**
+  **Three instances, same day, same source — which is why this is a rule and not an anecdote.**
+  The heading first read "Two instances" above a three-item list, which is the stale-count defect
+  described two bullets down.
+
+  **Provenance caveat, and it applies to all three.** Each is attributed to the owner seat on the
+  basis of conversation that leaves no trace in this repository, and **the sole source for that
+  attribution is the seat the attribution favours** — this one. By the self-critical-overstatement
+  rule above, the mirror holds: nobody has an interest in auditing an attribution that shifts blame
+  away from the attributor. A reader should treat the *mechanisms* as the durable content and the
+  *allocation* as unverified.
   1. The directional claim "every omission qualified a reassurance, nothing flattering was ever
      lost" was *supplied* and transcribed; its counter-example sat one row away in a table the
      transcriber already owned.

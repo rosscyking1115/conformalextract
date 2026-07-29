@@ -207,6 +207,34 @@ def _scanned_markdown() -> list[str]:
     return files
 
 
+def test_the_markdown_scan_reaches_untracked_files() -> None:
+    """The kind guard for this walk, added after exempting it by argument rather than evidence.
+
+    The exemption was: the index cross-check below covers both directions, so a probe adds nothing.
+    **That is false, and it fails analytically before it fails empirically.** Substitute the B2
+    defect — an index-based walk returns exactly `tracked`, so `tracked - scanned` is empty and
+    `scanned - tracked` is empty. **Both halves of the cross-check pass by construction under the
+    very implementation this probe exists to reject**; the check is at its most perfectly satisfied
+    when the walk is wrong. Measured: filesystem walk n=64 sees a planted untracked file, index walk
+    n=63 is blind, and both pass the cross-check.
+
+    The "adds nothing" reasoning was true of the **over-inclusion** direction only, and was
+    generalised to both. That is a gate exempted by argument, identical in shape to the
+    retrospective clause `REVIEW.md` had already rejected — written into the commit that made the
+    rule universal.
+    """
+
+    probe = ROOT / "docs" / "_untracked_markdown_probe.md"
+    probe.write_text("Probe file, deliberately untracked.\n", encoding="utf-8")
+    try:
+        assert "docs/_untracked_markdown_probe.md" in _scanned_markdown(), (
+            "the markdown walk did not see an untracked file; it must walk the filesystem, "
+            "not the index"
+        )
+    finally:
+        probe.unlink()
+
+
 def test_the_markdown_scan_matches_the_index() -> None:
     """Cross-check the scanned set against a second source of truth, not against a magic floor.
 
