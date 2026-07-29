@@ -87,10 +87,24 @@ table above, so this decomposes the certificate itself rather than a proxy for i
 | mean loss *within* the content-bearing channel | **0.579** | 0.947 | 0.986 |
 | group-level loss contributed by that channel | **0.530** / 0.607 | 0.354 / 0.958 | 0.404 / 0.992 |
 
-The 16× grounding separation lives in the first three rows. The certificate scores the fourth.
-**87% of QA's remaining loss (0.530 of 0.607) is grounded, well-formed, content-bearing output
-that is simply wrong** — the coreference and entity-selection errors ADR 0007 catalogued
-(`victim = "she"` for `"Mrs. Clinton"`).
+The ~16× separation in ungrounded spans lives in the first three rows. The certificate scores the
+fourth. **87% of QA's remaining loss (0.530 of 0.607) is grounded, well-formed, content-bearing
+output that is simply wrong.**
+
+> **Corrected 2026-07-29.** That sentence continued "— the coreference and entity-selection errors
+> ADR 0007 catalogued (`victim = "she"` for `"Mrs. Clinton"`)". The appositive attributed the 87% to
+> two named §12.1 error categories on the strength of an unquantified inspection of two development
+> examples, which §12.3 forbids. It was a **stronger** form of the attribution withdrawn from
+> `CX-GROUNDING-ORTHOGONAL-01` the same day, and it survived that correction because the search was
+> for the retired phrasing and this is a paraphrase — the O2 mechanism reappearing inside the fix
+> for O2.
+>
+> **The decomposition locates loss by channel and identifies no error category.** A measurement
+> points elsewhere: on these frames false positives exceed false negatives by 637 arguments (4,434
+> against 3,797), which is systematic over-generation, and both baselines run the other way, so it is
+> QA-specific rather than a metric artefact. Wrong-role, boundary and coreference errors share that
+> signature. §12.1's machine-coded taxonomy is what would separate them and is ruled for execution
+> ([`sections-11-and-12-disposition.md`](sections-11-and-12-disposition.md)) but has not been run.
 
 The counterfactual states it directly. Give each system a **grounding oracle** — drop every
 document outside the content-bearing channel, so the system is scored as though it never emitted

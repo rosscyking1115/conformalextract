@@ -1,8 +1,25 @@
-# Items carried into Plan 3 by Plan 2's close — status of each
+# Items carried forward by Plan 2's close — status of each
 
 - Source: [`../../evidence/plan2/reviewer_record.plan2-close.json`](../../evidence/plan2/reviewer_record.plan2-close.json)
-  → `what_this_close_does_and_does_not_authorise.carried_into_plan_3`
-- Created 2026-07-29, retrospectively, after finding **O3**
+- Created 2026-07-29, retrospectively, after finding **O3**; extended the same day after **R4**
+
+> ### This register covered the wrong list first
+>
+> Plan 2's close carries items forward in **two** places, and the first version of this document
+> registered only one of them:
+>
+> - `what_this_close_does_and_does_not_authorise.carried_into_plan_3` — four items (§A below)
+> - `ruling_2_serving_equivalence_probe.standing_limitation` — six elements (§B below)
+>
+> **The second list is the one O3 came from.** It is the sentence that says "Carry into Plan 4
+> limitations and any model/report card", so a register built to prevent O3 recurring was built
+> against the list that did not contain it. Extending it found **two more elements that never
+> arrived**, by the same asymmetry: both are qualifiers on reassurances that did travel.
+>
+> The generalisable point: **"carried forward" is not a field, it is a behaviour**, and a review can
+> express it in more than one place. Read the whole record, not the key that looks like the list.
+
+## §A — `carried_into_plan_3`, four items
 
 ## Why this document exists
 
@@ -73,6 +90,38 @@ stack-dependent at the margin.
 
 Now carried as limitation 4 on `CX-SERVING-01`, with the operating-point dependence of its
 companion reassurance as limitation 5.
+
+## §B — `standing_limitation`, six elements
+
+Directed to "Plan 4 limitations and any model/report card, scoped to the exact serving stack".
+`CX-SERVING-01` holds `report` and `model_card`, so it is the receiving artifact for all six.
+
+| # | Element | Status |
+|---|---|---|
+| B1 | 13.67% raw divergence | **arrived** — the claim's headline is its complement, 86.3% agreement |
+| B2 | 1.3–1.8% abstain/extract flip rate at plausible operating points | **dropped, discharged 2026-07-29 as O3** |
+| B3 | quality-neutrality | **arrived** — limitation 2 |
+| B4 | confidence-concentration **with its 4.80% upper bound in the top quartile** | **half-arrived — the bound never came** |
+| B5 | probe frames are train-split only | **arrived** — limitation 1 |
+| B6 | cause is not isolated to a specific kernel | **never arrived** |
+
+### B4 — the reassurance travelled, its bound did not
+
+Limitation 2 says divergence "concentrates in low-confidence frames". The source attaches a
+qualifier to that reassurance: the top-quartile result is **0 of 75**, which carries a two-sided
+Clopper–Pearson 95% upper bound of **4.80%** — not zero. The reassurance arrived; the number
+bounding how reassuring it is did not.
+
+**This is the O3 asymmetry a third time**, and B6 makes it a fourth. Each dropped element is a
+qualifier on something that survived. Nothing that flattered the result was lost.
+
+### B6 — cause is not isolated
+
+The probe established *that* the stacks diverge, not *why*. No kernel, quantisation path or sampler
+was identified as responsible, so nothing about the divergence can be assumed fixed by changing any
+one of them. Absent from the claim entirely.
+
+Both are now added to `CX-SERVING-01` as limitations 6 and 7.
 
 ## What this document does not do
 

@@ -92,6 +92,21 @@ e.g. gold `victim = "Mrs. Clinton"` vs predicted `victim = "she"`; gold `candida
 predicted `candidate = "dictators"`. These are genuine extraction errors (coreference/entity
 selection), not extraction-policy or grounding failures.
 
+> **Amended 2026-07-29.** The paragraph above stands as the record of what was inspected, but its
+> present tense over-reaches and this note is the scope it was written without. **It is an
+> unquantified look at a handful of high-loss documents, not a measurement.** "Shows the pattern
+> clearly" and "These *are* genuine extraction errors" read as findings about the corpus; they are
+> observations about the examples quoted. §12.3 of the accepted plan forbids generalising a failure
+> type from a few examples without a designed causal test, and this passage became the sole source
+> for an error-category attribution that reached `CX-GROUNDING-ORTHOGONAL-01`,
+> `certification-result.md` and the README before being withdrawn on 2026-07-29 (finding O2).
+>
+> A measurement points elsewhere: on QA's content-bearing certification frames, false positives
+> exceed false negatives by 637 arguments (4,434 against 3,797) — systematic over-generation, which
+> is not entity-naming — and both baselines run the other way, so it is QA-specific. Wrong-role,
+> boundary and coreference errors share that signature. §12.1's taxonomy is what would separate
+> them. **Do not cite this paragraph as evidence for an error-category claim.**
+
 **ZS and FS are near-vacuous at this operating point: the target is structurally unanswerable.**
 Even abstaining on literally every document, their base risk is high enough that the forced
 minimum abstention already exceeds what the floor allows — there is no selective policy at

@@ -44,13 +44,20 @@ def _register() -> list[dict[str, object]]:
 
 
 def _flat(text: str) -> str:
-    """Collapse whitespace so a phrase still matches across a line wrap.
+    """Normalise prose for phrase matching: strip blockquote markers, then collapse whitespace.
 
-    `tests/test_gate_state.py` learned this the expensive way: its first version matched raw text
-    and missed the one file that provoked it, because the phrase was wrapped across two lines.
+    Two misses, both found by running this rather than reading it:
+
+    - **Line wraps.** `tests/test_gate_state.py`'s first version matched raw text and missed the one
+      file that provoked it, because the phrase was wrapped across two lines.
+    - **Blockquote markers.** Collapsing whitespace alone is not enough. This repository records
+      every correction as a dated `>` blockquote that *quotes the withdrawn wording*, so a phrase
+      spanning two lines inside one acquires a `>` in the middle and stops matching — in exactly
+      the documents most likely to contain a retired assertion legitimately.
     """
 
-    return " ".join(text.split())
+    lines = [line.lstrip().removeprefix(">").lstrip() for line in text.splitlines()]
+    return " ".join(" ".join(lines).split())
 
 
 def _tracked_prose() -> list[str]:

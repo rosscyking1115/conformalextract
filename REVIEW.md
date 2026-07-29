@@ -81,8 +81,18 @@ uv run pytest -q && uv run ruff check . && uv run mypy
   prose for the **phrasing**, not the claim ID, because a copy carries the words and drops the
   identifier. It found two further surfaces on its first run — one of them regenerated minutes
   earlier by the author enumerating the list. **An inventory assembled from memory is short.**
-  Limit: literal phrase match, so a paraphrase still passes; reconciling a reworded claim against
-  its copies remains a reader's job.
+  **Limit, and it cost something immediately: a paraphrase defeats a phrase search.** Two surfaces
+  carried the same attribution in other words and passed the new check clean — including
+  `certification-result.md`, in a *stronger* form naming two taxonomy categories, on the primary
+  result document six claims cite. Found by a reviewer, not the test. **When a claim is reworded,
+  read its copies; do not delegate that to the search.**
+- **"Carried forward" is a behaviour, not a field.** A review can express it in more than one
+  place, and reading the key that looks like the list is not reading the record. Plan 2's close
+  carried items in two structures; the register built to stop carried items being dropped was built
+  against the one that did not contain the dropped item, and extending it found two more elements
+  that never arrived. **Every one of the four droppings was a qualifier on a reassurance that did
+  travel.** Nothing flattering was ever lost. Check the whole record, and check what the surviving
+  items were qualifying.
 - **Cite one source per figure. A count and its description must come from the same place.** The
   staged-release amendment argued from "four documented instances of a record drifting" — taking the
   **count** from the scope-matches-sentence gate above (four instances, none of which is drift) and
