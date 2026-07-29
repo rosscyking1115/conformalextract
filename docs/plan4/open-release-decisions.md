@@ -1,8 +1,17 @@
 # Open release-policy decisions for Plan 4
 
 Decisions that must be made **before** anything is published, recorded here so Plan 4 finds them
-rather than rediscovering them. Nothing here is decided. Plan 4 has not opened, and each item below
-needs the owner's approval and an independent review in its own right.
+rather than rediscovering them. Each item needs the owner's approval, and any item that changes a
+public claim needs an independent review as well.
+
+> **Amended 2026-07-29.** This paragraph read "Nothing here is decided. Plan 4 has not opened" —
+> false at this commit on both counts. Four decisions were ruled on 2026-07-29 and Plan 4 was opened
+> the same day. The standing of each ruling is stated per item: decisions 1, 3 and 4 are the owner's
+> calls on questions of policy and carry no separate review record; decision 2 changes a public
+> claim and its wording was independently reviewed (**BLOCK**, then re-worded — see
+> `evidence/plan4/reviewer_record.visibility-and-description.json`). Recorded rather than silently
+> corrected: a live list whose header contradicts its own table is the defect this repository has
+> spent two days removing from other documents.
 
 This file is a live list: items are added when found and struck when decided. It is deliberately not
 a dated record — see `docs/release-check-2026-07-28.md` for the check that surfaced the first item.
@@ -28,8 +37,22 @@ find the argument, not just the answer.
 **Raised:** 2026-07-28, by the release-hygiene check.
 **Decided:** 2026-07-29 by Ross — **option (a), publish as-is.**
 
-> **The reasoning below is adopted as the basis of the decision.** The cost is accepted: a public
-> artifact will contain a directory name from one machine.
+> **The reasoning below is adopted as the basis of the decision.**
+>
+> **The cost is larger than every document describing it has said, this one included.** It was
+> framed as "a directory name from one machine". Measured at this commit: the operator's Windows
+> **account name** appears in 19 tracked lines across two files — including two full user-home
+> paths — and the private-planning-directory name in 31 occurrences across three files. Decision 1
+> as first written named the directory only; `publishable-and-sealed.md` §4 named one file; the
+> `ALLOWED` list in `tests/test_internal_paths.py` names three. **Each description was narrower than
+> the thing it described**, which is this week's recurring defect appearing in the artifacts written
+> to prevent it.
+>
+> The decision is unchanged — an account name and a directory name disclose nothing exploitable, and
+> the attestations they sit inside are worth more than their removal. But it is accepted knowingly
+> now rather than on an undercount. **Note also that no gate covers the bare account name:**
+> `test_internal_paths.py` deliberately hardcodes no username, which is sound design and leaves that
+> class uncovered.
 >
 > **One addition that changes when this binds, and it was not said when the options were framed:**
 > **flipping repository visibility publishes those records whether or not a bundle is ever

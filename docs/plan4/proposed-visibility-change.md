@@ -19,7 +19,15 @@ explicitly did not rule that a bare visibility flip is permitted**, so this is a
 
 ## What a visibility flip actually does
 
-**It is not a release of selected artifacts. It publishes all 199 tracked files at once**, including
+> **Corrected 2026-07-29 on independent review.** The first version of this section said 199 tracked
+> files and 14 internal-audience files. Both were wrong. The count was 200 at the commit this
+> document was committed in — the table described the tree *one commit earlier*, **and the single
+> file it omitted was this document**. The internal-audience list was 24, not 14. A document arguing
+> that a visibility flip publishes more than people expect, which itself undercounted what would be
+> published and excluded itself from the count. Corrected below; the error is left recorded rather
+> than quietly fixed.
+
+**It is not a release of selected artifacts. It publishes all 200 tracked files at once**, including
 every file never written for an outside reader. Enumerated rather than characterised:
 
 | Count | Category | Written for an outside reader? |
@@ -40,25 +48,47 @@ every file never written for an outside reader. Enumerated rather than character
 | 2 | frontier-check notes | **no** |
 | 1 | CI | yes |
 
-**Fourteen files in the last five rows were written for an internal audience** and would go live
-unreviewed as public prose:
+**Twenty-four files were written for an internal audience** and would go live unreviewed as public
+prose:
 
-```
-docs/gate0/accepted-plan.md          docs/plan2/r1-launch-brief.md
-docs/plan2/accepted-plan.md          docs/plan2/r2-launch-brief.md
-docs/plan3/accepted-plan.md          docs/plan2/reviewer-brief.md
-docs/plan4/accepted-plan.md          docs/plan2/reviewer-brief-extraction-policy.md
-docs/plan2/claude-code-handoff.md    docs/plan2/prediction-generation-launch-brief.md
-docs/plan3/HANDOFF-2026-07-22-reanalysis.md    docs/plan2/r0-launch-plan.md
-docs/superpowers/plans/2026-07-18-rams-profiles-generator.md
-docs/superpowers/specs/2026-07-18-rams-profiles-generator-design.md
-```
+| Group | Files |
+|---|---|
+| Accepted plans (external planning documents) | `docs/gate0/`, `docs/plan2/`, `docs/plan3/`, `docs/plan4/accepted-plan.md` |
+| Launch and reviewer briefs | `docs/plan2/`: `r0-launch-plan`, `r1-launch-brief`, `r2-launch-brief`, `prediction-generation-launch-brief`, `reviewer-brief`, `reviewer-brief-extraction-policy` |
+| Agent handoffs | `docs/plan2/claude-code-handoff.md`, `docs/plan3/HANDOFF-2026-07-22-reanalysis.md` |
+| Agent tooling specs | `docs/superpowers/plans/…`, `docs/superpowers/specs/…` |
+| Frontier-check notes | `docs/frontier-check/findings.md`, `pre-paid-run-gate.md` |
+| **Agent instructions** | `CLAUDE.md`, `AGENTS.md` — first version of this table wrongly marked these "written for an outside reader" |
+| **Process records from this week** | `docs/progress.md`, `docs/release-check-2026-07-28.md` |
+| **Plan 4 deliberation, including this file** | `open-release-decisions.md`, `publishable-and-sealed.md`, `proposed-amendment-staged-release.md`, `proposed-visibility-change.md` |
+
+Two of those deserve naming individually.
+
+**`docs/progress.md` is a stale gate-state assertion.** It is a PMO log signed "Manager (Codex)",
+frozen at 2026-07-17, closing on *"Plans 3–4 remain sequentially blocked"* — which was true then and
+is not now. A public reader would meet it as a current statement of where the project stands, and
+the README links to it. It is the same defect corrected in the README on 2026-07-28 and in the Plan
+4 accepted plan on 2026-07-29, in a third file, still uncorrected.
+
+**This document is on the list.** A deliberation about whether to publish becomes, on publication,
+a public document. That is not an argument against publishing it — the reasoning is honest and the
+project's whole position is that its records are checkable — but it is an argument for reading it as
+public prose first, which has not been done.
 
 **This is the substance of the request, and it is what makes it a real question rather than a
 formality.** Every prior release decision in this project has been about *whether a particular claim
 may be published*. A visibility flip bypasses that model entirely: nothing is selected, nothing is
 assembled, and the claim ledger — which governs what may be *said* — has nothing to say about a file
 simply becoming readable.
+
+## Gate status of the plans themselves (required by R5, and omitted from the first version)
+
+- **Plan 3 is not formally closed.** Five Plan 3 reviewer records exist and none carries
+  `review_kind: "plan_close"`. The only close record in the repository is Plan 2's.
+- **Plan 4 was opened by the owner on 2026-07-29** while that remained true. Under the gated
+  doctrine — Plan N+1 opens only after Plan N's independent reviewer PASS — that is an owner
+  override of the sequence, not a satisfied gate, **and this document should have said so before
+  proposing anything.** It is surfaced here rather than left for a reader to infer.
 
 ## What gates it
 
@@ -77,6 +107,31 @@ simply becoming readable.
 5. **The write-up draft**, which is explicitly not a submission and would become a readable draft
    with no venue attached.
 
+## The reviewer's ruling on separability, 2026-07-29
+
+Recorded here because it answers the question this document asked
+(`evidence/plan4/reviewer_record.visibility-and-description.json`):
+
+**Visibility *is* separable from §17's twelve evidence-acceptance boxes** — five of them (frozen
+release candidate, immutable release manifest, adapter replay, cross-linked HF/Kaggle drafts, V12
+fresh-download) are unsatisfiable by construction for a bare repository, so reading §17 as gating
+visibility would make visibility unreachable without the seven items, which §1 never says. **It is
+not separable from §2.1's licence, privacy and link audit node.**
+
+The gate it set, which visibility must clear:
+
+| | Gate | Status |
+|---|---|---|
+| G1 | **Plan 4 open on a Plan 3 close record** | **UNSATISFIED — above everything else.** Plan 3 has none. |
+| G2 | V8/V9 re-walked at the flip commit | not done |
+| G3 | operator-string disclosure matching what actually ships | corrected 2026-07-29; now accurate |
+| G4 | decisions 1, 2, 3 each with a review record | 2 has one; 1 and 3 are owner policy calls |
+| G5 | every internal-audience file read as public prose, against a correct enumeration | not done — 24 files |
+| G6 | gate-state reconciliation | `docs/progress.md` outstanding |
+| G7 | recorded acknowledgement that the act has no rollback | this document, §"The risk" |
+
+**This does not authorise a flip and does not reopen the seven-item minimum.**
+
 ## The honest position
 
 **The implementer is not proposing that visibility be flipped now.** Gate 2 is unresolved and gate 4
@@ -90,8 +145,13 @@ has not been attempted. What is proposed is narrower:
 - If visibility is separable: **rule on what its gate should be**, given the fourteen files.
 - If it is not separable: say so, and the repository stays private until the seven items exist.
 
-**A one-line summary of the risk, stated against my own preference:** a public repository is what
-Ross wants and it is the outcome this project has been built toward, but a flip made before those
-fourteen files are read is a release of unreviewed prose, and this project has now produced five
-documented instances of prose asserting something its own records contradict. Four of them were
-found by review. A public repository has no reviewer.
+**The risk, stated against my own preference and without theatre.** A public repository is what Ross
+wants and it is the outcome this project has been built toward. The argument for waiting is not that
+"a public repository has no reviewer" — that was the first version's closing line, and it is both
+theatrical and against this document's own premise, since the point of publishing is that outside
+readers *can* check the work.
+
+**The real argument is irreversibility.** §11 gives R1, R2 and R3 explicit rollbacks and §9.3 gives
+a correction procedure; none of them reaches a fork, a cache, or an archive. Every other release
+step in this plan can be withdrawn. A visibility flip cannot. That asymmetry — not the absence of
+review — is why 24 unread files matter more here than they would anywhere else in Plan 4.

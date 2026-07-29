@@ -4,24 +4,24 @@
   "claims": [
     {
       "claim_id": "CX-REPO-DESCRIPTION-01",
-      "wording": "Selective, grounded event-argument extraction on RAMS: a ~16x grounding gain from QLoRA bought no certified coverage. An evidence-first negative result.",
+      "wording": "Selective, grounded event-argument extraction on RAMS: QLoRA sharply improved grounding, and no system — QLoRA, few-shot or zero-shot — could be certified at the frozen risk target. An evidence-first negative result.",
       "status": "negative",
       "scope": "the GitHub repository description field — one line, no second passage",
       "evidence": [
         "evidence/plan3/certification_result.json",
-        "evidence/plan3/loss_decomposition.json",
         "docs/plan3/certification-result.md",
         "docs/plan4/open-release-decisions.md"
       ],
-      "method": "Authored for the one-line constraint rather than compressed from an existing claim. It is the conjunction of CX-GROUNDING-01 (the ~16x grounding separation) and CX-H1-PRIMARY (no system certified), held in a single clause because the claim boundaries in docs/plan3/certification-result.md require the grounding gain and the null to appear in the same passage and a description has no second passage. No figure is quoted: 95.7% is forbidden by name outside a passage carrying the null, and the ratio is given as approximate exactly as its sources hedge it.",
+      "method": "Authored for the one-line constraint rather than compressed from an existing claim, because render_surface emits limitations as sub-bullets and a single-string field can carry none. It is the conjunction of CX-GROUNDING-01 (a large improvement in grounding fidelity, stated qualitatively) and CX-H1-PRIMARY plus CX-H2-SECONDARY (no system certified), held in one clause because the claim boundaries require the grounding gain and the null to appear in the same passage. NO FIGURE IS QUOTED, deliberately: 95.7% is forbidden outside a passage carrying the null, and the ~16x ratio belongs to CX-GROUNDING-ORTHOGONAL-01 and is licensed only with the restricted-population caveat attached — a caveat this surface cannot carry. The first draft quoted it, cited it to the wrong claim, and also mis-stated it: ~16x is the reduction in ungrounded spans (5,355 to 340), not the grounding rate, which moved 39.4% to 95.7%, i.e. ~2.4x.",
       "limitations": [
         "In-domain RAMS only, at the frozen operating point (alpha 0.20, delta 0.05, acceptance floor 0.20), on the frozen vLLM 4-bit serving stack. None of that fits in the field, which is why the field must not be read as the claim's scope.",
-        "\"No certified coverage\" is the null for all three systems, not a QLoRA-versus-baseline comparison; H1 and H2 collapse to one finding.",
-        "\"Grounding gain\" means parseable-and-grounded output, NOT correctness. It must never be read as accuracy.",
-        "The description is a pointer to the result, not the result. Every figure behind it lives in the ledger and the certification record, and a reader arriving from the description reaches those before any number."
+        "The null is ALL THREE systems, not a QLoRA-versus-baseline comparison. H1 and H2 collapse to one finding and no numerical difference is computed against an infeasible baseline.",
+        "\"Improved grounding\" means parseable-and-grounded output, NOT correctness. It must never be read as accuracy.",
+        "\"Could not be certified\" is not a near miss. Under an oracle with no finite-sample penalty the best system accepts 2.0% against a required 20%, and below alpha ~0.406 no certificate at any threshold could clear the floor.",
+        "This field is the whole claim for most of its readers. It is rendered in search results and link previews where nothing else in the repository is present, so it must be judged as though nothing behind it will be read."
       ],
       "surfaces": ["repo_description"],
-      "verified_by": "Composed 2026-07-29 from two claims already independently reviewed (CX-GROUNDING-01 reconciled against an independent extraction measurement 2026-07-21; CX-H1-PRIMARY reviewer PASS 2026-07-22). Routed for independent review as a new public sentence; the repository is private and the field is empty, so nothing is published by this entry."
+      "verified_by": "Composed 2026-07-29 from claims already independently reviewed (CX-GROUNDING-01 reconciled against an independent extraction measurement 2026-07-21; CX-H1-PRIMARY reviewer PASS 2026-07-22). Independent review of this entry: evidence/plan4/reviewer_record.visibility-and-description.json — BLOCK on the first wording (figure cited to the wrong claim, null attributed to QLoRA alone, near-miss reading available); re-worded here on that ruling. The repository is private and the description field is empty, so nothing is published by this entry."
     },
     {
       "claim_id": "CX-H1-PRIMARY",

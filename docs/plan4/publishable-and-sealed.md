@@ -70,15 +70,24 @@ does not cover binaries, the untracked `data/` tree, or artifacts on the private
 is a heuristic — a short corpus fragment of three words or fewer would not have been flagged. It is
 strong enough to clear the matrix's condition and not strong enough to be called a proof.
 
+> **Pinned to `128e52c`, and already one artifact behind.** There were 40 tracked evidence artifacts
+> when this ran; there are more now, and `reviewer_record.staged-release-amendment.json` was never
+> scanned. **Re-run before any bundle is assembled** — a privacy clearance is a measurement at a
+> commit, exactly like the test counts elsewhere in this repository, and it goes stale the same way.
+> Flagged on independent review, 2026-07-29.
+
 ## 4. Cleared for release on its own terms
 
 - **Original source code** — Apache-2.0, original work. `src/`, `tests/`, `jobs/`, `configs/`.
 - **Aggregate evidence artifacts** — subject to §3 above and to **open decision 1**, which asks
   whether reviewer records form part of the public bundle. That question is open and is not settled
   here.
-- **Documentation, ADRs, plans, the claim ledger** — with the caveat that
-  `evidence/plan3/reviewer_record.reanalysis.json` contains internal filesystem paths, which is the
-  same open decision 1.
+- **Documentation, ADRs, plans, the claim ledger** — with the caveat that internal filesystem
+  strings are tracked in **three** files, not one: `evidence/plan3/reviewer_record.reanalysis.json`,
+  `evidence/plan4/reviewer_record.release-hygiene.json` and `docs/release-check-2026-07-28.md`. The
+  operator's account name appears in 19 lines across two of them and the private-planning-directory
+  name in 31 occurrences across three. **This section named one file when it was written**, which
+  understated the thing it was documenting; decision 1 was ruled on the corrected figures.
 
 ## 5. Link audit
 
