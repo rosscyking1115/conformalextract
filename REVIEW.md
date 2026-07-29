@@ -57,6 +57,15 @@ uv run pytest -q && uv run ruff check . && uv run mypy
   markdown files. **A rule verified against the set its author could see is the defect the rule
   describes**, which is why the enumeration is now by gate and each companion names the set it
   bounds.
+
+  **Copy a scope decision's verification, not just its implementation — this is the subtlest of the
+  three and the one to keep closest.** `test_internal_paths.py` had carried the untracked-file probe
+  since the day before. The fix for B2 copied its *walk* and not its *probe*, which left the correct
+  code with **no evidence that it was correct** — a state indistinguishable from the wrong code until
+  something plants an untracked file. Reverting the walk demonstrates it: the probe fails, the
+  cardinality guard still passes. **When you adopt a hard-won scope decision from elsewhere, adopt
+  the test that proves it is the right kind, or you have inherited the conclusion without the
+  argument.**
   Second half, and the reason this recurred: `tests/test_internal_paths.py` already walked the
   filesystem rather than the index, for exactly this reason, discovered a day earlier. The newer
   check did not inherit it. **A hard-won scope decision that lives in one check's implementation
@@ -162,12 +171,25 @@ uv run pytest -q && uv run ruff check . && uv run mypy
   qualifier travelled. An overclaim about overclaiming, in the gate recording the countermeasure.
   The bias is in **what survives**, not in what is lost.
 - **A characterisation handed down from a reviewing seat gets less scrutiny than one derived
-  locally.** The overstated directional claim above was *supplied*, not derived, and was
-  transcribed rather than tested — while its counter-example sat one row away in a table the
-  transcriber already owned. A finding that arrives already looking like a conclusion skips the
-  step that would have caught it. **Check a supplied characterisation against the data with the
-  same effort you would spend deriving it**, and record where it came from, so a later reader can
-  tell whether it was tested or inherited.
+  locally.** A finding that arrives already looking like a conclusion skips the step that would have
+  caught it. **Check a supplied characterisation against the data with the same effort you would
+  spend deriving it**, and record where it came from, so a later reader can tell whether it was
+  tested or inherited.
+
+  **Two instances, same day, same source — which is why this is a rule and not an anecdote.**
+  1. The directional claim "every omission qualified a reassurance, nothing flattering was ever
+     lost" was *supplied* and transcribed; its counter-example sat one row away in a table the
+     transcriber already owned.
+  2. The guard-the-guard convention was singled out as "the most useful thing in the round", and
+     **that assessment was false in three measured ways** — one companion bounded a set with zero
+     overlap with the gate it was credited with guarding, the companion named as the countermeasure
+     passed under the broken implementation, and the enumeration counted modules where the unit is
+     gates.
+
+  Both were amplified **on their shape rather than their data**: each looked like a conclusion and
+  was written up without being measured. The measurement in both cases was cheap — comparing two
+  sets, and running one assertion against the reverted implementation. **The cost of checking a
+  handed-down finding is almost always lower than the cost of carrying it.**
 - **Cite one source per figure. A count and its description must come from the same place.** The
   staged-release amendment argued from "four documented instances of a record drifting" — taking the
   **count** from the scope-matches-sentence gate above (four instances, none of which is drift) and

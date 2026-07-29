@@ -28,6 +28,24 @@ a dated record — see `docs/release-check-2026-07-28.md` for the check that sur
 > withdrawn, and the Plan 4 work already done stands: the gate-state derivation, the privacy review,
 > the link audit, decisions 1–4, and the rejection of the staged-release amendment.
 
+> ### Known exposure, recorded and deliberately not addressed: unnamed conventions
+>
+> Several conventions in this repository exist **only in their implementations**, with no rule
+> naming them: the reviewer-record shape (`schema_version`, `review_kind`, `verdict`, per-question
+> sections), the dated-amendment form used to correct an accepted plan or ADR without rewriting it,
+> and the `permitted_in`/`ALLOWED`-with-reasons pattern for mention-not-use exemptions.
+>
+> **This is the exact mechanism that produced B2.** The guard-the-guard convention was real,
+> consistent across four modules, and unnamed — so the fifth scanning check shipped without it and
+> nothing noticed until it hid a red suite. **A convention that lives in N implementations and no
+> rule is one new file away from being broken**, and each of the three above is currently in that
+> state.
+>
+> **Not being addressed, and the reason is not that it is unimportant.** Plan 4 is paused pending
+> Plan 3's close on merits; naming these is new work, and starting new work during a pause is how a
+> pause stops meaning anything. Recorded here so it is a known exposure rather than a discovery
+> waiting to happen, and so whoever resumes Plan 4 finds it already enumerated.
+
 ## Live list
 
 | # | Decision | Status |
