@@ -75,6 +75,11 @@ ALLOWED: dict[str, str] = {
         "The independent review that ruled on the leak. Quoting the strings is how it reports "
         "them, and it discloses this about itself."
     ),
+    "evidence/plan3/reviewer_record.b1-primary-document.json": (
+        "The review that found the release-hygiene record's carried-forward obligation was "
+        "tracked nowhere. Reporting that the string is still in tracked files requires naming "
+        "it — the same mention-not-use ground as the record it reports on."
+    ),
     "tests/test_internal_paths.py": (
         "This file. It defines the patterns above, so it necessarily contains one of them."
     ),

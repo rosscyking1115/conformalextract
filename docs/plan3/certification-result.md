@@ -99,11 +99,24 @@ output that is simply wrong.**
 > for the retired phrasing and this is a paraphrase — the O2 mechanism reappearing inside the fix
 > for O2.
 >
-> **The decomposition locates loss by channel and identifies no error category.** A measurement
-> points elsewhere: on these frames false positives exceed false negatives by 637 arguments (4,434
-> against 3,797), which is systematic over-generation, and both baselines run the other way, so it is
-> QA-specific rather than a metric artefact. Wrong-role, boundary and coreference errors share that
-> signature. §12.1's machine-coded taxonomy is what would separate them and is ruled for execution
+> **The decomposition locates loss by channel and identifies no error category.** Two separate
+> measurements point elsewhere, and they must not be run together — an earlier version of this note
+> conflated them and stated a falsehood as a result.
+>
+> **Signature one, the excess.** False positives exceed false negatives by 637 arguments (4,434
+> against 3,797): the system predicts more arguments than the gold contains. Both baselines run the
+> other way, so it is QA-specific rather than a metric artefact. Note what this signature *cannot*
+> show: `fp = predictions − tp` and `fn = gold − tp`, so `fp − fn = predictions − gold` identically,
+> and **a substitution — wrong role, wrong boundary, wrong entity via coreference — produces one
+> false positive and one false negative and contributes exactly zero.** The 637 is over-generation
+> and nothing else.
+>
+> **Signature two, the co-occurrence.** 2,003 of 2,515 error-bearing documents show both a false
+> positive and a false negative, which *is* consistent with substitution and rules out "mostly
+> missing arguments". Wrong-role, boundary and coreference errors share **this** signature — not the
+> one above.
+>
+> §12.1's machine-coded taxonomy is what would separate them and is ruled for execution
 > ([`sections-11-and-12-disposition.md`](sections-11-and-12-disposition.md)) but has not been run.
 
 The counterfactual states it directly. Give each system a **grounding oracle** — drop every

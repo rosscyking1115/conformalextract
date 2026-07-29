@@ -16,7 +16,8 @@ The two halves are deliberately different in kind, as elsewhere in this suite:
   should and cannot rot into a blanket.
 
 Scope, stated because a check reported wider than it runs is this repository's recurring defect:
-this searches **tracked** files with prose-bearing suffixes. It is a literal phrase match after
+this walks the **filesystem** — tracked and untracked alike, see `_prose_files` for why that
+distinction cost a commit — over prose-bearing suffixes. It is a literal phrase match after
 normalisation, so a *paraphrase* of a withdrawn assertion passes.
 
 **That limit cost the primary result document, one commit after it was written down here.**
@@ -36,7 +37,6 @@ the next round reads a green suite as coverage. This register is where a paraphr
 from __future__ import annotations
 
 import json
-import subprocess
 from pathlib import Path
 
 import pytest
@@ -71,20 +71,57 @@ def _flat(text: str) -> str:
     return " ".join(" ".join(lines).split())
 
 
-def _tracked_prose() -> list[str]:
-    listing = subprocess.run(
-        ["git", "ls-files"], cwd=ROOT, capture_output=True, text=True, check=False
-    )
-    if listing.returncode != 0:  # pragma: no cover - only outside a git checkout
-        pytest.skip("not a git checkout")
-    return [f for f in listing.stdout.split() if Path(f).suffix.lower() in PROSE_SUFFIXES]
+#: Never scanned. Mirrors `tests/test_internal_paths.py`; `.venv*` is matched by prefix.
+SKIP_DIR_NAMES = frozenset(
+    {
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        ".hypothesis",
+        ".claude",
+        ".agents",
+        ".superpowers",
+        "__pycache__",
+        "node_modules",
+        "data",
+        "dist",
+        "build",
+        "htmlcov",
+    }
+)
+
+
+def _prose_files() -> list[str]:
+    """Walk the filesystem, NOT the index.
+
+    The first version used `git ls-files`, and that blind spot shipped a red suite reported as
+    green. The offending file — a reviewer record quoting both retired phrasings — was **untracked**
+    when the suite was run, so `git ls-files` did not list it; `git add -A` then tracked it in the
+    same commit. **The check's scope excluded precisely the file the commit was adding**, which is
+    the worst possible moment for it to be blind.
+
+    `tests/test_internal_paths.py` already walked the filesystem, for the same reason discovered a
+    day earlier. This test was written afterwards and did not inherit the lesson. Walking the tree
+    scans a file whether or not git has heard of it yet.
+    """
+
+    files: list[str] = []
+    for path in ROOT.rglob("*"):
+        if path.suffix.lower() not in PROSE_SUFFIXES or not path.is_file():
+            continue
+        parts = path.relative_to(ROOT).parts[:-1]
+        if any(part in SKIP_DIR_NAMES or part.startswith(".venv") for part in parts):
+            continue
+        files.append(path.relative_to(ROOT).as_posix())
+    return files
 
 
 def test_the_register_is_populated_and_the_scan_reaches_files() -> None:
     """Guard the guard: an empty register or an empty file list passes everything below."""
 
     assert _register(), "evidence/withdrawn_assertions.json lists no assertions"
-    assert len(_tracked_prose()) > 50
+    assert len(_prose_files()) > 50
 
 
 @pytest.mark.parametrize("entry", _register(), ids=lambda e: str(e["id"]))
@@ -95,7 +132,7 @@ def test_a_withdrawn_assertion_survives_only_where_named(entry: dict[str, object
     needle = _flat(phrase)
 
     offenders: list[str] = []
-    for relative in _tracked_prose():
+    for relative in _prose_files():
         if relative in permitted:
             continue
         text = (ROOT / relative).read_text(encoding="utf-8", errors="replace")
@@ -124,3 +161,4 @@ def test_every_exemption_still_earns_its_place(entry: dict[str, object]) -> None
             f"{relative} no longer contains the withdrawn phrase — remove the exemption. "
             f"({reason})"
         )
+

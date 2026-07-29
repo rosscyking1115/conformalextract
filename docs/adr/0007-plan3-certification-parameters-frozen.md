@@ -101,10 +101,14 @@ selection), not extraction-policy or grounding failures.
 > for an error-category attribution that reached `CX-GROUNDING-ORTHOGONAL-01`,
 > `certification-result.md` and the README before being withdrawn on 2026-07-29 (finding O2).
 >
-> A measurement points elsewhere: on QA's content-bearing certification frames, false positives
-> exceed false negatives by 637 arguments (4,434 against 3,797) — systematic over-generation, which
-> is not entity-naming — and both baselines run the other way, so it is QA-specific. Wrong-role,
-> boundary and coreference errors share that signature. §12.1's taxonomy is what would separate
+> A measurement points elsewhere. On QA's **content-bearing certification** frames — a different
+> split and a different population from the development documents inspected above — false positives
+> exceed false negatives by 637 arguments (4,434 against 3,797), which is over-generation, and both
+> baselines run the other way, so it is QA-specific. **Substitution errors contribute exactly zero
+> to that excess**, since `fp − fn = predictions − gold` identically, so it cannot be evidence for
+> or against an entity-naming account. Separately, 2,003 of 2,515 error-bearing documents show both
+> a false positive and a false negative, which is consistent with substitution — wrong-role,
+> boundary and coreference errors share *that* signature. §12.1's taxonomy is what would separate
 > them. **Do not cite this paragraph as evidence for an error-category claim.**
 
 **ZS and FS are near-vacuous at this operating point: the target is structurally unanswerable.**

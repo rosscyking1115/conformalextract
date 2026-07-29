@@ -130,7 +130,7 @@
         "The CAUSE of the divergence is not isolated to a specific kernel, quantisation path or sampler. Nothing about it may be assumed fixed by changing any one of them."
       ],
       "surfaces": ["report", "model_card"],
-      "verified_by": "job 6a5fab15 (n=300); reviewer recomputed the Wilson intervals and concentration significance, 2026-07-21. Limitations 4 and 5 added 2026-07-29 on independent review (evidence/plan3/reviewer_record.plan3-close.json, finding O3): Plan 2's close directed the abstain/extract flip finding into Plan 4 limitations and any model or report card, and it had been carried into neither."
+      "verified_by": "job 6a5fab15 (n=300); reviewer recomputed the Wilson intervals and concentration significance, 2026-07-21. Limitations 4 and 5 added 2026-07-29 on independent review (evidence/plan3/reviewer_record.plan3-close.json, finding O3): Plan 2's close directed the abstain/extract flip finding into Plan 4 limitations and any model or report card, and it had been carried into neither. Limitations 6 and 7 added 2026-07-29 on independent review (evidence/plan3/reviewer_record.b1-primary-document.json, finding R4): they are elements 4 and 6 of that same close record's standing_limitation list — a second carried-forward structure that no register had enumerated."
     },
     {
       "claim_id": "CX-FEASIBILITY-LESSON-01",

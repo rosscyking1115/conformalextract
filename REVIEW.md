@@ -104,14 +104,16 @@ uv run pytest -q && uv run ruff check . && uv run mypy
   top-level `carried_forward` key so new obligations have one home; that does nothing for records
   already written, or for an obligation stated in prose. Enumerating a source record is a manual
   read of the whole record.
-- **Record each carried item's DIRECTION: does it qualify a reassurance, or state a risk?** Six
-  items across Plan 2's two lists failed to arrive or arrived incomplete, and **every one qualified
-  a reassurance that did travel**. No dropped item was itself a reassurance; no counter-example
-  exists in the set. That is directional bias rather than attrition, and it is invisible to every
-  check here because each surviving sentence is individually true. Recording the direction makes a
-  one-way omission set detectable **as a signal, without needing to establish intent** — which is
-  neither knowable nor the point. A carried set whose omissions all point one way is a finding
-  whatever caused it.
+- **Record each carried item's DIRECTION: does it qualify a reassurance, or state a risk?** Across
+  Plan 2's two lists, four items failed to arrive and **every reassurance survived**. That is the
+  supported statement, and it is a real one-way asymmetry: nothing that flattered the result was
+  lost. It is invisible to every check here because each surviving sentence is individually true.
+  Recording the direction makes the asymmetry detectable **as a signal, without needing to establish
+  intent** — which is neither knowable nor the point.
+  **State it in the supported form.** The first version of this gate said "every omission qualified
+  a reassurance"; that is false — two omissions were free-standing risk statements, and one
+  qualifier travelled. An overclaim about overclaiming, in the gate recording the countermeasure.
+  The bias is in **what survives**, not in what is lost.
 - **Cite one source per figure. A count and its description must come from the same place.** The
   staged-release amendment argued from "four documented instances of a record drifting" — taking the
   **count** from the scope-matches-sentence gate above (four instances, none of which is drift) and

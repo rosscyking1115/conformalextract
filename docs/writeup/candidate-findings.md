@@ -23,17 +23,22 @@ surviving sentence passes. Forbidden-wording checks ask whether a claim overstat
 Citation checks ask whether evidence resolves; it does. **The defect is in the complement — what is
 absent — and no check reads the complement**, because a check evaluates what is in front of it.
 
-**The evidence, from this project.** Six items across two carried-forward lists in one plan close
-failed to arrive or arrived incomplete. Every one qualified a reassurance that did travel:
+**The evidence, from this project.** Across two carried-forward lists in one plan close, four items
+failed to arrive or arrived incomplete:
 
 - the operating-point dependence of a near-zero divergence result, which holds only under
-  aggressive abstention;
-- the abstain/extract flip rate, 1.3–1.8% at plausible operating points, dropped for eight days;
+  aggressive abstention *(qualifier)*;
+- the abstain/extract flip rate, 1.3–1.8% at plausible operating points, dropped for eight days
+  *(risk statement)*;
 - the 4.80% Clopper–Pearson upper bound on a "0 of 75" concentration result — the reassurance
-  travelled, the bound saying how reassuring it is did not;
-- "cause is not isolated to a specific kernel".
+  travelled, the bound saying how reassuring it is did not *(qualifier)*;
+- "cause is not isolated to a specific kernel" *(risk statement)*.
 
-No dropped item was itself a reassurance. **No counter-example exists in the set.**
+**The supported statement is that every reassurance survived** — no dropped item was itself a
+reassurance. It is **not** supported that every omission was a qualifier: two were free-standing
+risks, and one qualifier (probe frames are train-split only) did travel. **The bias is in what
+survives, not in what is lost**, and the first draft of this file said otherwise — an overclaim
+inside a candidate finding about overclaiming, corrected on independent review.
 
 **The proposed countermeasure**, which is the transferable part: record each carried item's
 **direction** — does it qualify a reassurance, or state a risk? A carried set whose omissions all

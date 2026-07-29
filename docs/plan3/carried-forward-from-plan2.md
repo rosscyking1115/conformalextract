@@ -129,6 +129,13 @@ Six items across the two lists failed to arrive or arrived incomplete. **Every o
 reassurance that did travel.** Recording the direction is the point, because the direction is the
 signal:
 
+> **Corrected 2026-07-29 on independent review.** The first version of this table asserted "every
+> one qualifies a reassurance that did travel" and "no counter-example exists". **Both were
+> overstated, and the table omitted a row that contradicts them** — B5, a qualifier that *did*
+> travel. Two of the dropped items are free-standing risk statements, which this table's own
+> direction column labels as such. An overclaim about overclaiming, in the document recording the
+> countermeasure. The supported form is narrower and is stated below.
+
 | Item | Direction | Travelled? | What it qualified |
 |---|---|---|---|
 | A1 probe condition 1 | qualifies a reassurance | late | the near-zero top-quartile result, which holds only under aggressive abstention |
@@ -136,11 +143,18 @@ signal:
 | B4 4.80% Clopper–Pearson bound | qualifies a reassurance | **no** | "concentrates in low-confidence frames" — 0 of 75 is not zero |
 | B6 cause not isolated | states a risk | **no** | — |
 | B1 13.67% raw divergence | states a risk | yes (as its complement, 86.3%) | — |
-| B3 quality-neutrality | reassurance | yes | — |
+| B3 quality-neutrality | **reassurance** | yes | — |
+| B5 train-split frames only | **qualifies a reassurance** | **yes** | generalisation of the probe rate to other splits |
 
-**No counter-example exists in this set.** Nothing that flattered the result was ever dropped, and
-no dropped item was a reassurance. That is a **directional bias, not attrition**, and it is
-invisible to every automated check here because each surviving sentence is individually true.
+**What is supported: no dropped item was itself a reassurance.** Four items failed to arrive; two
+are qualifiers on reassurances that travelled, and two are free-standing risk statements. Every
+reassurance in the set survived. That is a real one-way asymmetry — **nothing that flattered the
+result was lost** — and it is invisible to every automated check here, because each surviving
+sentence is individually true.
+
+**What is not supported: that every omission was a qualifier.** B5 is a qualifier that travelled,
+so qualifiers are not dropped as a class. The direction of the bias is about *what survives*
+(reassurances, always) rather than *what is lost* (mixed).
 
 **The countermeasure is the `direction` column, not vigilance.** Recording whether each carried item
 *qualifies a reassurance* or *states a risk* makes a one-way omission set detectable as a signal —
@@ -170,6 +184,24 @@ Partial mitigation, recorded honestly as partial: reviewer records now carry a t
 `carried_forward` key, so *new* obligations have one conventional home. That does nothing for
 records already written, and nothing for a reviewer who states an obligation in prose instead.
 **Enumerating a source record's obligations remains a manual read of the whole record.**
+
+## §E — obligations from other reviews, previously tracked nowhere
+
+Found by the B1 review (Q7) after §D established that a register is only as good as its source
+enumeration. **Two further live structures existed, in records nobody had enumerated.** Registered
+here rather than in a new file, so there is one place to look.
+
+| Source | Obligation | Direction | Status |
+|---|---|---|---|
+| `reviewer_record.reanalysis.json` → `carried_to_publication_none_blocking` | P5's ADR/backlog obligation | states a risk | **untracked until now** — open |
+| `reviewer_record.release-hygiene.json` → `consequence_that_must_be_carried_forward` | the internal planning path is still in tracked files, on the plan that makes the repo public | states a risk | **untracked until now** — open, and knowingly accepted under [open decision 1](../plan4/open-release-decisions.md) |
+| `reviewer_record.plan3-close.json` → finding **N1**, rhetorical exposure of the α-frontier | states a risk | **untracked until now** — open |
+
+**N1 was reported as discharged and was not.** The commit discharging B1 described R5 as the
+`withdrawn_assertions.json` registration; that was B1's own follow-on, not R5. R5 required N1 to be
+registered **by name** in a register, and until this table it appeared only inside reviewer records.
+**Retiring an item by relabelling it is worse than leaving it open**, because it converts an open
+obligation into a closed one without anything changing.
 
 ## What this document does not do
 
