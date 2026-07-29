@@ -43,12 +43,21 @@ uv run pytest -q && uv run ruff check . && uv run mypy
   it examined**, so an empty scan cannot render identically to a clean one.
 
   **Two guards are needed, not one, and conflating them is how B2 shipped.** A *cardinality* guard
-  bounds how many items the scan reached. A *kind* guard proves the scan looks at the right
-  population — for a filesystem walk, a live probe that plants an untracked file and asserts the
-  scan sees it. B2 was a failure of kind: the cardinality guard returned 202 and passed under the
-  broken implementation. **Every scanning gate needs the cardinality guard; a gate whose scope was
-  itself the defect needs the kind probe too** (`test_the_scan_reaches_untracked_files`, in both
-  `test_internal_paths.py` and `test_withdrawn_assertions.py`).
+  bounds what the scan reached. A *kind* guard proves it reads the right population — for a
+  filesystem walk, a live probe that plants an untracked file and asserts the scan sees it. B2 was a
+  failure of kind: the cardinality guard returned 202 and passed under the broken implementation.
+
+  **Every gate that walks the filesystem needs the kind guard.** An earlier version of this rule
+  said "a gate whose scope was itself the defect needs the kind probe too" — **that clause is only
+  knowable in retrospect, so before B2 it would have licensed B2.** A rule that exempts a gate until
+  it has already failed is not a rule.
+
+  **Prefer a cross-check to a floor.** A floor structurally cannot detect narrowing: a `> 30`
+  guard on a 63-file corpus survived the removal of *every individual subtree*, including the whole
+  repository root, and a floor set at the true count is the stale-count defect. Where a second
+  source of truth exists, assert against it — `test_the_markdown_scan_matches_the_index` asserts no
+  tracked file is missed (catches narrowing at any scale, no threshold) and nothing gitignored is
+  included (catches over-inclusion, which a probe cannot see). No magic number, nothing to update.
 
   **The unit is the gate, not the module.** A first version of this rule claimed four modules were
   guarded and named four companions. There are **six scanning gates across those four modules**, and
@@ -180,16 +189,27 @@ uv run pytest -q && uv run ruff check . && uv run mypy
   1. The directional claim "every omission qualified a reassurance, nothing flattering was ever
      lost" was *supplied* and transcribed; its counter-example sat one row away in a table the
      transcriber already owned.
-  2. The guard-the-guard convention was singled out as "the most useful thing in the round", and
-     **that assessment was false in three measured ways** — one companion bounded a set with zero
-     overlap with the gate it was credited with guarding, the companion named as the countermeasure
-     passed under the broken implementation, and the enumeration counted modules where the unit is
-     gates.
+  2. The claim that the guard-the-guard convention was **already implemented** — that all four
+     scanning modules carried a companion asserting the scan reached a plausible number of items.
+     That is a factual claim and it is **false in three measured ways**: one companion bounded a set
+     with zero overlap with the gate it was credited with guarding, the companion named as B2's
+     countermeasure passed under the broken implementation, and the enumeration counted modules
+     where the unit is gates.
 
-  Both were amplified **on their shape rather than their data**: each looked like a conclusion and
-  was written up without being measured. The measurement in both cases was cheap — comparing two
+  **Instance 2 was itself first written up overstated, which is the third recurrence.** It claimed
+  the *value assessment* — that this was "the most useful thing in the round" — had been falsified.
+  It had not: all three findings concern **coverage**, and no set comparison can falsify usefulness.
+  The reviewing record says so verbatim — *"Rule 1 is correct as a RULE; only its evidence sentence
+  is false"* and *"do not weaken or remove the rule"* — and the quoted phrase has no committed
+  source. **The rule stands; only the evidence sentence was wrong.** Corrected to the falsifiable
+  claim, which the three findings support exactly.
+
+  Both instances were amplified **on their shape rather than their data**: each looked like a
+  conclusion and was written up without being measured. Both measurements were cheap — comparing two
   sets, and running one assertion against the reverted implementation. **The cost of checking a
-  handed-down finding is almost always lower than the cost of carrying it.**
+  handed-down finding is almost always lower than the cost of carrying it** — and the third
+  recurrence shows the same is true of a finding you are *reporting about* someone else, where the
+  temptation is to state it more strongly than the data does.
 - **Cite one source per figure. A count and its description must come from the same place.** The
   staged-release amendment argued from "four documented instances of a record drifting" — taking the
   **count** from the scope-matches-sentence gate above (four instances, none of which is drift) and

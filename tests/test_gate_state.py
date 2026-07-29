@@ -29,6 +29,7 @@ it as a check rather than relying on this file.
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -206,12 +207,55 @@ def _scanned_markdown() -> list[str]:
     return files
 
 
-def test_the_markdown_scan_reaches_files() -> None:
-    """Guard the tripwire's own set — not the derivation's, which is a different set entirely."""
+def test_the_markdown_scan_matches_the_index() -> None:
+    """Cross-check the scanned set against a second source of truth, not against a magic floor.
 
-    scanned = _scanned_markdown()
-    assert len(scanned) > 30, f"markdown scan reached only {len(scanned)} files"
-    assert "README.md" in scanned
+    The first version asserted `len(scanned) > 30` against a real corpus of 63. An independent
+    reviewer removed each subtree in turn and **every one still passed** — `docs/plan2`, `docs/adr`,
+    the entire repository root. A floor tolerating 51% loss detects only near-total collapse, and a
+    floor set at the true count becomes the stale-count defect `test_internal_paths.py` already
+    rejects. **A floor structurally cannot detect narrowing.**
+
+    Two assertions instead, both derived from git rather than from a number someone chose:
+
+    - **No tracked markdown is missed.** Catches narrowing exactly, at any scale, with no threshold.
+    - **Nothing gitignored is included.** Catches over-inclusion — this walk's distinctive risk,
+      since it carries the narrowest skip list of the three walks in this suite, and the one an
+      untracked-file probe cannot see.
+    """
+
+    scanned = set(_scanned_markdown())
+    listing = subprocess.run(
+        ["git", "ls-files", "*.md"], cwd=ROOT, capture_output=True, text=True, check=False
+    )
+    if listing.returncode != 0:  # pragma: no cover - only outside a git checkout
+        pytest.skip("not a git checkout")
+
+    def skipped(relative: str) -> bool:
+        parts = Path(relative).parts[:-1]
+        return any(p.startswith(".") or p in {"node_modules", "data"} for p in parts)
+
+    tracked = {f for f in listing.stdout.split() if f and not skipped(f)}
+    assert tracked, "no tracked markdown found; the cross-check itself is broken"
+
+    missed = sorted(tracked - scanned)
+    assert not missed, (
+        f"the walk misses {len(missed)} tracked markdown file(s): {missed[:10]}. "
+        f"The scan has narrowed and the tripwire beside it is now blind to those files."
+    )
+
+    ignored = sorted(
+        relative
+        for relative in scanned - tracked
+        if subprocess.run(
+            ["git", "check-ignore", "-q", relative], cwd=ROOT, capture_output=True, check=False
+        ).returncode
+        == 0
+    )
+    assert not ignored, (
+        f"the walk includes gitignored file(s): {ignored[:10]}. SKIP_DIR_NAMES has diverged from "
+        f".gitignore, which makes this suite depend on what happens to be on the machine."
+    )
 
 
 @pytest.mark.parametrize("phrase", sorted(SUPERSEDED_ASSERTIONS))
@@ -246,3 +290,4 @@ def test_every_permitted_exception_still_earns_its_place(phrase: str) -> None:
         assert _flat(phrase) in _flat(path.read_text(encoding="utf-8")), (
             f"{relative} no longer contains {phrase!r} — remove the exemption. ({reason})"
         )
+

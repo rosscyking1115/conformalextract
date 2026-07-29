@@ -41,6 +41,13 @@ a dated record — see `docs/release-check-2026-07-28.md` for the check that sur
 > rule is one new file away from being broken**, and each of the three above is currently in that
 > state.
 >
+> **A fourth, measured and still latent:** the three filesystem walks in the test suite carry
+> **three different skip lists**, and the newest carries the narrowest. Divergence from `.gitignore`
+> is currently zero — 203 files against 202, differing only by a reviewer's probe — so nothing is
+> wrong today, but the suite's scope now depends on what happens to be on the machine.
+> `test_the_markdown_scan_matches_the_index` closes it for one of the three by asserting nothing
+> gitignored is included; the other two are unguarded against it.
+>
 > **Not being addressed, and the reason is not that it is unimportant.** Plan 4 is paused pending
 > Plan 3's close on merits; naming these is new work, and starting new work during a pause is how a
 > pause stops meaning anything. Recorded here so it is a known exposure rather than a discovery
