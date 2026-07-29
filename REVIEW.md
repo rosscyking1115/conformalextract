@@ -33,6 +33,35 @@ uv run pytest -q && uv run ruff check . && uv run mypy
   load.
 - **Licence/provenance:** RAMS/WikiEvents raw text is non-redistributable — recorded and enforced.
 - **No-secrets sweep:** `.env` gitignored; no tokens/keys in tracked files.
+- **A bound chosen to avoid false alarms is a bound chosen to miss partial failure. A floor detects
+  collapse, not narrowing.** Not specific to scanning gates — it holds of any threshold standing in
+  for a correctness condition: row counts, coverage percentages, timeout margins, sample sizes.
+  The instance, measured: a `len(scanned) > 30` guard on a **63-file** corpus. Removing *every
+  individual subtree in turn* still passed — `docs/plan2`, `docs/adr`, **the entire repository
+  root**. Only re-rooting the walk to `glob` instead of `rglob`, leaving 6 files, tripped it. The
+  bound was set low to avoid churn, and low enough to tolerate losing 51% of what it guarded.
+  **Raising it does not fix it.** A floor at the true count becomes a number that must be edited
+  whenever the corpus grows — the stale-count defect this repository already rejects elsewhere.
+  There is no correct threshold, because a threshold is the wrong instrument.
+  **The right shape is a cross-check against a second source of truth**, which needs no threshold
+  and nothing kept updated: `test_the_markdown_scan_matches_the_index` asserts that no git-tracked
+  file is missing from the walk (catches narrowing at any scale) and that nothing gitignored is
+  present (catches over-inclusion, which no probe can see). When you reach for a bound, first ask
+  what independent record could be compared against instead.
+- **Overstatement in the self-critical direction is still overstatement, and nothing checks it
+  because it reads as humility.** A separate mechanism from the amplification rule below, and it
+  runs the other way: the first two instances there were findings made *stronger* than their data;
+  this is a **retraction that exceeded its evidence.**
+  The instance: the guard-the-guard convention was reported as an assessment "false in three ways".
+  It was not. The three findings concern **coverage**; the rule itself was sound, and the reviewing
+  record said so verbatim — *"Rule 1 is correct as a RULE; only its evidence sentence is false"* and
+  *"do not weaken or remove the rule"*. Only the evidence sentence — that the convention was
+  already implemented — was false.
+  **Why it survives where an amplification would not:** a self-critical overstatement invites no
+  challenge. Nobody audits a concession, the party it costs is the party making it, and it reads as
+  rigour. But a retraction that goes further than the data destroys a sound rule, and the cost lands
+  on whoever needed that rule later. **Concede exactly as much as the evidence requires, and no
+  more** — then say which part survives, in the same breath.
 - **A check reports on the set it can see, and a clean result is evidence only if the set was the
   right one.** Not local to this repository — two instances in two days, in different repositories,
   from different parties. Here, `test_withdrawn_assertions` scanned `git ls-files`, so the file the
@@ -52,12 +81,7 @@ uv run pytest -q && uv run ruff check . && uv run mypy
   knowable in retrospect, so before B2 it would have licensed B2.** A rule that exempts a gate until
   it has already failed is not a rule.
 
-  **Prefer a cross-check to a floor.** A floor structurally cannot detect narrowing: a `> 30`
-  guard on a 63-file corpus survived the removal of *every individual subtree*, including the whole
-  repository root, and a floor set at the true count is the stale-count defect. Where a second
-  source of truth exists, assert against it — `test_the_markdown_scan_matches_the_index` asserts no
-  tracked file is missed (catches narrowing at any scale, no threshold) and nothing gitignored is
-  included (catches over-inclusion, which a probe cannot see). No magic number, nothing to update.
+  **Prefer a cross-check to a floor** — see the standalone rule below, which is the general form.
 
   **The unit is the gate, not the module.** A first version of this rule claimed four modules were
   guarded and named four companions. There are **six scanning gates across those four modules**, and
@@ -196,20 +220,19 @@ uv run pytest -q && uv run ruff check . && uv run mypy
      countermeasure passed under the broken implementation, and the enumeration counted modules
      where the unit is gates.
 
-  **Instance 2 was itself first written up overstated, which is the third recurrence.** It claimed
-  the *value assessment* — that this was "the most useful thing in the round" — had been falsified.
-  It had not: all three findings concern **coverage**, and no set comparison can falsify usefulness.
-  The reviewing record says so verbatim — *"Rule 1 is correct as a RULE; only its evidence sentence
-  is false"* and *"do not weaken or remove the rule"* — and the quoted phrase has no committed
-  source. **The rule stands; only the evidence sentence was wrong.** Corrected to the falsifiable
-  claim, which the three findings support exactly.
+  3. **The retrospective clause.** "A gate whose scope was itself the defect needs the kind guard"
+     was supplied and accepted rather than derived — and it **would have licensed B2 before B2
+     happened**, since a gate's scope being the defect is only knowable after the failure. A
+     different failure shape from the first two: not an overstated finding but an *under-specified
+     rule*, accepted because it sounded like a scoping principle. Replaced with: every gate that
+     walks the filesystem needs the kind guard.
 
-  Both instances were amplified **on their shape rather than their data**: each looked like a
-  conclusion and was written up without being measured. Both measurements were cheap — comparing two
-  sets, and running one assertion against the reverted implementation. **The cost of checking a
-  handed-down finding is almost always lower than the cost of carrying it** — and the third
-  recurrence shows the same is true of a finding you are *reporting about* someone else, where the
-  temptation is to state it more strongly than the data does.
+  All three were taken **on their shape rather than their data**: each looked like a conclusion or a
+  principle and was written up without being tested. Every test was cheap — comparing two sets,
+  running one assertion against the reverted implementation, asking when the clause's condition
+  becomes knowable. **The cost of checking a handed-down finding is almost always lower than the
+  cost of carrying it**, and the same holds for a finding you are *reporting about* someone else,
+  where stating it more strongly than the data does costs nothing locally.
 - **Cite one source per figure. A count and its description must come from the same place.** The
   staged-release amendment argued from "four documented instances of a record drifting" — taking the
   **count** from the scope-matches-sentence gate above (four instances, none of which is drift) and

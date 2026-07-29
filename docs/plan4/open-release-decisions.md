@@ -44,9 +44,12 @@ a dated record — see `docs/release-check-2026-07-28.md` for the check that sur
 > **A fourth, measured and still latent:** the three filesystem walks in the test suite carry
 > **three different skip lists**, and the newest carries the narrowest. Divergence from `.gitignore`
 > is currently zero — 203 files against 202, differing only by a reviewer's probe — so nothing is
-> wrong today, but the suite's scope now depends on what happens to be on the machine.
-> `test_the_markdown_scan_matches_the_index` closes it for one of the three by asserting nothing
-> gitignored is included; the other two are unguarded against it.
+> wrong today.
+>
+> **The live consequence, in one line: the suite's scope now depends on what happens to be on the
+> machine, and one of the three walks is guarded against that while two are not.**
+> `test_the_markdown_scan_matches_the_index` closes it for the markdown walk by asserting nothing
+> gitignored is included; `test_internal_paths.py` and `test_withdrawn_assertions.py` are unguarded.
 >
 > **Not being addressed, and the reason is not that it is unimportant.** Plan 4 is paused pending
 > Plan 3's close on merits; naming these is new work, and starting new work during a pause is how a
