@@ -25,9 +25,19 @@
     },
     "Plan 4": {
       "state": "open_by_owner_override",
+      "activity": "PAUSED",
       "mechanism": "owner_authorisation",
       "attested_by": null,
-      "detail": "Opened by the owner on 2026-07-29 while Plan 3 had no close record. Under the gated doctrine Plan N+1 opens only after Plan N's independent reviewer PASS, so this is an override of the sequence rather than a satisfied gate. Recorded as gate G1 in docs/plan4/proposed-visibility-change.md. If Plan 3 is subsequently closed on its merits, this state becomes 'open' and the override lapses."
+      "detail": "Opened by the owner on 2026-07-29 while Plan 3 had no close record. Under the gated doctrine Plan N+1 opens only after Plan N's independent reviewer PASS, so this is an override of the sequence rather than a satisfied gate. Recorded as gate G1 in docs/plan4/proposed-visibility-change.md. If Plan 3 is subsequently closed on its merits, this state becomes 'open' and the override lapses.",
+      "paused_on": "2026-07-29",
+      "paused_reason": "PAUSED, NOT CANCELLED. The override was granted on the hypothesis that only Plan 3's paperwork was missing; the independent close review refuted that hypothesis (evidence/plan3/reviewer_record.plan3-close.json, findings O1-O3). Plan 4 is the release plan and O2 was a live overclaim on README, report and abstract surfaces, so continuing would have built release artifacts on a claim that was about to change. Resumes when O1, O2 and O3 are discharged and Plan 3 closes on its merits.",
+      "work_that_stands": [
+        "evidence/gate_state.json and tests/test_gate_state.py — the gate-state derivation",
+        "docs/plan4/publishable-and-sealed.md — the non-reconstructive privacy review (re-run before any bundle; it is pinned to 128e52c)",
+        "the repo-wide link audit, 69 links across 57 files, zero broken",
+        "docs/plan4/open-release-decisions.md — decisions 1-4 ruled, decision 5 open",
+        "the rejection of the staged-release amendment; the seven-item minimum stands"
+      ]
     }
   }
 }

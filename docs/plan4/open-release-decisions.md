@@ -16,6 +16,18 @@ public claim needs an independent review as well.
 This file is a live list: items are added when found and struck when decided. It is deliberately not
 a dated record — see `docs/release-check-2026-07-28.md` for the check that surfaced the first item.
 
+> ## Plan 4 is PAUSED as of 2026-07-29 — not cancelled
+>
+> The owner's override kept Plan 4 open on the hypothesis that only Plan 3's paperwork was missing.
+> The independent close review **refuted** that hypothesis
+> ([`../../evidence/plan3/reviewer_record.plan3-close.json`](../../evidence/plan3/reviewer_record.plan3-close.json)).
+> Plan 4 is the release plan, and finding **O2** was a live overclaim on README, report and abstract
+> surfaces — so continuing would have built release artifacts on a claim that was about to change.
+>
+> **Resumes when O1, O2 and O3 are discharged and Plan 3 closes on its merits.** Nothing below is
+> withdrawn, and the Plan 4 work already done stands: the gate-state derivation, the privacy review,
+> the link audit, decisions 1–4, and the rejection of the staged-release amendment.
+
 ## Live list
 
 | # | Decision | Status |

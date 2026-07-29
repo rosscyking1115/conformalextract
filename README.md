@@ -63,9 +63,13 @@ This improvement did not translate into a certified selective guarantee, and mus
 without that null attached. Scoped to the frozen vLLM 4-bit serving stack.
 
 **Grounding and certifiability are orthogonal here** (`CX-GROUNDING-ORTHOGONAL-01`). The adapter's
-~16× grounding gain moved the certifiable frontier by 0.017 for itself and by 0.000 for both
-baselines, because 87% of its remaining loss is grounded, well-formed, content-bearing output that
-names the wrong entity. The decomposition is descriptive: it selects no threshold and certifies
+~16× reduction in ungrounded spans moved the certifiable frontier by 0.017 for itself and by 0.000
+for both baselines, because 87% of its remaining loss sits in output that is well-formed, grounded
+and content-bearing, and is scored wrong anyway. **The decomposition locates that loss; it does not
+identify the error category that produced it**, and no such attribution is claimed here — an earlier
+wording said "names the wrong entity" and was withdrawn on review, because false positives exceed
+false negatives by 637 arguments on those frames, which is over-generation rather than
+entity-naming. The decomposition is descriptive: it selects no threshold and certifies
 nothing, the grounding-oracle counterfactual is *not* uniformly generous, and for the baselines the
 conclusion rests on an arithmetic ceiling rather than on the counterfactual. The QLoRA system sits
 below that ceiling, so for it the ceiling is silent and only the measured curve leaves it short. See

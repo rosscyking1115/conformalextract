@@ -55,6 +55,20 @@ uv run pytest -q && uv run ruff check . && uv run mypy
   private-planning-directory name in 31 occurrences across three. Decision 1 in
   `docs/plan4/open-release-decisions.md` accepts this knowingly. Do not "fix" it by hardcoding the
   name.
+- **Check what a limitations list DROPPED, not just whether what it kept is true.** When a finding
+  is carried forward, carry the uncomfortable half. `CX-SERVING-01` inherited both *reassuring*
+  probe limitations — divergence is quality-neutral, and concentrates in low-confidence frames —
+  and dropped the one that cut against the result: the abstain/extract decision itself flips
+  between stacks at 1.3–1.8% at plausible operating points, with two of four flips surviving into
+  the accepted set. Plan 2's close had directed that finding into "Plan 4 limitations and any
+  model/report card". It reached neither, for eight days, and no check noticed.
+  **This is a distinct mechanism and it defeats every other gate here.** Elsewhere the defect has
+  been a claim outrunning its evidence, or a check that could not fail — both detectable by reading
+  the artifact. Selective carrying-forward leaves every surviving sentence *individually true*, so
+  claim-fidelity, forbidden-wording and citation checks all pass. **A limitations list that is
+  individually true and collectively flattering is invisible to all of them.** The only way to
+  catch it is to diff against the source that raised the findings and ask which ones did not make
+  the journey — so when a review carries items forward, list them and tick them off by name.
 - **Cite one source per figure. A count and its description must come from the same place.** The
   staged-release amendment argued from "four documented instances of a record drifting" — taking the
   **count** from the scope-matches-sentence gate above (four instances, none of which is drift) and
