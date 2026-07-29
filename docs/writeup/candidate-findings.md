@@ -1,0 +1,60 @@
+# Candidate findings for the write-up — recorded, not acted on
+
+- Created 2026-07-29
+- **The write-up is not open.** Nothing here has been added to any draft, and nothing here is a
+  claim: none has a ledger entry, and none may reach a surface without one.
+
+A holding place for observations that look like contributions about **evaluation practice** rather
+than about this project. The test for entry is that the finding would still be true in a repository
+that had never heard of ConformalExtract.
+
+---
+
+## C1 — Limitations lists degrade directionally under carry-forward
+
+**The claim.** When findings are carried from one review or artifact to the next, the set that
+survives is not a random sample of the set that started. Qualifiers on reassuring results are
+dropped preferentially, and the result is a limitations list that is **individually true in every
+sentence and collectively flattering**.
+
+**Why it would be a contribution.** The degradation is invisible to the checks a careful project
+actually runs. Claim-fidelity checking asks whether each published sentence is supported; every
+surviving sentence passes. Forbidden-wording checks ask whether a claim overstates; none does.
+Citation checks ask whether evidence resolves; it does. **The defect is in the complement — what is
+absent — and no check reads the complement**, because a check evaluates what is in front of it.
+
+**The evidence, from this project.** Six items across two carried-forward lists in one plan close
+failed to arrive or arrived incomplete. Every one qualified a reassurance that did travel:
+
+- the operating-point dependence of a near-zero divergence result, which holds only under
+  aggressive abstention;
+- the abstain/extract flip rate, 1.3–1.8% at plausible operating points, dropped for eight days;
+- the 4.80% Clopper–Pearson upper bound on a "0 of 75" concentration result — the reassurance
+  travelled, the bound saying how reassuring it is did not;
+- "cause is not isolated to a specific kernel".
+
+No dropped item was itself a reassurance. **No counter-example exists in the set.**
+
+**The proposed countermeasure**, which is the transferable part: record each carried item's
+**direction** — does it qualify a reassurance, or state a risk? A carried set whose omissions all
+point one way is then detectable as a signal, **without needing to establish intent**, which is
+neither knowable nor necessary.
+
+**What would have to be true before this could be claimed.** n = 1 project, one plan close, six
+items. The direction coding was done by the same party that made the omissions. To be a finding
+about practice rather than an anecdote it needs the pattern reproduced somewhere with independent
+coding — the sibling repositories are the obvious place, and none has been checked. **Until then
+this is a hypothesis with a worked example, and the write-up may not present it as more.**
+
+**Related, and separate.** A register built to prevent dropped obligations is only as good as its
+source enumeration, and nothing checks the enumeration. Its *absence* is visible; a register built
+on an incomplete enumeration looks exactly like a complete one. Distinct mechanism, same family.
+
+---
+
+## What this file does not do
+
+- It does not open the write-up, and nothing here has been drafted into one.
+- It creates no claim and needs no ledger entry **because nothing here is asserted publicly**. The
+  moment any of it reaches a surface it needs an entry and a review, like anything else.
+- It does not assert that the pattern generalises. That is the open question, stated as open.

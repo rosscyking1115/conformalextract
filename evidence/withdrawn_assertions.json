@@ -32,7 +32,9 @@
       "why_withdrawn": "Same ground as the entry above, and worse: it names specific taxonomy categories on the strength of the same unquantified two-example inspection, on the primary Plan 3 result document. Raised as finding B1.",
       "permitted_in": {
         "docs/plan3/certification-result.md": "reporting — the dated correction quotes the withdrawn appositive so a reader knows what changed",
-        "evidence/withdrawn_assertions.json": "this file"
+        "evidence/withdrawn_assertions.json": "this file",
+        "evidence/plan4/reviewer_record.o2-o3-claims-change.json": "reporting — the independent review that raised B1 quotes the passage it blocked; an immutable evidence artifact and not editable in any case",
+        "tests/test_withdrawn_assertions.py": "reporting — the module docstring quotes this exact phrase as the worked example of the paraphrase limit, which is the point the docstring exists to make"
       }
     },
     {
@@ -44,7 +46,9 @@
       "why_withdrawn": "Same ground. Amended by dated note rather than rewritten, per that document's own convention. Raised as finding R1.",
       "permitted_in": {
         "docs/plan3/HANDOFF-2026-07-22-reanalysis.md": "historical and reporting — the original line is preserved under a dated amendment that withdraws it",
-        "evidence/withdrawn_assertions.json": "this file"
+        "evidence/withdrawn_assertions.json": "this file",
+        "evidence/plan4/reviewer_record.o2-o3-claims-change.json": "reporting — the independent review that raised R1 quotes the compressed form it found",
+        "tests/test_withdrawn_assertions.py": "reporting — the module docstring names this compression as the second paraphrase the literal check missed"
       }
     }
   ]

@@ -17,9 +17,20 @@ The two halves are deliberately different in kind, as elsewhere in this suite:
 
 Scope, stated because a check reported wider than it runs is this repository's recurring defect:
 this searches **tracked** files with prose-bearing suffixes. It is a literal phrase match after
-whitespace normalisation, so a *paraphrase* of a withdrawn assertion passes. Catching paraphrase is
-natural-language work and is not attempted; reconciling a reworded claim against its copies stays a
-reviewer's job, which `REVIEW.md` records as a check.
+normalisation, so a *paraphrase* of a withdrawn assertion passes.
+
+**That limit cost the primary result document, one commit after it was written down here.**
+`docs/plan3/certification-result.md` carried the same attribution as "the coreference and
+entity-selection errors ADR 0007 catalogued" — a *stronger* form, naming two taxonomy categories,
+on the document six ledger claims cite as evidence — and this check passed it clean. A second
+surface compressed it to "grounded, well-formed, wrong-entity". Both were found by a reviewer
+reading the documents.
+
+So: **catching paraphrase is not attempted, and nothing automated fills that gap.** What fills it
+is a reviewer reading the primary documents end to end and searching by meaning. `REVIEW.md`
+records that as a *required manual step* rather than an aspiration, because the alternative is that
+the next round reads a green suite as coverage. This register is where a paraphrase is recorded
+**after** it is found; it is not the finding mechanism.
 """
 
 from __future__ import annotations

@@ -123,6 +123,54 @@ one of them. Absent from the claim entirely.
 
 Both are now added to `CX-SERVING-01` as limitations 6 and 7.
 
+## §C — the finding: omissions all pointed one way
+
+Six items across the two lists failed to arrive or arrived incomplete. **Every one qualifies a
+reassurance that did travel.** Recording the direction is the point, because the direction is the
+signal:
+
+| Item | Direction | Travelled? | What it qualified |
+|---|---|---|---|
+| A1 probe condition 1 | qualifies a reassurance | late | the near-zero top-quartile result, which holds only under aggressive abstention |
+| A4 / B2 abstain-extract flip | states a risk | **no** (8 days) | — |
+| B4 4.80% Clopper–Pearson bound | qualifies a reassurance | **no** | "concentrates in low-confidence frames" — 0 of 75 is not zero |
+| B6 cause not isolated | states a risk | **no** | — |
+| B1 13.67% raw divergence | states a risk | yes (as its complement, 86.3%) | — |
+| B3 quality-neutrality | reassurance | yes | — |
+
+**No counter-example exists in this set.** Nothing that flattered the result was ever dropped, and
+no dropped item was a reassurance. That is a **directional bias, not attrition**, and it is
+invisible to every automated check here because each surviving sentence is individually true.
+
+**The countermeasure is the `direction` column, not vigilance.** Recording whether each carried item
+*qualifies a reassurance* or *states a risk* makes a one-way omission set detectable as a signal —
+without needing to establish intent, which is neither knowable nor the point. A carried set whose
+omissions all point one way is a finding on its own, whatever caused it.
+
+`REVIEW.md` now requires the direction to be recorded when items are carried forward, and reviewer
+records carry a `carried_forward` key with a direction per item.
+
+## §D — the register was built against the wrong source, and nothing checks that
+
+A separate mechanism from §C, and separately unrecorded.
+
+This register was built against `carried_into_plan_3`. The dropped item came from
+`standing_limitation`. **A register whose entire purpose is to prevent dropped obligations was built
+against the one of two structures that did not contain the dropped obligation** — so it would have
+reported four-of-four complete while the thing it existed to catch sat unregistered in the same
+source record.
+
+**A register is only as good as its source enumeration, and nothing checks the enumeration.** The
+absence of a register is visible; a register built against an incomplete enumeration looks exactly
+like a complete one. This will recur wherever a structured record can express an obligation in more
+than one place — and reviewer records are free-form JSON, so there is no schema constraining where
+a future reviewer puts one.
+
+Partial mitigation, recorded honestly as partial: reviewer records now carry a top-level
+`carried_forward` key, so *new* obligations have one conventional home. That does nothing for
+records already written, and nothing for a reviewer who states an obligation in prose instead.
+**Enumerating a source record's obligations remains a manual read of the whole record.**
+
 ## What this document does not do
 
 It does not close Plan 3, and it does not discharge findings O1 or O2. It records the status of the

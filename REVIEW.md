@@ -84,15 +84,34 @@ uv run pytest -q && uv run ruff check . && uv run mypy
   **Limit, and it cost something immediately: a paraphrase defeats a phrase search.** Two surfaces
   carried the same attribution in other words and passed the new check clean — including
   `certification-result.md`, in a *stronger* form naming two taxonomy categories, on the primary
-  result document six claims cite. Found by a reviewer, not the test. **When a claim is reworded,
-  read its copies; do not delegate that to the search.**
+  result document six claims cite. Found by a reviewer, not the test.
+
+  **REQUIRED MANUAL STEP — nothing automated fills this gap.** When a claim is reworded or
+  withdrawn, a reviewer reads the **primary documents** end to end and searches by *meaning*, not by
+  string: `README.md`, `docs/plan3/certification-result.md`, the write-up, and any document the
+  ledger cites as `evidence`. Register each paraphrase found in `withdrawn_assertions.json`
+  afterwards so the literal check covers *that* wording next time — but the register is a record of
+  what was found, not the finding mechanism. **Do not treat a green suite as coverage here.** The
+  count of affected surfaces went 3 → 5 → 7 across three reports: two hand-assembled and one from a
+  check with this known limit. A hand-assembled inventory is short by construction, and a
+  literal-match check inherits the same shortness against paraphrase.
 - **"Carried forward" is a behaviour, not a field.** A review can express it in more than one
   place, and reading the key that looks like the list is not reading the record. Plan 2's close
   carried items in two structures; the register built to stop carried items being dropped was built
-  against the one that did not contain the dropped item, and extending it found two more elements
-  that never arrived. **Every one of the four droppings was a qualifier on a reassurance that did
-  travel.** Nothing flattering was ever lost. Check the whole record, and check what the surviving
-  items were qualifying.
+  against the one that did not contain the dropped item. **A register is only as good as its source
+  enumeration, and nothing checks the enumeration** — its absence is visible, but a register built
+  on an incomplete enumeration looks exactly like a complete one. Reviewer records now carry a
+  top-level `carried_forward` key so new obligations have one home; that does nothing for records
+  already written, or for an obligation stated in prose. Enumerating a source record is a manual
+  read of the whole record.
+- **Record each carried item's DIRECTION: does it qualify a reassurance, or state a risk?** Six
+  items across Plan 2's two lists failed to arrive or arrived incomplete, and **every one qualified
+  a reassurance that did travel**. No dropped item was itself a reassurance; no counter-example
+  exists in the set. That is directional bias rather than attrition, and it is invisible to every
+  check here because each surviving sentence is individually true. Recording the direction makes a
+  one-way omission set detectable **as a signal, without needing to establish intent** — which is
+  neither knowable nor the point. A carried set whose omissions all point one way is a finding
+  whatever caused it.
 - **Cite one source per figure. A count and its description must come from the same place.** The
   staged-release amendment argued from "four documented instances of a record drifting" — taking the
   **count** from the scope-matches-sentence gate above (four instances, none of which is drift) and
