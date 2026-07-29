@@ -48,6 +48,13 @@ uv run pytest -q && uv run ruff check . && uv run mypy
 - **No operator paths in prose:** enforced by `tests/test_internal_paths.py` over tracked **and
   untracked** files. Exceptions are named in `ALLOWED` with the reason each cannot do its job
   without the string, and an exception that stops matching fails the suite.
+  **Known uncovered class, by design, not oversight:** the patterns match the *shape* of a path and
+  deliberately hardcode no username, since a test containing the operator's account name would be
+  the leak it exists to prevent. The consequence is that a **bare account name** — not inside a path
+  — is not covered. Measured 2026-07-29: it appears in 19 tracked lines across two files, and the
+  private-planning-directory name in 31 occurrences across three. Decision 1 in
+  `docs/plan4/open-release-decisions.md` accepts this knowingly. Do not "fix" it by hardcoding the
+  name.
 - **Cite one source per figure. A count and its description must come from the same place.** The
   staged-release amendment argued from "four documented instances of a record drifting" — taking the
   **count** from the scope-matches-sentence gate above (four instances, none of which is drift) and
@@ -56,6 +63,19 @@ uv run pytest -q && uv run ruff check . && uv run mypy
   after `tests/test_internal_paths.py` landed to enforce this class**, by the author who had just
   written the enforcing test — so proximity to the lesson is not protection. When a sentence cites a
   number and a phenomenon, check they came from one source before checking whether either is right.
+  **This gate missed its author's first violation.** It was added on 2026-07-28; on 2026-07-29 the
+  same author quoted "~16×" from `CX-GROUNDING-ORTHOGONAL-01` while citing `CX-GROUNDING-01`, in a
+  commit three files away from the gate forbidding exactly that — and the figure was also mis-stated
+  (~16× is the reduction in ungrounded spans, not the grounding rate, which moved 2.4×). It was
+  caught by a reviewer, not by the gate. Recorded because **a gate that misses its own author's
+  first violation needs to know that**: this one is a check a reader performs, not a check the suite
+  runs, so writing it down did not make it fire.
+- **Gate state now has one derived home.** `evidence/gate_state.json` summarises it and
+  `tests/test_gate_state.py` holds that summary to the reviewer records — a real gate. The
+  superseded-assertion list in the same file is a **tripwire**: it catches known-stale phrasings
+  returning and cannot detect a gate-state error phrased any other way. Its first version missed the
+  very file that provoked it, because the phrase was wrapped across two lines. **Reconciling a new
+  document's prose against the records remains manual**, which is why the check below stays.
 - **A document that asserts a gate state must be reconciled before it is used, not after.**
   Three instances now: the README said "Plan 1 is active" through Plan 3 (fixed 2026-07-28);
   `main` sat eleven days behind the branch that corrected it, so the only story a reader could
