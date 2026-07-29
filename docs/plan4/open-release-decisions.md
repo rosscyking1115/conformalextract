@@ -79,3 +79,30 @@ public surface and still a claim of a kind. `conformal-prediction`, `selective-p
 boundary for something this project did not achieve.
 
 Both items are gated behind Plan 4 opening, and Plan 4 has not opened.
+
+---
+
+## 4. §1 and §17 of the accepted plan disagree on what the minimum contribution is
+
+**Raised:** 2026-07-29, by the independent review that rejected the staged-release amendment.
+**Status:** open. **Neither party had found it** — not the implementer proposing to cut §1, and not
+the reviewer refusing the cut, until it read §17 in the primary text.
+
+`accepted-plan.md` §1 names **seven** items as "the minimum useful public contribution". §17's
+evidence-acceptance checklist contains a ticked line reading *"The evaluator/certifier, evidence
+bundle and CPU replay are the minimum contribution"* — **three** items.
+
+This is a genuine internal contradiction in an accepted plan, and it is the strongest argument the
+rejected amendment could have made and did not. It does not rescue that proposal: §17's three are a
+*different set* (they omit item 4, the versioned GitHub release, which Stage A kept), and treating a
+checklist gloss as though it overrode the section it summarises is the exact trap `CLAUDE.md`
+already records from the §6.3 episode — *"the repo's gloss on §6.3 was stricter than §6.3 actually
+is, and an ADR was written against the gloss."*
+
+**Not resolved here, and deliberately not resolved by a release commit.** An accepted plan is
+amended by dated note and its hash pin moved in the same commit; which of the two readings governs
+is a scope question for Ross, and it changes what the release must contain. Until it is answered,
+**§1's seven stand**, because that is the section and §17 is the summary of it.
+
+Both readings should be tested against the same question: which one did the plan's author intend to
+bind — and if the answer is not recoverable, which one this project would rather be held to.
