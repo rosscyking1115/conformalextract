@@ -69,6 +69,20 @@ uv run pytest -q && uv run ruff check . && uv run mypy
   individually true and collectively flattering is invisible to all of them.** The only way to
   catch it is to diff against the source that raised the findings and ask which ones did not make
   the journey — so when a review carries items forward, list them and tick them off by name.
+  **The list must live in the RECEIVING document, not only in the review that raised the items.**
+  Plan 2's four carried items *were* listed — in Plan 2's close record — and a later reviewer still
+  had to find that record to discover one was missing. The obligation has to travel with the work.
+  Pattern: `docs/plan3/carried-forward-from-plan2.md`. **A close may not be issued while any
+  carried item is untracked.**
+- **A withdrawn claim lives wherever it was copied, and the ledger is not the inventory.** When
+  `CX-GROUNDING-ORTHOGONAL-01` was narrowed, the retired attribution was still live in three
+  publication surfaces the ledger knows nothing about, and `verify-claims` was green throughout.
+  `evidence/withdrawn_assertions.json` plus `tests/test_withdrawn_assertions.py` now search tracked
+  prose for the **phrasing**, not the claim ID, because a copy carries the words and drops the
+  identifier. It found two further surfaces on its first run — one of them regenerated minutes
+  earlier by the author enumerating the list. **An inventory assembled from memory is short.**
+  Limit: literal phrase match, so a paraphrase still passes; reconciling a reworded claim against
+  its copies remains a reader's job.
 - **Cite one source per figure. A count and its description must come from the same place.** The
   staged-release amendment argued from "four documented instances of a record drifting" — taking the
   **count** from the scope-matches-sentence gate above (four instances, none of which is drift) and
