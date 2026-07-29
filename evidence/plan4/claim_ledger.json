@@ -3,6 +3,27 @@
   "analysis_id": "plan2prep-f3f2f7a938061a92b2cb",
   "claims": [
     {
+      "claim_id": "CX-REPO-DESCRIPTION-01",
+      "wording": "Selective, grounded event-argument extraction on RAMS: a ~16x grounding gain from QLoRA bought no certified coverage. An evidence-first negative result.",
+      "status": "negative",
+      "scope": "the GitHub repository description field — one line, no second passage",
+      "evidence": [
+        "evidence/plan3/certification_result.json",
+        "evidence/plan3/loss_decomposition.json",
+        "docs/plan3/certification-result.md",
+        "docs/plan4/open-release-decisions.md"
+      ],
+      "method": "Authored for the one-line constraint rather than compressed from an existing claim. It is the conjunction of CX-GROUNDING-01 (the ~16x grounding separation) and CX-H1-PRIMARY (no system certified), held in a single clause because the claim boundaries in docs/plan3/certification-result.md require the grounding gain and the null to appear in the same passage and a description has no second passage. No figure is quoted: 95.7% is forbidden by name outside a passage carrying the null, and the ratio is given as approximate exactly as its sources hedge it.",
+      "limitations": [
+        "In-domain RAMS only, at the frozen operating point (alpha 0.20, delta 0.05, acceptance floor 0.20), on the frozen vLLM 4-bit serving stack. None of that fits in the field, which is why the field must not be read as the claim's scope.",
+        "\"No certified coverage\" is the null for all three systems, not a QLoRA-versus-baseline comparison; H1 and H2 collapse to one finding.",
+        "\"Grounding gain\" means parseable-and-grounded output, NOT correctness. It must never be read as accuracy.",
+        "The description is a pointer to the result, not the result. Every figure behind it lives in the ledger and the certification record, and a reader arriving from the description reaches those before any number."
+      ],
+      "surfaces": ["repo_description"],
+      "verified_by": "Composed 2026-07-29 from two claims already independently reviewed (CX-GROUNDING-01 reconciled against an independent extraction measurement 2026-07-21; CX-H1-PRIMARY reviewer PASS 2026-07-22). Routed for independent review as a new public sentence; the repository is private and the field is empty, so nothing is published by this entry."
+    },
+    {
       "claim_id": "CX-H1-PRIMARY",
       "wording": "At a target risk of 20% with 95% confidence and a 20% acceptance floor, neither the QLoRA-adapted system nor the zero-shot baseline could be certified on RAMS: both are Infeasible, so no comparison of certified acceptance between them is possible.",
       "status": "infeasible",

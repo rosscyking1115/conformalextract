@@ -62,8 +62,24 @@ PROSE_PERMITTED: frozenset[ClaimStatus] = frozenset(
     }
 )
 
+#: `repo_description` is deliberately distinct from `abstract`, not a synonym for it. An abstract
+#: has room to carry a claim's limitations in the same passage; a repository description is one
+#: line with no second passage, and the claim boundaries require the grounding gain and the null to
+#: travel together. A claim written for `abstract` cannot be trimmed into a description without
+#: dropping exactly the half the boundaries protect, so a description needs a wording authored for
+#: that constraint (Plan 4 open decision 2, ruled 2026-07-29).
 PUBLIC_SURFACES: frozenset[str] = frozenset(
-    {"README", "report", "model_card", "dataset_card", "CV", "kaggle", "slide", "abstract"}
+    {
+        "README",
+        "report",
+        "model_card",
+        "dataset_card",
+        "CV",
+        "kaggle",
+        "slide",
+        "abstract",
+        "repo_description",
+    }
 )
 
 #: Wordings the reviewer forbade, in both directions (over- and under-claiming).

@@ -48,6 +48,14 @@ uv run pytest -q && uv run ruff check . && uv run mypy
 - **No operator paths in prose:** enforced by `tests/test_internal_paths.py` over tracked **and
   untracked** files. Exceptions are named in `ALLOWED` with the reason each cannot do its job
   without the string, and an exception that stops matching fails the suite.
+- **Cite one source per figure. A count and its description must come from the same place.** The
+  staged-release amendment argued from "four documented instances of a record drifting" — taking the
+  **count** from the scope-matches-sentence gate above (four instances, none of which is drift) and
+  the **description** from the gate-state gate below (three instances, which are). Exactly one of
+  the four fits. It reads as an evidenced claim and is a splice of two. **It was written one commit
+  after `tests/test_internal_paths.py` landed to enforce this class**, by the author who had just
+  written the enforcing test — so proximity to the lesson is not protection. When a sentence cites a
+  number and a phenomenon, check they came from one source before checking whether either is right.
 - **A document that asserts a gate state must be reconciled before it is used, not after.**
   Three instances now: the README said "Plan 1 is active" through Plan 3 (fixed 2026-07-28);
   `main` sat eleven days behind the branch that corrected it, so the only story a reader could

@@ -7,12 +7,39 @@ needs the owner's approval and an independent review in its own right.
 This file is a live list: items are added when found and struck when decided. It is deliberately not
 a dated record — see `docs/release-check-2026-07-28.md` for the check that surfaced the first item.
 
+## Live list
+
+| # | Decision | Status |
+|---|---|---|
+| 1 | Reviewer records in the public bundle | ~~open~~ **DECIDED 2026-07-29 — publish as-is** |
+| 2 | Repository description | ~~open~~ **DECIDED 2026-07-29 — gets its own ledger claim; sentence still to be drafted and reviewed** |
+| 3 | Repository topics | ~~open~~ **DECIDED 2026-07-29 — three approved; more may be proposed** |
+| 4 | §1 versus §17 on the minimum contribution | **DEFERRED 2026-07-29** — §1's seven stand; not on the path to the actual goal |
+| 5 | Repository visibility | **OPEN** — routed separately, see [`proposed-visibility-change.md`](proposed-visibility-change.md) |
+
+Decisions 1–4 were ruled by Ross on 2026-07-29. Their reasoning is preserved below rather than
+deleted: a struck decision is a record of *why*, and the next person to ask the same question should
+find the argument, not just the answer.
+
 ---
 
-## 1. Do reviewer records ship in the public evidence bundle?
+## 1. ~~Do reviewer records ship in the public evidence bundle?~~ **DECIDED: publish as-is**
 
 **Raised:** 2026-07-28, by the release-hygiene check.
-**Status:** open.
+**Decided:** 2026-07-29 by Ross — **option (a), publish as-is.**
+
+> **The reasoning below is adopted as the basis of the decision.** The cost is accepted: a public
+> artifact will contain a directory name from one machine.
+>
+> **One addition that changes when this binds, and it was not said when the options were framed:**
+> **flipping repository visibility publishes those records whether or not a bundle is ever
+> assembled.** Every reviewer record is a tracked file. There is no assembly step between "the repo
+> is public" and "the records are public".
+>
+> **This decision is therefore a precondition for any visibility change, not merely for bundle
+> assembly.** It is now satisfied — but the general shape is worth keeping: a decision framed as
+> being about *what we publish* can be forced by an act that publishes *everything tracked*, and
+> the framing hides that.
 
 `evidence/plan3/reviewer_record.reanalysis.json` contains four references to the private planning
 directory the accepted plans were held in, including its absolute path. Two sibling occurrences
@@ -45,10 +72,20 @@ this seat's call, and it is not urgent until a public bundle is actually assembl
 
 ---
 
-## 2. What does the repository description say?
+## 2. ~~What does the repository description say?~~ **DECIDED: its own ledger claim**
 
 **Raised:** 2026-07-28, by the release-hygiene check.
-**Status:** open. Currently **empty** (`gh repo view` → `"description":""`).
+**Decided:** 2026-07-29 by Ross — **the description gets its own ledger claim, not a compression of
+an existing one.** The sentence itself is still to be drafted and routed like any other public
+sentence. Currently **empty** (`gh repo view` → `"description":""`).
+
+> **Why its own claim, and the analysis below is the specification:** the claim boundaries require
+> the ~16× grounding gain and the null to travel in the **same passage**, and a description has no
+> second passage. `CX-H1-PRIMARY`, `CX-CAPGAP-01` and `CX-GROUNDING-ORTHOGONAL-01` all carry the
+> `abstract` surface and none is short enough as written. **So the sentence must be written for the
+> constraint, not trimmed into it** — trimming an existing claim is how the null gets dropped.
+>
+> `"95.7% grounded event-argument extraction"` remains forbidden by name.
 
 A description is a claim about what the repository is, rendered on every search result, every
 listing, and every link preview — and it is the one public surface with no room for a caveat. This
@@ -67,10 +104,21 @@ closest existing analogue to a description; none of them is short enough as writ
 decision includes whether a description needs its own ledger entry rather than a compression of an
 existing one. **Not filled in now**, deliberately.
 
-## 3. What topics does the repository carry?
+## 3. ~~What topics does the repository carry?~~ **DECIDED: three approved**
 
 **Raised:** 2026-07-28, by the release-hygiene check.
-**Status:** open. Currently **none**.
+**Decided:** 2026-07-29 by Ross — **`conformal-prediction`, `selective-prediction`,
+`event-extraction`** are approved as accurate. Further topics may be proposed if they trace
+honestly. Currently **none** set.
+
+> `certified` and `production` stay **banned**. `certified` in particular is reserved by the honesty
+> boundary for something this project did not achieve, and a topic is not exempt from that because
+> it is metadata rather than prose.
+>
+> **Candidates for the "propose more" allowance, not applied:** `rams`, `qlora`, `negative-results`,
+> `reproducibility`, `llm-evaluation`. Each traces to something the repository actually contains.
+> `negative-results` is the one worth arguing for — it is the most accurate single word for what
+> this project produced, and it is the opposite of the direction a topic list usually drifts.
 
 Lower stakes than the description — topics are discovery metadata, not prose — but they are still a
 public surface and still a claim of a kind. `conformal-prediction`, `selective-prediction` and
@@ -82,11 +130,16 @@ Both items are gated behind Plan 4 opening, and Plan 4 has not opened.
 
 ---
 
-## 4. §1 and §17 of the accepted plan disagree on what the minimum contribution is
+## 4. ~~§1 and §17 disagree on the minimum contribution~~ **DEFERRED**
 
 **Raised:** 2026-07-29, by the independent review that rejected the staged-release amendment.
-**Status:** open. **Neither party had found it** — not the implementer proposing to cut §1, and not
-the reviewer refusing the cut, until it read §17 in the primary text.
+**Deferred:** 2026-07-29 by Ross. **§1's seven stand.** Deferred rather than answered, because it is
+**not on the path to the thing actually wanted** — visibility is decision 5, and §1 governs the
+public *contribution*, which is a different question. Resolving §1-versus-§17 would not move a
+visibility change one step closer.
+
+**Neither party had found it** — not the implementer proposing to cut §1, and not the reviewer
+refusing the cut, until it read §17 in the primary text.
 
 `accepted-plan.md` §1 names **seven** items as "the minimum useful public contribution". §17's
 evidence-acceptance checklist contains a ticked line reading *"The evaluator/certifier, evidence
