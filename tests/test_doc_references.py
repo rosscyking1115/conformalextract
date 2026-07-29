@@ -84,8 +84,12 @@ ACCEPTED_PLAN_SHA256 = {
     "docs/plan3/accepted-plan.md": (
         "83313d47ec2a9869dcc580bda8cc543a606b5a894be269c9fdd6a229308a07e9"
     ),
+    # Amended 2026-07-29 with a dated note reconciling its inherited-status line against the
+    # records (Plan 1 complete, Plan 2 closed, Plan 3 executed but not formally closed). The
+    # original paragraph is preserved above the note. Pin moved in the same commit, as the rule
+    # above requires; previous digest bdad3b4f…
     "docs/plan4/accepted-plan.md": (
-        "bdad3b4fcb2879d0c13499e4f6eded99e5f33269598e96776090c775bd35d2b1"
+        "2d957be07b96f454c6b88e9e7c76431e3e5a5212a574fefae34a3cda2754768c"
     ),
 }
 

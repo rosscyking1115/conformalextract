@@ -48,6 +48,16 @@ uv run pytest -q && uv run ruff check . && uv run mypy
 - **No operator paths in prose:** enforced by `tests/test_internal_paths.py` over tracked **and
   untracked** files. Exceptions are named in `ALLOWED` with the reason each cannot do its job
   without the string, and an exception that stops matching fails the suite.
+- **A document that asserts a gate state must be reconciled before it is used, not after.**
+  Three instances now: the README said "Plan 1 is active" through Plan 3 (fixed 2026-07-28);
+  `main` sat eleven days behind the branch that corrected it, so the only story a reader could
+  reach was the wrong one; and `docs/plan4/accepted-plan.md` opened Plan 4 still saying Plans 1–3
+  were "not implemented" (amended 2026-07-29). The last is the worst, because that document
+  *governs the release* and every artifact built from it would have inherited the error. **Gate
+  state is asserted in prose and checked nowhere** — `verify-claims` checks claim citations,
+  `test_doc_references` checks identifiers resolve, and neither reads a status line. Until that is
+  mechanical, reconciling a status line against `docs/gate0/decision.md` and the reviewer records
+  is a manual step at the *start* of using any planning document.
 
 **Verdict vocabulary:** PASS · PASS-WITH-NITS · BLOCK. A BLOCK escalates to the human Reviewer seat.
 For Plan 2 specifically, the independent reviewer basis is `docs/plan2/reviewer-brief.md`.

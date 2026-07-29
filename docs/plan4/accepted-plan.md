@@ -6,6 +6,39 @@
 
 **Inherited & locked:** Plans 1–3 are accepted in direction but not implemented. Route Z is ConformalExtract; Route Y remains a preserved deferred project. Certified acceptance is the headline object, QA–ZS is primary, QA–FS is secondary confirmatory, and static transfer under shift is explicitly uncertified. No release may imply that planning acceptance equals a completed experiment, that an infeasible certificate is a successful certificate, or that an in-domain guarantee survives schema/dataset shift.
 
+> ### Amendment — 2026-07-29: the inherited-status line above is out of date
+>
+> Appended, not rewritten; the paragraph above is preserved as the historical record of what was
+> true on 2026-07-15. **Read this note in its place.** Reconciled against the repository's own
+> records before Plan 4 was used for anything:
+>
+> | Plan | The line above says | The records say |
+> |---|---|---|
+> | Plan 1 | accepted in direction, not implemented | **complete** — Gates 0A–0F pass, Gate 0 decision `go`, consolidated reviewer PASS 2026-07-17 (`docs/gate0/decision.md`) |
+> | Plan 2 | accepted in direction, not implemented | **closed** — independent reviewer PASS at commit `2d3c6be`, 2026-07-21 (`evidence/plan2/reviewer_record.plan2-close.json`) |
+> | Plan 3 | accepted in direction, not implemented | **executed and independently reviewed, not formally closed** — certification ran 2026-07-22 and returned infeasibility for all three systems; five Plan 3 reviewer records exist and **none carries `review_kind: "plan_close"`** |
+>
+> **What is locked has not changed, and one clause of it now binds harder than when it was
+> written.** "No release may imply … that an infeasible certificate is a successful certificate"
+> was drafted as a precaution against a hypothetical. The certificate came back **infeasible for
+> all three systems**, so that clause is now the governing constraint on every artifact this plan
+> produces, not a guard against an unlikely branch.
+>
+> One inherited assumption is superseded rather than merely dated: the line names certified
+> acceptance as "the headline object". No certified acceptance exists. The headline object of the
+> release is the **negative result** and the grounding⊥certifiability decomposition
+> (`CX-GROUNDING-ORTHOGONAL-01`), bounded by
+> [`../plan3/certification-result.md`](../plan3/certification-result.md) → "What may and may not
+> be claimed".
+>
+> **This is the same defect as the README gate-state error corrected on 2026-07-28** — a document
+> asserting a gate state its own repository contradicted — and it is worse here for two reasons.
+> The README is read by anyone; this document *governs the release*, so a stale status line in it
+> would have been inherited by every artifact built from it. And it survived a full day spent
+> correcting exactly this class of error one directory away. **The lesson is recorded as a check
+> in [`../../REVIEW.md`](../../REVIEW.md), not here**, because a lesson written only into the
+> document it concerns fires once.
+
 ---
 
 ## 1. Executive release decision
