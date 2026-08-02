@@ -164,12 +164,20 @@ Orthogonality asserts independence, which one intervention across three systems 
 and which nothing here tested. The measured statement is narrower and is all the evidence carries:
 the gain in grounding was large and the change in certifiability was not.
 
-**Nor is it a task-wide impossibility.** A 20% target is demonstrably reachable on structured
-extraction: on the datasets 2606.29054 reports, `(μ−α)/(1−α)` forbids nothing at μ = 0.033 and
-permits up to 80.5% acceptance at μ = 0.356 (`docs/frontier-check/findings.md`, re-verified
-2026-07-22). What is established here is that **this** model with **this** score on **this** task
-at μ = 0.6071 could not — a model-and-score-specific result, not a statement about the task or the
-field. Any sentence that reads otherwise is an overclaim of the kind finding O2 was raised about.
+**Nor is it a task-wide impossibility.** On the datasets 2606.29054 reports,
+`(μ−α)/(1−α)` **forbids nothing** at μ = 0.033 and permits up to 80.5% acceptance at μ = 0.356
+(`docs/frontier-check/findings.md`, re-verified 2026-07-22), so a 20% target is **not excluded** on
+structured extraction at those base risks.
+
+> **Corrected 2026-08-02 (review finding F1).** This paragraph said "demonstrably reachable". It is
+> not: the impossibility bound is a **necessary** condition, and not being forbidden by it is not
+> achievability — the same ruling-in direction this document forbids for the 0.406 frontier point
+> three sections above. 2606.29054 in fact reports certification becoming practical only at
+> α = 0.30–0.40 on its own tasks. "Not excluded" is what the evidence carries.
+
+What is established here is that **this** model with **this** score on **this** task could not —
+a model-and-score-specific result, not a statement about the task or the field. Any sentence that
+reads otherwise is an overclaim of the kind finding O2 was raised about.
 
 Caveats that travel with this: conditional coverage under the grounding oracle is **not** a
 deployable acceptance rate — the restricted population differs per system, so those numbers are
@@ -285,9 +293,19 @@ reported as two independent confirmatory comparisons. There is one finding, not 
 - **(ADR 0011)** The grounding **dissociation**: a ~16× grounding gain moved the certifiable
   frontier by +0.017 for QA and by 0.000 for both baselines, with 87% of QA's residual loss in
   grounded, content-bearing output. Reported with the restricted-population caveat attached.
-- That the null is **model-and-score-specific**: a 20% target is reachable on structured extraction
-  at the base risks prior work reports (μ = 0.033, μ = 0.356), and this system's μ = 0.6071 is what
-  put it out of reach here.
+- That the null is **model-and-score-specific**: a 20% target is **not excluded** on structured
+  extraction at the base risks prior work reports (μ = 0.033, μ = 0.356). **What put it out of
+  reach here is not μ alone** — at μ = 0.6071 the bound still permits 49.1% acceptance, far above
+  the floor. Infeasibility here is **overdetermined**, and all three parts must be stated together:
+  (i) base risk, which alone forbids the floor for ZS and FS but *not* for QA; (ii) **ranking** —
+  the score reached 2.0% where a perfect ranking of the same population reaches 23.6%; and
+  (iii) the **finite-sample penalty** — that same perfect ranking certifies only 11.4% at δ/3
+  (8.4% family-wide), still below the floor, and the measured score certifies 0.0%.
+
+  > **Corrected 2026-08-02 (review finding F1).** This bullet read "this system's μ = 0.6071 is
+  > what put it out of reach here". That is false on this repository's own bound and re-commits
+  > exactly the base-risk-as-forecast error `CX-FEASIBILITY-LESSON-01` exists to record — the
+  > ceiling bounds what an ORACLE score could do and is not a forecast of certifiability.
 
 **Forbidden — in both directions:**
 
@@ -301,6 +319,8 @@ reported as two independent confirmatory comparisons. There is one finding, not 
 | Any **task-wide or field-wide** impossibility reading. α ≤ 0.20 is reachable on structured extraction at the base risks prior work reports; this is a model-and-score-specific result *(added 2026-08-02)* | — |
 | Calling **0.406** a threshold, a certified operating point, or anything other than an empirical oracle frontier point measured on an already-opened split *(added 2026-08-02)* | — |
 | Describing grounding and certifiability as **orthogonal**, **independent**, or **unrelated**. The measured relation is a dissociation; independence was never tested *(added 2026-08-02)* | — |
+| Attributing the null to base risk **alone**. At μ = 0.6071 the bound permits 49.1%; infeasibility is overdetermined by base risk, ranking AND the finite-sample penalty *(added 2026-08-02)* | — |
+| Reading the **empirical** oracle acceptance (0.2357) as something that could have been certified, or saying the floor "was reachable". Certified, that oracle is 0.1139 at δ/3 — below the floor. Only `acceptance_certified_loss_optimal` licenses the word "certified" *(added 2026-08-02)* | — |
 
 ## Status
 

@@ -446,8 +446,8 @@ def test_system_readout_carries_every_indicator_and_the_headline_reads_it() -> N
     assert discrimination["above_alpha"]["auroc"] == 1.0
     # No group is invalid, so that indicator has one empty class and no AUROC.
     assert discrimination["not_all_valid"]["auroc"] is None
-    assert headline(readout)["delivered"] == pytest.approx(0.5)
-    assert headline(readout)["oracle_ranking"] == pytest.approx(0.5)
+    assert headline(readout)["delivered_empirical"] == pytest.approx(0.5)
+    assert headline(readout)["oracle_ranking_empirical"] == pytest.approx(0.5)
 
 
 def test_prediction_status_literals_still_match_the_channels_grounding_relies_on() -> None:
@@ -460,3 +460,64 @@ def test_prediction_status_literals_still_match_the_channels_grounding_relies_on
         "structural_failure",
         "grounding_failure",
     }
+
+
+# --- the correction of 2026-08-02: empirical oracle is not certified oracle -----------
+
+
+def test_the_certified_oracle_is_never_above_the_empirical_one() -> None:
+    """A confidence bound can only be worse than the point estimate it is built from.
+
+    The property the refuted claim violated. An independent review found the paper asserting that
+    a perfect ranking "would clear the floor" on the strength of the EMPIRICAL oracle, when the
+    certified one sat below it. Nothing enforced the relationship; this does.
+    """
+
+    rows = _rows(
+        [0.0, 0.05, 0.1, 0.15, 0.2, 0.9, 0.95, 1.0],
+        [8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0],
+    )
+    r = selective_risk(rows, alpha=0.2)
+    assert r.acceptance_certified_loss_optimal <= r.acceptance_under_loss_optimal_ranking
+    assert r.acceptance_certified_score_ranked <= r.max_acceptance_within_alpha
+
+
+def test_a_tighter_delta_can_only_certify_less() -> None:
+    """Monotonicity in the confidence budget: a stricter delta widens the radius."""
+
+    rows = _rows([0.0] * 40 + [1.0] * 10, [float(-i) for i in range(50)])
+    loose = selective_risk(rows, alpha=0.2, delta=0.05 / 3)
+    tight = selective_risk(rows, alpha=0.2, delta=0.05 / 18)
+    assert tight.acceptance_certified_loss_optimal <= loose.acceptance_certified_loss_optimal
+
+
+def test_certified_acceptance_uses_the_certifiers_own_bound() -> None:
+    """Recomputed against ``certification.hoeffding_upper`` directly, so a second implementation
+    of the bound cannot silently appear in this module.
+
+    The population is deliberately large: at delta/3 the Hoeffding radius only falls below
+    alpha = 0.2 past roughly 60 samples, so a small fixture certifies nothing and would test
+    nothing. That threshold is itself the reason the certified oracle sits so far below the
+    empirical one on real data.
+    """
+
+    from conformalextract.certification import hoeffding_upper
+
+    losses = [0.0] * 200 + [1.0] * 50
+    rows = _rows(losses, [float(-i) for i in range(len(losses))])
+    r = selective_risk(rows, alpha=0.2, delta=0.05 / 3)
+    assert r.acceptance_certified_loss_optimal > 0.0
+    k = round(r.acceptance_certified_loss_optimal * len(losses))
+    ordered = sorted(losses)
+    assert hoeffding_upper(ordered[:k], 0.05 / 3) <= 0.2
+    assert hoeffding_upper(ordered[: k + 1], 0.05 / 3) > 0.2
+
+
+def test_a_population_can_be_empirically_within_alpha_and_still_uncertifiable() -> None:
+    """The exact shape of the refuted claim, as a unit test: a tiny clean prefix is within alpha
+    empirically and certifies nothing, because the Hoeffding radius on few samples exceeds it."""
+
+    rows = _rows([0.0, 0.0, 1.0, 1.0], [4.0, 3.0, 2.0, 1.0])
+    r = selective_risk(rows, alpha=0.2, delta=0.05 / 3)
+    assert r.acceptance_under_loss_optimal_ranking == pytest.approx(0.5)
+    assert r.acceptance_certified_loss_optimal == 0.0

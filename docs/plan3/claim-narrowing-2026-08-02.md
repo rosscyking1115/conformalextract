@@ -104,9 +104,12 @@ quantisation path or sampler. Both are limitations that make the probe result *l
 the drift ran in the flattering direction. An independent reviewer verified byte-identity by hand on
 2026-07-28 and nothing held it there afterwards.
 
-`tests/test_claims.py::test_the_committed_appendix_still_matches_what_the_ledger_renders` now fails
-if any rendered line is absent from the committed appendix. A hand-checked invariant with no test is
-a comment.
+`tests/test_claims.py::test_the_committed_appendix_is_byte_identical_to_what_the_ledger_renders` now asserts
+BYTE-IDENTITY against `claims.render_surface`. Its first version checked only that every rendered
+line appeared somewhere in the file; an independent reviewer broke that by mutation on 2026-08-02
+(it passed a fabricated added claim, an added limitation, and the file reversed), so it was
+strengthened to equality — which is what the human reviewer had used all along. A hand-checked
+invariant with no test is a comment; a containment check is not a fidelity check.
 
 **The write-up title repeated a phrasing already ruled against on another surface.**
 `evidence/plan4/reviewer_record.visibility-and-description.json` required "bought no certified

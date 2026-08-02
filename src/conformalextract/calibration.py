@@ -6,16 +6,27 @@ It does not answer **why**, and the two candidate answers have very different co
 * the population is too hard — base risk alone forbids the acceptance floor; or
 * the population is reachable but the *score* does not rank the reachable part to the top.
 
-Those are separable, and this module reports two separations rather than one because they differ
-in tightness and the difference matters. The loose one is arithmetic: with losses bounded in [0,1]
-and base risk ``mu``, abstention of at least ``(mu - alpha)/(1 - alpha)`` is forced
-(:func:`minimum_abstention`), so one minus that bounds any score. It assumes the population's
-goodness can be concentrated arbitrarily, which no real population allows, so it OVERSTATES the
-shortfall. The tight one holds the population fixed and varies only the ranking: rank the same
-groups by their actual loss and read the same height
-(``SelectiveRisk.acceptance_under_loss_optimal_ranking``). Whatever distance remains between that
-and the measured acceptance is attributable to the score and to nothing else, and it is the only
-one of the two that a score-discrimination claim may be stated in.
+Answering that needs THREE upper bounds, not one, and confusing them is the error this module was
+corrected for. In increasing order of strictness, for QA on the certification split:
+
+1. **Arithmetic** (0.4911) -- ``1 - (mu - alpha)/(1 - alpha)`` (:func:`minimum_abstention`).
+   Assumes the population's goodness can be concentrated arbitrarily, which no real population
+   allows. It OVERSTATES what was available and must not be quoted as a shortfall.
+2. **Empirical oracle** (0.2357) -- rank this exact population by its actual loss and read the
+   same height (``acceptance_under_loss_optimal_ranking``). Holds the population fixed and varies
+   only the ranking, so the distance from the measured 0.0201 is attributable to the score. This
+   is the like-for-like comparison and the only one a SCORE-DISCRIMINATION claim may use.
+3. **Certified oracle** (0.1139 at delta/3) -- the same perfect ranking, but required to keep its
+   Hoeffding UPPER bound within alpha (``acceptance_certified_loss_optimal``). This is the only
+   one that licenses the word "certified".
+
+The gap between (2) and (3) is not a detail. **An independent review on 2026-08-02 refuted the
+claim that a perfect ranking "would clear the 20% floor"**: it clears the floor at (2) and misses
+it at (3), because 0.1139 < 0.20. The measured score certifies 0.0000. So infeasibility here is
+OVERDETERMINED -- base risk, ranking, and finite-sample penalty each independently forbid the
+target -- and no statement of the form "it was reachable" is supportable. Reading (2) as if it
+were (3) is the same category error as reading the alpha-frontier point 0.406 as a threshold,
+which this repository already forbids by name.
 
 **Governance, stated plainly rather than buried.** ``docs/plan3/sections-11-and-12-disposition.md``
 (2026-07-29, Ross's ruling, itself still pending independent review) DESCOPES three of the four
@@ -48,6 +59,7 @@ import numpy as np
 import numpy.typing as npt
 from scipy.stats import rankdata, spearmanr
 
+from conformalextract.certification import FROZEN_DELTA, hoeffding_upper
 from conformalextract.certification_run import GroupRow
 from conformalextract.profiles import RamsInstance
 from conformalextract.reanalysis import CONTENT_CHANNEL, SplitSystemData
@@ -163,6 +175,9 @@ class SelectiveRisk:
     minimum_abstention_at_alpha: float
     acceptance_permitted_by_base_risk: float
     acceptance_under_loss_optimal_ranking: float
+    acceptance_certified_score_ranked: float
+    acceptance_certified_loss_optimal: float
+    certified_delta: float
 
     @property
     def acceptance_shortfall_vs_base_risk(self) -> float:
@@ -179,11 +194,18 @@ class SelectiveRisk:
     @property
     def acceptance_shortfall_vs_oracle(self) -> float:
         """Acceptance a PERFECT ranking of this exact population would have reached, minus what
-        the score delivered.
+        the score delivered -- **both measured empirically, with no finite-sample penalty**.
 
-        The tight reading, and the one any claim about score discrimination should be stated in.
-        It holds the population fixed and varies only the ranking, so whatever it leaves
-        unexplained is attributable to the score and to nothing else.
+        The like-for-like reading, and the one a claim about score DISCRIMINATION should use: it
+        holds the population fixed and varies only the ranking, so what it leaves unexplained is
+        attributable to the score.
+
+        It says nothing whatever about certifiability, and reading it that way is the error this
+        module was corrected for on 2026-08-02. An independent review refuted the claim that a
+        perfect ranking "would clear the floor": the empirical oracle reaches 0.2357 for QA, but
+        under the certifier's own bound the same perfect ranking certifies only 0.1139, below the
+        0.20 floor. Use :attr:`acceptance_certified_loss_optimal` for any statement about what
+        could have been certified -- never this.
         """
 
         return self.acceptance_under_loss_optimal_ranking - self.max_acceptance_within_alpha
@@ -193,8 +215,43 @@ def _running_risk(losses: np.ndarray) -> np.ndarray:
     return np.cumsum(losses) / np.arange(1, losses.size + 1)
 
 
+#: Per-system confidence allocation used for the CERTIFIED readings. The certification run splits
+#: the frozen delta three ways, one share per system, so delta/3 is the allocation a single
+#: system's certificate actually gets. The family-wide Bonferroni allocation delta/(2*9) is
+#: tighter still and is quoted in the write-up where the more conservative figure is wanted.
+CERTIFIED_DELTA: float = FROZEN_DELTA / 3.0
+
+
+def _certified_acceptance(
+    sorted_losses: np.ndarray, total: int, alpha: float, delta: float
+) -> float:
+    """Largest coverage whose accepted prefix keeps its Hoeffding UPPER bound within ``alpha``.
+
+    The empirical curve asks whether the accepted set's mean loss is within alpha. A certificate
+    asks whether its upper confidence bound is, which is a strictly harder question and the only
+    one that licenses the word "certified". Accepting more groups lowers the empirical mean but
+    also shrinks the radius, so the two curves cross at very different coverages: on QA the
+    empirical oracle reaches 0.2357 and the certified oracle 0.1139.
+
+    Uses ``certification.hoeffding_upper`` rather than reimplementing it, so this cannot drift
+    from the bound the certifier itself applied.
+    """
+
+    if sorted_losses.size == 0 or total == 0:
+        return 0.0
+    bounds = np.array(
+        [hoeffding_upper(list(sorted_losses[:k]), delta) for k in range(1, sorted_losses.size + 1)]
+    )
+    within = np.flatnonzero(bounds <= alpha)
+    return float((int(within[-1]) + 1) / total) if within.size else 0.0
+
+
 def selective_risk(
-    rows: Sequence[GroupRow], *, alpha: float, coverage_grid: Sequence[float] = COVERAGE_GRID
+    rows: Sequence[GroupRow],
+    *,
+    alpha: float,
+    coverage_grid: Sequence[float] = COVERAGE_GRID,
+    delta: float = CERTIFIED_DELTA,
 ) -> SelectiveRisk:
     """Summarise one system-and-score's whole risk-coverage behaviour.
 
@@ -228,6 +285,9 @@ def selective_risk(
             minimum_abstention_at_alpha=minimum_abstention(base_all, alpha) if total else 0.0,
             acceptance_permitted_by_base_risk=permitted,
             acceptance_under_loss_optimal_ranking=0.0,
+            acceptance_certified_score_ranked=0.0,
+            acceptance_certified_loss_optimal=0.0,
+            certified_delta=delta,
         )
 
     losses = np.asarray([row.loss for row in eligible], dtype=np.float64)
@@ -247,7 +307,8 @@ def selective_risk(
     # height. It varies only the ranking, so the distance from it to the measured acceptance is
     # attributable to the score alone -- unlike the base-risk bound, which also absorbs whatever
     # the population's loss distribution makes impossible.
-    optimal_running = _running_risk(np.sort(losses))
+    optimal_losses = np.sort(losses)
+    optimal_running = _running_risk(optimal_losses)
     optimal_within = np.flatnonzero(optimal_running <= alpha)
     readout: dict[str, float | None] = {}
     for target in coverage_grid:
@@ -270,6 +331,11 @@ def selective_risk(
         acceptance_under_loss_optimal_ranking=(
             float(coverage[int(optimal_within[-1])]) if optimal_within.size else 0.0
         ),
+        acceptance_certified_score_ranked=_certified_acceptance(losses, total, alpha, delta),
+        acceptance_certified_loss_optimal=_certified_acceptance(
+            optimal_losses, total, alpha, delta
+        ),
+        certified_delta=delta,
     )
 
 
@@ -538,6 +604,9 @@ def system_readout(
             "minimum_abstention_at_alpha": risk.minimum_abstention_at_alpha,
             "acceptance_permitted_by_base_risk": risk.acceptance_permitted_by_base_risk,
             "acceptance_under_loss_optimal_ranking": risk.acceptance_under_loss_optimal_ranking,
+            "acceptance_certified_score_ranked": risk.acceptance_certified_score_ranked,
+            "acceptance_certified_loss_optimal": risk.acceptance_certified_loss_optimal,
+            "certified_delta": risk.certified_delta,
             "acceptance_shortfall_vs_base_risk": risk.acceptance_shortfall_vs_base_risk,
             "acceptance_shortfall_vs_oracle": risk.acceptance_shortfall_vs_oracle,
         },
@@ -587,8 +656,10 @@ def headline(readout: Mapping[str, object]) -> dict[str, object]:
     discrimination = cast(Mapping[str, Mapping[str, object]], readout["discrimination"])
     return {
         "permitted_by_base_risk": risk["acceptance_permitted_by_base_risk"],
-        "oracle_ranking": risk["acceptance_under_loss_optimal_ranking"],
-        "delivered": risk["max_acceptance_within_alpha"],
+        "oracle_ranking_empirical": risk["acceptance_under_loss_optimal_ranking"],
+        "oracle_ranking_certified": risk["acceptance_certified_loss_optimal"],
+        "delivered_empirical": risk["max_acceptance_within_alpha"],
+        "delivered_certified": risk["acceptance_certified_score_ranked"],
         "normalized_aurc": risk["normalized_aurc"],
         "auroc_any_error": discrimination["any_error"]["auroc"],
     }
@@ -624,15 +695,24 @@ def calibration_artifact(
         "interpretation": (
             "Group-level calibration diagnostics for all three confidence candidates on all "
             "three systems. Every statistic is descriptive: no threshold is selected, no "
-            "certificate is issued, no finite-sample penalty is applied and the frozen "
-            "alpha=0.20 headline is untouched. The load-bearing pair is "
-            "acceptance_permitted_by_base_risk -- one minus the arithmetic minimum abstention "
-            "(mu-alpha)/(1-alpha), which assumes a PERFECT score and so is not attainable by "
-            "any real system -- against max_acceptance_within_alpha, the acceptance the "
-            "measured ranking actually reached. A large gap locates the failure in score "
-            "discrimination rather than in base risk; normalized_aurc quantifies the same thing "
-            "on a 0=perfect, 1=chance scale. AUROC is oriented so that higher is better and 0.5 "
-            "is chance, and AUPRC must be read against failure_prevalence, not against 0.5. The "
+            "certificate is issued and the frozen alpha=0.20 headline is untouched. THREE upper "
+            "bounds on what any score could have delivered are reported and they must not be "
+            "confused, in increasing strictness: acceptance_permitted_by_base_risk is the loose "
+            "arithmetic bound 1-(mu-alpha)/(1-alpha), which assumes goodness can be concentrated "
+            "arbitrarily and OVERSTATES what was available; "
+            "acceptance_under_loss_optimal_ranking is the EMPIRICAL oracle over this exact "
+            "population, carrying NO finite-sample penalty, and is the like-for-like comparison "
+            "against max_acceptance_within_alpha that a SCORE-DISCRIMINATION claim may use; "
+            "acceptance_certified_loss_optimal applies the certifier's own Hoeffding upper bound "
+            "at certified_delta and is the ONLY figure here that licenses the word 'certified'. "
+            "An independent review on 2026-08-02 refuted a claim that the empirical oracle "
+            "'would clear the floor' -- it does at 0.2357 and does not once certified at 0.1139, "
+            "and the measured score certifies 0.0000. Infeasibility is OVERDETERMINED: base risk, "
+            "ranking quality and finite-sample penalty each independently forbid the target, so "
+            "no reading of any figure here supports 'the target was reachable'. AUROC is oriented "
+            "so higher is better and 0.5 is chance, and AUPRC must be read against "
+            "failure_prevalence; where that prevalence is near 1 the AUROC rests on very few "
+            "non-failing groups (3 for zs, 18 for fs) and is correspondingly unstable. The "
             "oracle-accepted set used for acceptance_lift is diagnostic and was never certified."
         ),
         "certification_access": dict(access),

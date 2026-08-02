@@ -1,5 +1,8 @@
 # Handoff — ADR 0011 $0 re-analysis (2026-07-22)
 
+> **Superseded wording, 2026-08-02.** This handoff twice writes “grounding ⊥ certifiability”. That shorthand is retired: the claim is a **dissociation**, not an orthogonality result, and independence was never tested. The record is left otherwise unedited because it is a dated account of what was known on 2026-07-22. See [`claim-narrowing-2026-08-02.md`](claim-narrowing-2026-08-02.md).
+
+
 Dated handoff per the project doctrine. Records what was **executed** vs planned, evidence paths,
 gate outcomes, spend, and the next authorised action. Append dated amendments; never rewrite.
 

@@ -11,7 +11,7 @@
   },
   "certifies_nothing": true,
   "diagnostic_only": true,
-  "interpretation": "Group-level calibration diagnostics for all three confidence candidates on all three systems. Every statistic is descriptive: no threshold is selected, no certificate is issued, no finite-sample penalty is applied and the frozen alpha=0.20 headline is untouched. The load-bearing pair is acceptance_permitted_by_base_risk -- one minus the arithmetic minimum abstention (mu-alpha)/(1-alpha), which assumes a PERFECT score and so is not attainable by any real system -- against max_acceptance_within_alpha, the acceptance the measured ranking actually reached. A large gap locates the failure in score discrimination rather than in base risk; normalized_aurc quantifies the same thing on a 0=perfect, 1=chance scale. AUROC is oriented so that higher is better and 0.5 is chance, and AUPRC must be read against failure_prevalence, not against 0.5. The oracle-accepted set used for acceptance_lift is diagnostic and was never certified.",
+  "interpretation": "Group-level calibration diagnostics for all three confidence candidates on all three systems. Every statistic is descriptive: no threshold is selected, no certificate is issued and the frozen alpha=0.20 headline is untouched. THREE upper bounds on what any score could have delivered are reported and they must not be confused, in increasing strictness: acceptance_permitted_by_base_risk is the loose arithmetic bound 1-(mu-alpha)/(1-alpha), which assumes goodness can be concentrated arbitrarily and OVERSTATES what was available; acceptance_under_loss_optimal_ranking is the EMPIRICAL oracle over this exact population, carrying NO finite-sample penalty, and is the like-for-like comparison against max_acceptance_within_alpha that a SCORE-DISCRIMINATION claim may use; acceptance_certified_loss_optimal applies the certifier's own Hoeffding upper bound at certified_delta and is the ONLY figure here that licenses the word 'certified'. An independent review on 2026-08-02 refuted a claim that the empirical oracle 'would clear the floor' -- it does at 0.2357 and does not once certified at 0.1139, and the measured score certifies 0.0000. Infeasibility is OVERDETERMINED: base risk, ranking quality and finite-sample penalty each independently forbid the target, so no reading of any figure here supports 'the target was reachable'. AUROC is oriented so higher is better and 0.5 is chance, and AUPRC must be read against failure_prevalence; where that prevalence is near 1 the AUROC rests on very few non-failing groups (3 for zs, 18 for fs) and is correspondingly unstable. The oracle-accepted set used for acceptance_lift is diagnostic and was never certified.",
   "reverses_disposition": "docs/plan3/sections-11-and-12-disposition.md descopes score-loss Spearman, AUROC/AUPRC and binned confidence/risk readouts. This artifact computes them and therefore proposes reversing those three rows. The reversal is NOT independently reviewed and nothing here may reach a public surface until it is.",
   "schema_version": "1",
   "splits": {
@@ -66,6 +66,8 @@
             }
           },
           "selective_risk": {
+            "acceptance_certified_loss_optimal": 0.0,
+            "acceptance_certified_score_ranked": 0.0,
             "acceptance_permitted_by_base_risk": 0.05250918096548485,
             "acceptance_shortfall_vs_base_risk": 0.05250918096548485,
             "acceptance_shortfall_vs_oracle": 0.024355300859598854,
@@ -75,6 +77,7 @@
             "aurc_random_ranking": 0.9396457553058677,
             "base_risk_all_groups": 0.9579926552276122,
             "base_risk_eligible_groups": 0.9396457553058677,
+            "certified_delta": 0.016666666666666666,
             "eligible_groups": 712,
             "max_acceptance_within_alpha": 0.0,
             "minimum_abstention_at_alpha": 0.9474908190345152,
@@ -311,6 +314,8 @@
             }
           },
           "selective_risk": {
+            "acceptance_certified_loss_optimal": 0.0,
+            "acceptance_certified_score_ranked": 0.0,
             "acceptance_permitted_by_base_risk": 0.05250918096548485,
             "acceptance_shortfall_vs_base_risk": 0.05250918096548485,
             "acceptance_shortfall_vs_oracle": 0.024355300859598854,
@@ -320,6 +325,7 @@
             "aurc_random_ranking": 0.9396457553058677,
             "base_risk_all_groups": 0.9579926552276122,
             "base_risk_eligible_groups": 0.9396457553058677,
+            "certified_delta": 0.016666666666666666,
             "eligible_groups": 712,
             "max_acceptance_within_alpha": 0.0,
             "minimum_abstention_at_alpha": 0.9474908190345152,
@@ -556,6 +562,8 @@
             }
           },
           "selective_risk": {
+            "acceptance_certified_loss_optimal": 0.0,
+            "acceptance_certified_score_ranked": 0.0,
             "acceptance_permitted_by_base_risk": 0.05250918096548485,
             "acceptance_shortfall_vs_base_risk": 0.05250918096548485,
             "acceptance_shortfall_vs_oracle": 0.024355300859598854,
@@ -565,6 +573,7 @@
             "aurc_random_ranking": 0.9396457553058677,
             "base_risk_all_groups": 0.9579926552276122,
             "base_risk_eligible_groups": 0.9396457553058677,
+            "certified_delta": 0.016666666666666666,
             "eligible_groups": 712,
             "max_acceptance_within_alpha": 0.0,
             "minimum_abstention_at_alpha": 0.9474908190345152,
@@ -803,6 +812,8 @@
             }
           },
           "selective_risk": {
+            "acceptance_certified_loss_optimal": 0.11389684813753581,
+            "acceptance_certified_score_ranked": 0.0,
             "acceptance_permitted_by_base_risk": 0.4911378289267603,
             "acceptance_shortfall_vs_base_risk": 0.4710805223365024,
             "acceptance_shortfall_vs_oracle": 0.21561604584527222,
@@ -812,6 +823,7 @@
             "aurc_random_ranking": 0.5888817665435528,
             "base_risk_all_groups": 0.6070897368585918,
             "base_risk_eligible_groups": 0.5888817665435528,
+            "certified_delta": 0.016666666666666666,
             "eligible_groups": 1266,
             "max_acceptance_within_alpha": 0.02005730659025788,
             "minimum_abstention_at_alpha": 0.5088621710732397,
@@ -1048,6 +1060,8 @@
             }
           },
           "selective_risk": {
+            "acceptance_certified_loss_optimal": 0.11389684813753581,
+            "acceptance_certified_score_ranked": 0.0,
             "acceptance_permitted_by_base_risk": 0.4911378289267603,
             "acceptance_shortfall_vs_base_risk": 0.47322951947117287,
             "acceptance_shortfall_vs_oracle": 0.2177650429799427,
@@ -1057,6 +1071,7 @@
             "aurc_random_ranking": 0.5888817665435528,
             "base_risk_all_groups": 0.6070897368585918,
             "base_risk_eligible_groups": 0.5888817665435528,
+            "certified_delta": 0.016666666666666666,
             "eligible_groups": 1266,
             "max_acceptance_within_alpha": 0.01790830945558739,
             "minimum_abstention_at_alpha": 0.5088621710732397,
@@ -1293,6 +1308,8 @@
             }
           },
           "selective_risk": {
+            "acceptance_certified_loss_optimal": 0.11389684813753581,
+            "acceptance_certified_score_ranked": 0.0,
             "acceptance_permitted_by_base_risk": 0.4911378289267603,
             "acceptance_shortfall_vs_base_risk": 0.4904214965485368,
             "acceptance_shortfall_vs_oracle": 0.2349570200573066,
@@ -1302,6 +1319,7 @@
             "aurc_random_ranking": 0.5888817665435528,
             "base_risk_all_groups": 0.6070897368585918,
             "base_risk_eligible_groups": 0.5888817665435528,
+            "certified_delta": 0.016666666666666666,
             "eligible_groups": 1266,
             "max_acceptance_within_alpha": 0.0007163323782234957,
             "minimum_abstention_at_alpha": 0.5088621710732397,
@@ -1540,6 +1558,8 @@
             }
           },
           "selective_risk": {
+            "acceptance_certified_loss_optimal": 0.0,
+            "acceptance_certified_score_ranked": 0.0,
             "acceptance_permitted_by_base_risk": 0.009585564765543175,
             "acceptance_shortfall_vs_base_risk": 0.009585564765543175,
             "acceptance_shortfall_vs_oracle": 0.0035816618911174787,
@@ -1549,6 +1569,7 @@
             "aurc_random_ranking": 0.9808510638297873,
             "base_risk_all_groups": 0.9923315481875654,
             "base_risk_eligible_groups": 0.9808510638297873,
+            "certified_delta": 0.016666666666666666,
             "eligible_groups": 376,
             "max_acceptance_within_alpha": 0.0,
             "minimum_abstention_at_alpha": 0.9904144352344568,
@@ -1785,6 +1806,8 @@
             }
           },
           "selective_risk": {
+            "acceptance_certified_loss_optimal": 0.0,
+            "acceptance_certified_score_ranked": 0.0,
             "acceptance_permitted_by_base_risk": 0.009585564765543175,
             "acceptance_shortfall_vs_base_risk": 0.009585564765543175,
             "acceptance_shortfall_vs_oracle": 0.0035816618911174787,
@@ -1794,6 +1817,7 @@
             "aurc_random_ranking": 0.9808510638297873,
             "base_risk_all_groups": 0.9923315481875654,
             "base_risk_eligible_groups": 0.9808510638297873,
+            "certified_delta": 0.016666666666666666,
             "eligible_groups": 376,
             "max_acceptance_within_alpha": 0.0,
             "minimum_abstention_at_alpha": 0.9904144352344568,
@@ -2030,6 +2054,8 @@
             }
           },
           "selective_risk": {
+            "acceptance_certified_loss_optimal": 0.0,
+            "acceptance_certified_score_ranked": 0.0,
             "acceptance_permitted_by_base_risk": 0.009585564765543175,
             "acceptance_shortfall_vs_base_risk": 0.009585564765543175,
             "acceptance_shortfall_vs_oracle": 0.0035816618911174787,
@@ -2039,6 +2065,7 @@
             "aurc_random_ranking": 0.9808510638297872,
             "base_risk_all_groups": 0.9923315481875654,
             "base_risk_eligible_groups": 0.9808510638297872,
+            "certified_delta": 0.016666666666666666,
             "eligible_groups": 376,
             "max_acceptance_within_alpha": 0.0,
             "minimum_abstention_at_alpha": 0.9904144352344568,
@@ -2279,6 +2306,8 @@
             }
           },
           "selective_risk": {
+            "acceptance_certified_loss_optimal": 0.0,
+            "acceptance_certified_score_ranked": 0.0,
             "acceptance_permitted_by_base_risk": 0.054990823653214504,
             "acceptance_shortfall_vs_base_risk": 0.054990823653214504,
             "acceptance_shortfall_vs_oracle": 0.02763819095477387,
@@ -2288,6 +2317,7 @@
             "aurc_random_ranking": 0.936140350877193,
             "base_risk_all_groups": 0.9560073410774284,
             "base_risk_eligible_groups": 0.936140350877193,
+            "certified_delta": 0.016666666666666666,
             "eligible_groups": 190,
             "max_acceptance_within_alpha": 0.0,
             "minimum_abstention_at_alpha": 0.9450091763467855,
@@ -2524,6 +2554,8 @@
             }
           },
           "selective_risk": {
+            "acceptance_certified_loss_optimal": 0.0,
+            "acceptance_certified_score_ranked": 0.0,
             "acceptance_permitted_by_base_risk": 0.054990823653214504,
             "acceptance_shortfall_vs_base_risk": 0.054990823653214504,
             "acceptance_shortfall_vs_oracle": 0.02763819095477387,
@@ -2533,6 +2565,7 @@
             "aurc_random_ranking": 0.936140350877193,
             "base_risk_all_groups": 0.9560073410774284,
             "base_risk_eligible_groups": 0.936140350877193,
+            "certified_delta": 0.016666666666666666,
             "eligible_groups": 190,
             "max_acceptance_within_alpha": 0.0,
             "minimum_abstention_at_alpha": 0.9450091763467855,
@@ -2769,6 +2802,8 @@
             }
           },
           "selective_risk": {
+            "acceptance_certified_loss_optimal": 0.0,
+            "acceptance_certified_score_ranked": 0.0,
             "acceptance_permitted_by_base_risk": 0.054990823653214504,
             "acceptance_shortfall_vs_base_risk": 0.054990823653214504,
             "acceptance_shortfall_vs_oracle": 0.02763819095477387,
@@ -2778,6 +2813,7 @@
             "aurc_random_ranking": 0.936140350877193,
             "base_risk_all_groups": 0.9560073410774284,
             "base_risk_eligible_groups": 0.936140350877193,
+            "certified_delta": 0.016666666666666666,
             "eligible_groups": 190,
             "max_acceptance_within_alpha": 0.0,
             "minimum_abstention_at_alpha": 0.9450091763467855,
@@ -3015,6 +3051,8 @@
             }
           },
           "selective_risk": {
+            "acceptance_certified_loss_optimal": 0.0,
+            "acceptance_certified_score_ranked": 0.0,
             "acceptance_permitted_by_base_risk": 0.5128100481617854,
             "acceptance_shortfall_vs_base_risk": 0.4826592943929412,
             "acceptance_shortfall_vs_oracle": 0.2135678391959799,
@@ -3024,6 +3062,7 @@
             "aurc_random_ranking": 0.5665570065239166,
             "base_risk_all_groups": 0.5897519614705717,
             "base_risk_eligible_groups": 0.5665570065239166,
+            "certified_delta": 0.016666666666666666,
             "eligible_groups": 361,
             "max_acceptance_within_alpha": 0.03015075376884422,
             "minimum_abstention_at_alpha": 0.4871899518382146,
@@ -3259,6 +3298,8 @@
             }
           },
           "selective_risk": {
+            "acceptance_certified_loss_optimal": 0.0,
+            "acceptance_certified_score_ranked": 0.0,
             "acceptance_permitted_by_base_risk": 0.5128100481617854,
             "acceptance_shortfall_vs_base_risk": 0.502759796905504,
             "acceptance_shortfall_vs_oracle": 0.23366834170854273,
@@ -3268,6 +3309,7 @@
             "aurc_random_ranking": 0.5665570065239165,
             "base_risk_all_groups": 0.5897519614705717,
             "base_risk_eligible_groups": 0.5665570065239165,
+            "certified_delta": 0.016666666666666666,
             "eligible_groups": 361,
             "max_acceptance_within_alpha": 0.010050251256281407,
             "minimum_abstention_at_alpha": 0.4871899518382146,
@@ -3503,6 +3545,8 @@
             }
           },
           "selective_risk": {
+            "acceptance_certified_loss_optimal": 0.0,
+            "acceptance_certified_score_ranked": 0.0,
             "acceptance_permitted_by_base_risk": 0.5128100481617854,
             "acceptance_shortfall_vs_base_risk": 0.48517185720701156,
             "acceptance_shortfall_vs_oracle": 0.21608040201005024,
@@ -3512,6 +3556,7 @@
             "aurc_random_ranking": 0.5665570065239165,
             "base_risk_all_groups": 0.5897519614705717,
             "base_risk_eligible_groups": 0.5665570065239165,
+            "certified_delta": 0.016666666666666666,
             "eligible_groups": 361,
             "max_acceptance_within_alpha": 0.02763819095477387,
             "minimum_abstention_at_alpha": 0.4871899518382146,
@@ -3750,6 +3795,8 @@
             }
           },
           "selective_risk": {
+            "acceptance_certified_loss_optimal": 0.0,
+            "acceptance_certified_score_ranked": 0.0,
             "acceptance_permitted_by_base_risk": 0.005827749860413123,
             "acceptance_shortfall_vs_base_risk": 0.005827749860413123,
             "acceptance_shortfall_vs_oracle": 0.0,
@@ -3759,6 +3806,7 @@
             "aurc_random_ranking": 1.0,
             "base_risk_all_groups": 0.9953378001116695,
             "base_risk_eligible_groups": 1.0,
+            "certified_delta": 0.016666666666666666,
             "eligible_groups": 106,
             "max_acceptance_within_alpha": 0.0,
             "minimum_abstention_at_alpha": 0.9941722501395869,
@@ -3992,6 +4040,8 @@
             }
           },
           "selective_risk": {
+            "acceptance_certified_loss_optimal": 0.0,
+            "acceptance_certified_score_ranked": 0.0,
             "acceptance_permitted_by_base_risk": 0.005827749860413123,
             "acceptance_shortfall_vs_base_risk": 0.005827749860413123,
             "acceptance_shortfall_vs_oracle": 0.0,
@@ -4001,6 +4051,7 @@
             "aurc_random_ranking": 1.0,
             "base_risk_all_groups": 0.9953378001116695,
             "base_risk_eligible_groups": 1.0,
+            "certified_delta": 0.016666666666666666,
             "eligible_groups": 106,
             "max_acceptance_within_alpha": 0.0,
             "minimum_abstention_at_alpha": 0.9941722501395869,
@@ -4234,6 +4285,8 @@
             }
           },
           "selective_risk": {
+            "acceptance_certified_loss_optimal": 0.0,
+            "acceptance_certified_score_ranked": 0.0,
             "acceptance_permitted_by_base_risk": 0.005827749860413123,
             "acceptance_shortfall_vs_base_risk": 0.005827749860413123,
             "acceptance_shortfall_vs_oracle": 0.0,
@@ -4243,6 +4296,7 @@
             "aurc_random_ranking": 1.0,
             "base_risk_all_groups": 0.9953378001116695,
             "base_risk_eligible_groups": 1.0,
+            "certified_delta": 0.016666666666666666,
             "eligible_groups": 106,
             "max_acceptance_within_alpha": 0.0,
             "minimum_abstention_at_alpha": 0.9941722501395869,

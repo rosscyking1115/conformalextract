@@ -1,14 +1,19 @@
-r"""Draw the write-up's risk-coverage figure: what the score delivered against what was there.
+r"""Draw the write-up's risk-coverage figure: three curves, three ways of failing.
 
-The figure is the paper's argument in one panel. Two curves over the same population, differing
-only in how it is ranked:
+The figure is the paper's argument in one panel. All three curves cover the same population and
+differ only in how it is ranked and whether a confidence bound is applied:
 
-* **score-ranked** -- accept best-scoring groups first, the curve the certifier actually sweeps;
-* **loss-optimal** -- accept lowest-loss groups first, what a perfect ranking would have reached.
+* **score-ranked, empirical** -- accept best-scoring groups first, the curve the certifier sweeps;
+* **loss-optimal, empirical** -- accept lowest-loss groups first, what a perfect ranking reaches;
+* **loss-optimal, certified** -- the same perfect ranking, required to keep its Hoeffding UPPER
+  bound within alpha. This is the only one of the three that licenses the word "certified".
 
-With the alpha = 0.20 and acceptance-floor = 0.20 rules drawn in, the two cross the floor line at
-0.0201 and 0.2357 for the QLoRA system, and the distance between those crossings is the finding:
-the target was reachable by ranking alone and the score reached less than a tenth of it.
+Where each crosses the alpha rule is the acceptance it supports: 0.0201, 0.2357 and 0.1139 for the
+QLoRA system. **The third is below the acceptance floor**, which is why the figure was redrawn on
+2026-08-02: its first version showed only the first two, and an independent review found the paper
+reading the empirical oracle as if it were certifiable and concluding the floor "was reachable".
+It was not. The distance between curves 1 and 2 is the ranking's; the distance between 2 and 3 is
+the finite-sample penalty's; and no curve clears the floor.
 
 **Not part of the certified path.** matplotlib is a `docs` extra, nothing under ``src/`` imports it,
 and no test depends on this script. It selects no threshold, issues no certificate and writes no
@@ -16,9 +21,10 @@ artifact that any claim cites -- it only redraws committed evidence.
 
 **Reads the guarded loader, not a private re-derivation.** Curves come from
 ``reanalysis.load_split_system_data``, the same path the certifier and the three ADR 0011 commands
-use, so ``assert_reanalysis_role`` refuses ``final``/``shift`` before a file is opened. The script
-then **cross-checks its own score curve against the committed** ``alpha_frontier.json`` and refuses
-to draw on mismatch, so the figure cannot quietly disagree with the artifact it illustrates.
+use, so ``assert_reanalysis_role`` refuses ``final``/``shift`` before a file is opened. The
+certified curve uses ``certification.hoeffding_upper`` rather than a second implementation of the
+bound. The script then **cross-checks its own score curve against the committed**
+``alpha_frontier.json`` and refuses to draw on mismatch.
 
 Usage::
 
@@ -34,7 +40,12 @@ from pathlib import Path
 
 import numpy as np
 
-from conformalextract.certification import FROZEN_ACCEPTANCE_FLOOR, FROZEN_ALPHA
+from conformalextract.calibration import CERTIFIED_DELTA
+from conformalextract.certification import (
+    FROZEN_ACCEPTANCE_FLOOR,
+    FROZEN_ALPHA,
+    hoeffding_upper,
+)
 from conformalextract.certification_run import GroupRow
 from conformalextract.reanalysis import (
     SYSTEM_IDS,
@@ -47,8 +58,10 @@ from conformalextract.reanalysis import (
 CROSS_CHECK_TOLERANCE = 1e-9
 
 
-def _curves(rows: list[GroupRow]) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Coverage, score-ranked running risk, and loss-optimal running risk.
+def _curves(
+    rows: list[GroupRow],
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Coverage, score-ranked risk, loss-optimal risk, and the certified loss-optimal bound.
 
     Eligibility, sort order and the coverage denominator are the certifier's
     (``certification_run._curve_arrays``): only all-valid finitely-scored groups can be accepted,
@@ -62,7 +75,11 @@ def _curves(rows: list[GroupRow]) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     losses = np.asarray([r.loss for r in eligible], dtype=np.float64)
     n = np.arange(1, losses.size + 1)
     coverage = n / total
-    return coverage, np.cumsum(losses) / n, np.cumsum(np.sort(losses)) / n
+    optimal = np.sort(losses)
+    certified = np.array(
+        [hoeffding_upper(list(optimal[:k]), CERTIFIED_DELTA) for k in range(1, optimal.size + 1)]
+    )
+    return coverage, np.cumsum(losses) / n, np.cumsum(optimal) / n, certified
 
 
 def _crossing(coverage: np.ndarray, risk: np.ndarray, alpha: float) -> float:
@@ -134,24 +151,33 @@ def main() -> None:
         gold_frames=gold_frames,
     )
 
-    coverage, scored, optimal = _curves(data.rows)
+    coverage, scored, optimal, certified = _curves(data.rows)
     _cross_check(args.system, coverage, scored, args.frontier)
 
     delivered = _crossing(coverage, scored, FROZEN_ALPHA)
     attainable = _crossing(coverage, optimal, FROZEN_ALPHA)
+    certifiable = _crossing(coverage, certified, FROZEN_ALPHA)
 
     fig, ax = plt.subplots(figsize=(5.5, 3.4))
-    ax.plot(coverage, optimal, color="#4c72b0", lw=1.8, label="loss-optimal ranking (oracle)")
+    ax.plot(coverage, optimal, color="#4c72b0", lw=1.8, label="loss-optimal ranking, empirical")
+    ax.plot(
+        coverage,
+        certified,
+        color="#4c72b0",
+        lw=1.6,
+        ls="--",
+        label="loss-optimal ranking, certified ($\\delta$/3)",
+    )
     ax.plot(coverage, scored, color="#c44e52", lw=1.8, label=f"score-ranked ({candidate} logprob)")
 
     ax.axhline(FROZEN_ALPHA, color="0.35", ls="--", lw=1.0)
     ax.axvline(FROZEN_ACCEPTANCE_FLOOR, color="0.35", ls=":", lw=1.0)
     ax.annotate(
         f"target risk $\\alpha$ = {FROZEN_ALPHA:g}",
-        xy=(0.985, FROZEN_ALPHA),
+        xy=(0.60, FROZEN_ALPHA),
         xytext=(0, 4),
         textcoords="offset points",
-        ha="right",
+        ha="left",
         va="bottom",
         fontsize=8,
         color="0.25",
@@ -168,42 +194,36 @@ def main() -> None:
         rotation=90,
     )
 
-    # The two crossings and the gap between them are the whole point of the panel, so they are
-    # marked rather than left for the reader to measure off the axis.
-    for x, colour in ((delivered, "#c44e52"), (attainable, "#4c72b0")):
+    # Three crossings, and the point of the panel is that NONE of them reaches the floor line.
+    for x, colour in (
+        (delivered, "#c44e52"),
+        (certifiable, "#4c72b0"),
+        (attainable, "#4c72b0"),
+    ):
         ax.plot([x], [FROZEN_ALPHA], marker="o", ms=5, color=colour, zorder=5)
-    # Three annotations share this corner and will collide if they are not given separate bands:
-    # the crossing labels sit just under the alpha rule, the arrow below them, its caption below
-    # that. Measured against the drawn figure rather than guessed.
-    ax.annotate(
-        f"{delivered:.4f}",
-        xy=(delivered, FROZEN_ALPHA),
-        xytext=(3, -13),
-        textcoords="offset points",
-        fontsize=8,
-        color="#c44e52",
-        ha="left",
-    )
-    ax.annotate(
-        f"{attainable:.4f}",
-        xy=(attainable, FROZEN_ALPHA),
-        xytext=(3, -13),
-        textcoords="offset points",
-        fontsize=8,
-        color="#4c72b0",
-        ha="left",
-    )
+    for x, text, colour, dy in (
+        (delivered, f"{delivered:.4f}", "#c44e52", -13),
+        (certifiable, f"{certifiable:.4f}", "#4c72b0", -13),
+        (attainable, f"{attainable:.4f}", "#4c72b0", -13),
+    ):
+        ax.annotate(
+            text,
+            xy=(x, FROZEN_ALPHA),
+            xytext=(3, dy),
+            textcoords="offset points",
+            fontsize=8,
+            color=colour,
+            ha="left",
+        )
     ax.annotate(
         "",
         xy=(attainable, FROZEN_ALPHA - 0.085),
         xytext=(delivered, FROZEN_ALPHA - 0.085),
         arrowprops={"arrowstyle": "<->", "color": "0.3", "lw": 0.9},
     )
-    # Left-anchored at the delivered crossing, not centred on the arrow: centring pushes the
-    # string past the y-axis whenever the left crossing is near zero, which is exactly the case
-    # this figure exists to show.
     ax.annotate(
-        f"{attainable - delivered:.3f} of acceptance lost to ranking",
+        f"lost to ranking {attainable - delivered:.3f}  ·  to finite-sample penalty "
+        f"{attainable - certifiable:.3f}",
         xy=(delivered, FROZEN_ALPHA - 0.105),
         ha="left",
         va="top",
@@ -215,7 +235,7 @@ def main() -> None:
     ax.set_ylabel("risk among accepted groups")
     ax.set_xlim(0.0, 1.0)
     ax.set_ylim(0.0, 1.0)
-    ax.legend(loc="lower right", fontsize=8, frameon=False)
+    ax.legend(loc="upper right", fontsize=8, frameon=False)
     ax.spines[["top", "right"]].set_visible(False)
     fig.tight_layout()
 
@@ -228,9 +248,16 @@ def main() -> None:
                 "out": str(args.out),
                 "system": args.system,
                 "confidence_candidate": candidate,
-                "delivered_at_alpha": delivered,
-                "attainable_under_loss_optimal_ranking": attainable,
-                "gap": attainable - delivered,
+                "delivered_at_alpha_empirical": delivered,
+                "attainable_empirical": attainable,
+                "attainable_certified": certifiable,
+                "gap_ranking": attainable - delivered,
+                "gap_finite_sample": attainable - certifiable,
+                # Named precisely, because "a curve clears the floor" is the ambiguity that
+                # produced the refuted claim: the EMPIRICAL oracle does and the certified one
+                # does not, and only the second bears on whether anything could be certified.
+                "empirical_oracle_clears_floor": bool(attainable >= FROZEN_ACCEPTANCE_FLOOR),
+                "certified_oracle_clears_floor": bool(certifiable >= FROZEN_ACCEPTANCE_FLOOR),
                 "cross_check": f"agrees with {args.frontier}",
             },
             sort_keys=True,

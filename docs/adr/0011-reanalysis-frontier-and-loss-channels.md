@@ -186,7 +186,9 @@ Consequences:
 - A **descriptive** WikiEvents base-risk arm (μ measurement, no certificate) remains possible and
   is not taken here — it needs a KAIROS prompt/profile/parser and the native head-word+coref
   metric, and it would generalise the base-risk observation without adding a mechanism. The
-  grounding⊥certifiability decomposition was judged the stronger use of the same effort, at $0.
+  grounding/certifiability decomposition was judged the stronger use of the same effort, at $0.
+  (Written as “grounding⊥certifiability” until 2026-08-02; see Amendment 1 above — the claim is
+  a dissociation, not an orthogonality result.)
 - RAMS cleared the precondition by 10 groups out of 1,386. That margin is worth knowing: a slightly
   smaller corpus, or a fourth threshold in the grid (min n **1,432** at the same δ/3 allocation),
   would have made the preferred method unavailable on RAMS too.

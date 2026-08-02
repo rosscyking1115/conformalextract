@@ -35,6 +35,12 @@ def _claim(**overrides: object) -> Claim:
     return Claim(**fields)  # type: ignore[arg-type]
 
 
+def _lf(text: str) -> str:
+    """Normalise line endings only. Git checks Markdown out with CRLF on Windows."""
+
+    return text.replace("\r\n", "\n").rstrip("\n")
+
+
 # --- enforcement rules ---------------------------------------------------------------
 
 
@@ -145,29 +151,32 @@ def test_render_surface_emits_approved_wording_with_limitations() -> None:
     assert "_Limitation:_" in rendered
 
 
-def test_the_committed_appendix_still_matches_what_the_ledger_renders() -> None:
+def test_the_committed_appendix_is_byte_identical_to_what_the_ledger_renders() -> None:
     """The generated appendix must not drift from the ledger it claims to be generated from.
 
     It had. `evidence/plan4/reviewer_record.writeup-draft.json` verified byte-identity by hand on
-    2026-07-28 and nothing held it there afterwards: two `CX-SERVING-01` limitations were later
-    added to the ledger and never reached the appendix, so the draft's stated guarantee -- "every
-    claim available to this draft, generated from the ledger" -- was false for a fortnight while
-    the file still carried its "Do not hand-edit" banner. A hand-checked invariant with no test is
-    a comment.
+    2026-07-28 and nothing held it there: two `CX-SERVING-01` limitations were later added to the
+    ledger and never reached the appendix, both of them the half that makes the probe result LESS
+    reassuring, while the file still carried its "Do not hand-edit" banner.
+
+    **This assertion is byte-identity, deliberately.** Its first version tested only that every
+    rendered line appears somewhere in the file, and an independent reviewer broke that by
+    mutation: it passed a fabricated ADDED claim line, an added limitation, and the whole file
+    reversed. A containment check is not a fidelity check, and byte-identity was available all
+    along -- it is what the human reviewer had used. Line endings are normalised because git
+    checks this file out with CRLF on Windows; nothing else is forgiven.
     """
 
     appendix = (ROOT / "docs" / "writeup" / "claims-appendix.generated.md").read_text(
         encoding="utf-8"
     )
     rendered = render_surface(load_ledger(LEDGER), "report")
-    missing = [
-        line.strip()
-        for line in rendered.splitlines()
-        if line.strip() and line.strip() not in appendix
-    ]
-    assert not missing, (
-        f"{len(missing)} rendered line(s) are absent from the committed appendix; "
-        f"regenerate it from the ledger. First: {missing[0][:160]!r}"
+    marker = "rendered verbatim from `evidence/plan4/claim_ledger.json`."
+    assert marker in appendix, "the appendix lost its generated-from header"
+    body = appendix.split(marker, 1)[1].lstrip("\r\n")
+    assert _lf(body) == _lf(rendered), (
+        "the committed appendix is not byte-identical to claims.render_surface(ledger, 'report'); "
+        "regenerate it from the ledger rather than editing it"
     )
 
 

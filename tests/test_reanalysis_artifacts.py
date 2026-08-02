@@ -44,6 +44,11 @@ def decomposition() -> dict:
 
 
 @pytest.fixture(scope="module")
+def calibration() -> dict:
+    return _load("calibration_diagnostics.json")
+
+
+@pytest.fixture(scope="module")
 def diagnostic() -> dict:
     return _load("risk_coverage_diagnostic.json")
 
@@ -236,3 +241,112 @@ def test_artifacts_declare_themselves_diagnostic(name: str) -> None:
     artifact = _load(name)
     assert artifact["diagnostic_only"] is True
     assert artifact["certifies_nothing"] is True
+
+
+# --- the section 11.3 calibration artifact (added 2026-08-02, reviewer ruling R3) ------
+
+#: The candidate the development gate selected per system. The calibration artifact reports all
+#: three candidates; only the selected one is comparable with the committed certification figures.
+SELECTED_CANDIDATE = {"qa": "mean", "fs": "tenth_percentile", "zs": "mean"}
+
+
+def test_calibration_reproduces_the_committed_risk_coverage_diagnostic(
+    calibration: dict, diagnostic: dict
+) -> None:
+    """The two artifacts must agree about acceptance and risk, or one of them is wrong.
+
+    This is the check the packet asserted by hand and nothing enforced. It reads committed
+    evidence only.
+    """
+
+    for system in SYSTEMS:
+        cal = calibration["splits"]["certification"][system][SELECTED_CANDIDATE[system]]
+        ref = diagnostic["splits"]["certification"][system]
+        assert cal["selective_risk"]["max_acceptance_within_alpha"] == pytest.approx(
+            ref["max_acceptance_within_alpha"], abs=1e-12
+        ), system
+        assert cal["selective_risk"]["eligible_groups"] == ref["eligible_groups"], system
+        assert cal["selective_risk"]["total_groups"] == ref["total_groups"], system
+        at_floor = cal["selective_risk"]["risk_at_coverage"][f"{FROZEN_ACCEPTANCE_FLOOR:.2f}"]
+        if ref["risk_at_floor_acceptance"] is not None:
+            assert at_floor == pytest.approx(ref["risk_at_floor_acceptance"], abs=1e-12), system
+
+
+def test_calibration_shares_the_one_certification_access_chain(
+    calibration: dict, frontier: dict, decomposition: dict, certification: dict
+) -> None:
+    """One opening of the sealed split, re-read -- not a second opening.
+
+    ``risk_coverage_diagnostic.json`` carries NO access block and is deliberately absent from this
+    list; an earlier version of the amendment and its routing packet both named it as a
+    hash-carrier, which was wrong. The third carrier is the certification result itself.
+    """
+
+    heads = {
+        name: art["certification_access"]["head_hash"]
+        for name, art in (
+            ("calibration", calibration),
+            ("frontier", frontier),
+            ("decomposition", decomposition),
+            ("certification", certification),
+        )
+    }
+    assert len(set(heads.values())) == 1, heads
+    assert "certification_access" not in diagnostic_has_access_block()
+
+
+def diagnostic_has_access_block() -> dict:
+    """The risk-coverage diagnostic, read fresh, so the assertion above states a fact rather than
+    relying on a fixture that might later gain the field."""
+
+    return _load("risk_coverage_diagnostic.json")
+
+
+def test_calibration_never_reports_a_sealed_read(calibration: dict) -> None:
+    access = calibration["certification_access"]
+    assert access["final_reads"] == 0
+    assert access["shift_reads"] == 0
+    assert access["verified"] is True
+    assert access["documents_read"] == 3152
+
+
+def test_certified_acceptance_never_exceeds_the_empirical_figure(calibration: dict) -> None:
+    """The refuted claim, pinned as an invariant of the committed artifact.
+
+    An independent review found the write-up asserting that a perfect ranking "would clear the
+    20% floor" on the strength of the EMPIRICAL oracle while the certified one sat below it. A
+    confidence bound cannot beat the point estimate it is built from, and no regeneration of this
+    artifact may ever suggest otherwise.
+    """
+
+    for split in ("development", "certification"):
+        for system in SYSTEMS:
+            for candidate, readout in calibration["splits"][split][system].items():
+                risk = readout["selective_risk"]
+                assert (
+                    risk["acceptance_certified_loss_optimal"]
+                    <= risk["acceptance_under_loss_optimal_ranking"] + 1e-12
+                ), (split, system, candidate)
+                assert (
+                    risk["acceptance_certified_score_ranked"]
+                    <= risk["max_acceptance_within_alpha"] + 1e-12
+                ), (split, system, candidate)
+
+
+def test_the_certified_oracle_misses_the_floor_for_every_system(calibration: dict) -> None:
+    """The corrected finding, in the artifact rather than only in prose: infeasibility is
+    overdetermined, and not even a perfect ranking certifies at the frozen floor."""
+
+    for system in SYSTEMS:
+        risk = calibration["splits"]["certification"][system][SELECTED_CANDIDATE[system]][
+            "selective_risk"
+        ]
+        assert risk["acceptance_certified_loss_optimal"] < FROZEN_ACCEPTANCE_FLOOR, system
+        assert risk["acceptance_certified_score_ranked"] == 0.0, system
+
+
+def test_calibration_declares_itself_diagnostic_and_names_its_reversal(calibration: dict) -> None:
+    assert calibration["diagnostic_only"] is True
+    assert calibration["certifies_nothing"] is True
+    assert calibration["alpha"] == FROZEN_ALPHA
+    assert "reverses_disposition" in calibration
