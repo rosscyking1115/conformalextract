@@ -70,11 +70,11 @@ ORACLE_CERTIFIED_STYLE = (0, (3, 1.5, 1, 1.5))
 #: Set explicitly rather than inherited, so the figure renders identically on any machine and does
 #: not silently change if a matplotlibrc appears.
 FONT_SIZES = {
-    "font.size": 9,
-    "axes.labelsize": 10,
-    "xtick.labelsize": 9,
-    "ytick.labelsize": 9,
-    "legend.fontsize": 8,
+    "font.size": 7,
+    "axes.labelsize": 7.5,
+    "xtick.labelsize": 6.5,
+    "ytick.labelsize": 6.5,
+    "legend.fontsize": 6,
 }
 
 #: Tolerance for the cross-check against the committed frontier artifact. The artifact stores
@@ -210,10 +210,12 @@ def main() -> None:
     plt.rcParams.update(FONT_SIZES)
     # constrained_layout rather than tight_layout: it reserves space for the legend and the
     # annotations as it lays out, instead of shrinking the axes afterwards.
-    # 5.5 x 3.0 rather than a squarer panel: included at full text width in a two-column
-    # layout, every extra inch of height costs page budget, and the curves are wide and
-    # shallow so the aspect loses nothing.
-    fig, ax = plt.subplots(figsize=(5.5, 3.0), constrained_layout=True)
+    # SINGLE-COLUMN geometry (3.3 in is the ACL column width), not a full-width figure*.
+    # Measured, not preferred: as a figure* spanning both columns this panel cost about seven
+    # column-inches of page budget and pushed the Conclusion onto a fifth page. In one column it
+    # costs under two. Type is set correspondingly small; at this size the figure is included at
+    # its natural width with no further scaling, so these point sizes are what the reader sees.
+    fig, ax = plt.subplots(figsize=(3.3, 2.2), constrained_layout=True)
     ax.plot(
         coverage,
         optimal,
@@ -242,8 +244,8 @@ def main() -> None:
     ax.axhline(FROZEN_ALPHA, color="0.35", ls="--", lw=1.0)
     ax.axvline(FROZEN_ACCEPTANCE_FLOOR, color="0.35", ls=":", lw=1.0)
     ax.annotate(
-        f"target risk $\\alpha$ = {FROZEN_ALPHA:g}",
-        xy=(0.60, FROZEN_ALPHA),
+        f"$\\alpha$ = {FROZEN_ALPHA:g}",
+        xy=(0.78, FROZEN_ALPHA),
         xytext=(0, 4),
         textcoords="offset points",
         ha="left",
@@ -252,7 +254,7 @@ def main() -> None:
         color="0.25",
     )
     ax.annotate(
-        f"acceptance floor {FROZEN_ACCEPTANCE_FLOOR:g}",
+        f"floor {FROZEN_ACCEPTANCE_FLOOR:g}",
         xy=(FROZEN_ACCEPTANCE_FLOOR, 0.97),
         xytext=(4, 0),
         textcoords="offset points",
@@ -273,9 +275,9 @@ def main() -> None:
     for x, text, colour, dy in (
         # Staggered: the first two crossings sit close together on x, so a single row of labels
         # collides once the figure is scaled into a two-column page.
-        (delivered, f"{delivered:.4f}", SCORE_COLOUR, -13),
-        (certifiable, f"{certifiable:.4f}", ORACLE_COLOUR, -26),
-        (attainable, f"{attainable:.4f}", ORACLE_COLOUR, -13),
+        (delivered, f"{delivered:.3f}", SCORE_COLOUR, -10),
+        (certifiable, f"{certifiable:.3f}", ORACLE_COLOUR, -19),
+        (attainable, f"{attainable:.3f}", ORACLE_COLOUR, -10),
     ):
         ax.annotate(
             text,
@@ -295,7 +297,14 @@ def main() -> None:
     ax.set_ylabel("risk among accepted groups")
     ax.set_xlim(0.0, 1.0)
     ax.set_ylim(0.0, 1.0)
-    ax.legend(loc="upper right", fontsize=8, frameon=False)
+    ax.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.28),
+        ncol=1,
+        fontsize=6,
+        frameon=False,
+        handlelength=2.4,
+    )
     ax.spines[["top", "right"]].set_visible(False)
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
