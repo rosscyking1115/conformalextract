@@ -189,13 +189,15 @@ mechanism 1. Figure~\ref{fig:rc} shows all three distances in one panel.
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.72\textwidth]{fig/risk-coverage-qa.pdf}
+\includegraphics[width=\textwidth]{fig/risk-coverage-qa.pdf}
 \caption{Three curves over the same 1,396 groups, differing only in ranking and in whether a
 confidence bound is applied. Where each crosses the $\alpha = 0.20$ rule is the acceptance it
 supports: 0.0201 for the measured score, 0.2357 for a perfect ranking, and 0.1139 for that same
 perfect ranking once certified. \textbf{The certified crossing lies to the left of the 0.20
-acceptance floor}, so no curve here represents a system that could have been certified. The first
-distance is the ranking's; the second is the finite-sample penalty's.}
+acceptance floor}, so no curve here represents a system that could have been certified. Ranking
+costs 0.216 of acceptance (0.0201 against 0.2357); the finite-sample penalty costs a further 0.122
+(0.2357 against 0.1139). Curves are distinguished by dash pattern as well as colour, so the
+comparison survives greyscale printing.}
 \label{fig:rc}
 \end{figure*}
 

@@ -43,3 +43,7 @@ docs/writeup/*.log
 docs/writeup/*.out
 docs/writeup/*.pdf
 !docs/writeup/fig/*.pdf
+# The greyscale proof is a check artefact, regenerated on demand with
+# `scripts/plot_risk_coverage.py --greyscale-check`. It is evidence that the figure's
+# encoding is redundant, not an input to the paper.
+docs/writeup/fig/*-greyscale.png
