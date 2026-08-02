@@ -67,6 +67,7 @@
         "docs/plan3/certification-result.md": "reporting - the dated narrowing note quotes the retired heading in order to retire it",
         "docs/plan3/claim-narrowing-2026-08-02.md": "reporting - the review packet that proposed the narrowing quotes the old wording",
         "docs/progress.md": "reporting - the dated log entry states the wording was narrowed",
+        "docs/writeup/reviewer_analysis.md": "reporting - the reviewer diagnosis lists the retired wording under 'claims intentionally weakened or removed', which requires naming it",
         "evidence/plan3/reviewer_record.reanalysis.json": "immutable reviewer record - it quotes the wording it confirmed the numbers for",
         "evidence/plan4/reviewer_record.o2-o3-claims-change.json": "immutable reviewer record - it quotes the wording it ruled on",
         "evidence/plan4/reviewer_record.writeup-draft.json": "immutable reviewer record - it quotes the wording it ruled on",
