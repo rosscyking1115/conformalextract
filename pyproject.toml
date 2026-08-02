@@ -19,6 +19,10 @@ dependencies = [
 
 [project.optional-dependencies]
 data = ["datasketch>=1.6,<2", "pyarrow>=18,<21"]
+# Figure generation for the write-ups ONLY. Deliberately not a runtime dependency and not part of
+# `dev`: nothing under src/ imports matplotlib, no test needs it, and the certified path must not
+# grow a plotting library. `scripts/plot_risk_coverage.py` is the only consumer.
+docs = ["matplotlib>=3.9,<4"]
 train = [
   "accelerate>=1.2,<2",
   "bitsandbytes>=0.45,<1; platform_system == 'Linux'",

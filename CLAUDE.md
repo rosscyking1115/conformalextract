@@ -10,7 +10,10 @@ never real extraction quality; in-domain guarantees are never claimed to survive
 
 ## Build / run / test (exact commands)
 ```bash
-uv sync --extra dev          # uv.lock is the authority; --extra train for GPU jobs (Linux only)
+uv sync --extra dev --extra data   # BOTH: `--extra dev` alone leaves 2 test_data_grouping tests
+                                   # failing on a missing datasketch. Add --extra docs to draw
+                                   # write-up figures, --extra train for GPU jobs (Linux only).
+                                   # uv.lock is the authority.
 uv run pytest -q
 uv run ruff check .
 uv run mypy                  # strict; must be clean
@@ -51,6 +54,14 @@ uv run conformalextract --help   # CLI seams (build-profiles, prepare-data, free
   `VLLM_USE_FLASHINFER_SAMPLER=0`; vLLM 0.25.x takes token prompts as `{"prompt_token_ids": ids}` dicts;
   submit `--detach` and poll (streaming charmap-crashes locally, above).
 - `graphify-out/` is absent — use `rg`.
+- **`uv sync` PRUNES extras you omit.** Running the documented `uv sync --extra dev` in an
+  environment that had `data`/`train` installed *uninstalls* datasketch, torch and transformers.
+  The damage looks like a code regression and is not one: 2 `test_data_grouping` failures plus
+  5 mypy errors in `profiles.py`/`model_smoke.py` (`import-not-found`, then `unused-ignore` on the
+  `type: ignore` comments that guarded those imports). Re-sync with every extra you need at once.
+- **matplotlib is a `docs` extra and must stay one.** Nothing under `src/` imports it and no test
+  needs it; `scripts/plot_risk_coverage.py` is the only consumer. The certified path does not grow
+  a plotting library.
 
 ## Pointers
 - Gates/decisions: `docs/adr/`, `docs/plan2/`, `docs/plan3/`, `docs/gate0/`. Review standard: `REVIEW.md`.

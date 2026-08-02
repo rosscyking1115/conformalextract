@@ -29,3 +29,8 @@ trackio/
 *.pt
 *.pth
 access-log.jsonl
+# ACL conference style files, fetched locally to typeset the write-ups. NOT vendored: the upstream
+# repository (acl-org/acl-style-files) declares NO licence — the GitHub API reports `license: null`
+# and there is no LICENSE file — so default copyright applies and we have no redistribution right.
+# docs/writeup/acl-template.md records the exact pinned fetch.
+docs/writeup/acl-template/
