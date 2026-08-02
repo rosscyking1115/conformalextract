@@ -145,6 +145,32 @@ def test_render_surface_emits_approved_wording_with_limitations() -> None:
     assert "_Limitation:_" in rendered
 
 
+def test_the_committed_appendix_still_matches_what_the_ledger_renders() -> None:
+    """The generated appendix must not drift from the ledger it claims to be generated from.
+
+    It had. `evidence/plan4/reviewer_record.writeup-draft.json` verified byte-identity by hand on
+    2026-07-28 and nothing held it there afterwards: two `CX-SERVING-01` limitations were later
+    added to the ledger and never reached the appendix, so the draft's stated guarantee -- "every
+    claim available to this draft, generated from the ledger" -- was false for a fortnight while
+    the file still carried its "Do not hand-edit" banner. A hand-checked invariant with no test is
+    a comment.
+    """
+
+    appendix = (ROOT / "docs" / "writeup" / "claims-appendix.generated.md").read_text(
+        encoding="utf-8"
+    )
+    rendered = render_surface(load_ledger(LEDGER), "report")
+    missing = [
+        line.strip()
+        for line in rendered.splitlines()
+        if line.strip() and line.strip() not in appendix
+    ]
+    assert not missing, (
+        f"{len(missing)} rendered line(s) are absent from the committed appendix; "
+        f"regenerate it from the ledger. First: {missing[0][:160]!r}"
+    )
+
+
 # --- ADR 0011 section 6: the two publication-gate defects the reviewer found ------------
 
 

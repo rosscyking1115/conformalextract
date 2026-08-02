@@ -53,7 +53,10 @@ the frozen vLLM 4-bit serving stack.
 finite-sample penalty and oracle threshold selection, the adapted system could accept at most 2.0%
 of documents at 20% empirical error, against a required 20%. This is a diagnostic that selects no
 threshold and certifies nothing; the same diagnostic on the development split gives 3.0%, so the
-conclusion reproduces out of sample.
+conclusion reproduces out of sample. **It is specific to this model, this score and this task, and
+is not evidence that structured extraction cannot be certified at 20% risk** — the datasets
+`2606.29054` reports include base risks of 0.033 and 0.356, at which the same arithmetic forbids
+nothing and permits up to 80.5% acceptance respectively.
 
 **QLoRA produced a large, real gain — in the wrong property** (`CX-GROUNDING-01`). 95.7% of the
 adapted system's outputs parse and ground to the source document, against 39.4% zero-shot and 68.1%
@@ -62,10 +65,16 @@ few-shot, with ungrounded spans falling from 5,355 to 340. "Valid" means parseab
 This improvement did not translate into a certified selective guarantee, and must never be reported
 without that null attached. Scoped to the frozen vLLM 4-bit serving stack.
 
-**Grounding and certifiability are orthogonal here** (`CX-GROUNDING-ORTHOGONAL-01`). The adapter's
+**QLoRA improved grounding sharply and certifiability not at all** (`CX-GROUNDING-ORTHOGONAL-01`).
+It sharply improved output validity and span grounding, but did not make low-risk documents
+identifiable using transition-logprobability confidence: the adapter's
 ~16× reduction in ungrounded spans moved the certifiable frontier by 0.017 for itself and by 0.000
 for both baselines, because 87% of its remaining loss sits in output that is well-formed, grounded
-and content-bearing, and is scored wrong anyway. **The decomposition locates that loss; it does not
+and content-bearing, and is scored wrong anyway. **This is a dissociation, not an orthogonality
+result** — one intervention across three systems cannot establish that two properties are
+independent, and the wording was narrowed on 2026-08-02 to stop implying it did. (The claim
+identifier keeps the word for traceability to the reviews that ruled on it.) **The decomposition
+locates that loss; it does not
 identify the error category that produced it**, and no such attribution is claimed here — an earlier
 wording said "names the wrong entity" and was withdrawn on review, because false positives exceed
 false negatives by 637 arguments on those frames, which is over-generation rather than

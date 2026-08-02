@@ -1,6 +1,6 @@
 # ADR 0011: $0 re-analysis — the α-frontier and the loss-channel decomposition; WikiEvents withdrawn
 
-- Status: accepted
+- Status: accepted; **§2's headline sentence narrowed 2026-08-02** (see "Amendment 1" below)
 - Date: 2026-07-22
 - Trigger: a 3-agent adversarial review (2026-07-22) found the Plan 3 negative result to be
   substantially a replication of arXiv 2606.29054 — the impossibility bound, the base-risk
@@ -129,6 +129,17 @@ and `excluded_by_ceiling` so the argument is checkable rather than rhetorical.
 
 **Grounding and certifiability are orthogonal for this task.** That is the contribution; the
 grounding number on its own is not.
+
+> **Amendment 1, 2026-08-02 — this sentence is narrowed and no longer holds as written.** The
+> decision, the two commands and every number in this ADR stand unchanged; only the wording of the
+> contribution does. "Orthogonal" asserts independence between grounding and certifiability, and
+> one intervention observed across three systems cannot establish independence — nothing in this
+> ADR tested it. Read instead: **QLoRA sharply improved output validity and span grounding, but did
+> not make low-risk documents identifiable using transition-logprobability confidence.** That is a
+> *dissociation*, which is what the decomposition measures and all it supports. The claim
+> identifier `CX-GROUNDING-ORTHOGONAL-01` is retained for traceability to the reviewer records that
+> ruled on it and is now historical. Applied across the ledger, README, `certification-result.md`,
+> the write-up draft and the generated appendix on the same date.
 
 ### Boundaries fixed here
 

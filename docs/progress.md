@@ -87,8 +87,10 @@
 
 - 2026-07-22 — **ADR 0011 $0 re-analysis.** An α-frontier (the 20% floor first becomes
   oracle-reachable at α ≈ 0.406 for QA) and a loss-channel decomposition establishing that
-  **grounding and certifiability are orthogonal** — a ~16× reduction in ungrounded spans moved the
-  certifiable frontier by +0.017 for QA and 0.000 for both baselines. The WikiEvents second arm was
+  **a large grounding gain moved certifiability almost not at all** — a ~16× reduction in ungrounded
+  spans moved the certifiable frontier by +0.017 for QA and 0.000 for both baselines. (This entry
+  read "grounding and certifiability are orthogonal" until 2026-08-02, when the claim was narrowed
+  to a dissociation; independence was never tested.) The WikiEvents second arm was
   **withdrawn, not deferred**: the method needs 1,386 groups and the corpus has 246 documents.
   Independent review over four passes, opening at `BLOCK` — it found a `--roles` hole by which the
   analysis commands could have opened the sealed `final` split while the artifact attested

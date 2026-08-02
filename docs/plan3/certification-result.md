@@ -70,7 +70,12 @@ survives. It is simply not sufficient for a *certified selective* guarantee at t
 well-formed and grounded is a much weaker property than being *correct*, and the certificate
 scores correctness.
 
-### Grounding and certifiability are orthogonal here — measured, not asserted
+### Grounding improved sharply and certifiability not at all — measured, not asserted
+
+> **Narrowed 2026-08-02.** This section was headed "Grounding and certifiability are orthogonal
+> here". One intervention observed across three systems cannot establish that two properties are
+> independent, and "orthogonal" asserted exactly that. What is measured is a **dissociation**: a
+> large gain in the first produced almost none in the second. The numbers below are unchanged.
 
 That last sentence was an interpretation when this document was first written. It is now a
 measurement: `uv run conformalextract loss-decomposition` →
@@ -146,12 +151,25 @@ reaches the floor for them. QA sits below the ceiling at 0.582, so for QA the ce
 and the measured curve is what leaves it short. Both readings are recorded as
 `excluded_by_ceiling` and `groups_worsened_by_restriction` in the artifact.
 
-So the QLoRA adapter's principal learned behaviour — grounding fidelity — is **orthogonal to the
-property the certificate measures**. A 16× grounding gain bought no certifiable coverage. This is
-the finding that does not appear in the prior work: 2606.29054 tests neither event-argument
-extraction nor the grounding/correctness distinction. Its one extraction task (JSON-Extract,
-μ = 0.033) is a much easier regime than this one — a different task under a different metric, so
-the comparison marks out a new operating regime rather than contradicting their measurement.
+So the QLoRA adapter's principal learned behaviour — grounding fidelity — **did not make low-risk
+documents identifiable by the confidence score the certificate uses**. A 16× grounding gain left
+certified acceptance where it was. This is the finding that does not appear in the prior work:
+2606.29054 tests neither event-argument extraction nor the grounding/correctness distinction. Its
+one extraction task (JSON-Extract, μ = 0.033) is a much easier regime than this one — a different
+task under a different metric, so the comparison marks out a new operating regime rather than
+contradicting their measurement.
+
+**This is a dissociation, not an orthogonality result, and the difference is not pedantic.**
+Orthogonality asserts independence, which one intervention across three systems cannot establish
+and which nothing here tested. The measured statement is narrower and is all the evidence carries:
+the gain in grounding was large and the change in certifiability was not.
+
+**Nor is it a task-wide impossibility.** A 20% target is demonstrably reachable on structured
+extraction: on the datasets 2606.29054 reports, `(μ−α)/(1−α)` forbids nothing at μ = 0.033 and
+permits up to 80.5% acceptance at μ = 0.356 (`docs/frontier-check/findings.md`, re-verified
+2026-07-22). What is established here is that **this** model with **this** score on **this** task
+at μ = 0.6071 could not — a model-and-score-specific result, not a statement about the task or the
+field. Any sentence that reads otherwise is an overclaim of the kind finding O2 was raised about.
 
 Caveats that travel with this: conditional coverage under the grounding oracle is **not** a
 deployable acceptance rate — the restricted population differs per system, so those numbers are
@@ -223,11 +241,17 @@ reported as two independent confirmatory comparisons. There is one finding, not 
   (`uv run conformalextract alpha-frontier`, ADR 0011) reports the oracle risk–coverage curve
   read at every α, and no certificate is issued at any of them.
 
-  | System | α at which the 20% floor first becomes oracle-reachable (certification split) |
+  | System | **empirical oracle frontier point** — α at which the 20% floor first becomes oracle-reachable (certification split) |
   |---|---|
   | **QA** | **0.406** |
   | FS | 0.930 |
   | ZS | 0.981 |
+
+  **These are empirical oracle frontier points, not thresholds.** They were computed *after* the
+  certification split was opened, from that split's own labels, so each describes where this
+  measured population's curve crosses the floor and nothing more. No threshold was selected at
+  0.406 or anywhere else, and no certificate was issued at any of them. Calling 0.406 a threshold
+  would imply a certificate that does not exist.
 
   Read that as the answer to "you picked the one α where it fails": you did not need to pick.
   The curve is an oracle **upper** bound on what any threshold rule could achieve, so below
@@ -256,10 +280,14 @@ reported as two independent confirmatory comparisons. There is one finding, not 
 - The oracle risk–coverage diagnostic, as evidence the failure is capability rather than method.
 - **(ADR 0011)** The α-frontier, stated as: below α ≈ 0.406 no certificate at any threshold could
   have cleared the 20% floor for the best system. It is an oracle upper bound and may only be used
-  in that ruling-out direction — never to suggest what *would* certify above it.
-- **(ADR 0011)** Grounding ⊥ certifiability: a ~16× grounding gain moved the certifiable frontier
-  by +0.017 for QA and by 0.000 for both baselines, with 87% of QA's residual loss in grounded,
-  content-bearing output. Reported with the restricted-population caveat attached.
+  in that ruling-out direction — never to suggest what *would* certify above it. 0.406 is an
+  **empirical oracle frontier point, never a threshold**.
+- **(ADR 0011)** The grounding **dissociation**: a ~16× grounding gain moved the certifiable
+  frontier by +0.017 for QA and by 0.000 for both baselines, with 87% of QA's residual loss in
+  grounded, content-bearing output. Reported with the restricted-population caveat attached.
+- That the null is **model-and-score-specific**: a 20% target is reachable on structured extraction
+  at the base risks prior work reports (μ = 0.033, μ = 0.356), and this system's μ = 0.6071 is what
+  put it out of reach here.
 
 **Forbidden — in both directions:**
 
@@ -270,6 +298,9 @@ reported as two independent confirmatory comparisons. There is one finding, not 
 | Generalising past the frozen vLLM 4-bit stack (86.3% parity) or past in-domain RAMS | Calling grounding validity "accuracy" |
 | Presenting the α-frontier or the grounding oracle as a certificate — both are oracle diagnostics that select no threshold | Quoting grounding-oracle coverage as a deployable acceptance rate, or comparing it across systems |
 | Claiming we discovered that CRC cannot certify extraction — that is 2606.29054's result, not ours | Claiming μ ≈ 0.60 replicates their extraction base risk, or that it refutes it — their JSON-Extract 0.033 is a different task under a different metric, so ours marks out a harder regime and settles nothing about their number |
+| Any **task-wide or field-wide** impossibility reading. α ≤ 0.20 is reachable on structured extraction at the base risks prior work reports; this is a model-and-score-specific result *(added 2026-08-02)* | — |
+| Calling **0.406** a threshold, a certified operating point, or anything other than an empirical oracle frontier point measured on an already-opened split *(added 2026-08-02)* | — |
+| Describing grounding and certifiability as **orthogonal**, **independent**, or **unrelated**. The measured relation is a dissociation; independence was never tested *(added 2026-08-02)* | — |
 
 ## Status
 
