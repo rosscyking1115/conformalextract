@@ -419,7 +419,12 @@ def test_the_role_reading_commands_are_discovered() -> None:
     """Guard the guard: if discovery silently returns nothing, the tests below prove nothing."""
 
     discovered = set(_role_reading_commands())
-    assert discovered == {"risk-coverage-diagnostic", "alpha-frontier", "loss-decomposition"}, (
+    assert discovered == {
+        "risk-coverage-diagnostic",
+        "alpha-frontier",
+        "loss-decomposition",
+        "calibration-diagnostics",
+    }, (
         "a command taking a split-role list appeared or vanished; if it is new it must be "
         "guarded, and if it is a Path-typed --roles it must not be selected here"
     )

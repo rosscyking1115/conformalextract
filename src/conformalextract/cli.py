@@ -1138,6 +1138,115 @@ def loss_decomposition_command(
     typer.echo(json.dumps({"out": str(out)}, sort_keys=True))
 
 
+@app.command("calibration-diagnostics")
+def calibration_diagnostics_command(
+    predictions_dir: Annotated[Path, typer.Option()] = Path("data/private/plan2/predictions"),
+    rams_archive: Annotated[Path, typer.Option()] = Path("data/raw/rams/RAMS_1.0c.tar.gz"),
+    role_map: Annotated[Path, typer.Option()] = Path("data/private/splits/rams_roles.jsonl"),
+    development_gate: Annotated[Path, typer.Option()] = Path(
+        "evidence/plan2/development_gate_summary.json"
+    ),
+    roles: Annotated[str, typer.Option(help="Comma-separated split roles.")] = (
+        "development,certification"
+    ),
+    out: Annotated[Path, typer.Option()] = Path("evidence/plan3/calibration_diagnostics.json"),
+) -> None:
+    """Plan 3 §11.3 group-level calibration diagnostics — DIAGNOSTIC, certifies nothing.
+
+    AUROC/AUPRC, AURC and its normalized form, Spearman score-loss association, risk at fixed
+    coverage, and the stratifications §11.2 asks for — for all THREE confidence candidates on all
+    three systems, not only the candidate the development gate selected.
+
+    Its purpose is to separate two explanations of the null that the certification artifact
+    cannot tell apart: a population too hard to certify, versus a score that fails to rank the
+    certifiable part to the top. The arithmetic minimum abstention (mu-alpha)/(1-alpha) settles
+    the first; the gap between the acceptance that permits and the acceptance the score reached
+    is the second.
+
+    Reverses three descoped rows of `docs/plan3/sections-11-and-12-disposition.md` and says so on
+    the artifact. The reversal is not independently reviewed; nothing here is publishable yet.
+    """
+
+    from conformalextract.calibration import (
+        build_group_features,
+        calibration_artifact,
+        headline,
+        read_sentence_offsets,
+        system_readout,
+    )
+    from conformalextract.certification import FROZEN_ACCEPTANCE_FLOOR, FROZEN_ALPHA
+    from conformalextract.predictions import CONFIDENCE_CANDIDATES
+    from conformalextract.reanalysis import (
+        SYSTEM_IDS,
+        access_block,
+        assert_reanalysis_role,
+        certification_access_for,
+        load_split_system_data,
+        write_artifact,
+    )
+
+    # Refuse an unauthorised --roles value before ANY file is opened, exactly as the two ADR 0011
+    # commands do. A sealed split must not be read and then disclosed as unread (reviewer R1).
+    requested = [r.strip() for r in roles.split(",") if r.strip()]
+    for split_role in requested:
+        assert_reanalysis_role(split_role)
+
+    instances, contexts, assignments, gold_frames, _gate = _reanalysis_inputs(
+        rams_archive, role_map, development_gate
+    )
+    sentence_offsets = read_sentence_offsets(rams_archive)
+
+    readouts: dict[str, dict[str, dict[str, dict[str, object]]]] = {}
+    certification_documents: set[str] = set()
+    for split_role in requested:
+        groups = {
+            str(a["document_id"]): str(a["group_id"])
+            for a in assignments
+            if a["role"] == split_role
+        }
+        per_system: dict[str, dict[str, dict[str, object]]] = {}
+        for system_id in SYSTEM_IDS:
+            per_candidate: dict[str, dict[str, object]] = {}
+            for candidate in CONFIDENCE_CANDIDATES:
+                data = load_split_system_data(
+                    split_role=split_role,
+                    system_id=system_id,
+                    confidence_candidate=candidate,
+                    predictions_path=predictions_dir / f"{system_id}.v1.jsonl",
+                    contexts=contexts,
+                    instances=instances,
+                    group_by_document=groups,
+                    gold_frames=gold_frames,
+                )
+                features = build_group_features(
+                    data, instances=instances, sentence_offsets=sentence_offsets
+                )
+                per_candidate[candidate] = system_readout(data, features, alpha=FROZEN_ALPHA)
+                if split_role == "certification":
+                    certification_documents.update(data.loss_by_document)
+            per_system[system_id] = per_candidate
+        readouts[split_role] = per_system
+
+    log = certification_access_for(
+        "certification" if certification_documents else "development",
+        sorted(certification_documents),
+    )
+    artifact = calibration_artifact(
+        readouts,
+        alpha=FROZEN_ALPHA,
+        acceptance_floor=FROZEN_ACCEPTANCE_FLOOR,
+        access=access_block(log),
+    )
+    write_artifact(artifact, out)
+    # Echo the headline this command exists to produce, per system on the certification split:
+    # what base risk permitted, what the score delivered, and how well it ranked.
+    echoed = {
+        system: {candidate: headline(readout) for candidate, readout in candidates.items()}
+        for system, candidates in readouts.get("certification", {}).items()
+    }
+    typer.echo(json.dumps({"out": str(out), "certification": echoed}, sort_keys=True))
+
+
 @app.command("verify-claims")
 def verify_claims_command(
     ledger_path: Annotated[Path, typer.Option("--ledger")] = Path(
