@@ -73,6 +73,7 @@ a dated record — see `docs/release-check-2026-07-28.md` for the check that sur
 | 3 | Repository topics | ~~open~~ **DECIDED 2026-07-29 — three approved; more may be proposed** |
 | 4 | §1 versus §17 on the minimum contribution | **DEFERRED 2026-07-29** — §1's seven stand; not on the path to the actual goal |
 | 5 | Repository visibility | **OPEN** — routed separately, see [`proposed-visibility-change.md`](proposed-visibility-change.md) |
+| 6 | An operator path inside a byte-frozen document | **OPEN** — added 2026-08-02; see §6 below |
 
 Decisions 1–4 were ruled by Ross on 2026-07-29. Their reasoning is preserved below rather than
 deleted: a struck decision is a record of *why*, and the next person to ask the same question should
@@ -230,3 +231,39 @@ is a scope question for Ross, and it changes what the release must contain. Unti
 
 Both readings should be tested against the same question: which one did the plan's author intend to
 bind — and if the answer is not recoverable, which one this project would rather be held to.
+
+---
+
+## 6. An operator path inside a byte-frozen document **OPEN**
+
+`docs/plan3/section-12-1-certification-only-scope-addendum-2026-07-30.md` cites, at its line 36, an
+operator-local implementer report held under a machine temp directory, as the source of the five
+input hashes it then reproduces inline. The file is admitted **byte-for-byte** — its authority is
+hash equality with the artifact independently reviewed on 2026-07-30 — so the string cannot be
+edited without destroying the evidentiary value the document exists to carry.
+
+**What was done, and what was not.** `tests/test_internal_paths.py` previously enumerated three
+known roots by name and matched none of this, so the suite would have stayed green while the path
+shipped. A `windows-drive-path` pattern matching the *shape* of a drive-letter path now catches it,
+and the file is named in `ALLOWED` with byte-fidelity as the stated reason. **The gate now sees the
+string; nothing has removed it.** That is the open decision.
+
+**This section was rewritten by its own gate, which is the point.** The first draft quoted the paths
+verbatim — the natural way to be specific — and the newly widened pattern failed the suite on nine
+hits in this file. That is the 2026-07-28 defect recorded in `REVIEW.md` recurring exactly: a
+disclosure that introduces the strings it exists to disclose. The difference is that this time a
+mechanism caught it instead of a reviewer, in the same change that built the mechanism. The paths are
+therefore described here rather than quoted; the one document that may quote one is the frozen
+addendum, because it may not be edited at all.
+
+**The choice, stated plainly.** Either (a) this repository publishes a document containing an
+operator-local path, disclosed here and defensible as mention-not-use — the same ground three
+reviewer records already stand on; or (b) the addendum does not ship in the public bundle, which
+means the §12.1 amendment's own text is absent from what a reader can check. Interacts with decision
+1: reviewer records were ruled publishable as-is on the same reasoning, so (a) is the consistent
+answer, and consistency is not by itself a reason.
+
+**Not to be confused with the packet-location finding.** That the *routing packets* for this work
+also lived under the same temp directory, outside any enumerable location, is a governance defect
+recorded in the PMO learning log as entry `2026-08-01-003` — it is about where packets are kept, not
+about what a shipped document contains, and it is not this decision.

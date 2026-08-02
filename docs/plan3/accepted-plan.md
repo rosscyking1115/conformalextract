@@ -503,6 +503,8 @@ Assign every non-zero-loss prediction one or more deterministic categories:
 - empty-output collapse;
 - context-window evidence loss.
 
+> **Scope amendment:** The reviewed [2026-07-30 certification-only scope addendum](section-12-1-certification-only-scope-addendum-2026-07-30.md) amends the population scope of the sentence introducing the list above — every non-zero-loss prediction in the already-open `certification` role, across `zs`, `fs` and `qa` — and leaves the eleven categories and their multi-label semantics unchanged. It additionally imposes, among other things, a fail-closed role guard, pinned input identities, a retain-uncertainty rule, required per-system reporting, and seven preconditions on any future execution against this section. It does not authorise execution.
+
 ### 12.2 Manual audit sample
 
 Create a frozen stratified sample before reading examples:

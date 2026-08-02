@@ -1,0 +1,96 @@
+{
+  "schema_version": "1",
+
+  "_record_notice": "First-person independent reviewer record for the Plan 3 §12.1 certification-only scope addendum. Produced by a reviewer who implemented none of it and who did not author the packet that proposes to apply it. This record exists because the addendum's own preconditions assert 'this addendum has independently PASSed' and, until this file, nothing in this repository recorded that PASS — `rg -F '2026-07-30'` returned exactly one repository hit, the pointer line in docs/plan3/accepted-plan.md. No sealed label was read and nothing was spent during this review.",
+
+  "review_kind": "certification_scope_addendum_authority_record",
+
+  "reviewer_identity": "Reviewer / QA (Claude) — independent; NOT the implementer, NOT the author of any routing packet, and NOT the reviewer who issued the 2026-07-30 PASS.",
+
+  "reviewed_date": "2026-08-02",
+
+  "reviewed_commit": "73283ccd537e496b8bf207966c028330bc21be5e",
+
+  "reviewed_commit_note": "Branch codex/plan4-release. At review time the working tree carried exactly one modification, ` M docs/plan3/accepted-plan.md` (a two-line pointer insertion at line 506), and the addendum file itself was absent from the repository. This record was written to the reviewer's desk and transported into evidence/plan3/ by the Manager byte-for-byte; the reviewer wrote nothing into the repository.",
+
+  "verdict": "The frozen artifact is the artifact that was independently reviewed on 2026-07-30, and its content matches that review's verification points item by item. This record ATTESTS that identity and that match. It does not itself constitute the 2026-07-30 review, and it grants no authority — see `what_i_verified_versus_what_i_cite` below, which is the load-bearing section of this file.",
+
+  "the_two_filenames_and_the_hash": {
+    "why_this_section_exists": "The frozen artifact and its repository copy have different stems, so a search on either one misses the other. Once the ephemeral source directory is cleared, this record is the only thing connecting the shipped copy to the artifact that was reviewed. Both names and the digest are therefore stated together, in one place.",
+    "frozen_source_filename": "conformalextract-plan3-s12-1-certification-only-addendum-2026-07-30.md",
+    "frozen_source_location": "C:\\tmp\\ — operator-local, outside this repository, and ephemeral. Its presence is not durable and must not be relied on.",
+    "repository_target_filename": "docs/plan3/section-12-1-certification-only-scope-addendum-2026-07-30.md",
+    "sha256": "5BE8B8CF164A5AD58A54335CE3B829E6B250433B2C47E871763C177A8730FCF7",
+    "size_bytes": 4943,
+    "encoding": "UTF-8, no BOM, pure LF, single trailing newline",
+    "how_a_later_reader_checks_this": "Run `Get-FileHash -Algorithm SHA256 docs/plan3/section-12-1-certification-only-scope-addendum-2026-07-30.md` (or `sha256sum`) against the repository copy and compare with the digest above. Equality is the whole evidentiary value of that file; it is why the copy was required to be byte-for-byte and why the file carries an entry in `ALLOWED` in tests/test_internal_paths.py."
+  },
+
+  "what_i_verified_versus_what_i_cite": {
+    "why_this_distinction_is_the_point_of_this_record": "No artifact inside this repository can manufacture a review that happened outside it. The failure mode this record exists to avoid is a later reader mistaking it for the 2026-07-30 review. So the two categories are separated explicitly rather than blended into a single confident sentence.",
+    "verified_by_me_first_hand": [
+      "I computed the frozen artifact's SHA-256 and byte length myself: 5BE8B8CF164A5AD58A54335CE3B829E6B250433B2C47E871763C177A8730FCF7, 4,943 bytes. They match the digest recorded in the 2026-07-30 verdict, which names the same file.",
+      "I read the frozen artifact end to end — not a paraphrase, not a summary — and I read the 2026-07-30 verdict end to end.",
+      "I checked the verdict's nine numbered verification points against the artifact's content one by one. Every one describes this file: the certification-only population across zs/fs/qa; 3,152 treated as an observed identity and explicitly 'not an eligibility threshold or a stale count guard'; all eleven taxonomy labels retained verbatim and multi-label; separate unsupported_or_unclassified accounting that does not become a twelfth asserted category; the fail-before-open exact-singleton role guard; the four zero-capable per-system counts (examined, non_zero_loss, classified, unsupported_or_unclassified); the retained O2 / §12.2-moot / §12.3-binding boundaries; the future-command interface honestly labelled as a target rather than an executable command; and the explicit non-authority clause.",
+      "I verified the artifact has not drifted since the review: hash equality settles the bytes, and reading settles that the bytes say what the verdict says they say. Hash equality alone would have been necessary and not sufficient, so I did both.",
+      "I verified the artifact's five input SHA-256 values are reproduced inline in its own table (its lines 38-44), so its one operator-local path citation is a provenance reference and not a load-bearing dependency.",
+      "I verified the pointer wording proposed for docs/plan3/accepted-plan.md §12.1 against this artifact clause by clause, including the counts 'eleven categories' and 'seven preconditions', both of which I counted in the source."
+    ],
+    "cited_by_me_not_attested": [
+      "That an independent review of this artifact occurred on 2026-07-30 and returned PASS. I did not perform that review. I read the file recording it. Its reviewer was Reviewer/QA (Codex), a seat no longer available to be asked.",
+      "That review's own empirical claims — in particular its independent recomputation of the role-map distribution (train 4,068, development 933, certification 3,152, final 971, shift 0, total 9,124) and its confirmation of the five input hashes against live local inputs. Those rest on data under `data/`, which is gitignored and which I did not open. I neither confirm nor dispute them; I record that they are that review's claims, not mine."
+    ],
+    "where_the_2026_07_30_pass_lives": "C:\\dev\\_pmo\\team\\reviews\\2026-07-30-conformalextract-s12-1-certification-scope-addendum.md — outside this repository, in the operator's private planning directory.",
+    "disclosure_about_the_line_above": "Naming that path puts an operator filesystem path inside a tracked file, which is the class tests/test_internal_paths.py exists to catch, and this file is therefore named in ALLOWED. I made that trade deliberately and it is the reviewer's choice, not the Manager's: the entire purpose of this record under the filename-divergence finding is that a later reader can LOCATE the review, and a bare filename with no directory would have been weaker evidence. Three sibling records already carry the same directory on the same mention-not-use ground. Whether reviewer records ship publicly is a decided question — docs/plan4/open-release-decisions.md Decision 1, 'publish as-is' — and this file is a fourth instance under that decided exposure, not a new one."
+  },
+
+  "what_this_record_does_and_does_not_do": {
+    "does": "Makes the reviewed bytes citable inside the repository forever: both filenames, the digest, and the location and identity of the review that PASSed them. Before this file, nothing in the repository connected the shipped copy to the artifact that was reviewed.",
+    "does_not": "Manufacture the 2026-07-30 PASS, re-issue it, or extend it. It does not close Plan 3 — it deliberately carries no `plan` key and its `review_kind` is not `plan_close`, because tests/test_gate_state.py derives plan closure from exactly that value plus a PASS verdict, and a close kind here would flip Plan 3 closed against evidence/gate_state.json. It does not authorise implementing or running `failure-taxonomy`, does not authorise commit, push or publication, does not resume Plan 4, and does not license any public claim.",
+    "residue_stated_plainly": "The PASS itself remains an out-of-repo file. No in-repo artifact can change that. What this record removes is the situation where the claim 'this addendum has independently PASSed' pointed at nothing a reader of this repository could reach."
+  },
+
+  "the_addendum_binds_more_than_it_amends": {
+    "why_recorded_here": "An earlier draft of the §12.1 pointer said the addendum 'governs this section', which overstated its reach; the correction of that overstatement then understated it in the permissive direction, stating what the addendum amends and staying silent on what it imposes. Both errors are avoided by writing the distinction down once, here, where it cannot be lost in a one-line pointer.",
+    "what_it_amends": "One thing only: the population scope of the sentence at docs/plan3/accepted-plan.md line 492, 'Assign every non-zero-loss prediction one or more deterministic categories', which is to be read for this authorised analysis as every non-zero-loss prediction in the already-open `certification` role across zs, fs and qa. The eleven categories and their multi-label semantics are unchanged.",
+    "what_it_additionally_imposes_on_any_future_execution": [
+      "A fail-closed role guard: the command must accept only the exact singleton `certification`, and must reject final, shift, development, empty, comma-separated and unknown values BEFORE any RAMS gold, source or input is opened — proven adversarially on the actual command path, not merely disclosed.",
+      "Per-system reporting: for each of zs, fs and qa, the emitted text-free artifact must report examined, non_zero_loss, classified and unsupported_or_unclassified counts, and any zero-capable check must report how many items it examined so a zero cannot mean both 'clean' and 'nothing was scanned'.",
+      "Pinned input identities: the execution must use the five locally verified input SHA-256 values the artifact tabulates.",
+      "Retained uncertainty: where the evidence cannot distinguish a category, the implementation must record unsupported/unclassified rather than forcing an attribution.",
+      "Seven preconditions, all of which must hold before §12.1's analysis may run at all: the addendum has independently PASSed and has then been applied; the command implementation has independently PASSed; a fresh routing verdict permits the named action; required verification is clean; the repository is clean; the final/shift guard has been adversarially proven; and the action requires no paid, network or model activity."
+    ],
+    "and_it_authorises_nothing": "The artifact says so itself: it does not close Plan 3, start or resume Plan 4, authorise public claims, or authorise execution by itself."
+  },
+
+  "external_signal": {
+    "commands_i_ran": "Get-FileHash -Algorithm SHA256 and (Get-Item).Length on the frozen artifact; git rev-parse, git status --porcelain, git diff, git show HEAD:<path> | sha256sum, git check-ignore -v against the repository; a scratchpad replica of tests/test_internal_paths.py's own rglob walk over 203 prose files; a post-copy simulation of that gate with the artifact at its repository path; 22 over/under-match probes on the proposed path pattern; python route_next_action.py on the routing packet; and full reads of tests/test_internal_paths.py, tests/test_doc_references.py and tests/test_gate_state.py.",
+    "green_command_NOT_run_and_why": "`uv run pytest -q && uv run ruff check . && uv run mypy` was NOT run. This repository's scanning gates plant and remove probe files INSIDE the repository (docs/_untracked_scan_probe.md, docs/_untracked_prose_probe.md, docs/_untracked_markdown_probe.md) and write __pycache__, and this review was conducted under an absolute prohibition on creating any file inside the repository. I therefore assert NOTHING about the suite being green on this date. I assert only what the measurements above establish, and I state the gap rather than leaving a reader to infer coverage I did not have.",
+    "what_none_of_this_can_see": "Anything under data/ (gitignored and skipped by every walk), .git internals, any instruction given verbally, and — for literal searches — any paraphrase of a claim in wording I did not think of, which is the known limit REVIEW.md records for string-matching checks."
+  },
+
+  "scope": "This record covers the identity and content of the frozen §12.1 certification-only scope addendum and the locatability of the review that PASSed it. It does not rule on the taxonomy's statistical content, on any Plan 3 result, or on whether the addendum should be applied — that ruling is the separate verdict named below.",
+
+  "carried_forward": {
+    "why_this_key_exists_here": "REVIEW.md requires carried obligations to live in the RECEIVING document rather than only in the review that raised them, and records that a close may not be issued while any carried item is untracked. Each of the three items below was, before this file, tracked only in governance packets and reviewer desk files — none of which is in this repository. This key is their in-repo home.",
+    "1_accepted_plan_pin": "ACCEPTED_PLAN_SHA256['docs/plan3/accepted-plan.md'] in tests/test_doc_references.py currently reads 83313d47ec2a9869dcc580bda8cc543a606b5a894be269c9fdd6a229308a07e9, which I recomputed against HEAD and confirmed identical. The pin's own comment requires the hash to move IN THE SAME COMMIT as any amendment, with the reason in the commit message. The §12.1 pointer amendment is uncommitted, so the pin is untouched and the suite is unaffected — the test reads `git show HEAD:`, not the working tree. THE OBLIGATION IS LIVE FOR THE COMMIT THAT LANDS THE POINTER. Raised as v1 F3, carried by v2, carried here.",
+    "2_gate_state_stale_record_enumeration": "evidence/gate_state.json's Plan 3 `detail` reads 'Five Plan 3 reviewer records exist (phase-a, phase-a.v2, adr-0009, certification, reanalysis)'. There are SEVEN in evidence/plan3/ — b1-primary-document and plan3-close are missing from the enumeration — and this record makes eight. The count is prose in a `detail` field that no test reads, and it was already wrong at HEAD, so it is a pre-existing defect rather than one caused here. It was deliberately excluded from the applying packet to hold scope flat across reissues, per learning entry 2026-08-01-002 countermeasure (c), and is routed to its own packet. The rest of that sentence — 'NONE carries review_kind plan_close' — remains true, and stays true because this record deliberately does not carry that value. Raised as v2 G6.",
+    "3_a_fourth_instance_of_the_handed_down_characterisation_gate": "REVIEW.md's gate on handed-down characterisations reads 'Three instances, same day, same source'. This is a fourth, from a different source class, and it survived two independent reviews. A pointer position and an exact wording were specified in a routing packet that carried review_required:false and therefore reached AUTO_EXECUTE unseen; a later review searched two directories, reported that no artifact on disk carried the requirement, and that sentence was broader than the command that produced it — the repository's own scope-matches-sentence defect, committed inside a finding that BLOCKED a packet. The second review did not re-derive it either, because it had declared the finding moot and moved on. A characterisation is least likely to be tested once it has been superseded. The root cause is logged as learning entry 2026-08-01-003 with pattern_tag `self-declared-gate-trigger`, status open; its countermeasure — make the review trigger derivable from the action's content rather than self-declared — is NOT yet implemented, and until it is, the same class can recur.",
+    "obligation": "None of the three may be treated as discharged by the existence of this record. A discharge must name the item and point at where it now lives."
+  },
+
+  "reviewer_disclosures": {
+    "1_i_authored_this_because_a_packet_asked_a_reviewer_to": "Every one of the eighteen sibling reviewer records in this repository is a first-person account by the reviewer who ruled. The 2026-07-30 reviewer is unavailable, and the alternative on the table was for the Manager — the producer, which wants a PASS — to author a record about a review it did not perform. That would have made a transcription look like an attestation. This resolution keeps authorship with a reviewer and reduces the Manager to a byte-for-byte transporter, which is what it also does with the addendum itself.",
+    "2_the_incentive_this_creates_and_why_it_did_not_bite": "This file exists only because I did not BLOCK. That couples a reviewer's verdict to the production of an artifact the packet needs, and it should be named rather than left implicit. It is bounded three ways: blocking was fully available and would simply have produced no record; every word here is mine; and nothing in this record asserts that the packet is correct — it attests only what I verified about the frozen artifact, which I would have verified identically on the way to a BLOCK.",
+    "3_i_did_not_narrow_or_rewrite_the_packet": "Doing so would have made me its producer and forfeited the gate.",
+    "4_what_i_relied_on_rather_than_re_derived": "Two things, both from the immediately preceding independent verdict and both unchanged by the packet: the copy-mechanics experiment showing byte identity survives commit and checkout under this repository's .gitattributes, and the re-derivation of eight of the nine ROSS_ONLY routing flags. I re-confirmed the frozen artifact's own length and hash directly, and re-derived the ninth flag."
+  },
+
+  "acceptance_rule": "An artifact whose authority is asserted inside itself must be locatable and checkable from inside the repository that relies on it, or the assertion is unfalsifiable. Hash equality to a named, reviewed original is the cheapest form that check can take, and it is worth the cost of an exemption in the path-hygiene gate — but only while the bytes are actually pinned. Nothing in this repository currently enforces the byte-fidelity that this file's ALLOWED exemption rests on; recording the digest here is a check a reader performs, not a check the suite runs. Pinning it beside ACCEPTED_PLAN_SHA256 would close that, and belongs in the commit that lands the file.",
+
+  "related_records": {
+    "the_review_that_passed_the_artifact": "C:\\dev\\_pmo\\team\\reviews\\2026-07-30-conformalextract-s12-1-certification-scope-addendum.md — Reviewer/QA (Codex), PASS, no findings.",
+    "the_verdict_that_produced_this_record": "C:\\dev\\_pmo\\team\\reviews\\2026-08-02-conformalextract-s12-1-addendum-corrective-v3.md — Reviewer/QA (Claude), PASS-WITH-NITS on the packet applying the addendum. Two prior BLOCKs on earlier versions of that packet are dated 2026-08-01 and 2026-08-02 in the same directory.",
+    "note": "All four live outside this repository. That is the gap this record narrows and cannot close."
+  }
+}
