@@ -42,7 +42,9 @@ risk, ranking quality and the finite-sample penalty each independently forbid th
 adapted system's confidence score is \emph{not} weak by selective-prediction standards --- group
 AUROC 0.796, Spearman $\rho = -0.403$, matching what log-probability achieves on structured
 generation elsewhere --- and it certifies \textbf{nothing at all}. Nor would a perfect ranking:
-ranked by true loss, the same population certifies 11.4\%, still short of the floor. Separating the
+ranked by true loss, the same population certifies 11.4\%, still short of the floor, and the corpus
+would need to be roughly 13$\times$ larger before that gap could close. The third mechanism is
+observable in only one of our three systems, because the other two fail at base risk first. Separating the
 three mechanisms is what makes the null diagnostic rather than merely negative, and only one of
 them is the score's fault.
 \end{abstract}
@@ -167,14 +169,16 @@ ranking alone}. This is the score-discrimination result, and it is the only one 
 mechanisms that is the score's fault.
 
 What makes it worth reporting is that the score is not bad. Group AUROC for error detection is
-\textbf{0.796}; $\rho = -0.403$ at $p \approx 10^{-55}$; normalized AURC 0.531 says it closes
-roughly half the distance between a random ranking and a perfect one. On development the figures
-are 0.834, $-0.313$ and 0.568. Table 5 of \citet{kotte2026crc} puts that in context: log-probability
-scores there reach AUROC 0.485--0.604 across NER, QA and classification, but \textbf{0.793 on JSON
-extraction}, the one structured-generation task in that paper. Our 0.796 sits almost exactly on it.
-Two independent studies find this score family discriminating errors at close to 0.80 on structured
-generation --- and the certification outcomes diverge completely, because JSON extraction has base
-risk 0.033 and ours 0.6071. (Not like-for-like: theirs is instance-level, ours group-level.)
+\textbf{0.796} (95\% bootstrap CI $[0.737, 0.850]$, 10{,}000 resamples; the interval is wide
+because only 90 of 1{,}392 scored groups are error-free); $\rho = -0.403$ at $p \approx 10^{-55}$;
+normalized AURC 0.531 says it closes roughly half the distance between a random ranking and a
+perfect one. On development the figures are 0.834, $-0.313$ and 0.568. Table 5 of
+\citet{kotte2026crc} puts that in the same broad range: log-probability scores there reach AUROC
+0.485--0.604 across NER, QA and classification, and 0.793 on JSON extraction, the one
+structured-generation task in that paper. We do not treat 0.796 against 0.793 as a matched
+comparison --- theirs is instance-level and ours group-level, and our own interval spans
+0.737--0.850. The claim we need is weaker and safe: this is an ordinary log-probability score,
+performing about as its family does, not a straw man built to fail.
 
 \paragraph{Mechanism 3: the finite-sample penalty.} Ranking well is not enough, and this is the
 mechanism we had no vocabulary for. Take the perfect ranking of mechanism 2 --- 23.6\% acceptance,
@@ -183,6 +187,17 @@ average below $\alpha$. Its Hoeffding upper bound at the per-system $\delta/3$ a
 0.267 at the floor, and the largest acceptance it can certify is \textbf{11.4\%} (8.4\%
 family-wide). \textbf{A perfect ranking of this population does not clear the floor either.} The
 measured score certifies \textbf{0.0\%}.
+
+\paragraph{Which bound, and why it matters.} The 11.4\% is the \emph{conservative audit's}
+Hoeffding bound, not this framework's primary certificate. The primary construction is a joint
+finite-grid SCoRC certificate whose risk test is an \textbf{empirical Bernstein} bound --- the
+natural objection to Hoeffding here, since a loss-optimal prefix is almost all zero-loss groups and
+Bernstein is tighter on low variance. It does not rescue the result. Run through the certifier
+itself, with a single pre-chosen oracle candidate and no multiplicity penalty, the loss-optimal
+ranking certifies \textbf{0.0000} at every coverage we tested, and the binding constraint is the
+risk bound rather than the acceptance floor: at 23.6\% coverage the acceptance lower bound is
+0.2053, which clears the floor, and the risk test still fails. The stricter construction is
+stricter, so we report 11.4\% as the \emph{most generous} certified reading available.
 
 QA is the only system in which this mechanism is visible, because ZS and FS are already dead at
 mechanism 1. Figure~\ref{fig:rc} shows all three distances in one panel.
@@ -200,6 +215,16 @@ costs 0.216 of acceptance (0.0201 against 0.2357); the finite-sample penalty cos
 comparison survives greyscale printing.}
 \label{fig:rc}
 \end{figure*}
+
+\paragraph{The corpus is too small to certify this target, and that is a fact about the
+benchmark.} Mechanism 3 is not a property of this run. At the acceptance floor the loss-optimal
+prefix has empirical risk 0.174, leaving a radius budget of 0.026 before the Hoeffding upper bound
+crosses $\alpha$; that budget needs roughly \textbf{3{,}600 accepted groups, so about 18{,}000
+groups in total --- 12.9$\times$ the 1{,}396 in RAMS's certification split}. The certifier's own
+sample precondition says the same thing from the other side: a nine-candidate grid requires 1{,}386
+groups and we have 1{,}396, a margin of ten. \textbf{The standard corpus for this task is an order
+of magnitude too small to support a certificate at this target}, for any model and any score --- a
+constraint on the benchmark, and one that applies to work which has not run yet.
 
 \paragraph{Taken together: overdetermined.} Each mechanism independently forbids the target. This
 matters for what may be concluded. A reader shown only mechanism 2 would infer that a better score
@@ -271,12 +296,18 @@ the score's fault. Reporting ranking quality alone --- as selective-prediction w
 \section*{Limitations}
 \label{sec:limitations}
 
-\textbf{We made this paper's own error, twice.} A no-penalty empirical quantity was read as if it
-were certifiable: caught for the $\alpha$-frontier point 0.406, missed for the oracle acceptance
-0.2357, where a draft concluded that a perfect ranking ``would clear the floor''. It does not
-(11.4\% certified against a 20\% floor); an independent review caught it. Both slips ran in the
-direction that flattered the result. We report this because it is the paper's thesis happening to
-its authors: the empirical figure looked like evidence of certifiability and was not.
+\textbf{We made this paper's own error three times, and no two were caught the same way.} The
+defect class is quoting a quantity that resembles a certified one and is not. (i) The
+$\alpha$-frontier point 0.406 was nearly reported as a threshold; caught by a claim-wording audit.
+(ii) The empirical oracle 0.2357 was reported as clearing the floor; caught by an independent
+methodological review, and false --- the certified figure is 11.4\%. (iii) That 11.4\% was then
+labelled ``certified'' without stating it is the conservative audit's bound rather than the primary
+construction; caught by a pre-submission audit. All three ran in the direction that flattered the
+result. We report this because it is the paper's own thesis happening to its authors: at each step
+a number that looked like evidence of certifiability was not, and the distance between those two
+things is what this paper is about. It is also the strongest argument we can offer that one
+ranking-quality figure is not enough --- we could not hold the distinction steady ourselves while
+writing the paper that draws it.
 
 \textbf{Not production-grade}, and no deployment claim is made. \textbf{The certificate bounds
 average within-group loss, not the absence of error} in any document; certified $\neq$ safe.

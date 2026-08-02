@@ -1,8 +1,13 @@
 # Reviewer Analysis — UncertaiNLP 2026 short paper
 
 Produced 2026-08-02 with the `ai-research-writing-skill` reviewer-diagnosis and submission-audit
-routes. Author-facing: it is a diagnosis for the owner to act on, **not** a set of edits already
-made. Nothing in the paper was changed on the strength of this document.
+routes. Author-facing: a diagnosis for the owner to act on, not a set of edits already made.
+
+> **DISPOSITION, 2026-08-02.** The owner ruled on this document the same day. R1 was verified
+> through `scorc_certificate` itself (result **0.0000**, confirming the ad hoc figure and its
+> reason) and all six items were then applied to the paper. This file is retained as the diagnosis
+> of record; the risks below are **addressed**, not outstanding. What remains outstanding is the
+> re-review of both §11.3 and claim-narrowing packets.
 
 Subject: [`uncertainlp-2026-short.tex`](uncertainlp-2026-short.tex) at commit `61b7846`.
 
