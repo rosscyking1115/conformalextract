@@ -34,3 +34,12 @@ access-log.jsonl
 # and there is no LICENSE file — so default copyright applies and we have no redistribution right.
 # docs/writeup/acl-template.md records the exact pinned fetch.
 docs/writeup/acl-template/
+# LaTeX build products. The .tex/.bib are the source; scripts/build_paper.ps1 regenerates the PDF
+# in seconds, so the binary is not tracked. docs/writeup/fig/*.pdf IS tracked — that is an input.
+docs/writeup/*.aux
+docs/writeup/*.bbl
+docs/writeup/*.blg
+docs/writeup/*.log
+docs/writeup/*.out
+docs/writeup/*.pdf
+!docs/writeup/fig/*.pdf

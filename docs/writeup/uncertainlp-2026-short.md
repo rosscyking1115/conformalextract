@@ -11,8 +11,37 @@
 > claim IDs refer to [`../../evidence/plan4/claim_ledger.json`](../../evidence/plan4/claim_ledger.json)
 > and the [generated appendix](claims-appendix.generated.md).
 >
-> **Not yet formatted for the venue.** ACL style files are not in this repository — see
-> "Remaining work" at the end.
+> **THE TYPESET SOURCE IS NOW `uncertainlp-2026-short.tex`, AND IT IS AUTHORITATIVE.** This
+> Markdown file is the working draft it was written from. The two can drift and nothing enforces
+> otherwise — a two-source problem this repository has been bitten by before, so it is stated
+> rather than assumed. **Edit the `.tex` for anything submission-bound**; keep this file for the
+> status banner, the provenance notes and the remaining-work list, which are deliberately not in
+> the paper. Build: `pwsh -File scripts/build_paper.ps1`.
+
+> ## ⛔ HEADLINE CLAIM REFUTED ON REVIEW, 2026-08-02 — DO NOT CIRCULATE
+>
+> The independent review of the §11.3 packet returned **REVISE** and refuted this paper's central
+> sentence. **"A perfect ranking would clear the 20% floor" is FALSE.** The 23.6% oracle acceptance
+> is an *empirical* figure carrying no finite-sample penalty. Applying the certifier's own
+> `hoeffding_upper`, a perfect ranking of this exact population certifies **0.1139** at the
+> per-system δ/3 allocation and **0.0838** family-wide — both **below** the 0.20 floor. At the floor
+> itself (279 groups) the empirical risk is 0.174 but the upper bound is 0.267–0.283.
+> Verified independently by the author, not accepted on the reviewer's word.
+>
+> This is the *same* error the paper takes care to avoid for the α\* = 0.406 frontier point —
+> reading a no-penalty oracle quantity as if it were certifiable — committed one section later, and
+> it runs in the flattering direction.
+>
+> **What survives:** the 2.0% vs 23.6% comparison itself, because both sides are empirical
+> no-penalty quantities, so the 21.6-point gap is still attributable to the ranking alone. **What
+> does not:** every sentence saying the target was reachable, that the floor would have been
+> cleared, or that the failure was the score's alone. Affected: the abstract, §4, §7, Figure 1's
+> caption, and `sections-11-and-12-disposition-amendment-1.md`.
+>
+> Awaiting the owner's decision on the rewrite. Five further required corrections are recorded in
+> the reviewer's verdict, held in the team review desk outside this repository
+> (`2026-08-02-conformalextract-s11-3-calibration-diagnostics`).
+eviews6-08-02-conformalextract-s11-3-calibration-diagnostics.md`.
 
 ## Abstract
 
@@ -291,12 +320,14 @@ text and sealed labels are not redistributable.
 ## Remaining work before this can be submitted
 
 1. **Both review packets must pass** (see the status banner). This is the blocking item.
-2. **ACL formatting.** No LaTeX sources exist in this repository and the ACL style files are not
-   vendored. Obtaining `acl_latex.sty` and the class files needs a download, which needs your
-   go-ahead.
-3. **Length check against the real template.** This is written to a 4-page budget but that is an
-   estimate until it is typeset; §4 and §5 are where to cut.
-4. **References** are cited by name and arXiv id above and need a `.bib`.
+2. ~~ACL formatting.~~ **Done 2026-08-02.** `uncertainlp-2026-short.tex` builds under TinyTeX
+   (installed locally, ~235 MB zip, digest-verified) against the gitignored, unvendored `acl.sty`.
+   Clean build: no overfull boxes, all citations and cross-references resolved.
+3. ~~Length check against the real template.~~ **Done — it fits.** Typeset, the content runs
+   Introduction to Conclusion and ends **72% down page 4**; Limitations and References run onto
+   page 5 and ACL does not count them. Roughly a quarter-page spare. No cut is needed.
+4. ~~References need a `.bib`.~~ **Done**: `uncertainlp-2026-short.bib`, four entries, all
+   resolving. Author lists for the RoSE entry are incomplete and need filling before submission.
 5. ~~Verify the external comparison figures against primary sources.~~ **Done 2026-08-02**, and it
    caught a real error — see the provenance note in §4. Kotte's Table 5 is now recorded in
    `docs/frontier-check/findings.md`; the unverifiable Farquhar figure was dropped rather than kept
@@ -305,12 +336,9 @@ text and sealed labels are not redistributable.
    — never a runtime dependency; nothing under `src/` imports it and no test needs it). It renders
    at 5.5 in wide, which is a full-width `figure*`; at single-column width the annotations will
    need larger relative type. Decide which when the template is in place.
-7. **Length is now tight, not comfortable.** ACL counts the abstract and body but not Limitations:
-   that is 2,786 words, roughly 3.3 pages of prose, plus the table (~0.25) and Figure 1 (~0.3 as a
-   full-width `figure*`) — about 3.85 of the 4 pages. It fits, with nothing spare. **First cut if
-   it overruns: the provenance note in §4** (~180 words). It is the right thing to keep in the
-   repository copy and the easiest thing to compress to one sentence in a submitted version.
-   Second cut: §6's second paragraph.
+7. **Remaining, and this is now the whole list:** the two review packets must pass; the RoSE
+   reference needs its full author list; and a decision is needed on whether Figure 1 stays
+   full-width (`figure*`, as built) or is redrawn single-column.
 
 ## References
 
