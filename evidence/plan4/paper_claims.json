@@ -755,6 +755,145 @@
         "alpha": 0.2
       },
       "note": ""
+    },
+    {
+      "figure": "0.0925",
+      "artifact": "evidence/plan3/derived_quantities.json",
+      "pointer": "quantities.at_the_acceptance_floor.hoeffding_radius",
+      "render": "round4",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2,
+        "n": 1396,
+        "quantities.at_the_acceptance_floor.k": 280
+      },
+      "note": "what the bound spends before any data is seen, at delta/3 and k = 280"
+    },
+    {
+      "figure": "0.1075",
+      "artifact": "evidence/plan3/derived_quantities.json",
+      "pointer": "quantities.at_the_acceptance_floor.mean_loss_an_accepted_set_may_carry",
+      "render": "round4",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2,
+        "n": 1396,
+        "quantities.at_the_acceptance_floor.k": 280
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.267",
+      "artifact": "evidence/plan3/derived_quantities.json",
+      "pointer": "quantities.at_the_acceptance_floor.hoeffding_upper_bound",
+      "render": "round3",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2,
+        "n": 1396,
+        "quantities.at_the_acceptance_floor.k": 280
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.216",
+      "artifact": "evidence/plan3/derived_quantities.json",
+      "pointer": "quantities.shortfalls.ranking_cost",
+      "render": "round3",
+      "configuration": {
+        "alpha": 0.2,
+        "n": 1396
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.122",
+      "artifact": "evidence/plan3/derived_quantities.json",
+      "pointer": "quantities.shortfalls.finite_sample_penalty_cost",
+      "render": "round3",
+      "configuration": {
+        "alpha": 0.2,
+        "n": 1396
+      },
+      "note": ""
+    },
+    {
+      "figure": "21.6",
+      "artifact": "evidence/plan3/derived_quantities.json",
+      "pointer": "quantities.shortfalls.ranking_cost_points",
+      "render": "round1",
+      "configuration": {
+        "alpha": 0.2,
+        "n": 1396
+      },
+      "note": ""
+    },
+    {
+      "figure": "8.4",
+      "artifact": "evidence/plan3/derived_quantities.json",
+      "pointer": "quantities.certified_acceptance_by_allocation.family_wide.acceptance",
+      "render": "pct1",
+      "configuration": {
+        "quantities.certified_acceptance_by_allocation.family_wide.delta": 0.002777777777777778,
+        "quantities.certified_acceptance_by_allocation.family_wide.n": 1396,
+        "alpha": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "13",
+      "artifact": "evidence/plan3/derived_quantities.json",
+      "pointer": "quantities.at_the_acceptance_floor.corpus_multiple",
+      "render": "int",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2,
+        "n": 1396,
+        "quantities.at_the_acceptance_floor.k": 280
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.174",
+      "artifact": "evidence/plan3/derived_quantities.json",
+      "pointer": "quantities.at_the_acceptance_floor.empirical_risk_of_loss_optimal_prefix",
+      "render": "round3",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2,
+        "n": 1396,
+        "quantities.at_the_acceptance_floor.k": 280
+      },
+      "note": "DISAGREES: at the floor-meeting prefix this is 0.1747, which renders 0.175",
+      "disagrees_with_paper": "0.175"
+    },
+    {
+      "figure": "18000",
+      "artifact": "evidence/plan3/derived_quantities.json",
+      "pointer": "quantities.at_the_acceptance_floor.required_total_groups",
+      "render": "int",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2,
+        "n": 1396,
+        "quantities.at_the_acceptance_floor.k": 280
+      },
+      "note": "DISAGREES: at the floor-meeting prefix the requirement is 18,740",
+      "disagrees_with_paper": "18740"
+    },
+    {
+      "figure": "12.9",
+      "artifact": "evidence/plan3/derived_quantities.json",
+      "pointer": "quantities.at_the_acceptance_floor.corpus_multiple",
+      "render": "round1",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2,
+        "n": 1396,
+        "quantities.at_the_acceptance_floor.k": 280
+      },
+      "note": "DISAGREES: 13.4 at the floor, 12.8 one group below it. 12.9 reproduces from neither - it is 18000/1396, the ROUNDED group count divided by n",
+      "disagrees_with_paper": "13.4"
     }
   ]
 }

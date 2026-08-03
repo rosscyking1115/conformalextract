@@ -143,6 +143,42 @@ a dated record — see `docs/release-check-2026-07-28.md` for the check that sur
 > checked. And the manifest is authored, so a human step remains — though the build-time verifier
 > caught two of this author's own pointer errors before either reached a run.
 >
+> ### The residual hole, and the design that closes it. RECORDED, NOT BUILT.
+>
+> The guard checks the **manifest's** declared configuration against the **artifact**. It never
+> checks either against **what the prose claims**, because it cannot read prose. So instance (v)
+> survives it in the general case: a figure pointed at a block honestly stamped "three candidates,
+> full δ" passes, while the sentence two words away says "at the frozen δ/3 allocation". The guard
+> would have caught (v) *only if the manifest author had pointed the entry at the allocation the
+> sentence names* — which converts "did anyone check?" into "did the author declare truthfully?",
+> a weaker property and the same human step that produced the error.
+>
+> **The closing design: declare the configuration inline in the paper, adjacent to the figure**, in
+> a macro that both typesets the number and states the allocation it belongs to. The manifest is
+> then **derived from the paper** rather than written alongside it, so a declaration cannot diverge
+> from the sentence it sits in — the two are the same token. That restores "did anyone check?",
+> which is the property the current guard cannot have at any level of author diligence.
+>
+> Not built. Whether to build it is the owner's call.
+>
+> ### Stated hit rate: one conditional catch in six, and the five it misses
+>
+> An instrument whose limits are unstated is worth less than one with a modest, published hit rate.
+> Against this project's own six recorded instances:
+>
+> | # | Instance | Would the guard have caught it? |
+> |---|---|---|
+> | i | 0.406 reported as a threshold | **No** — the value is right; "threshold" is a wording claim |
+> | ii | 0.2357 reported as clearing the floor | **No** — the value is right; the inference is wrong |
+> | iii | 11.4% called "certified" without its construction | **No** — `calibration_diagnostics.json` records no `construction` field to pin |
+> | iv | correction applied to a derived doc, not the ledger | **No** — neither file is in its population; it reads only the paper |
+> | v | acceptance LCB quoted at an allocation not used | **Conditionally** — caught iff the entry is pointed at the allocation the sentence names |
+> | vi | "content ends 82% down page 4" | **No** — not in the paper, and not a computed quantity |
+>
+> **Five missed, one conditional.** Every miss is of the same two kinds: a correct number attached
+> to a wrong claim, or a document outside the paper. The guard closes absence and drift. It does
+> not close attribution, and no version of it that cannot read prose will.
+>
 > **Reference implementation: `redteam-foundry` built the equivalent.** Two properties of it are
 > the requirement, not decoration. Its checker **opens both the artifact and the document** and
 > compares — the thing `verify_ledger` does not do. And it **refuses to pass on an empty claim
@@ -150,6 +186,39 @@ a dated record — see `docs/release-check-2026-07-28.md` for the check that sur
 > as a metric satisfied by absence. Any guard built here inherits both or it reproduces the gap it
 > was written to close.
 
+> ### First run: the paper's figures are not wrong, they are backed by nothing
+>
+> **Zero value mismatches and zero configuration mismatches** on the first paper-scoped run.
+> Everything that resolved, resolved correctly under the configuration it declared. The failure was
+> entirely **absence**: 53 of 120 figures resolved to no artifact at all — and the set included
+> **21.6, the paper's headline ranking gap**, and **8.4%, its family-wide certified acceptance**.
+> Both had been derived in a shell and written into prose, and had been in that state since they
+> were written. That is a finding about the paper, not a to-do list: the central quantity of a
+> results paper was traceable to nothing, and every gate the project had passed it.
+>
+> **Then the eleven were computed into `evidence/plan3/derived_quantities.json`** by
+> `scripts/derived_quantities.py`, each stamped with its construction, δ, allocation, n and prefix
+> length. Eight now resolve. **Three disagree with the paper**, reported by the guard rather than
+> asserted:
+>
+> | Paper | Artifact at the floor-meeting prefix (k = 280) |
+> |---|---|
+> | empirical risk 0.174 at the floor | **0.1747**, which renders 0.175 |
+> | "about 18,000 groups" | **18,740** |
+> | "12.9× this split" | **13.4×** — and 12.8× one group below the floor, so 12.9 reproduces at neither |
+>
+> The cause is a definition the paper never states. 0.20 × 1396 = 279.2, so the floor is *met* at
+> k = 280 and *missed* at k = 279. The paper's 0.0925 is the k = 280 figure; its 18,000 and 12.9×
+> reconcile at k = 279. **One paragraph uses both prefixes without naming either.** And 12.9 is not
+> a computation at all — it is 18000/1396, the already-rounded group count divided by n, so a
+> rounding was fed back in as an input.
+>
+> The manifest entries point at **k = 280 deliberately**, so the guard fails. Pointing them at
+> k = 279, where two of the three match, would be choosing the configuration that makes the paper
+> right — the defect this apparatus exists to refuse. **The prose is not corrected here**: the
+> figures were discovered in the session that built the instrument, and correcting a number in the
+> session that found it is the shape that produced three of the six instances.
+>
 > ### Carried forward from the 2026-08-03 review round, recorded and deliberately not fixed
 >
 > Both come from the independent reviews of packets 1 and 2. Neither is actioned, and the second

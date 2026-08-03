@@ -62,10 +62,19 @@ CONFIG_MISMATCH = "CONFIG_MISMATCH"
 
 @dataclass
 class Failure:
+    """One failed figure.
+
+    ``figure`` is the token as the paper writes it (``18{,}000``) and ``value`` is its normalised
+    form (``18000``), which is what the manifest keys on. Both are carried because reporting wants
+    the first and joining back to the manifest wants the second -- an earlier version carried only
+    the token and its own output could not be matched against its own manifest.
+    """
+
     kind: str
     figure: str
     detail: str
     where: str = ""
+    value: str = ""
 
     def line(self) -> str:
         loc = f"  [{self.where}]" if self.where else ""
@@ -161,7 +170,13 @@ def check(
         where = f"line {figure.lines[0]}"
         if entry is None:
             failures.append(
-                Failure(UNBACKED, figure.token, "no manifest entry: no artifact carries it", where)
+                Failure(
+                    UNBACKED,
+                    figure.token,
+                    "no manifest entry: no artifact carries it",
+                    where,
+                    figure.value,
+                )
             )
             continue
 
@@ -169,13 +184,15 @@ def check(
         if relative not in cache:
             path = ROOT / relative
             if not path.exists():
-                failures.append(Failure(ARTIFACT_MISSING, figure.token, relative, where))
+                failures.append(
+                    Failure(ARTIFACT_MISSING, figure.token, relative, where, figure.value)
+                )
                 cache[relative] = None
                 continue
             cache[relative] = json.loads(path.read_text(encoding="utf-8"))
         artifact = cache[relative]
         if artifact is None:
-            failures.append(Failure(ARTIFACT_MISSING, figure.token, relative, where))
+            failures.append(Failure(ARTIFACT_MISSING, figure.token, relative, where, figure.value))
             continue
 
         pointer = entry["pointer"]
@@ -183,7 +200,9 @@ def check(
             value = resolve(artifact, pointer)
         except KeyError:
             failures.append(
-                Failure(POINTER_MISSING, figure.token, f"{relative} :: {pointer}", where)
+                Failure(
+                    POINTER_MISSING, figure.token, f"{relative} :: {pointer}", where, figure.value
+                )
             )
             continue
 
@@ -195,6 +214,7 @@ def check(
                     figure.token,
                     f"paper says {figure.value}, {relative} :: {pointer} renders {rendered}",
                     where,
+                    figure.value,
                 )
             )
             continue
@@ -212,6 +232,7 @@ def check(
                         figure.token,
                         f"{relative} does not record {config_pointer}",
                         where,
+                        figure.value,
                     )
                 )
                 bad_config = True
@@ -223,6 +244,7 @@ def check(
                         figure.token,
                         f"{config_pointer} is {actual!r}, entry declares {expected!r}",
                         where,
+                        figure.value,
                     )
                 )
                 bad_config = True

@@ -53,7 +53,9 @@ def manifest():
 
 
 def _kinds(failures, figure: str) -> set[str]:
-    return {f.kind for f in failures if f.figure == figure}
+    """Match on the NORMALISED value, which is what the manifest keys on."""
+
+    return {f.kind for f in failures if f.value == figure or f.figure == figure}
 
 
 def test_the_guard_refuses_a_vacuous_run(figures) -> None:
@@ -64,7 +66,14 @@ def test_the_guard_refuses_a_vacuous_run(figures) -> None:
 
 
 def test_every_manifest_entry_resolves_and_renders(manifest) -> None:
-    """A pointer that no longer resolves must not degrade into a silent pass."""
+    """A pointer that no longer resolves must not degrade into a silent pass.
+
+    An entry may legitimately disagree with the paper: where a figure was computed into an
+    artifact and the written number turned out not to match, the entry is retained pointing at
+    the defensible configuration so the guard reports it. Those carry ``disagrees_with_paper``
+    with the value the artifact actually renders, so a KNOWN disagreement is declared in the
+    manifest rather than looking like a broken pointer -- and an UNDECLARED one still fails here.
+    """
 
     loaded: dict[str, object] = {}
     for figure, entry in manifest.items():
@@ -72,8 +81,29 @@ def test_every_manifest_entry_resolves_and_renders(manifest) -> None:
         if relative not in loaded:
             loaded[relative] = json.loads((ROOT / relative).read_text(encoding="utf-8"))
         value = resolve(loaded[relative], entry["pointer"])
-        assert render(value, entry["render"]) == figure, (
-            f"{figure}: {relative}::{entry['pointer']} no longer renders it"
+        rendered = render(value, entry["render"])
+        declared = entry.get("disagrees_with_paper")
+        if declared is not None:
+            assert rendered == declared, (
+                f"{figure}: the declared disagreement is stale -- the artifact now renders "
+                f"{rendered!r}, not the recorded {declared!r}"
+            )
+            continue
+        assert rendered == figure, (
+            f"{figure}: {relative}::{entry['pointer']} renders {rendered!r}. If the paper is "
+            "wrong, declare it with disagrees_with_paper; do not repoint the entry."
+        )
+
+
+def test_declared_disagreements_are_reported_not_swallowed(figures, manifest) -> None:
+    """A declared disagreement must still FAIL the guard. Declaring is disclosure, not a waiver."""
+
+    declared = {f for f, e in manifest.items() if e.get("disagrees_with_paper") is not None}
+    assert declared, "no disagreements declared; this test would pass vacuously"
+    failures, _ = check(figures, dict(manifest))
+    for figure in declared:
+        assert VALUE_MISMATCH in _kinds(failures, figure), (
+            f"{figure} is declared as disagreeing and the guard passed it"
         )
 
 
