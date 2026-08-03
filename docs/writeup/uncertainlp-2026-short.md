@@ -11,9 +11,17 @@
 
 - **Status: DRAFT, 2026-08-03. Not submitted. Not submittable yet.**
 - Build: `pwsh -File scripts/build_paper.ps1` → all citations and cross-references resolve.
-- **OVER THE PAGE LIMIT by 10 lines, measured 2026-08-03.** The Conclusion runs onto page 5: page 4
-  ends mid-sentence in §5 and lines 334–343 of content precede the `Limitations` heading. Limitations
-  and References do not count toward the limit; the Conclusion does.
+- **Within the 4-page limit — measured from a build, 2026-08-03.** Content ends **95% down page 4**;
+  the `Limitations` heading is the first thing on page 5. Limitations, References and the appendix
+  do not count toward the limit. **The margin is about 5% of one page**, so the next addition
+  overflows: re-measure from a build before adding anything, and do not trust this line.
+- **It was ten lines over, and the fix was structural rather than a compression pass.** Two levers,
+  no prose compressed: the trigger-count and cross-sentence stratification moved to
+  `Appendix A: The aggregation unit` (ACL appendices follow References and do not count), leaving a
+  one-line pointer in §3; and the finite-sample argument was de-duplicated — C1's rewrite and the
+  0.0925/0.1075 addition had left the paper saying "the corpus is too small" three times in three
+  units, so the penalty statement absorbed the "18,000 groups" restatement instead of sitting
+  beside it.
 
   > **This line previously read "content ends 82% down page 4, so within the 4-page ACL limit", and
   > that was instance SIX of the defect class the paper's Limitations section is about.** The 82%
@@ -29,10 +37,11 @@
   > but not the same subject, and an ACL Limitations section is not the place to report a build
   > measurement. Recorded here for the owner to overrule if he wants the count to read six.
   >
-  > The fix is a ~10-line trim of counted prose and **has not been done**. It is not attempted in
-  > the same pass that found it: compression introduced a factual defect twice in this document's
-  > history, and the correct order is to trim once, deliberately, and re-measure. Recorded as
-  > blocking item 1 below.
+  > **Resolved by relocation, not compression.** A compression pass was the highest-risk edit
+  > available here — it had already introduced a factual defect twice in this document — so
+  > structural levers were surveyed first and two were sufficient. The full instance list, and what
+  > makes instance six worse than the other five, is in
+  > [`../plan4/open-release-decisions.md`](../plan4/open-release-decisions.md).
 
 ## Gate status — both packets returned REVISE, neither is discharged
 
@@ -85,9 +94,9 @@ primary source and recorded here.
 
 ## Remaining work
 
-1. **Trim ~10 lines of counted prose.** The Conclusion currently runs onto page 5. Re-measure from
-   a build, not from this file — that is how the overflow went unnoticed. **Blocking.**
-2. **Both packets must be re-reviewed and pass.** **Blocking.**
+1. ~~Trim ~10 lines of counted prose.~~ **Done** — see the build note above. Any future addition
+   must be re-measured from a build, not from this file; that is how the overflow went unnoticed.
+2. **Both packets must be re-reviewed and pass.** The only blocking item.
 3. The RoSE reference needs its full author list.
 4. ~~Decide the figure's width.~~ **Done** — single-column, regenerated at 3.3×2.2in with type
    sized for it. It was a full-width `figure*` costing about seven column-inches; in one column it

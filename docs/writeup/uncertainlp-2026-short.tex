@@ -193,11 +193,7 @@ empirical risk 0.174 at the floor --- and require it to \emph{certify} rather th
 average below $\alpha$. Its Hoeffding upper bound at the per-system $\delta/3$ allocation is
 0.267 at the floor, and the largest acceptance it can certify is \textbf{11.4\%} (8.4\%
 family-wide). \textbf{A perfect ranking of this population does not clear the floor either.} The
-measured score certifies \textbf{0.0\%}. This mechanism is not a fact about our system: at
-$n = 1{,}396$ and $\delta/3$ the bound spends \textbf{0.0925} of the 0.20 budget before any data is
-seen, so certifying at the floor needs an accepted set with mean loss $\leq 0.1075$, \emph{whoever}
-produced it. The benchmark halves the effective target for everyone --- though it forbids no one:
-a system under that figure would certify here.
+measured score certifies \textbf{0.0\%}.
 
 \paragraph{Which bound, and why it matters.} The 11.4\% is the \emph{conservative audit's}
 Hoeffding bound, not the primary certificate, whose risk test is an \textbf{empirical Bernstein}
@@ -239,9 +235,12 @@ comparison survives greyscale printing.}
 benchmark.} Mechanism 3 is not a property of this run. Two independent calculations say so, and
 they are separate arguments rather than one restated.
 
-\emph{From the bound.} At the floor the loss-optimal prefix has empirical risk 0.174, leaving a
-radius budget of 0.026 before the Hoeffding bound crosses $\alpha$ --- roughly 3{,}600 accepted
-groups, so about \textbf{18{,}000 in total, 12.9$\times$ this split}.
+\emph{From the bound.} At $n = 1{,}396$ and $\delta/3$ the Hoeffding radius at the floor is
+\textbf{0.0925}, spent before any data is seen --- so certifying at the floor requires an accepted
+set carrying mean loss $\leq \mathbf{0.1075}$, \emph{whoever} produced it. \textbf{The benchmark
+halves the effective target for every entrant while forbidding none}: a system under that figure
+certifies here. Clearing it with \emph{this} loss distribution would take roughly \textbf{18{,}000
+groups, 12.9$\times$ this split}.
 
 \emph{From the certifier's own precondition, which binds far sooner.} At the frozen $\delta/3$
 allocation the theorem admits a grid of at most \textbf{three} candidates on this corpus: three
@@ -263,14 +262,9 @@ the model is simply too weak; that is false for QA. The honest statement is that
 \textbf{nothing could have certified this system --- not a better score, not a perfect one} --- and
 that the score is nonetheless responsible for a 21.6-point share of the shortfall.
 
-\paragraph{The unit definition is also decisive}, and this is easy to miss. Stratifying QA's groups
-by triggers per document, mean group loss is essentially flat (0.606, 0.608, 0.589, 0.634, 0.596
-from 1 to 6+) --- but the share of groups within $\alpha$ collapses from \textbf{17.3\% to 0.7\% to
-zero}, and 23 of the 28 oracle-accepted groups are single-trigger. Groups with three or more
-triggers contribute \textbf{none}. Averaging frame loss across a document and scoring the group by
-its weakest member makes acceptance vanish with document complexity even where mean loss does not
-move. Cross-sentence distance behaves the same way: 25 of 28 acceptances have no cross-sentence
-argument. A protocol reporting only aggregate loss sees neither effect.
+\paragraph{The unit definition is also decisive}, independently of all three mechanisms: acceptance
+vanishes with document complexity even where mean loss is flat, and a protocol reporting only
+aggregate loss sees none of it. Appendix~\ref{app:unit} gives the stratification.
 
 \section{What the adapter changed, and what it did not}
 \label{sec:grounding}
@@ -319,7 +313,10 @@ none of them.
 \label{sec:limitations}
 
 \textbf{Our publication gate cannot see the error this paper is about, and we made that error five
-times.} Start with the gate's design, because the record below follows from it. The gate checks
+times in the claims reported here.} That scope is stated rather than implied: five is the count
+within the reported claims, not the count in the project, and an unscoped five would be doing the
+thing this section is about. Start with the gate's design, because the record below follows from
+it. The gate checks
 that a claim's cited evidence exists and is version-controlled. It never opens the file, never
 compares a number against it, and never sees the configuration --- the confidence allocation, the
 candidate count, the sample size --- that produced either. Three things follow immediately. The
@@ -346,8 +343,8 @@ reviewers rather than by our own checking.} That is the predicted bias, observed
 and (v) occurred inside passages written specifically to state a margin honestly: the intention to
 be careful did not prevent them, because intention is not the variable --- what varies is whether
 anything reads the evidence. We report this as a measurement rather than a confession. Five
-instances of one defect class, all in one direction, under a gate that by construction cannot see
-any of them, is a property of the gate. \textbf{Our gate certifies agreement, not correctness},
+instances of one defect class in the reported claims, all in one direction, under a gate that by
+construction cannot see any of them, is a property of the gate. \textbf{Our gate certifies agreement, not correctness},
 which is the same distinction, one level up, that this paper draws between ranking a population
 well and certifying anything about it.
 
@@ -376,10 +373,28 @@ differently, and mechanism 3 would still apply to them.
 Protocol, certifier, diagnostics and claim ledger are code, and every figure resolves to a
 committed artifact --- including a sensitivity artifact that stamps each quoted bound with the
 $\delta$, allocation, candidate count and $n$ that produced it, because a figure carrying no
-configuration is how three of the errors in Limitations happened. Released with publication: source, the frozen group mapping, per-system
+configuration is how three of the errors in Limitations happened. Artifact hashes are pinned over
+git-canonical (LF) bytes and say so: \textbf{a hash without its byte convention is the same defect
+as a bound without its $\delta$ allocation}, and we shipped one --- a CRLF working-copy digest,
+which no reader on a Linux checkout could reproduce, in a line whose only purpose was to let them
+try. Released with publication: source, the frozen group mapping, per-system
 predictions with confidence candidates, and the certification and diagnostic artifacts. Raw corpus
 text and sealed labels are not redistributable.
 
 \bibliography{uncertainlp-2026-short}
+
+\appendix
+
+\section{The aggregation unit}
+\label{app:unit}
+
+Stratifying QA's groups by triggers per document, mean group loss is essentially flat (0.606,
+0.608, 0.589, 0.634, 0.596 from 1 to 6+) --- but the share of groups within $\alpha$ collapses from
+\textbf{17.3\% to 0.7\% to zero}, and 23 of the 28 oracle-accepted groups are single-trigger.
+Groups with three or more triggers contribute \textbf{none}. Averaging frame loss across a document
+and scoring the group by its weakest member makes acceptance vanish with document complexity even
+where mean loss does not move. Cross-sentence distance behaves the same way: 25 of 28 acceptances
+have no cross-sentence argument. Both are descriptive over all groups rather than an accepted set;
+neither selects a threshold and neither certifies anything.
 
 \end{document}
