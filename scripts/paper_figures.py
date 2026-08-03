@@ -39,10 +39,15 @@ PAPER = ROOT / "docs" / "writeup" / "uncertainlp-2026-short.tex"
 
 #: Arguments that are typesetting rather than claims.
 _STRIP = (
-    r"\\(?:citet|citep|cite|label|ref|autoref|eqref|bibliography|includegraphics|setlength)"
+    r"\\(?:citet|citep|cite|label|ref|autoref|eqref|bibliography|includegraphics)"
     r"\s*(?:\[[^\]]*\])?\{[^{}]*\}",
+    # setlength takes TWO brace groups and the length lives in the second; stripping only the
+    # first leaks "4pt" into the figure list as though the paper asserted it.
+    r"\\setlength\s*\{[^{}]*\}\s*\{[^{}]*\}",
     r"\\begin\{tabular\}\{[^{}]*\}",
-    r"\\multicolumn\{\d+\}\{[^{}]*\}",
+    # multicolumn's column spec nests braces (``{@{}l}``), so a flat [^{}]* misses it and the
+    # span count leaks through as if it were a figure.
+    r"\\multicolumn\{\d+\}\{(?:[^{}]|\{[^{}]*\})*\}",
     r"\\(?:begin|end)\{[^{}]*\}",
 )
 
@@ -72,6 +77,74 @@ class Figure:
     value: str
     occurrences: list[str] = field(default_factory=list)
     lines: list[int] = field(default_factory=list)
+    excluded: list[tuple[str, str]] = field(default_factory=list)
+
+
+#: Structural rules that decide **this occurrence is not a quantity the paper asserts**.
+#:
+#: The distinction these encode is the one that matters, and it is easy to lose. An EXEMPTION says
+#: "this is a claim, do not check it" and is refused here always. BETTER EXTRACTION says "this was
+#: never a claim" -- and ``Table 5``, the ``2507`` in a model name and a ``(2)`` row label were
+#: never claims. So every rule below is stated over **context** -- position, LaTeX environment,
+#: surrounding tokens -- and none is a list of values to skip. A rule keyed on the value would be
+#: an exemption wearing a rule's clothes.
+#:
+#: They apply **per occurrence**, not per figure. A figure is dropped only when *every* place it
+#: is written is structural, so a real claim can never be hidden behind a piece of typesetting
+#: that happens to render the same token. That was a stated limitation of the first version: ``3``
+#: is both a table row label and "3 non-failing groups", and the row label came first.
+_IDENTIFIER_RUN = re.compile(r"[A-Za-z0-9]+(?:[-.][A-Za-z0-9]+)+")
+#: A name-with-an-ordinal, not a measurement: "Table 5", "Appendix A", "Mechanism 3". The paper
+#: names its three mechanisms by number throughout, and those ordinals are labels for arguments,
+#: not quantities the paper asserts about the world.
+_LOCATOR = re.compile(r"(?:Table|Figure|Section|Appendix|Eq\.?|\\S|[Mm]echanism)[~\s-]*$")
+_MATH_SYMBOL = re.compile(r"\\(?:mu|alpha|delta|rho|times|leq|geq|approx|frac)")
+
+
+def _classify(text: str, start: int, end: int) -> str | None:
+    """Why this occurrence is not an asserted quantity, or ``None`` if it is one."""
+
+    token = text[start:end]
+    before = text[max(0, start - 24) : start]
+    after = text[end : end + 12]
+
+    # A cross-reference locator: "Table 5", "Figure 2", "Appendix A". Never a measurement.
+    if _LOCATOR.search(before):
+        return "cross-reference locator"
+
+    # Part of an alphanumeric identifier: Qwen3-4B-Instruct-2507, and only when the surrounding
+    # run has at least two letter-bearing segments. "top-75" has one, so it survives -- a
+    # threshold written that way is a real parameter and must not be swallowed.
+    left = start
+    while left > 0 and (text[left - 1].isalnum() or text[left - 1] in "-."):
+        left -= 1
+    right = end
+    while right < len(text) and (text[right].isalnum() or text[right] in "-."):
+        right += 1
+    run = text[left:right]
+    if _IDENTIFIER_RUN.fullmatch(run):
+        segments = re.split(r"[-.]", run)
+        if sum(1 for s in segments if any(c.isalpha() for c in s)) >= 2:
+            return "identifier fragment"
+
+    # An enumerated row label: parentheses containing the integer and nothing else.
+    if token.isdigit() and before.endswith("(") and after.startswith(")"):
+        return "enumerated row label"
+
+    # A bin label: "6+".
+    if token.isdigit() and after.startswith("+"):
+        return "stratum bin label"
+
+    # A bare single digit inside symbolic math is a formula operand, not a measurement:
+    # the 1 in (1-\alpha). Decimals and thousands-separated numbers are never treated this way,
+    # so $\alpha = 0.20$ and $n = 1{,}396$ both survive.
+    if len(token) == 1 and token.isdigit():
+        opening = text.rfind("$", 0, start)
+        closing = text.find("$", end)
+        if opening != -1 and closing != -1 and _MATH_SYMBOL.search(text[opening:closing]):
+            return "symbolic formula operand"
+
+    return None
 
 
 def _strip_comments(text: str) -> str:
@@ -122,9 +195,42 @@ def extract_figures(paper: Path = PAPER) -> list[Figure]:
     for match in _TOKEN.finditer(scrubbed):
         token = match.group(1)
         value = normalise(token)
-        start = max(0, match.start() - 75)
-        context = " ".join(body[start : match.end() + 45].split())
+        window = max(0, match.start() - 75)
+        context = " ".join(body[window : match.end() + 45].split())
         figure = figures.setdefault(value, Figure(token=token, value=value))
+        reason = _classify(scrubbed, match.start(), match.end())
+        if reason is not None:
+            figure.excluded.append((reason, context))
+            continue
         figure.occurrences.append(context)
         figure.lines.append(offset + scrubbed[: match.start()].count("\n") + 1)
-    return list(figures.values())
+
+    # A figure survives if ANY occurrence is an asserted quantity. One written entirely as
+    # typesetting is not a claim and is not checked; one written anywhere as a claim is.
+    return [f for f in figures.values() if f.occurrences]
+
+
+def excluded_occurrences(paper: Path = PAPER) -> list[tuple[str, str, str]]:
+    """(token, rule, context) for every occurrence the structural rules removed.
+
+    Exposed so the exclusions can be read and argued with. A rule nobody can inspect is an
+    exemption list with extra steps.
+    """
+
+    raw = paper.read_text(encoding="utf-8")
+    text = _strip_comments(raw)
+    body = _body(text)
+    scrubbed = body
+    for pattern in _STRIP:
+        scrubbed = re.sub(pattern, lambda m: " " * len(m.group(0)), scrubbed)
+
+    out: list[tuple[str, str, str]] = []
+    for match in _TOKEN.finditer(scrubbed):
+        reason = _classify(scrubbed, match.start(), match.end())
+        if reason is None:
+            continue
+        window = max(0, match.start() - 60)
+        out.append(
+            (match.group(1), reason, " ".join(body[window : match.end() + 30].split()))
+        )
+    return out

@@ -1401,6 +1401,62 @@
       },
       "kind": "computed",
       "note": "recomputed through the frozen scorer the certifier uses; the excess is stored so no guard has to subtract"
+    },
+    {
+      "figure": "0",
+      "artifact": "evidence/plan3/derived_ratios.json",
+      "pointer": "counts.normalized_aurc_of_a_perfect_ranking.value",
+      "render": "int",
+      "configuration": {
+        "counts.normalized_aurc_of_a_perfect_ranking.construction": "(aurc_optimal - aurc_optimal) / (aurc_random - aurc_optimal)"
+      },
+      "kind": "computed",
+      "note": "normalized AURC is 0 for a perfect ranking, computed from the committed AURC endpoints"
+    },
+    {
+      "figure": "1",
+      "artifact": "evidence/plan3/derived_ratios.json",
+      "pointer": "counts.normalized_aurc_of_chance.value",
+      "render": "int",
+      "configuration": {
+        "counts.normalized_aurc_of_chance.construction": "(aurc_random - aurc_optimal) / (aurc_random - aurc_optimal)"
+      },
+      "kind": "computed",
+      "note": "and 1 for chance"
+    },
+    {
+      "figure": "1.0",
+      "artifact": "evidence/plan3/derived_ratios.json",
+      "pointer": "counts.loss_of_a_structurally_invalid_output.value",
+      "render": "round1",
+      "configuration": {
+        "counts.loss_of_a_structurally_invalid_output.artifact": "src/conformalextract/evaluation.py"
+      },
+      "kind": "computed",
+      "note": "the always-answer contract: a non-valid prediction scores 1.0, checked through the frozen scorer rather than asserted"
+    },
+    {
+      "figure": "3",
+      "artifact": "evidence/plan3/derived_ratios.json",
+      "pointer": "counts.zs_non_failing_groups.value",
+      "render": "int",
+      "configuration": {
+        "counts.zs_non_failing_groups.pointer": "splits.certification.zs.mean.discrimination.any_error"
+      },
+      "kind": "computed",
+      "note": "the count the ZS AUROC rests on. It survived structural exclusion because 'rests on only 3 and 18 non-failing groups' is a claim, while every other occurrence of 3 is a label"
+    },
+    {
+      "figure": "4",
+      "artifact": "evidence/plan4/programme_facts.json",
+      "pointer": "serving_stack_quantisation.bits",
+      "render": "int",
+      "configuration": {
+        "serving_stack_quantisation.load_in_4bit": true,
+        "serving_stack_quantisation.quant_type": "nf4"
+      },
+      "kind": "computed",
+      "note": "the 4-bit width of the frozen serving stack. Backed rather than excluded: a rule that swallowed '4-bit' would also swallow 'top-75%', which is a real threshold"
     }
   ]
 }

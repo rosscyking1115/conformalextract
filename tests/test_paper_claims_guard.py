@@ -128,11 +128,22 @@ def test_declared_disagreements_are_reported_not_swallowed(figures, manifest) ->
 
 
 def test_a_figure_with_no_backing_fails(figures, manifest) -> None:
-    """The paper is the population. A figure absent from the manifest is not exempt."""
+    """The paper is the population. A figure absent from the manifest is not exempt.
 
-    failures, _ = check(figures, dict(manifest))
-    assert any(f.kind == UNBACKED for f in failures), (
-        "no figure reported unbacked; the guard is not scoping by the paper"
+    Written against a REMOVED entry rather than a live gap. This is the second test in this file
+    that originally asserted a defect existed and turned red the moment the defect was repaired;
+    a test that punishes repair is the wrong test, and the property here is that absence fails,
+    not that something is currently absent.
+    """
+
+    stripped = json.loads(json.dumps(dict(manifest)))
+    victim = "0.1139"
+    assert victim in stripped, "expected a known-backed figure to remove"
+    del stripped[victim]
+
+    failures, _ = check(figures, stripped)
+    assert UNBACKED in _kinds(failures, victim), (
+        "a figure with no manifest entry was passed; the guard is not scoping by the paper"
     )
 
 
@@ -237,6 +248,69 @@ def test_the_scientific_render_ops_match_the_written_form() -> None:
 
     assert render(1.2235463357706085e-55, "oom") == "10^{-55}"
     assert render(8.195950323748051e-15, "sci0") == "8\\times10^{-15}"
+
+
+def _values(tex: str, tmp_path: Path) -> set[str]:
+    path = tmp_path / "probe.tex"
+    path.write_text("\\begin{document}\n" + tex + "\n\\end{document}\n", encoding="utf-8")
+    return {f.value for f in extract_figures(path)}
+
+
+def test_structural_exclusion_removes_only_typesetting(tmp_path) -> None:
+    """The rules must key on CONTEXT, never on the value.
+
+    An exemption says "this is a claim, do not check it" and is refused. Better extraction says
+    "this was never a claim". These are the cases where the second is true.
+    """
+
+    assert "5" not in _values("See Table 5 of the paper.", tmp_path)
+    assert "2507" not in _values("a Qwen3-4B-Instruct-2507 model", tmp_path)
+    assert "2" not in _values("(1) first & (2) second \\\\", tmp_path)
+    assert "6" not in _values("strata from 1 to 6+ inclusive", tmp_path)
+    assert "3" not in _values("at the per-system $\\delta/3$ allocation", tmp_path)
+    assert "2" not in _values("the mechanism-2 quantities are post-hoc", tmp_path)
+
+
+def test_structural_exclusion_keeps_genuine_claims(tmp_path) -> None:
+    """The test the rules have to survive: a real claim that LOOKS like typesetting.
+
+    ``top-75\\%`` is a hyphenated alphanumeric run exactly like ``4-bit``, and it is a real
+    threshold. The identifier rule therefore requires TWO letter-bearing segments, so a
+    ``word-number`` compound survives. If this ever fails, the rule has become an exemption.
+    """
+
+    assert "75" in _values("measured at top-75\\% acceptance", tmp_path)
+    assert "0.20" in _values("Risk $\\alpha = 0.20$ was frozen.", tmp_path)
+    assert "1396" in _values("over $n = 1{,}396$ groups", tmp_path)
+    assert "28" in _values("the oracle accepted (28 groups) in total", tmp_path)
+    assert "0.406" in _values("the frontier point 0.406", tmp_path)
+
+
+def test_a_claim_is_not_hidden_behind_a_label_that_renders_the_same(tmp_path) -> None:
+    """Exclusion is per OCCURRENCE, so a real claim survives a same-token label elsewhere.
+
+    This was a stated limitation of the first version and it was not hypothetical: ``3`` is a
+    table row label, an allocation divisor in $\\delta/3$, AND the number of non-failing groups
+    the ZS AUROC rests on. Dropping the figure because its first occurrence was typesetting would
+    have hidden the claim.
+    """
+
+    tex = "(3) oracle & at $\\delta/3$ \\\\ AUROC rests on only 3 non-failing groups"
+    assert "3" in _values(tex, tmp_path), "a real claim was hidden behind a row label"
+
+
+def test_every_figure_in_the_paper_is_backed() -> None:
+    """The gate itself. A permanently red gate stops being read, so this keeps it honest.
+
+    If this fails, either a figure was written into the paper without an artifact behind it, or
+    an artifact moved. Both are the thing the guard exists to catch. Back the figure or withdraw
+    it -- do NOT add an exemption, and do not repoint an entry to make it pass.
+    """
+
+    figures = extract_figures()
+    failures, passed = check(figures, load_manifest(MANIFEST))
+    assert not failures, "\n".join(f.line() for f in failures)
+    assert len(passed) == len(figures)
 
 
 def test_the_dotted_key_pointer_form_addresses_the_right_leaf() -> None:

@@ -68,5 +68,13 @@
       "upper": 89.76348539079136,
       "z": 1.959963984540054
     }
+  },
+  "serving_stack_quantisation": {
+    "bits": 4,
+    "compute_dtype": "bfloat16",
+    "construction": "load_in_4bit implies a 4-bit width; quant_type nf4 names the format",
+    "load_in_4bit": true,
+    "quant_type": "nf4",
+    "source_artifact": "evidence/gate0/qlora_smoke.v1.json"
   }
 }

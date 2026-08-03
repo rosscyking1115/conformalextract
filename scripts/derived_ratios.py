@@ -160,6 +160,48 @@ def main() -> None:
         },
     }
 
+    # --- definitional constants the paper states about its own metrics ------------------------
+    # These are claims, not typesetting: "normalized AURC is 0 for a perfect ranking and 1 for
+    # chance" and "an invalid output scores 1.0" are assertions about the implementation, and they
+    # are checkable against it. Excluding them structurally would have been an exemption; they are
+    # computed instead, from the committed AURC endpoints and from the frozen scorer itself.
+    from conformalextract.evaluation import evaluate_document
+
+    qa_risk = _get(sources[CALIB], f"{QA}.mean.selective_risk")
+    optimal = qa_risk["aurc_optimal_ranking"]
+    chance = qa_risk["aurc_random_ranking"]
+    zs_err = _get(sources[CALIB], "splits.certification.zs.mean.discrimination.any_error")
+
+    counts["normalized_aurc_of_a_perfect_ranking"] = {
+        "value": (optimal - optimal) / (chance - optimal),
+        "construction": "(aurc_optimal - aurc_optimal) / (aurc_random - aurc_optimal)",
+        "artifact": CALIB,
+        "pointer": f"{QA}.mean.selective_risk.aurc_optimal_ranking",
+    }
+    counts["normalized_aurc_of_chance"] = {
+        "value": (chance - optimal) / (chance - optimal),
+        "construction": "(aurc_random - aurc_optimal) / (aurc_random - aurc_optimal)",
+        "artifact": CALIB,
+        "pointer": f"{QA}.mean.selective_risk.aurc_random_ranking",
+    }
+    counts["loss_of_a_structurally_invalid_output"] = {
+        "value": evaluate_document([], None, structural_failure="invalid_json").loss,
+        "construction": (
+            "evaluation.evaluate_document with a structural failure, through the frozen scorer. "
+            "A pure function over no data: the always-answer contract scores a non-valid "
+            "prediction as wrong."
+        ),
+        "artifact": "src/conformalextract/evaluation.py",
+        "pointer": "evaluate_document(structural_failure=...).loss",
+    }
+    counts["zs_non_failing_groups"] = {
+        "value": round(zs_err["scored_groups"] * (1.0 - zs_err["failure_prevalence"])),
+        "construction": "scored_groups * (1 - failure_prevalence), ZS at mean",
+        "artifact": CALIB,
+        "pointer": "splits.certification.zs.mean.discrimination.any_error",
+        "note": "The count the ZS AUROC rests on. It and the FS count are why both are unstable.",
+    }
+
     artifact = {
         "schema_version": "1",
         "certifies_nothing": True,

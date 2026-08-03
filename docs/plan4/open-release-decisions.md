@@ -169,6 +169,44 @@ a dated record — see `docs/release-check-2026-07-28.md` for the check that sur
 > checked. And the manifest is authored, so a human step remains — though the build-time verifier
 > caught two of this author's own pointer errors before either reached a run.
 >
+> ### The gate is green: all 118 figures backed. What changed, and what was refused
+>
+> **`scripts/check_paper_claims.py` now exits 0.** Every figure the paper asserts resolves to a
+> committed artifact carrying its value and its configuration, and
+> `test_every_figure_in_the_paper_is_backed` holds it there. A permanently red gate stops being
+> read, which is its own quiet failure mode; the fix was **better extraction plus more backing**,
+> never an exemption.
+>
+> **The distinction, held precisely.** An exemption says "this is a claim, do not check it" — 
+> refused, always. Better extraction says "this was never a claim". `Table 5`, the `2507` in
+> `Qwen3-4B-Instruct-2507`, a `(2)` row label, `6+`, `mechanism-3` and the `1` in $(1-\alpha)$ were
+> never claims. Every rule is stated over **context** — position, LaTeX environment, surrounding
+> tokens — and none is a list of values to skip, because a rule keyed on the value is an exemption
+> wearing a rule's clothes.
+>
+> **The rules apply per OCCURRENCE, not per figure**, which also closes the token-collision limit
+> recorded above. A figure is dropped only when *every* place it is written is structural, so
+> `3` survives — it is a row label, an allocation divisor in $\delta/3$, **and** the number of
+> non-failing groups the ZS AUROC rests on. `test_a_claim_is_not_hidden_behind_a_label_that_
+> renders_the_same` pins that.
+>
+> **The rules were tested against the case that would prove them wrong.** `top-75\%` is a
+> hyphenated alphanumeric run structurally identical to `4-bit`, and it is a real threshold. The
+> identifier rule therefore requires two letter-bearing segments, so a `word-number` compound
+> survives. Which meant **`4-bit` had to be backed rather than excluded** — it is derived in
+> `programme_facts.json` from the gate-0 smoke artifact's `load_in_4bit` and `quant_type: nf4`,
+> because the artifact records the mode and not the numeral.
+>
+> **Four figures were backed rather than excluded, and this is the part worth arguing with.**
+> "Normalized AURC is 0 for a perfect ranking, 1 for chance" and "an invalid output scores 1.0"
+> *are* claims — assertions about the implementation, checkable against it. So they are computed:
+> the AURC endpoints from the committed values, and the structural-failure loss through the frozen
+> scorer itself. Excluding them would have been the exemption the whole apparatus refuses.
+>
+> **Two extractor bugs surfaced on the way.** `\setlength{\tabcolsep}{4pt}` leaked `4pt` because
+> the strip pattern took only the first brace group, and `\multicolumn{4}{@{}l}` leaked its span
+> count because the column spec nests braces. Both were reporting typesetting as asserted figures.
+>
 > ### The audit, stated as a result
 >
 > **An instrument scoped by the paper found 53 of the paper's own 120 figures unbacked — including

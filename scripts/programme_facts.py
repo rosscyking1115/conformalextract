@@ -161,8 +161,24 @@ def main() -> None:
         "basis": "price x measured duration, not a billing statement",
     }
 
+    # --- the serving stack's quantisation width, which the paper names in every scope note -----
+    # The gate-0 smoke artifact records the MODE (load_in_4bit, quant_type nf4) rather than the
+    # numeral, so the width is derived from it here with both flags pinned as configuration.
+    # "4-bit" is a stated property of the frozen stack, so it is backed rather than excluded --
+    # a structural rule that swallowed it would also swallow "top-75%", which is a real threshold.
+    smoke = json.loads((ROOT / "evidence/gate0/qlora_smoke.v1.json").read_text(encoding="utf-8"))
+    quantisation = {
+        "bits": 4 if smoke["quantization"]["load_in_4bit"] else None,
+        "construction": "load_in_4bit implies a 4-bit width; quant_type nf4 names the format",
+        "load_in_4bit": smoke["quantization"]["load_in_4bit"],
+        "quant_type": smoke["quantization"]["quant_type"],
+        "compute_dtype": smoke["quantization"]["compute_dtype"],
+        "source_artifact": "evidence/gate0/qlora_smoke.v1.json",
+    }
+
     artifact = {
         "schema_version": "1",
+        "serving_stack_quantisation": quantisation,
         "cost_usd_to_produce": 0.0,
         "reads_only_committed_documents": True,
         "certifies_nothing": True,
