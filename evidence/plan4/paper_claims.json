@@ -1,0 +1,760 @@
+{
+  "schema_version": "1",
+  "_notice": "Backing entries for figures written in docs/writeup/uncertainlp-2026-short.tex. Read by scripts/check_paper_claims.py, which extracts EVERY numeric leaf from the paper and fails any figure this file does not back. This file is not the scope - the paper is. Adding an entry cannot hide a figure, and omitting one cannot exempt it.",
+  "_how_to_use": "One entry per figure as the paper writes it. 'pointer' is a dotted path into 'artifact'; 'render' turns the stored value into the written token; 'configuration' maps pointers in the SAME artifact to the values that must hold. A configuration the artifact does not record cannot be declared, and a mismatch fails even when the value matches - that is the defect class this guard exists for. If a figure has no artifact carrying both, it FAILS: compute it into an artifact, or stop writing it.",
+  "claims": [
+    {
+      "figure": "0.20",
+      "artifact": "evidence/plan3/certification_result.json",
+      "pointer": "alpha",
+      "render": "round2",
+      "configuration": {
+        "delta": 0.05,
+        "acceptance_floor": 0.2
+      },
+      "note": "the frozen target; delta and floor pinned alongside so the triple cannot drift apart"
+    },
+    {
+      "figure": "0.05",
+      "artifact": "evidence/plan3/certification_result.json",
+      "pointer": "delta",
+      "render": "round2",
+      "configuration": {
+        "alpha": 0.2
+      },
+      "note": "frozen family-wide confidence"
+    },
+    {
+      "figure": "1396",
+      "artifact": "evidence/plan3/certification_result.json",
+      "pointer": "n_certification_groups",
+      "render": "int",
+      "configuration": {
+        "alpha": 0.2,
+        "delta": 0.05,
+        "acceptance_floor": 0.2,
+        "n_certification_groups": 1396
+      },
+      "note": "coverage denominator; rows the precondition sees"
+    },
+    {
+      "figure": "3152",
+      "artifact": "evidence/plan3/certification_result.json",
+      "pointer": "certification_access.documents_read",
+      "render": "int",
+      "configuration": {
+        "certification_access.final_reads": 0,
+        "certification_access.shift_reads": 0
+      },
+      "note": "sealed-split discipline travels with the count"
+    },
+    {
+      "figure": "0.6071",
+      "artifact": "evidence/plan3/certification_result.json",
+      "pointer": "systems.qa.loss_summary.unweighted_mean_loss",
+      "render": "round4",
+      "configuration": {
+        "alpha": 0.2,
+        "delta": 0.05,
+        "acceptance_floor": 0.2,
+        "n_certification_groups": 1396
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.9923",
+      "artifact": "evidence/plan3/certification_result.json",
+      "pointer": "systems.zs.loss_summary.unweighted_mean_loss",
+      "render": "round4",
+      "configuration": {
+        "alpha": 0.2,
+        "delta": 0.05,
+        "acceptance_floor": 0.2,
+        "n_certification_groups": 1396
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.9580",
+      "artifact": "evidence/plan3/certification_result.json",
+      "pointer": "systems.fs.loss_summary.unweighted_mean_loss",
+      "render": "round4",
+      "configuration": {
+        "alpha": 0.2,
+        "delta": 0.05,
+        "acceptance_floor": 0.2,
+        "n_certification_groups": 1396
+      },
+      "note": ""
+    },
+    {
+      "figure": "130",
+      "artifact": "evidence/plan3/certification_result.json",
+      "pointer": "systems.qa.never_acceptable_groups",
+      "render": "int",
+      "configuration": {
+        "alpha": 0.2,
+        "delta": 0.05,
+        "acceptance_floor": 0.2,
+        "n_certification_groups": 1396
+      },
+      "note": ""
+    },
+    {
+      "figure": "1020",
+      "artifact": "evidence/plan3/certification_result.json",
+      "pointer": "systems.zs.never_acceptable_groups",
+      "render": "int",
+      "configuration": {
+        "alpha": 0.2,
+        "delta": 0.05,
+        "acceptance_floor": 0.2,
+        "n_certification_groups": 1396
+      },
+      "note": ""
+    },
+    {
+      "figure": "684",
+      "artifact": "evidence/plan3/certification_result.json",
+      "pointer": "systems.fs.never_acceptable_groups",
+      "render": "int",
+      "configuration": {
+        "alpha": 0.2,
+        "delta": 0.05,
+        "acceptance_floor": 0.2,
+        "n_certification_groups": 1396
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.4911",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.selective_risk.acceptance_permitted_by_base_risk",
+      "render": "round4",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.0096",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.zs.mean.selective_risk.acceptance_permitted_by_base_risk",
+      "render": "round4",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.0525",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.fs.tenth_percentile.selective_risk.acceptance_permitted_by_base_risk",
+      "render": "round4",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.2357",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.selective_risk.acceptance_under_loss_optimal_ranking",
+      "render": "round4",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.0036",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.zs.mean.selective_risk.acceptance_under_loss_optimal_ranking",
+      "render": "round4",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.0244",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.fs.tenth_percentile.selective_risk.acceptance_under_loss_optimal_ranking",
+      "render": "round4",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.1139",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.selective_risk.acceptance_certified_loss_optimal",
+      "render": "round4",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2,
+        "splits.certification.qa.mean.selective_risk.certified_delta": 0.016666666666666666
+      },
+      "note": "the ONLY figure licensing 'certified'; its delta allocation is pinned in the entry"
+    },
+    {
+      "figure": "0.0201",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.selective_risk.max_acceptance_within_alpha",
+      "render": "round4",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.0000",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.selective_risk.acceptance_certified_score_ranked",
+      "render": "round4",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2,
+        "splits.certification.qa.mean.selective_risk.certified_delta": 0.016666666666666666
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.796",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.discrimination.any_error.auroc",
+      "render": "round3",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2,
+        "splits.certification.qa.mean.discrimination.any_error.scored_groups": 1392
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.344",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.zs.mean.discrimination.any_error.auroc",
+      "render": "round3",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2,
+        "splits.certification.zs.mean.confidence_candidate": "mean"
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.727",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.fs.tenth_percentile.discrimination.any_error.auroc",
+      "render": "round3",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2,
+        "splits.certification.fs.tenth_percentile.confidence_candidate": "tenth_percentile"
+      },
+      "note": "FS Table 1 row is the tenth_percentile candidate its development gate selected, not mean; pinning the candidate is what stops a figure being pulled from the wrong cell"
+    },
+    {
+      "figure": "0.531",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.selective_risk.normalized_aurc",
+      "render": "round3",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2,
+        "splits.certification.qa.mean.confidence_candidate": "mean"
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.926",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.zs.mean.selective_risk.normalized_aurc",
+      "render": "round3",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2,
+        "splits.certification.zs.mean.confidence_candidate": "mean"
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.920",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.fs.tenth_percentile.selective_risk.normalized_aurc",
+      "render": "round3",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2,
+        "splits.certification.fs.tenth_percentile.confidence_candidate": "tenth_percentile"
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.998",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.zs.mean.discrimination.any_error.failure_prevalence",
+      "render": "round3",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.987",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.fs.tenth_percentile.discrimination.any_error.failure_prevalence",
+      "render": "round3",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "1392",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.discrimination.any_error.scored_groups",
+      "render": "int",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "1266",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.selective_risk.eligible_groups",
+      "render": "int",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.834",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.development.qa.mean.discrimination.any_error.auroc",
+      "render": "round3",
+      "configuration": {
+        "alpha": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.568",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.development.qa.mean.selective_risk.normalized_aurc",
+      "render": "round3",
+      "configuration": {
+        "alpha": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.1984",
+      "artifact": "evidence/plan3/certification_sensitivity.json",
+      "pointer": "acceptance_lower_bound_by_allocation.frozen_run_three_candidates_delta_over_three.acceptance_lower_bound",
+      "render": "round4",
+      "configuration": {
+        "acceptance_lower_bound_by_allocation.frozen_run_three_candidates_delta_over_three.delta": 0.016666666666666666,
+        "acceptance_lower_bound_by_allocation.frozen_run_three_candidates_delta_over_three.candidate_count": 3,
+        "acceptance_lower_bound_by_allocation.frozen_run_three_candidates_delta_over_three.n": 1396,
+        "acceptance_lower_bound_by_allocation.frozen_run_three_candidates_delta_over_three.clears_acceptance_floor": false
+      },
+      "note": "the frozen allocation. Both divisions apply and the entry pins both."
+    },
+    {
+      "figure": "0.2017",
+      "artifact": "evidence/plan3/certification_sensitivity.json",
+      "pointer": "acceptance_lower_bound_by_allocation.three_candidates_full_delta.acceptance_lower_bound",
+      "render": "round4",
+      "configuration": {
+        "acceptance_lower_bound_by_allocation.three_candidates_full_delta.delta": 0.05,
+        "acceptance_lower_bound_by_allocation.three_candidates_full_delta.candidate_count": 3
+      },
+      "note": "quoted in the paper ONLY to report it as the wrong allocation; the entry pins the allocation it actually belongs to, so the sentence cannot silently reattach it to the frozen one"
+    },
+    {
+      "figure": "332",
+      "artifact": "evidence/plan3/certification_sensitivity.json",
+      "pointer": "acceptance_lower_bound_by_allocation.frozen_run_three_candidates_delta_over_three.smallest_k_clearing_floor",
+      "render": "int",
+      "configuration": {
+        "acceptance_lower_bound_by_allocation.frozen_run_three_candidates_delta_over_three.delta": 0.016666666666666666,
+        "acceptance_lower_bound_by_allocation.frozen_run_three_candidates_delta_over_three.candidate_count": 3
+      },
+      "note": ""
+    },
+    {
+      "figure": "329",
+      "artifact": "evidence/plan3/certification_sensitivity.json",
+      "pointer": "acceptance_lower_bound_by_allocation.frozen_run_three_candidates_delta_over_three.k_at_oracle_prefix",
+      "render": "int",
+      "configuration": {
+        "acceptance_lower_bound_by_allocation.frozen_run_three_candidates_delta_over_three.delta": 0.016666666666666666,
+        "acceptance_lower_bound_by_allocation.frozen_run_three_candidates_delta_over_three.n": 1396
+      },
+      "note": ""
+    },
+    {
+      "figure": "1386",
+      "artifact": "evidence/plan3/certification_sensitivity.json",
+      "pointer": "grid_capacity.required_n_by_candidate_count.3",
+      "render": "int",
+      "configuration": {
+        "grid_capacity.delta_allocation": 0.016666666666666666
+      },
+      "note": ""
+    },
+    {
+      "figure": "1432",
+      "artifact": "evidence/plan3/certification_sensitivity.json",
+      "pointer": "grid_capacity.required_n_by_candidate_count.4",
+      "render": "int",
+      "configuration": {
+        "grid_capacity.delta_allocation": 0.016666666666666666
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.737",
+      "artifact": "evidence/plan3/certification_sensitivity.json",
+      "pointer": "auroc_interval.ci_lower",
+      "render": "round3",
+      "configuration": {
+        "auroc_interval.resamples": 10000,
+        "auroc_interval.seed": 20260802,
+        "auroc_interval.scored_groups": 1392
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.850",
+      "artifact": "evidence/plan3/certification_sensitivity.json",
+      "pointer": "auroc_interval.ci_upper",
+      "render": "round3",
+      "configuration": {
+        "auroc_interval.resamples": 10000,
+        "auroc_interval.seed": 20260802
+      },
+      "note": ""
+    },
+    {
+      "figure": "10000",
+      "artifact": "evidence/plan3/certification_sensitivity.json",
+      "pointer": "auroc_interval.resamples",
+      "render": "int",
+      "configuration": {
+        "auroc_interval.seed": 20260802
+      },
+      "note": ""
+    },
+    {
+      "figure": "90",
+      "artifact": "evidence/plan3/certification_sensitivity.json",
+      "pointer": "auroc_interval.non_failing_groups",
+      "render": "int",
+      "configuration": {
+        "auroc_interval.scored_groups": 1392
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.406",
+      "artifact": "evidence/plan3/alpha_frontier.json",
+      "pointer": "splits.certification.qa.alpha_star_at_floor",
+      "render": "round3",
+      "configuration": {
+        "frozen_alpha": 0.2,
+        "acceptance_floor": 0.2,
+        "diagnostic_only": true,
+        "certifies_nothing": true
+      },
+      "note": "an empirical oracle frontier point, never a threshold; the diagnostic-only flags are pinned"
+    },
+    {
+      "figure": "0.579",
+      "artifact": "evidence/plan3/loss_decomposition.json",
+      "pointer": "splits.certification.qa.channels.valid_content_bearing.mean_loss_within_channel",
+      "render": "round3",
+      "configuration": {
+        "alpha": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "340",
+      "artifact": "evidence/plan2/prediction_parse_summary.json",
+      "pointer": "qa.grounding_failure",
+      "render": "int",
+      "configuration": {
+        "qa.system_id": "qa"
+      },
+      "note": ""
+    },
+    {
+      "figure": "5355",
+      "artifact": "evidence/plan2/prediction_parse_summary.json",
+      "pointer": "zs.grounding_failure",
+      "render": "int",
+      "configuration": {
+        "zs.system_id": "zs"
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.589",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.grounding.conditional_mean_loss_by_grounded_fraction['1.00'].mean_loss",
+      "render": "round3",
+      "configuration": {
+        "splits.certification.qa.mean.grounding.conditional_mean_loss_by_grounded_fraction['1.00'].groups": 1266
+      },
+      "note": "the fully-grounded stratum; its group count is pinned because the sentence quotes both"
+    },
+    {
+      "figure": "11.4",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.selective_risk.acceptance_certified_loss_optimal",
+      "render": "pct1",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2,
+        "splits.certification.qa.mean.selective_risk.certified_delta": 0.016666666666666666
+      },
+      "note": ""
+    },
+    {
+      "figure": "2.0",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.selective_risk.max_acceptance_within_alpha",
+      "render": "pct1",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "23.6",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.selective_risk.acceptance_under_loss_optimal_ranking",
+      "render": "pct1",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "49.1",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.selective_risk.acceptance_permitted_by_base_risk",
+      "render": "pct1",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "5.25",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.fs.tenth_percentile.selective_risk.acceptance_permitted_by_base_risk",
+      "render": "pct2",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.96",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.zs.mean.selective_risk.acceptance_permitted_by_base_risk",
+      "render": "pct2",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.992",
+      "artifact": "evidence/plan3/certification_result.json",
+      "pointer": "systems.zs.loss_summary.unweighted_mean_loss",
+      "render": "round3",
+      "configuration": {
+        "alpha": 0.2,
+        "delta": 0.05,
+        "acceptance_floor": 0.2,
+        "n_certification_groups": 1396
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.958",
+      "artifact": "evidence/plan3/certification_result.json",
+      "pointer": "systems.fs.loss_summary.unweighted_mean_loss",
+      "render": "round3",
+      "configuration": {
+        "alpha": 0.2,
+        "delta": 0.05,
+        "acceptance_floor": 0.2,
+        "n_certification_groups": 1396
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.403",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.spearman_score_vs_loss.all_scored_groups.rho",
+      "render": "abs|round3",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": "the paper prints it as $-$0.403; the entry renders the sign away rather than the paper quietly dropping it"
+    },
+    {
+      "figure": "0.027",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.zs.mean.spearman_score_vs_loss.all_scored_groups.rho",
+      "render": "abs|round3",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.073",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.fs.tenth_percentile.spearman_score_vs_loss.all_scored_groups.rho",
+      "render": "abs|round3",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.313",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.development.qa.mean.spearman_score_vs_loss.all_scored_groups.rho",
+      "render": "abs|round3",
+      "configuration": {
+        "alpha": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.206",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.grounding.spearman_grounded_vs_loss.rho",
+      "render": "abs|round3",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.606",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.stratified.triggers['1'].mean_loss",
+      "render": "round3",
+      "configuration": {
+        "splits.certification.qa.mean.stratified.triggers['1'].groups": 684
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.608",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.stratified.triggers['2'].mean_loss",
+      "render": "round3",
+      "configuration": {
+        "splits.certification.qa.mean.stratified.triggers['2'].groups": 336
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.634",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.stratified.triggers['4-5'].mean_loss",
+      "render": "round3",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.596",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.stratified.triggers['6+'].mean_loss",
+      "render": "round3",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "17.3",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.stratified.triggers['1'].share_loss_within_alpha",
+      "render": "pct1",
+      "configuration": {
+        "splits.certification.qa.mean.stratified.triggers['1'].groups": 684
+      },
+      "note": ""
+    },
+    {
+      "figure": "0.7",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.stratified.triggers['4-5'].share_loss_within_alpha",
+      "render": "pct1",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2
+      },
+      "note": ""
+    },
+    {
+      "figure": "23",
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "pointer": "splits.certification.qa.mean.stratified.triggers['1'].accepted_groups",
+      "render": "int",
+      "configuration": {
+        "splits.certification.qa.mean.stratified.triggers['1'].groups": 684
+      },
+      "note": ""
+    },
+    {
+      "figure": "90.3",
+      "artifact": "evidence/plan3/loss_decomposition.json",
+      "pointer": "splits.certification.qa.channels.valid_content_bearing.document_share",
+      "render": "pct1",
+      "configuration": {
+        "splits.certification.qa.channels.valid_content_bearing.documents": 2847,
+        "alpha": 0.2
+      },
+      "note": ""
+    }
+  ]
+}
