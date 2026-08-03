@@ -187,8 +187,9 @@ a dated record — see `docs/release-check-2026-07-28.md` for the check that sur
 > **The rules apply per OCCURRENCE, not per figure**, which also closes the token-collision limit
 > recorded above. A figure is dropped only when *every* place it is written is structural, so
 > `3` survives — it is a row label, an allocation divisor in $\delta/3$, **and** the number of
-> non-failing groups the ZS AUROC rests on. `test_a_claim_is_not_hidden_behind_a_label_that_
-> renders_the_same` pins that.
+> non-failing groups the ZS AUROC rests on. The test
+> `tests/test_paper_claims_guard.py::test_a_claim_is_not_hidden_behind_a_label_that_renders_the_same`
+> pins that.
 >
 > **The rules were tested against the case that would prove them wrong.** `top-75\%` is a
 > hyphenated alphanumeric run structurally identical to `4-bit`, and it is a real threshold. The
