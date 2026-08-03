@@ -69,6 +69,13 @@
       "note": "Differences between three committed acceptance readings, all over the same n. Each input is itself stamped in calibration_diagnostics.json.",
       "ranking_cost": 0.21561604584527222,
       "ranking_cost_points": 21.56160458452722
+    },
+    "the_floor_in_groups": {
+      "acceptance_floor": 0.2,
+      "construction": "acceptance_floor * n, before the ceiling is taken",
+      "n": 1396,
+      "note": "The floor falls between two whole groups, which is the whole reason 'at the floor' was ambiguous: it is MET at ceil(this) and MISSED at floor(this). The write-up now states the definition where it is first used.",
+      "value": 279.2
     }
   },
   "schema_version": "1",

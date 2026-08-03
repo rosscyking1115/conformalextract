@@ -69,8 +69,8 @@ reasons.
 control frequently cannot certify LLM outputs, that base risk $\mu$ forces abstention of at least
 $(\mu-\alpha)/(1-\alpha)$, and that this bites across multiple systems, are all established by
 \citet{kotte2026crc}, which we read on 2026-07-18 and folded into this study's design three days
-before its parameters were frozen. Roughly 80\% of what we measured is a replication of that work
-in a new task. Three things are ours:
+before its parameters were frozen. Most of what we measure replicates that work in a new task.
+Three things are ours:
 
 \begin{enumerate}
 \item \textbf{A protocol} (\S\ref{sec:protocol}): a frozen, sealed-split certification for
@@ -188,11 +188,13 @@ comparison --- theirs is instance-level and ours group-level, and our own interv
 performing about as its family does, not a straw man built to fail.
 
 \paragraph{Mechanism 3: the finite-sample penalty.} Ranking well is not enough, and this is the
-mechanism we had no vocabulary for. Take the perfect ranking of mechanism 2 --- 23.6\% acceptance,
-empirical risk 0.174 at the floor --- and require it to \emph{certify} rather than merely to
-average below $\alpha$. Its Hoeffding upper bound at the per-system $\delta/3$ allocation is
-0.267 at the floor, and the largest acceptance it can certify is \textbf{11.4\%} (8.4\%
-family-wide). \textbf{A perfect ranking of this population does not clear the floor either.} The
+mechanism we had no vocabulary for. \emph{At the floor} means the smallest accepted prefix that
+meets the 20\% acceptance floor: $0.20 \times 1{,}396 = 279.2$, so the floor is met at
+$k = \mathbf{280}$ and missed at 279, and every figure below uses 280. Take the perfect ranking of
+mechanism 2 --- 23.6\% acceptance, empirical risk 0.175 at the floor --- and require it to
+\emph{certify} rather than merely to average below $\alpha$. Its Hoeffding upper bound at the
+per-system $\delta/3$ allocation is 0.267 at the floor, and the largest acceptance it can certify
+is \textbf{11.4\%} (8.4\% family-wide). \textbf{A perfect ranking of this population does not clear the floor either.} The
 measured score certifies \textbf{0.0\%}.
 
 \paragraph{Which bound, and why it matters.} The 11.4\% is the \emph{conservative audit's}
@@ -239,8 +241,8 @@ they are separate arguments rather than one restated.
 \textbf{0.0925}, spent before any data is seen --- so certifying at the floor requires an accepted
 set carrying mean loss $\leq \mathbf{0.1075}$, \emph{whoever} produced it. \textbf{The benchmark
 halves the effective target for every entrant while forbidding none}: a system under that figure
-certifies here. Clearing it with \emph{this} loss distribution would take roughly \textbf{18{,}000
-groups, 12.9$\times$ this split}.
+certifies here. Clearing it with \emph{this} loss distribution would take \textbf{18{,}740 groups,
+13.4$\times$ this split}.
 
 \emph{From the certifier's own precondition, which binds far sooner.} At the frozen $\delta/3$
 allocation the theorem admits a grid of at most \textbf{three} candidates on this corpus: three

@@ -929,7 +929,7 @@
       "note": ""
     },
     {
-      "figure": "0.174",
+      "figure": "0.175",
       "artifact": "evidence/plan3/derived_quantities.json",
       "pointer": "quantities.at_the_acceptance_floor.empirical_risk_of_loss_optimal_prefix",
       "render": "round3",
@@ -940,11 +940,10 @@
         "quantities.at_the_acceptance_floor.k": 280
       },
       "kind": "computed",
-      "note": "DISAGREES: at the floor-meeting prefix this is 0.1747, which renders 0.175",
-      "disagrees_with_paper": "0.175"
+      "note": "the loss-optimal prefix's empirical risk AT THE FLOOR-MEETING PREFIX"
     },
     {
-      "figure": "18000",
+      "figure": "18740",
       "artifact": "evidence/plan3/derived_quantities.json",
       "pointer": "quantities.at_the_acceptance_floor.required_total_groups",
       "render": "int",
@@ -955,11 +954,10 @@
         "quantities.at_the_acceptance_floor.k": 280
       },
       "kind": "computed",
-      "note": "DISAGREES: at the floor-meeting prefix the requirement is 18,740",
-      "disagrees_with_paper": "18740"
+      "note": ""
     },
     {
-      "figure": "12.9",
+      "figure": "13.4",
       "artifact": "evidence/plan3/derived_quantities.json",
       "pointer": "quantities.at_the_acceptance_floor.corpus_multiple",
       "render": "round1",
@@ -970,8 +968,49 @@
         "quantities.at_the_acceptance_floor.k": 280
       },
       "kind": "computed",
-      "note": "DISAGREES: 13.4 at the floor, 12.8 one group below it. 12.9 reproduces from neither - it is 18000/1396, the ROUNDED group count divided by n",
-      "disagrees_with_paper": "13.4"
+      "note": "recomputed from the unrounded required group count. The withdrawn 12.9 was 18000/1396 - a rounded presentational figure divided by n, correct at neither prefix"
+    },
+    {
+      "figure": "279.2",
+      "artifact": "evidence/plan3/derived_quantities.json",
+      "pointer": "quantities.the_floor_in_groups.value",
+      "render": "round1",
+      "configuration": {
+        "quantities.the_floor_in_groups.n": 1396,
+        "quantities.the_floor_in_groups.acceptance_floor": 0.2
+      },
+      "kind": "computed",
+      "note": "acceptance_floor * n before the ceiling. The floor falls between two whole groups, which is why 'at the floor' was ambiguous"
+    },
+    {
+      "figure": "279",
+      "artifact": "evidence/plan3/derived_quantities.json",
+      "pointer": "quantities.one_group_below_the_floor.k",
+      "render": "int",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2,
+        "n": 1396,
+        "quantities.at_the_acceptance_floor.k": 280,
+        "quantities.one_group_below_the_floor.coverage": 0.1998567335243553
+      },
+      "kind": "computed",
+      "note": "the prefix that MISSES the floor, quoted in the definition sentence"
+    },
+    {
+      "figure": "280",
+      "artifact": "evidence/plan3/derived_quantities.json",
+      "pointer": "quantities.at_the_acceptance_floor.k",
+      "render": "int",
+      "configuration": {
+        "alpha": 0.2,
+        "acceptance_floor": 0.2,
+        "n": 1396,
+        "quantities.at_the_acceptance_floor.k": 280,
+        "quantities.at_the_acceptance_floor.k_definition": "ceil(acceptance_floor * n) -- the smallest prefix that MEETS the 0.20 floor"
+      },
+      "kind": "computed",
+      "note": "the prefix definition is now stated in the paper, so the paper quotes k and the guard pins the definition alongside it"
     },
     {
       "figure": "95.7",

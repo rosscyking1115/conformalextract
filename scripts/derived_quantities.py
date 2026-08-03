@@ -169,6 +169,17 @@ def main() -> None:
         }
 
     quantities: dict[str, Any] = {
+        "the_floor_in_groups": {
+            "value": FROZEN_ACCEPTANCE_FLOOR * n_total,
+            "construction": "acceptance_floor * n, before the ceiling is taken",
+            "n": n_total,
+            "acceptance_floor": FROZEN_ACCEPTANCE_FLOOR,
+            "note": (
+                "The floor falls between two whole groups, which is the whole reason 'at the "
+                "floor' was ambiguous: it is MET at ceil(this) and MISSED at floor(this). The "
+                "write-up now states the definition where it is first used."
+            ),
+        },
         "at_the_acceptance_floor": prefix_block(
             k_floor, "ceil(acceptance_floor * n) -- the smallest prefix that MEETS the 0.20 floor"
         ),

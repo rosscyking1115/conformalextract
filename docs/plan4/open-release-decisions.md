@@ -143,6 +143,36 @@ a dated record — see `docs/release-check-2026-07-28.md` for the check that sur
 > checked. And the manifest is authored, so a human step remains — though the build-time verifier
 > caught two of this author's own pointer errors before either reached a run.
 >
+> ### The audit, stated as a result
+>
+> **An instrument scoped by the paper found 53 of the paper's own 120 figures unbacked — including
+> the headline 21.6-point ranking gap and the 8.4% family-wide certified acceptance — six that
+> traced to no artifact at all, and three that disagreed with a freshly computed value because one
+> paragraph used two prefix definitions and named neither.** Every one of those figures had passed
+> every gate this project had. `verify-claims` returned `ok` throughout.
+>
+> That is this paper's own thesis demonstrated on itself, one level up. The paper argues that
+> ranking a population well is not the same as certifying anything about it; the repository's gate
+> certified *agreement between documents* and was silent on whether the documents were right. A
+> synchronisation guard cannot find an unbacked figure, because absence satisfies it. A validity
+> guard finds it on the first run — and did.
+>
+> **The three disagreements share one cause, and it is not arithmetic.** 0.20 × 1,396 = 279.2, so
+> the acceptance floor is met at k = 280 and missed at 279. The paper used both prefixes in a single
+> paragraph and named neither, so 0.0925 was a k = 280 figure sitting beside an 18,000-group
+> extrapolation that only reconciles at k = 279. **An undefined term, not a miscalculation.**
+> The paper now states the definition where it is first used.
+>
+> **Fairy's view on whether any of this belongs in the paper** — the owner's call, not hers. The
+> Limitations section already carries the mechanism and the five instances, and it earns its space
+> because the failure it describes is the paper's subject. The audit is a *result about this
+> repository*, not about selective prediction, and a short paper that spent a paragraph on its own
+> tooling would be spending it on the wrong thesis. **One sentence is defensible**: that every
+> figure in the paper resolves to an artifact carrying its value and its configuration, checked
+> mechanically, with the exceptions named. That is a reproducibility claim, it belongs in the
+> Reproducibility section where a version of it already sits, and it is worth more than the
+> narrative would be. The rest stays here.
+>
 > ### Second run: 101 of 120 backed. What remains, and why each one remains
 >
 > Buckets B, C, D and E are now backed — ratios stored beside their counts
@@ -150,6 +180,34 @@ a dated record — see `docs/release-check-2026-07-28.md` for the check that sur
 > identifier and access date (`evidence/plan4/external_citations.json`), and two renderer ops for
 > the order-of-magnitude p-values. **101 pass, 19 fail: the 3 declared disagreements and 16
 > unbacked.** No prose was touched.
+>
+> ### Recoverability of the six, established before deciding anything. NOT YET ACTED ON.
+>
+> The earlier entry below called these six "untraceable". That was a search result, not a verdict,
+> and checking changed the answer for **all six**: none is genuinely unrecoverable, and the reason
+> the first search missed them is that it looked only in `evidence/*.json` while their sources are
+> committed **Markdown**.
+>
+> | Figure | Status | Where its inputs are |
+> |---|---|---|
+> | `86.3` | **(a)** inputs exist | `docs/plan2/serving-equivalence-probe-result.md`: **259/300**, 95% Wilson CI [81.98%, 89.76%] |
+> | `1.3` | **(a)** inputs exist | same document: **4/300** abstain/extract flips at 100% acceptance |
+> | `1.8` | **(a)** inputs exist | same document: the flip rate rises to 1.78% under tightening — *and note this is a different denominator from 1.3, not the same measurement twice* |
+> | `18.7`–`18.9` | **(a)** inputs exist | `docs/adr/0012`: a full per-job table, Plan 2 subtotal $18.33 + Gate 0 $0.2008 = $18.53, plus one job never recorded per-job and recovered by differencing four running totals |
+> | `637` | **(b)** re-runnable at $0 | `evaluation.py` emits `false_positives` and `false_negatives`; recomputable over the already-open certification split |
+> | — | **(c)** genuinely untraceable | **none** |
+>
+> **Held, per instruction: classification reported, nothing built.** Two observations that bear on
+> how they should be backed. First, `1.3` and `1.8` are *not* a range of one measurement — 1.33% is
+> the flip rate at full acceptance and 1.78% is the rate under tightening, and the write-up prints
+> them as a dash-joined band, which reads as a confidence interval. That is a presentation defect
+> hiding inside an unbacked figure, and it would not have surfaced without going to the source.
+> Second, the cost band's reason for *being* a band — no single ledger, one job differenced — is
+> recorded in the README and in ADR 0012 but **not in the paper beside the figure**. A paper about
+> backing quantities cannot carry an unbacked quantity silently; whatever the resolution, it is
+> visible.
+>
+> ### Superseded by the table above: the "six untraceable" finding
 >
 > **Six figures have no computation-bearing artifact anywhere in the repository**, and this is the
 > new finding. `86.3` (serving-stack parity), `637` (false positives less false negatives),

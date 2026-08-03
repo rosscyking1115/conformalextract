@@ -97,13 +97,32 @@ def test_every_manifest_entry_resolves_and_renders(manifest) -> None:
 
 
 def test_declared_disagreements_are_reported_not_swallowed(figures, manifest) -> None:
-    """A declared disagreement must still FAIL the guard. Declaring is disclosure, not a waiver."""
+    """A declared disagreement must still FAIL the guard. Declaring is disclosure, not a waiver.
 
-    declared = {f for f, e in manifest.items() if e.get("disagrees_with_paper") is not None}
-    assert declared, "no disagreements declared; this test would pass vacuously"
-    failures, _ = check(figures, dict(manifest))
-    for figure in declared:
-        assert VALUE_MISMATCH in _kinds(failures, figure), (
+    Written against a SYNTHESISED declaration rather than a live one. The first version asserted
+    that the manifest contained at least one real disagreement, which was true when three were
+    open and became a false failure the moment they were fixed -- a test that requires a defect to
+    exist in order to pass is a test that punishes repair. The property under test is that the
+    ``disagrees_with_paper`` field cannot mute the guard, and that holds whether or not any
+    disagreement is currently open.
+    """
+
+    live = {f for f, e in manifest.items() if e.get("disagrees_with_paper") is not None}
+    mutated = json.loads(json.dumps(dict(manifest)))
+    target = "0.1139"
+    assert target in mutated, "expected a known-good entry to synthesise a declaration on"
+    mutated[target]["disagrees_with_paper"] = "0.9999"
+    mutated[target]["pointer"] = "splits.certification.zs.mean.selective_risk.normalized_aurc"
+
+    failures, _ = check(figures, mutated)
+    assert VALUE_MISMATCH in _kinds(failures, target), (
+        "an entry declaring a disagreement was passed by the guard; declaring must disclose, "
+        "not waive"
+    )
+
+    for figure in live:
+        real, _ = check(figures, dict(manifest))
+        assert VALUE_MISMATCH in _kinds(real, figure), (
             f"{figure} is declared as disagreeing and the guard passed it"
         )
 
