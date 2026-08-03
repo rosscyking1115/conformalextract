@@ -90,12 +90,44 @@ a dated record — see `docs/release-check-2026-07-28.md` for the check that sur
 > covers and closes nothing: **nothing compares the prose against it.** The stamp is a place to look
 > up the right answer, not a gate that notices the wrong one.
 >
+> **The instance list. The paper carries five; this repository carries six.** The paper's five are
+> scoped to the claims it reports, and it now says so in the sentence rather than leaving the scope
+> implied. The sixth is not a reported claim and does not belong in an ACL Limitations section,
+> where it would dilute the five that bear on the result.
+>
+> | # | The quantity | Where it was quoted | Caught by |
+> |---|---|---|---|
+> | i | $\alpha$-frontier point 0.406, as a threshold | claim wording | claim-wording audit |
+> | ii | empirical oracle 0.2357, as clearing the floor | write-up | independent review |
+> | iii | 11.4%, as "certified" without naming the construction | write-up | pre-submission audit |
+> | iv | a narrowing applied to a derived doc, not the ledger | ledger → appendix | review |
+> | v | acceptance LCB 0.2017, at an allocation not used | write-up | review |
+> | **vi** | **"content ends 82% down page 4, within the limit"** | **every status line** | **a rebuild** |
+>
+> **Instance vi is the purest example in the set.** It cites an artifact that exists — the built
+> PDF — states a number that artifact does not contain, flatters compliance, and sits in the one
+> line whose entire job is to assert compliance. No guard could have caught it, and none did.
+>
+> **And it propagated further than any of the others.** It was repeated in every status report,
+> including to the owner, who read it and repeated it back. **A wrong number that its reader
+> confirms is a different failure from one that goes unnoticed**: the confirmation is evidence to
+> the author that the number was checked, so the error acquires a second source and becomes harder
+> to find than it was when only one person held it. None of instances (i)–(v) had that property.
+> Nothing in this repository currently distinguishes "confirmed by a reader" from "verified".
+>
 > **Open item — a validity guard that reads its evidence.** First scope, deliberately small: the
 > four quantities in `certification_sensitivity.json` (the acceptance lower bound by allocation, the
 > empirical-Bernstein probe, the AUROC bootstrap interval, and grid capacity), asserted against the
 > surfaces that quote them. **Not built.** Building it before the overdue review round would repeat
 > the bundling problem the round exists to catch, and naming the gap is the disclosure the paper
 > carries. Whether to build it at all is the owner's call.
+>
+> **Reference implementation: `redteam-foundry` built the equivalent.** Two properties of it are
+> the requirement, not decoration. Its checker **opens both the artifact and the document** and
+> compares — the thing `verify_ledger` does not do. And it **refuses to pass on an empty claim
+> list**, because a checker with nothing to check passes vacuously, which is the same failure shape
+> as a metric satisfied by absence. Any guard built here inherits both or it reproduces the gap it
+> was written to close.
 
 ## Live list
 
