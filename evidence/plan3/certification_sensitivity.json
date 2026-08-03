@@ -47,6 +47,14 @@
     "scored_groups": 1392,
     "seed": 20260802
   },
+  "certification_access": {
+    "certification_gold_read": true,
+    "documents_read": 3152,
+    "final_reads": 0,
+    "head_hash": "ff5562419c7ddd543e06fdf656114a26cf79cdbf12063e906002b1024b423d9f",
+    "shift_reads": 0,
+    "verified": true
+  },
   "certifies_nothing": true,
   "diagnostic_only": true,
   "empirical_bernstein_probe": {

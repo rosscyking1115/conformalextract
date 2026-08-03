@@ -119,6 +119,31 @@ a dated record — see `docs/release-check-2026-07-28.md` for the check that sur
 > one level up: a metric satisfied by absence, where absence was never measured against a stated
 > universe.
 >
+> **A fourth class, and the second to cross a repository boundary: the status you read is not the
+> status of the thing you ran, and it fails toward "fine".**
+>
+> | # | The wrapper | What it reported | What had happened | Repository |
+> |---|---|---|---|---|
+> | P1 | `pytest \| tail -2 && git commit` | success, so the commit proceeded | the suite was red; `&&` reads `tail`'s status, not pytest's | conformalextract |
+> | P2 | a run wrapper | exit 0 | the process took a SIGSEGV | redteam-foundry |
+> | P3 | the same wrapper | exit 0 | a CUDA out-of-memory | redteam-foundry |
+>
+> All three fail **toward "fine"**, which is the direction that ships. And all three are the
+> session's own defect one level down: a check reported as passing because *the thing being read
+> was not the thing being measured* — a status from the last element of a pipe, not from the
+> command that mattered. **Verify by exit status or `PIPESTATUS`; never through a pipe.** With the
+> population rule, this is the second class to recur across different repositories, which is the
+> signal that it is a property of the practice rather than of one codebase.
+>
+> **A shape, not two incidents: a test that requires a defect to exist becomes an obstacle to
+> fixing it.** Twice in `tests/test_paper_claims_guard.py` — one asserting an unbacked figure
+> existed, one asserting a declared disagreement existed. Both were true when written and both
+> turned red the moment the last instance was repaired, so the suite punished the repair it was
+> written to encourage. The correct form asserts the *property* against a synthesised case:
+> remove an entry from a copy and assert absence fails; declare a disagreement on a copy and
+> assert it is not muted. Neither needs a live defect, and neither goes red when the paper is
+> clean.
+>
 > **A third class, distinct from both and from anything a value check can reach: the form is wrong
 > while every value is right.** The write-up printed the abstain/extract flip rate as
 > "1.3--1.8\%", which reads as a confidence interval. It is not. 1.33% is the flip rate at full

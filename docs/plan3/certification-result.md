@@ -367,7 +367,7 @@ reported as two independent confirmatory comparisons. There is one finding, not 
 | Any **task-wide or field-wide** impossibility reading. α ≤ 0.20 is **not excluded** on structured extraction at the base risks prior work reports — not the same as reachable — and this is a model-and-score-specific result *(added 2026-08-02; "is reachable" corrected to "not excluded" 2026-08-03, finding F1)* | — |
 | Calling **0.406** a threshold, a certified operating point, or anything other than an empirical oracle frontier point measured on an already-opened split *(added 2026-08-02)* | — |
 | Describing grounding and certifiability as **orthogonal**, **independent**, or **unrelated**. The measured relation is a dissociation; independence was never tested *(added 2026-08-02)* | — |
-| Attributing the null to base risk **alone**. At μ = 0.6071 the bound permits 49.1%; infeasibility is overdetermined by base risk, ranking AND the finite-sample penalty *(added 2026-08-02)* | — |
+| Attributing the null to base risk **alone**. At μ = 0.6071 the bound permits 49.1%; infeasibility is overdetermined by base risk, ranking AND the finite-sample penalty — **and stating the conjunction without its qualifier is the opposite error**: the three are *not* all active on every system, base risk settles ZS and FS outright and does **not** forbid the floor for QA *(added 2026-08-02; qualifier added 2026-08-03, the ninth surface of that correction)* | — |
 | Reading the **empirical** oracle acceptance (0.2357) as something that could have been certified, or saying the floor "was reachable". Certified, that oracle is 0.1139 at δ/3 — below the floor. Only `acceptance_certified_loss_optimal` licenses the word "certified" *(added 2026-08-02)* | — |
 
 ## Status

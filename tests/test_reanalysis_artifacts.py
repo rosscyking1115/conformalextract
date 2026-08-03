@@ -350,3 +350,61 @@ def test_calibration_declares_itself_diagnostic_and_names_its_reversal(calibrati
     assert calibration["certifies_nothing"] is True
     assert calibration["alpha"] == FROZEN_ALPHA
     assert "reverses_disposition" in calibration
+
+
+# --- ruling R3 applied to the sensitivity artifact ------------------------------------------
+# It was cited as evidence by the ledger and quoted by the write-up while nothing re-checked it,
+# which is the state R3 exists to close. An independent reviewer found it registered nowhere and
+# carrying no access attestation, so a verifier of the file had nothing to check.
+
+
+@pytest.fixture(scope="module")
+def sensitivity() -> dict:
+    return _load("certification_sensitivity.json")
+
+
+def test_sensitivity_agrees_with_the_certificate_it_decomposes(
+    sensitivity: dict, certification: dict
+) -> None:
+    """Its n and its frozen configuration must be the certificate's, or it decomposes nothing."""
+
+    frozen = sensitivity["frozen"]
+    assert frozen["alpha"] == certification["alpha"] == FROZEN_ALPHA
+    assert frozen["delta"] == certification["delta"]
+    assert frozen["acceptance_floor"] == certification["acceptance_floor"]
+    assert sensitivity["population"]["rows_passed_to_certifier"] == (
+        certification["n_certification_groups"]
+    )
+
+
+def test_only_the_frozen_allocation_is_marked_frozen(sensitivity: dict) -> None:
+    """The allocation the run actually used must be the one that fails, and it must say so.
+
+    The error this artifact was written for was quoting 0.2017 -- the value at an allocation the
+    project never ran -- while naming the frozen one. So the frozen entry carries both divisions
+    and does NOT clear the floor, and the other entries are recorded as what they are.
+    """
+
+    allocations = sensitivity["acceptance_lower_bound_by_allocation"]
+    frozen = allocations["frozen_run_three_candidates_delta_over_three"]
+    assert frozen["delta"] == pytest.approx(sensitivity["frozen"]["delta"] / 3)
+    assert frozen["candidate_count"] == sensitivity["frozen"]["candidates_per_system"]
+    assert frozen["clears_acceptance_floor"] is False
+    assert frozen["acceptance_lower_bound"] < FROZEN_ACCEPTANCE_FLOOR
+    assert allocations["three_candidates_full_delta"]["delta"] == sensitivity["frozen"]["delta"]
+
+
+def test_sensitivity_discloses_its_label_access(sensitivity: dict, calibration: dict) -> None:
+    """It opens certification gold, so it carries the same chained disclosure as its siblings."""
+
+    access = sensitivity["certification_access"]
+    assert access["certification_gold_read"] is True
+    assert access["verified"] is True
+    assert access["final_reads"] == 0
+    assert access["shift_reads"] == 0
+    assert access["head_hash"] == calibration["certification_access"]["head_hash"]
+
+
+def test_sensitivity_declares_itself_diagnostic(sensitivity: dict) -> None:
+    assert sensitivity["diagnostic_only"] is True
+    assert sensitivity["certifies_nothing"] is True

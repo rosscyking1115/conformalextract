@@ -239,24 +239,29 @@ comparison survives greyscale printing.}
 benchmark.} Mechanism 3 is not a property of this run. Two independent calculations say so, and
 they are separate arguments rather than one restated.
 
-\emph{From the bound.} At $n = 1{,}396$ and $\delta/3$ the Hoeffding radius at the floor is
-\textbf{0.0925}, spent before any data is seen --- so certifying at the floor requires an accepted
-set carrying mean loss $\leq \mathbf{0.1075}$, \emph{whoever} produced it. \textbf{The benchmark
-halves the effective target for every entrant while forbidding none}: a system under that figure
-certifies here. Clearing it with \emph{this} loss distribution would take \textbf{18{,}740 groups,
-13.4$\times$ this split}.
+\emph{From the bound.} At $n = 1{,}396$ and this study's $\delta/3$ allocation, the Hoeffding
+radius at the floor is \textbf{0.0925}, spent before any data is seen --- so passing the
+\emph{risk test} at the floor requires an accepted set carrying mean loss $\leq \mathbf{0.1075}$.
+\textbf{At this allocation the benchmark halves the effective risk target}, for any system. It does
+not follow that such a system certifies: a certificate must also clear the acceptance floor on its
+\emph{lower} bound, which at the floor-meeting prefix it does not, and 332 accepted groups are
+needed for that. Clearing the risk test with \emph{this} loss distribution would take
+\textbf{18{,}740 groups, 13.4$\times$ this split}. Both figures are properties of $n$ and of the
+$\delta/3$ split, not of the corpus alone: a single-system entrant at the full $\delta$ inherits
+neither.
 
 \emph{From the certifier's own precondition, which binds far sooner.} At the frozen $\delta/3$
 allocation the theorem admits a grid of at most \textbf{three} candidates on this corpus: three
 require 1{,}386 groups and the split holds 1{,}396, but a fourth would require 1{,}432. \textbf{The
-frozen grid is the largest this benchmark can support}, and it is frozen at exactly that size. We
+frozen grid is the largest this allocation can support}, and it is frozen at exactly that size. We
 state capacity rather than a margin in groups because the row count and the rankable count differ
 --- four groups contain a document that produced no generation at all, and since a group scores at
 its weakest member all four are unscorable, the same four for every system, so a property of the
 corpus rather than any model. They remain rows, so the precondition still sees 1{,}396; they cannot
-be ranked, so 1{,}392 is what any score orders. \textbf{The standard corpus for this task sits at
-the edge of what the certificate can be run on at all}, for any model and any score --- a
-constraint on the benchmark, applying to work that has not run yet.
+be ranked, so 1{,}392 is what any score orders. \textbf{At a three-system $\delta/3$ split this
+corpus sits at the edge of what the certificate can be run on at all} --- a constraint on the
+benchmark under this design, applying to work that has not run yet. A study certifying one system
+at the full $\delta$ would face a laxer capacity, and we do not claim otherwise.
 
 \paragraph{Taken together: overdetermined.} Every system is blocked by at least one mechanism and
 QA by two, so no single repair rescues any of them. Saying they \emph{each} forbid the target would
@@ -266,7 +271,8 @@ the model is simply too weak; that is false for QA. The honest statement is that
 \textbf{nothing could have certified this system --- not a better score, not a perfect one} --- and
 that the score is nonetheless responsible for a 21.6-point share of the shortfall.
 
-\paragraph{The unit definition is also decisive}, independently of all three mechanisms: acceptance
+\paragraph{The unit definition is also decisive}, and it is not separable from mechanism 3 ---
+the unit fixes the group count, which is what the capacity argument above turns on: acceptance
 vanishes with document complexity even where mean loss is flat, and a protocol reporting only
 aggregate loss sees none of it. Appendix~\ref{app:unit} gives the stratification.
 

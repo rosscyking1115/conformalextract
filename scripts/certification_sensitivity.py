@@ -41,7 +41,11 @@ from conformalextract.certification import (
     scorc_certificate,
     scorc_minimum_n,
 )
-from conformalextract.reanalysis import load_split_system_data
+from conformalextract.reanalysis import (
+    access_block,
+    certification_access_for,
+    load_split_system_data,
+)
 
 #: The frozen run's own allocation, read off the committed certification result rather than
 #: assumed: three systems share delta, so each gets delta/3, and each system's grid holds three
@@ -215,6 +219,13 @@ def main() -> None:
         "schema_version": "1",
         "diagnostic_only": True,
         "certifies_nothing": True,
+        # Every other artifact that opens gold carries this. An independent reviewer found this
+        # one did not, which left a verifier of the file with nothing to check -- the same family
+        # as naming the wrong hash-carrier: a claim about access made against a file that cannot
+        # support it. The structural guard was never absent; the attestation was.
+        "certification_access": access_block(
+            certification_access_for("certification", sorted(groups))
+        ),
         "interpretation": (
             "Sensitivity quantities the write-up quotes, each stamped with the configuration that "
             "produced it. Written because claims.verify_ledger checks only that a claim's cited "
