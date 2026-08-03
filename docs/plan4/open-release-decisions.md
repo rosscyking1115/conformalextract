@@ -104,6 +104,32 @@ a dated record — see `docs/release-check-2026-07-28.md` for the check that sur
 > | v | acceptance LCB 0.2017, at an allocation not used | write-up | review |
 > | **vi** | **"content ends 82% down page 4, within the limit"** | **every status line** | **a rebuild** |
 >
+> **A second defect class, recorded separately so it does not dilute the six above: a search that
+> ends in a conclusion must state what it searched.** Three occurrences, all ending in a verdict:
+>
+> | # | The search | Population it used | What it missed | The verdict it produced |
+> |---|---|---|---|---|
+> | S1 | surfaces carrying "each forbid the target" | the write-up | source, generated strings, committed artifacts | "corrected on all five surfaces" — it was eight |
+> | S2 | surfaces carrying the capability attribution | prose, source, artifacts, tests | required companion records | "the ten-surface map is complete" — the withdrawn-assertions registry was not in it |
+> | S3 | artifacts backing six programme figures | `evidence/*.json` | committed **Markdown** | "six figures are untraceable" — all six were recoverable |
+>
+> **The rule: "I found none" is not a finding until "I looked in X, Y, Z" is stated beside it.** In
+> all three the query was correct and the population was wrong, which is why re-running the search
+> never helps — the error is invisible from inside it. This is the same shape as the claims gate
+> one level up: a metric satisfied by absence, where absence was never measured against a stated
+> universe.
+>
+> **A third class, distinct from both and from anything a value check can reach: the form is wrong
+> while every value is right.** The write-up printed the abstain/extract flip rate as
+> "1.3--1.8\%", which reads as a confidence interval. It is not. 1.33% is the flip rate at full
+> acceptance and 1.78% is the same four flips over the top-75% denominator — two measurements of
+> different things, dash-joined into an apparent claim about sampling uncertainty that neither
+> figure supports. **Both numbers are correct, so no value check and no configuration check can
+> see this.** Its sibling is `12.9×`, where a presentational choice ran the other way and
+> manufactured a quantity that was never correct anywhere. Corrected in the paper; the guard now
+> backs each rate separately with its own denominator pinned, which is what makes the distinction
+> visible in the manifest rather than only in prose.
+>
 > **Instance vi is the purest example in the set.** It cites an artifact that exists — the built
 > PDF — states a number that artifact does not contain, flatters compliance, and sits in the one
 > line whose entire job is to assert compliance. No guard could have caught it, and none did.

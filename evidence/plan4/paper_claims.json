@@ -1326,6 +1326,81 @@
       },
       "kind": "computed",
       "note": "OUR arithmetic on THEIR base risk: the construction is ours and the input is cited"
+    },
+    {
+      "figure": "86.3",
+      "artifact": "evidence/plan4/programme_facts.json",
+      "pointer": "serving_equivalence_probe.parsed_output_agreement_percent.value",
+      "render": "round1",
+      "configuration": {
+        "serving_equivalence_probe.parsed_output_agreement_percent.numerator": 259,
+        "serving_equivalence_probe.parsed_output_agreement_percent.denominator": 300,
+        "serving_equivalence_probe.wilson_interval_95_percent.agrees_with_document": true
+      },
+      "kind": "computed",
+      "note": "the transcription is checked by recomputing the Wilson interval and comparing it against the one the probe document states"
+    },
+    {
+      "figure": "1.3",
+      "artifact": "evidence/plan4/programme_facts.json",
+      "pointer": "serving_equivalence_probe.flip_rate_at_full_acceptance_percent.value",
+      "render": "round1",
+      "configuration": {
+        "serving_equivalence_probe.flip_rate_at_full_acceptance_percent.numerator": 4,
+        "serving_equivalence_probe.flip_rate_at_full_acceptance_percent.denominator": 300
+      },
+      "kind": "computed",
+      "note": ""
+    },
+    {
+      "figure": "1.8",
+      "artifact": "evidence/plan4/programme_facts.json",
+      "pointer": "serving_equivalence_probe.flip_rate_at_top_75_percent_acceptance.value",
+      "render": "round1",
+      "configuration": {
+        "serving_equivalence_probe.flip_rate_at_top_75_percent_acceptance.numerator": 4,
+        "serving_equivalence_probe.flip_rate_at_top_75_percent_acceptance.denominator": 225
+      },
+      "kind": "computed",
+      "note": "SAME four flips, smaller denominator. The pinned numerator is what makes it visible that this and 1.3 are not two draws from one measurement"
+    },
+    {
+      "figure": "18.7",
+      "artifact": "evidence/plan4/programme_facts.json",
+      "pointer": "programme_cost.band_usd.lower",
+      "render": "round1",
+      "configuration": {
+        "programme_cost.recorded_components.plan2_subtotal_usd": 18.33,
+        "programme_cost.recorded_components.gate0_per_job_artifact_usd": 0.2008,
+        "programme_cost.recovered_by_differencing.reading_running_totals_include_gate0_usd": 0.149
+      },
+      "kind": "computed",
+      "note": ""
+    },
+    {
+      "figure": "18.9",
+      "artifact": "evidence/plan4/programme_facts.json",
+      "pointer": "programme_cost.band_usd.upper",
+      "render": "round1",
+      "configuration": {
+        "programme_cost.recorded_components.plan2_subtotal_usd": 18.33,
+        "programme_cost.recovered_by_differencing.reading_running_totals_exclude_gate0_usd": 0.35
+      },
+      "kind": "computed",
+      "note": "the two endpoints differ ONLY in which reading of the running totals is taken; both readings are pinned so the band cannot quietly become a point"
+    },
+    {
+      "figure": "637",
+      "artifact": "evidence/plan3/argument_error_counts.json",
+      "pointer": "systems.qa.false_positive_excess",
+      "render": "int",
+      "configuration": {
+        "systems.qa.false_positives": 4434,
+        "systems.qa.false_negatives": 3797,
+        "channel": "valid_content_bearing"
+      },
+      "kind": "computed",
+      "note": "recomputed through the frozen scorer the certifier uses; the excess is stored so no guard has to subtract"
     }
   ]
 }

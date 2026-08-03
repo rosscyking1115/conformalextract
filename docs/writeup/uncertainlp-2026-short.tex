@@ -109,7 +109,9 @@ log-probability over the parsed object; two alternatives were pre-registered and
 \paragraph{Discipline.} The certification split was opened \textbf{exactly once} --- 3,152
 documents forming 1,396 groups --- under a hash-chained access log, with zero reads of the held-out
 \texttt{final} and \texttt{shift} splits, which remain sealed. Certification and all analysis ran
-on CPU at no cost; the GPU programme totalled about \$18.7--18.9.
+on CPU at no cost; the GPU programme totalled \$18.7--18.9 --- a band rather than a figure because
+there is no single spend ledger, and one job's cost is recovered by differencing running totals
+that admit two readings.
 
 \paragraph{Three population sizes, kept distinct.} 1{,}396 groups form the coverage denominator;
 \textbf{1{,}392} can be scored and ranked, the population every AUROC here uses; acceptance
@@ -359,8 +361,10 @@ comparable to corpus-level micro Arg-C figures such as the 54.4 of \citet{huang2
 gap is real and we claim no competitiveness.
 
 \textbf{Single seed, no ablations.} One frozen 4-bit vLLM stack, 86.3\% parsed-output agreement
-against the training stack, with the abstain/extract decision flipping between stacks at 1.3--1.8\%
-of frames. Portability is not established.
+against the training stack. The abstain/extract decision flips between stacks on \textbf{1.3\%} of
+frames, and those flips \emph{concentrate} rather than thin out under tightening --- \textbf{1.8\%}
+among the most-confident three quarters. These are two measurements, not an interval: the same
+flips over a smaller denominator. Portability is not established.
 
 \textbf{In-domain RAMS only}, span-exact matching; \texttt{final} and \texttt{shift} are descoped
 and remain sealed, so no shift claim is made in either direction. \textbf{The mechanism-2 and
@@ -372,10 +376,11 @@ differently, and mechanism 3 would still apply to them.
 
 \section*{Reproducibility}
 
-Protocol, certifier, diagnostics and claim ledger are code, and every figure resolves to a
-committed artifact --- including a sensitivity artifact that stamps each quoted bound with the
-$\delta$, allocation, candidate count and $n$ that produced it, because a figure carrying no
-configuration is how three of the errors in Limitations happened. Artifact hashes are pinned over
+Protocol, certifier, diagnostics and claim ledger are code. \textbf{Every figure in this paper is
+checked mechanically against a committed artifact carrying both its value and the configuration
+that produced it} --- the $\delta$, its allocation, the candidate count, the $n$ --- with the
+exceptions named in the released manifest. A figure carrying no configuration is how three of the
+errors in Limitations happened. Artifact hashes are pinned over
 git-canonical (LF) bytes and say so: \textbf{a hash without its byte convention is the same defect
 as a bound without its $\delta$ allocation}, and we shipped one --- a CRLF working-copy digest,
 which no reader on a Linux checkout could reproduce, in a line whose only purpose was to let them
