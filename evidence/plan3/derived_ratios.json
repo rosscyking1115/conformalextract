@@ -1,0 +1,132 @@
+{
+  "certifies_nothing": true,
+  "counts": {
+    "confidence_level_percent": {
+      "artifact": "evidence/plan3/certification_result.json",
+      "construction": "100 * (1 - delta)",
+      "note": "The write-up says '95% confidence'. It is stored here rather than rendered from delta by the guard, because a semantic transform in a guard is a computation in a guard.",
+      "pointer": "delta",
+      "value": 95
+    },
+    "fs_non_failing_groups": {
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "construction": "scored_groups * (1 - failure_prevalence), FS at tenth_percentile",
+      "note": "The count the FS AUROC rests on, and why the write-up calls it unstable.",
+      "pointer": "splits.certification.fs.tenth_percentile.discrimination.any_error",
+      "value": 18
+    },
+    "mean_per_document_span_exact_f1": {
+      "artifact": "evidence/plan3/certification_result.json",
+      "construction": "1 - unweighted mean group loss; the loss IS 1 - F1 per document",
+      "note": "A mean of per-document F1. NOT comparable to corpus-level micro Arg-C figures.",
+      "pointer": "systems.qa.loss_summary.unweighted_mean_loss",
+      "value": 0.3929102631414082
+    },
+    "oracle_accepted_groups_total": {
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "components": {
+        "1": 23,
+        "2": 5,
+        "3": 0,
+        "4-5": 0,
+        "6+": 0
+      },
+      "construction": "sum of accepted_groups across the trigger-count strata",
+      "pointer": "splits.certification.qa.mean.stratified.triggers",
+      "value": 28
+    },
+    "oracle_accepted_with_no_cross_sentence_argument": {
+      "artifact": "evidence/plan3/calibration_diagnostics.json",
+      "components": {
+        "0": 25,
+        "1": 2,
+        "2": 1,
+        "3+": 0
+      },
+      "construction": "accepted_groups in the zero-cross-sentence stratum",
+      "pointer": "splits.certification.qa.mean.stratified.cross_sentence['0'].accepted_groups",
+      "value": 25
+    }
+  },
+  "diagnostic_only": true,
+  "interpretation": "Ratios and counts the write-up quotes that were derived in prose from committed inputs and never stored. Each is recorded WITH pointers to the counts that produced it, so the pairing is auditable and scripts/check_paper_claims.py never has to divide - a guard that computes can be wrong in the same direction as the author. Nothing here selects a threshold or issues a certificate, and nothing here opens a split: it reads committed evidence JSON only.",
+  "ratios": {
+    "content_bearing_share_of_group_loss": {
+      "construction": "100 * channel group-level contribution / total group-level loss",
+      "denominator": {
+        "artifact": "evidence/plan3/loss_decomposition.json",
+        "pointer": "splits.certification.qa.group_level_total_loss",
+        "value": 0.6070897368585918
+      },
+      "note": "The GROUP-level share is 87.3%. The document-level share of the same channel is 86.2% and is a different quantity; the write-up quotes the group-level one.",
+      "numerator": {
+        "artifact": "evidence/plan3/loss_decomposition.json",
+        "pointer": "splits.certification.qa.channels.valid_content_bearing.group_level_contribution",
+        "value": 0.5300207397143797
+      },
+      "value": 87.30517212446902
+    },
+    "parse_and_ground_rate_fs": {
+      "construction": "100 * valid / records, over frames",
+      "denominator": {
+        "artifact": "evidence/plan2/prediction_parse_summary.json",
+        "pointer": "fs.records",
+        "value": 9124
+      },
+      "note": "'Valid' is parseable AND grounded. It is NOT correctness: a span can point at real document text and still name the wrong entity or role.",
+      "numerator": {
+        "artifact": "evidence/plan2/prediction_parse_summary.json",
+        "pointer": "fs.valid",
+        "value": 6217
+      },
+      "value": 68.13897413415168
+    },
+    "parse_and_ground_rate_qa": {
+      "construction": "100 * valid / records, over frames",
+      "denominator": {
+        "artifact": "evidence/plan2/prediction_parse_summary.json",
+        "pointer": "qa.records",
+        "value": 9124
+      },
+      "note": "'Valid' is parseable AND grounded. It is NOT correctness: a span can point at real document text and still name the wrong entity or role.",
+      "numerator": {
+        "artifact": "evidence/plan2/prediction_parse_summary.json",
+        "pointer": "qa.valid",
+        "value": 8729
+      },
+      "value": 95.67075843928102
+    },
+    "parse_and_ground_rate_zs": {
+      "construction": "100 * valid / records, over frames",
+      "denominator": {
+        "artifact": "evidence/plan2/prediction_parse_summary.json",
+        "pointer": "zs.records",
+        "value": 9124
+      },
+      "note": "'Valid' is parseable AND grounded. It is NOT correctness: a span can point at real document text and still name the wrong entity or role.",
+      "numerator": {
+        "artifact": "evidence/plan2/prediction_parse_summary.json",
+        "pointer": "zs.valid",
+        "value": 3596
+      },
+      "value": 39.41253836036826
+    },
+    "ungrounded_span_separation": {
+      "construction": "zs ungrounded spans / qa ungrounded spans",
+      "denominator": {
+        "artifact": "evidence/plan2/prediction_parse_summary.json",
+        "pointer": "qa.grounding_failure",
+        "value": 340
+      },
+      "note": "The write-up rounds this to ~16x. The unrounded value is 15.75.",
+      "numerator": {
+        "artifact": "evidence/plan2/prediction_parse_summary.json",
+        "pointer": "zs.grounding_failure",
+        "value": 5355
+      },
+      "value": 15.75
+    }
+  },
+  "reads_only_committed_evidence": true,
+  "schema_version": "1"
+}

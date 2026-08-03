@@ -143,6 +143,63 @@ a dated record — see `docs/release-check-2026-07-28.md` for the check that sur
 > checked. And the manifest is authored, so a human step remains — though the build-time verifier
 > caught two of this author's own pointer errors before either reached a run.
 >
+> ### Second run: 101 of 120 backed. What remains, and why each one remains
+>
+> Buckets B, C, D and E are now backed — ratios stored beside their counts
+> (`evidence/plan3/derived_ratios.json`), quoted values in a citation record with source,
+> identifier and access date (`evidence/plan4/external_citations.json`), and two renderer ops for
+> the order-of-magnitude p-values. **101 pass, 19 fail: the 3 declared disagreements and 16
+> unbacked.** No prose was touched.
+>
+> **Six figures have no computation-bearing artifact anywhere in the repository**, and this is the
+> new finding. `86.3` (serving-stack parity), `637` (false positives less false negatives),
+> `1.3`–`1.8` (the abstain/extract flip band) and `18.7`–`18.9` (the cost band) appear **only in
+> reviewer records, the claim ledger and prose**. A search of every committed `evidence/*.json`
+> finds no computed source for any of them; the one apparent hit on `86.3` is a coincidental
+> coordinate on an unrelated curve. They are not wrong — they are untraceable, which is the state
+> the whole apparatus exists to detect, and they were not invented an artifact to hide in. The cost
+> band is a special case the README already records: there is no single spend ledger, the total is
+> assembled by a reader, and one job is recovered by differencing running totals, which is what
+> makes it a band. Recording *that* is honest; manufacturing a ledger would not be.
+>
+> **Nine are extractor false positives** — table row labels `1`/`2`/`3`, the citation locator
+> `Table 5`, the stratum label `6+`, `Qwen3-4B`, `-2507`, and the definitional `0` and `1.0` of the
+> loss range. They get no pointer and **no exemption**. A guard loud about what it cannot parse is
+> honest; one that exempts it is the defect.
+>
+> ### Stated limit: one entry per rendered token, and it already hides a real claim
+>
+> The guard keys on the rendered token, so where two different quantities render the same string
+> only one binding is checked. **`3` is both a table row label and "3 non-failing groups"** — a
+> real claim about why the ZS AUROC is unstable, sitting behind a piece of typesetting. `0.589` is
+> both the 3-trigger stratum and the fully-grounded stratum. This is no longer hypothetical.
+>
+> Not fixed. Disambiguating by context is the same work as the inline declaration below and belongs
+> with it — both need the guard to know *where* in the paper a token sits, not just that it occurs.
+>
+> ### Ruling: remove the number 80, do not back it and do not exempt it
+>
+> "Roughly 80% of what we measured is a replication" is an author's estimate wearing a
+> measurement's clothes, in a paper about backing quantities. An `author_estimate` pointer kind
+> would be an exemption with better manners. The replacement says more and needs no artifact:
+>
+> > Most of what we measure replicates prior work. What is new is X, Y and Z.
+>
+> Checkable, more informative, no number. **This is a prose edit and has not been made.** Recorded
+> here so the ruling survives to the repair round.
+>
+> ### For the instance table, when the repair round comes
+>
+> **`12.9×` is not a measurement.** It is `18000/1396` — the already-rounded group count divided by
+> n. It reproduces at neither prefix (13.4 at the floor, 12.8 below it). **A rounding was fed back
+> in as an input.** That is a distinct sub-species and deserves its own name: every prior instance
+> was a correct number attached to a wrong configuration, while this one was never correct
+> anywhere, produced by a presentational choice being read back as data.
+>
+> **The cause of all three disagreements is one thing, recorded once.** 0.20 × 1396 = 279.2, so the
+> acceptance floor is met at k = 280 and missed at k = 279. One paragraph uses both prefixes and
+> names neither: `0.0925` is the k = 280 figure, `18,000` and `12.9×` reconcile at k = 279.
+>
 > ### The residual hole, and the design that closes it. RECORDED, NOT BUILT.
 >
 > The guard checks the **manifest's** declared configuration against the **artifact**. It never

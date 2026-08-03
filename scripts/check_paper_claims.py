@@ -39,6 +39,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import re
 import sys
 from dataclasses import dataclass
@@ -58,6 +59,7 @@ POINTER_MISSING = "POINTER_MISSING"
 VALUE_MISMATCH = "VALUE_MISMATCH"
 CONFIG_ABSENT = "CONFIG_ABSENT"
 CONFIG_MISMATCH = "CONFIG_MISMATCH"
+CITATION_UNSOURCED = "CITATION_UNSOURCED"
 
 
 @dataclass
@@ -129,7 +131,13 @@ def render(value: Any, spec: str) -> str:
     """Turn an artifact value into the string the paper writes.
 
     Operations chain with ``|``: ``abs`` (drop sign, for figures the paper prints as $-$0.403),
-    ``pctN`` (multiply by 100, N decimals), ``roundN``, ``int``, ``raw``.
+    ``pctN`` (multiply by 100, N decimals), ``roundN``, ``int``, ``raw``, and two for scientific
+    notation --- ``oom`` renders ``1.2235e-55`` as ``10^{-55}`` and ``sciN`` renders ``8.196e-15``
+    as ``8\\times10^{-15}``.
+
+    The scientific ops exist because the paper writes p-values at an order of magnitude, and the
+    alternative --- storing a second, pre-rendered copy of the value --- is how two representations
+    of one number drift apart.
     """
 
     current: Any = value
@@ -140,6 +148,14 @@ def render(value: Any, spec: str) -> str:
             current = str(round(float(current)))
         elif op == "raw":
             current = str(current)
+        elif op == "oom":
+            exponent = math.floor(math.log10(abs(float(current))))
+            current = f"10^{{{exponent}}}"
+        elif op.startswith("sci"):
+            digits = int(op[3:])
+            exponent = math.floor(math.log10(abs(float(current))))
+            mantissa = float(current) / (10.0**exponent)
+            current = f"{mantissa:.{digits}f}\\times10^{{{exponent}}}"
         elif op.startswith("pct"):
             current = f"{float(current) * 100:.{int(op[3:])}f}"
         elif op.startswith("round"):
@@ -147,6 +163,13 @@ def render(value: Any, spec: str) -> str:
         else:
             raise ValueError(f"unknown render op: {op!r}")
     return str(current)
+
+
+#: A citation-kind entry must evidence its provenance, not merely resolve to a number. These are
+#: the fields whose pointers the entry's ``configuration`` has to pin: a quoted value with no
+#: source, identifier or access date is exactly the state that let a relayed band --- missing the
+#: one cell that mattered --- support a comparison it did not support.
+CITATION_PROVENANCE = ("source", "identifier", "accessed")
 
 
 def load_manifest(path: Path = MANIFEST) -> dict[str, dict[str, Any]]:
@@ -222,7 +245,25 @@ def check(
         # A configuration mismatch fails even when the value matches. Each key is a pointer into
         # the SAME artifact, so a configuration the artifact does not record cannot be declared.
         bad_config = False
-        for config_pointer, expected in (entry.get("configuration") or {}).items():
+        declared = entry.get("configuration") or {}
+        if entry.get("kind") == "citation":
+            missing = [
+                field
+                for field in CITATION_PROVENANCE
+                if not any(pointer.endswith(field) for pointer in declared)
+            ]
+            if missing:
+                failures.append(
+                    Failure(
+                        CITATION_UNSOURCED,
+                        figure.token,
+                        f"citation entry declares no {', '.join(missing)}",
+                        where,
+                        figure.value,
+                    )
+                )
+                bad_config = True
+        for config_pointer, expected in declared.items():
             try:
                 actual = resolve(artifact, config_pointer)
             except KeyError:
@@ -306,6 +347,7 @@ def main() -> int:
         VALUE_MISMATCH,
         CONFIG_MISMATCH,
         CONFIG_ABSENT,
+        CITATION_UNSOURCED,
         POINTER_MISSING,
         ARTIFACT_MISSING,
         UNBACKED,

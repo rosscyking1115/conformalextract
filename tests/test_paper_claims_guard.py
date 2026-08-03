@@ -25,6 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from check_paper_claims import (  # noqa: E402
+    CITATION_UNSOURCED,
     CONFIG_ABSENT,
     CONFIG_MISMATCH,
     UNBACKED,
@@ -186,6 +187,37 @@ def test_a_changed_paper_value_fails(tmp_path, manifest) -> None:
     mutant.write_text(text.replace("0.6071", "0.6072"), encoding="utf-8")
     failures, _ = check(extract_figures(mutant), dict(manifest))
     assert UNBACKED in _kinds(failures, "0.6072"), "a value invented in the paper was not caught"
+
+
+def test_a_citation_entry_without_provenance_fails(figures, manifest) -> None:
+    """A quoted number may not enter the paper without source, identifier and access date.
+
+    The failure this guards against happened: a band from another group's paper was relayed with
+    one cell omitted, and the omission changed what the band supported. Resolving to a value is
+    not enough for a figure that is someone else's measurement.
+    """
+
+    citations = [f for f, e in manifest.items() if e.get("kind") == "citation"]
+    assert citations, "no citation entries; this test would pass vacuously"
+
+    stripped = json.loads(json.dumps(dict(manifest)))
+    target = citations[0]
+    stripped[target]["configuration"] = {
+        pointer: value
+        for pointer, value in stripped[target]["configuration"].items()
+        if not pointer.endswith("accessed")
+    }
+    failures, _ = check(figures, stripped)
+    assert CITATION_UNSOURCED in _kinds(failures, target), (
+        "a citation entry lost its access date and the guard passed it"
+    )
+
+
+def test_the_scientific_render_ops_match_the_written_form() -> None:
+    """Order-of-magnitude p-values are RENDERED, never stored a second time pre-formatted."""
+
+    assert render(1.2235463357706085e-55, "oom") == "10^{-55}"
+    assert render(8.195950323748051e-15, "sci0") == "8\\times10^{-15}"
 
 
 def test_the_dotted_key_pointer_form_addresses_the_right_leaf() -> None:
