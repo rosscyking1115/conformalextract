@@ -804,10 +804,12 @@ def risk_coverage_diagnostic_command(
 ) -> None:
     """Oracle risk-coverage frontier per system and split — DIAGNOSTIC, certifies nothing.
 
-    Answers the question that decides how the certification result must be reported: is
-    infeasibility a capability gap or an artifact of the grid/bounds? Applies no finite-sample
-    penalty, no grid and no multiplicity correction, so if the acceptance floor is unreachable
-    here it is unreachable by any threshold rule.
+    Answers one half of the question that decides how the certification result must be reported:
+    is infeasibility an artifact of the grid/bounds? Applies no finite-sample penalty, no grid and
+    no multiplicity correction, so if the acceptance floor is unreachable here it is unreachable by
+    any threshold rule. It cannot answer the other half -- being penalty-free blinds it to the
+    finite-sample penalty, which forbids a certificate here that this curve permits. See
+    ``calibration.acceptance_certified_loss_optimal`` and ``CX-CAPGAP-01``.
 
     Run it on ``development`` **before** certifying: it settles feasibility at $0 with no sealed
     access, which the base-risk ceiling `(1-r)/(1-alpha)` does not (that ceiling assumes an

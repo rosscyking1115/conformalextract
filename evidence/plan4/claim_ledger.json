@@ -68,19 +68,24 @@
     },
     {
       "claim_id": "CX-CAPGAP-01",
-      "wording": "The infeasibility reflects a capability gap rather than a limitation of the certification method: with an unlimited threshold grid, no finite-sample penalty and oracle threshold selection, the adapted system could accept at most 2.0% of documents at 20% empirical error, against a required 20%.",
+      "wording": "The infeasibility has two separable causes and only the first is a capability gap. (1) CAPABILITY, specific to this model and score on this task: with an unlimited threshold grid, no finite-sample penalty and oracle threshold selection, the adapted system accepts at most 2.0% of documents at 20% empirical error, where a perfect ranking of the same population reaches 23.6%. Both figures are empirical and penalty-free, so the 21.6-point gap is attributable to the score and not to the coarse grid, the delta split, the bound looseness or a distribution difference between splits. (2) METHOD AND BENCHMARK, independent of capability: at n = 1,396 groups with delta/3, the certifier's Hoeffding bound spends 0.0925 of the 0.20 risk budget on the finite-sample penalty before any data is seen, so a certificate at the 20% acceptance floor requires an accepted set carrying mean loss at most 0.1075 - barely half the nominal target - whoever produced it. For this model that is decisive independently of the score: the loss-optimal ranking upper-bounds what ANY score could certify, and it certifies 0.1139 at delta/3, below the floor. Separately, at delta/3 this corpus admits at most a three-candidate grid, which the frozen configuration exactly fills.",
       "status": "verified",
-      "scope": "in-domain RAMS, oracle risk-coverage diagnostic on certification and development splits",
+      "scope": "in-domain RAMS; (1) oracle risk-coverage diagnostic on the certification and development splits, (2) the frozen n = 1,396 corpus at alpha = 0.20, delta/3 and a 20% acceptance floor",
       "evidence": [
         "evidence/plan3/risk_coverage_diagnostic.json",
+        "evidence/plan3/calibration_diagnostics.json",
+        "evidence/plan3/certification_sensitivity.json",
         "docs/plan3/certification-result.md",
         "docs/frontier-check/findings.md"
       ],
-      "method": "Oracle risk-coverage frontier over source-document groups via certification_run.risk_coverage_frontier, using the same aggregation, eligibility, loss and score as the certifier; no threshold is selected or certified.",
+      "method": "(1) Oracle risk-coverage frontier over source-document groups via certification_run.risk_coverage_frontier, using the same aggregation, eligibility, loss and score as the certifier; no threshold is selected or certified. (2) The certifier's own Hoeffding upper bound at certified_delta = delta/3, via calibration.acceptance_certified_loss_optimal (the loss-sorted prefix, which weakly dominates every score-induced ordering at every k) and certification.largest_scorc_grid at n = 1,396; tabulated with its delta, allocation, candidate count and n in evidence/plan3/certification_sensitivity.json.",
       "limitations": [
         "A diagnostic, not a certificate: it selects no threshold and certifies nothing.",
-        "The same diagnostic on the development split gives 3.0%, so the conclusion reproduces out of sample.",
-        "Specific to this model, this confidence score and this task. It is not evidence that event-argument extraction, or structured extraction generally, cannot be certified at 20% risk: 2606.29054's own datasets include base risks of 0.033 and 0.356, at which the arithmetic bound forbids nothing and permits up to 80.5% acceptance respectively (docs/frontier-check/findings.md, re-verified 2026-07-22)."
+        "The same oracle diagnostic on the development split gives 3.0%, so cause (1) reproduces out of sample.",
+        "Cause (1) is specific to this model, this confidence score and this task. It is not evidence that event-argument extraction, or structured extraction generally, cannot be certified at 20% risk: 2606.29054's own datasets include base risks of 0.033 and 0.356, at which the arithmetic bound forbids nothing and permits up to 80.5% acceptance respectively (docs/frontier-check/findings.md, re-verified 2026-07-22).",
+        "Cause (2) is NOT the claim that no model could be certified on this corpus. A system whose accepted 20% carries mean loss at most 0.1075 would clear the risk test at n = 1,396 and delta/3. What cause (2) establishes is that the corpus and the allocation halve the effective target for every system, and that for THIS model no score whatsoever clears what remains.",
+        "The two causes attach to different mechanisms of the three-way decomposition and must not be merged: cause (1) is ranking (mechanism 2), cause (2) is the finite-sample penalty (mechanism 3) plus grid capacity. Base risk (mechanism 1) belongs to neither - it settles ZS and FS outright and permits QA 49.1%.",
+        "Narrowed 2026-08-03. This claim previously read 'a capability gap rather than a limitation of the certification method' and attributed BOTH causes to capability, which is the same flattering direction as the five quoting errors recorded in the write-up's limitations, expressed in attribution rather than in arithmetic."
       ],
       "surfaces": [
         "README",

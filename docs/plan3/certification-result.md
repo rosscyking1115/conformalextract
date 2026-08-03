@@ -27,7 +27,21 @@ The conservative Bonferroni audit (Construction B) agrees: infeasible for all th
 the closest any system came — 296 groups accepted, acceptance LCB 0.1825 (just under the 0.20
 floor) with risk UCB 0.5157 (far over α = 0.20).
 
-## The failure is a capability gap, not a methodological artifact
+## Two separable causes: a score that cannot rank, and a corpus that halves the target
+
+> **Narrowed 2026-08-03.** This section was headed "The failure is a capability gap, not a
+> methodological artifact", and the section below establishes only half of that. The oracle
+> diagnostic is penalty-free — which is exactly what makes it clean evidence about the *score*, and
+> exactly what blinds it to the finite-sample penalty. The penalty is a second barrier, on the
+> method-and-benchmark side, and it forbids a certificate here that the empirical curve permits: at
+> n = 1,396 with δ/3 the certifier's Hoeffding bound spends **0.0925** of the 0.20 risk budget
+> before any data is seen, so a certificate at the acceptance floor requires an accepted set
+> carrying mean loss ≤ **0.1075** — whoever produced it. Attributing both causes to capability ran
+> in the flattering direction, and it cost the repository a benchmark finding by folding it into a
+> task finding. The numbers below are unchanged; the heading and the attribution are not. See
+> `CX-CAPGAP-01` and the second sub-section added below.
+
+### Cause 1 — the score cannot rank (capability, this model and task)
 
 This is the important question, and the answer is unambiguous. Reproduce with:
 
@@ -60,6 +74,36 @@ So the infeasibility is **not** caused by:
 
 The confidence score simply cannot isolate a 20%-sized subset of documents on which the model is
 80% correct. At 20% acceptance QA's error is 0.405 — **twice the target**.
+
+### Cause 2 — the corpus halves the target (method and benchmark, for every system)
+
+*Added 2026-08-03. Nothing above is retracted; this is the barrier the diagnostic above cannot see.*
+
+The oracle curve carries no δ, which is what makes it clean evidence about the score. A certificate
+does carry δ, and at this corpus size the penalty is not a rounding term:
+
+| Quantity | Value | Configuration |
+|---|---|---|
+| Hoeffding penalty at the floor | **0.0925** | n = 1,396, k = 280, δ/3 = 0.016667 |
+| mean loss an accepted set may carry | **≤ 0.1075** | α = 0.20 less the penalty |
+| certified acceptance, loss-optimal ranking | **0.1139** | δ/3; below the 0.20 floor |
+| acceptance lower bound, oracle prefix | **0.1984** | frozen allocation, 3 candidates, δ/3 |
+| largest admissible grid | **3 candidates** | δ/3 at n = 1,396; a fourth needs 1,432 |
+
+Read together: **the benchmark spends nearly half the nominal risk budget on the finite-sample
+penalty before any system is evaluated.** That is a property of n and the δ allocation and holds
+whoever produced the outputs. For this model it is decisive independently of the score, because the
+loss-optimal ranking weakly dominates every score-induced ordering at every prefix length and so
+upper-bounds what **any** score could certify — and it certifies 0.1139.
+
+**This is not the claim that no model could be certified on this corpus,** and it must not be
+written that way. A system whose accepted 20% carried mean loss ≤ 0.1075 would clear the risk test
+at n = 1,396 and δ/3. What is established is that the effective target here is roughly half the
+nominal one, and that this model clears neither.
+
+Every figure in the table is stamped with its δ, allocation, candidate count and n in
+[`../../evidence/plan3/certification_sensitivity.json`](../../evidence/plan3/certification_sensitivity.json).
+This section selects no threshold and certifies nothing.
 
 ## What this means, stated honestly
 
@@ -285,7 +329,11 @@ reported as two independent confirmatory comparisons. There is one finding, not 
   guarantee**, because well-formed-and-grounded is a much weaker property than correct, and the
   certificate scores correctness.
 - **One** finding, not two (H1/H2 collapsed).
-- The oracle risk–coverage diagnostic, as evidence the failure is capability rather than method.
+- The oracle risk–coverage diagnostic, as evidence the failure is **not an artifact of the grid or
+  the bounds** — and, from 2026-08-03, only that. It is penalty-free, so it is silent on the
+  finite-sample penalty and may not be cited as evidence that the failure is capability rather than
+  method. Both causes must travel together: the score cannot rank (2.0% against a 23.6% oracle) and
+  the corpus halves the target (0.0925 of the 0.20 budget spent on the penalty at n = 1,396, δ/3).
 - **(ADR 0011)** The α-frontier, stated as: below α ≈ 0.406 no certificate at any threshold could
   have cleared the 20% floor for the best system. It is an oracle upper bound and may only be used
   in that ruling-out direction — never to suggest what *would* certify above it. 0.406 is an

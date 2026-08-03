@@ -275,10 +275,16 @@ def loss_summaries(rows: Sequence[GroupRow]) -> dict[str, float]:
 class RiskCoverageFrontier:
     """Oracle risk-coverage frontier: what ANY threshold could achieve, before any bound.
 
-    This is the diagnostic that distinguishes a capability gap from a methodological artifact.
-    It applies no finite-sample penalty, no grid, and no multiplicity correction -- it sorts by
-    score and reads the empirical risk of the best-scoring prefix. If the acceptance floor is
-    unreachable *here*, no grid refinement, delta reallocation or tighter bound can rescue it.
+    This is the diagnostic that rules out the GRID AND THE BOUNDS as the cause. It applies no
+    finite-sample penalty, no grid, and no multiplicity correction -- it sorts by score and reads
+    the empirical risk of the best-scoring prefix. If the acceptance floor is unreachable *here*,
+    no grid refinement, delta reallocation or tighter bound can rescue it.
+
+    It does NOT establish that the whole infeasibility is a capability gap, and reading it that way
+    was corrected on 2026-08-03 (``CX-CAPGAP-01``). Being penalty-free is what makes it clean
+    evidence about the score, and it is also what blinds it to the finite-sample penalty -- a
+    second, method-side barrier that can forbid a certificate the empirical curve permits. Here it
+    does: the loss-optimal ranking reaches 0.2357 empirically and certifies 0.1139 at delta/3.
 
     It is a DIAGNOSTIC only: it selects no threshold and certifies nothing (plan §7.2 forbids
     picking the empirically best point and calling it certified).

@@ -256,8 +256,13 @@ def test_groups_with_an_invalid_member_cap_acceptance_before_thresholding(  # A4
     assert qa["accepted_size_distribution"] is not None
 
 
-def test_risk_coverage_frontier_separates_capability_gap_from_artifact() -> None:
-    """The diagnostic that decides how the certification null is reported (correction C4)."""
+def test_risk_coverage_frontier_separates_score_failure_from_grid_artifact() -> None:
+    """Half of how the certification null is reported (correction C4).
+
+    Renamed 2026-08-03: it was ``..._separates_capability_gap_from_artifact``, which claimed more
+    than the frontier can see. Penalty-free is what makes it clean evidence about the score and
+    also what blinds it to the finite-sample penalty (``CX-CAPGAP-01`` cause 2).
+    """
     # A perfectly separable system: the top half is loss-free, so the floor is reachable.
     separable = [
         GroupRow(group_id=f"g{i:03d}", score=float(-i), all_valid=True,

@@ -49,14 +49,28 @@ certified acceptance between them is possible. H1 and H2 collapse into **one** f
 no numerical difference is computed against an infeasible baseline. Scoped to in-domain RAMS and to
 the frozen vLLM 4-bit serving stack.
 
-**The failure is capability, not method** (`CX-CAPGAP-01`). With an unlimited threshold grid, no
-finite-sample penalty and oracle threshold selection, the adapted system could accept at most 2.0%
-of documents at 20% empirical error, against a required 20%. This is a diagnostic that selects no
-threshold and certifies nothing; the same diagnostic on the development split gives 3.0%, so the
-conclusion reproduces out of sample. **It is specific to this model, this score and this task, and
-is not evidence that structured extraction cannot be certified at 20% risk** — the datasets
-`2606.29054` reports include base risks of 0.033 and 0.356, at which the same arithmetic forbids
-nothing and permits up to 80.5% acceptance respectively.
+**Two separable causes, and only one of them is capability** (`CX-CAPGAP-01`).
+
+*The score cannot rank.* With an unlimited threshold grid, no finite-sample penalty and oracle
+threshold selection, the adapted system could accept at most 2.0% of documents at 20% empirical
+error, where a perfect ranking of the same population reaches 23.6%. Both are empirical and
+penalty-free, so the 21.6-point gap is the score's, and it is not caused by the coarse grid, the δ
+split, the bound looseness or a split difference. This is a diagnostic that selects no threshold
+and certifies nothing; on the development split it gives 3.0%, so it reproduces out of sample.
+**It is specific to this model, this score and this task, and is not evidence that structured
+extraction cannot be certified at 20% risk** — the datasets `2606.29054` reports include base risks
+of 0.033 and 0.356, at which the same arithmetic forbids nothing and permits up to 80.5%
+acceptance respectively.
+
+*The corpus halves the target, for everyone.* At n = 1,396 groups with δ/3, the certifier's
+Hoeffding bound spends 0.0925 of the 0.20 risk budget on the finite-sample penalty before any data
+is seen — so a certificate at the 20% acceptance floor needs an accepted set carrying mean loss
+≤ 0.1075, whoever produced it. That is a property of this benchmark and this allocation, not of any
+model. For *this* model it settles the question independently of the score: the loss-optimal
+ranking upper-bounds what **any** score could certify and it certifies 0.1139, below the floor.
+Separately, δ/3 at this n admits at most a three-candidate grid, which the frozen configuration
+exactly fills. **This is not the claim that no model could be certified here** — one whose accepted
+20% carried mean loss ≤ 0.1075 would clear the risk test at this n.
 
 **QLoRA produced a large, real gain — in the wrong property** (`CX-GROUNDING-01`). 95.7% of the
 adapted system's outputs parse and ground to the source document, against 39.4% zero-shot and 68.1%

@@ -129,6 +129,45 @@ an extension of it rather than a breach of it, but the reasoning transfers exact
 
 ---
 
+## Added 2026-08-03 — `CX-CAPGAP-01` attributed a benchmark finding to capability
+
+**Owner ruling, not a reviewer verdict.** The claim read "a capability gap rather than a limitation
+of the certification method" and covered two causes, only one of which is that:
+
+1. **The score cannot rank** — 2.0% delivered against a 23.6% empirical oracle on the same
+   population, both penalty-free. A capability result about this model and this task.
+2. **The corpus halves the target** — at n = 1,396 with δ/3 the certifier's Hoeffding bound spends
+   **0.0925** of the 0.20 risk budget on the finite-sample penalty before any data is seen, so a
+   certificate at the acceptance floor needs an accepted set carrying mean loss ≤ **0.1075**,
+   whoever produced it. A method-and-benchmark result with nothing to do with capability.
+
+Attributing (2) to capability is the same flattering direction as the five quoting errors the
+write-up's limitations record, **expressed in attribution rather than in arithmetic**. It also cost
+the repository a result: a benchmark finding was folded into a task finding and reported as one.
+
+**Deviation from the instruction, stated.** The ruling described cause (2) as "the corpus cannot
+support a certificate at this target for any model and any score". The second half holds and is
+now claimed — the loss-optimal ranking weakly dominates every score-induced ordering at every
+prefix length, so its 0.1139 upper-bounds what any score could certify for this model. **The first
+half does not.** A system whose accepted 20% carried mean loss ≤ 0.1075 clears the risk test at
+this n: `hoeffding_upper([0.10] * 280, δ/3) = 0.1925 ≤ 0.20`. Writing "for any model" would have
+been a sixth instance of the defect being corrected, so the claim says what is true instead — the
+corpus halves the *effective* target for everyone, and this model clears neither half.
+
+**Surfaces (all in one commit, per the twin-surface rule):** the ledger entry (authority);
+`claims-appendix.generated.md` (regenerated, not edited); `README.md`; `certification-result.md`
+(section heading, a new cause-2 sub-section, the permitted-claims bullet); `docs/progress.md`;
+`draft-2026-07-28.md` §2; `cli.py`'s `risk-coverage-diagnostic` docstring;
+`certification_run.RiskCoverageFrontier`'s docstring; and
+`tests/test_certification_run.py::test_risk_coverage_frontier_separates_score_failure_from_grid_artifact`,
+renamed from `..._separates_capability_gap_from_artifact` — a test *name* is a claim surface, and
+that one asserted in its name what the function cannot show.
+
+The rename was caught by `tests/test_doc_references.py::test_every_test_named_in_the_docs_exists`
+when this paragraph first cited the old identifier: a doc naming a test that no longer exists fails
+the suite. That guard does open the file and compare, which is precisely what the claims guard does
+not do.
+
 ## What a reviewer should check
 
 1. That every change is a narrowing and none is a re-scoring — no number moved.

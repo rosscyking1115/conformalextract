@@ -79,9 +79,12 @@
 - 2026-07-22 — **Plan 3 certification executed, and returned a negative result.** The sealed
   certification split was opened exactly once, over 3,152 documents in 1,396 groups, with
   `final_reads: 0` and `shift_reads: 0`. Cost $0. **All three systems are Infeasible** at α = 0.20,
-  δ = 0.05, acceptance floor 0.20; H1 and H2 both return `both_infeasible`. The failure is a
-  capability gap, not a methodological artifact: under an oracle with no finite-sample penalty the
-  best system accepts 2.0% of documents at 20% error against a required 20%. Independent
+  δ = 0.05, acceptance floor 0.20; H1 and H2 both return `both_infeasible`. Under an oracle with no
+  finite-sample penalty the best system accepts 2.0% of documents at 20% error against a required
+  20%. *(This entry read "the failure is a capability gap, not a methodological artifact" —
+  narrowed 2026-08-03, `CX-CAPGAP-01`: the penalty-free diagnostic rules out the grid and the
+  bounds, not the finite-sample penalty, which is a second barrier on the method side and forbids a
+  certificate the empirical curve permits.)* Independent
   post-execution review `PASS`, four corrections incorporated.
   `evidence/plan3/certification_result.json`. — Manager (Claude)
 
