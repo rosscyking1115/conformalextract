@@ -23,8 +23,10 @@ corrected for. In increasing order of strictness, for QA on the certification sp
 The gap between (2) and (3) is not a detail. **An independent review on 2026-08-02 refuted the
 claim that a perfect ranking "would clear the 20% floor"**: it clears the floor at (2) and misses
 it at (3), because 0.1139 < 0.20. The measured score certifies 0.0000. So infeasibility here is
-OVERDETERMINED -- base risk, ranking, and finite-sample penalty each independently forbid the
-target -- and no statement of the form "it was reachable" is supportable. Reading (2) as if it
+OVERDETERMINED -- three separate barriers, no one of which could be removed to rescue the result.
+They are NOT all active on every system, and saying they each forbid the target is false: base risk
+alone settles ZS and FS and PERMITS QA 0.4911, so QA is settled by the other two. No statement of
+the form "it was reachable" is supportable either way. Reading (2) as if it
 were (3) is the same category error as reading the alpha-frontier point 0.406 as a threshold,
 which this repository already forbids by name.
 
@@ -707,9 +709,12 @@ def calibration_artifact(
             "at certified_delta and is the ONLY figure here that licenses the word 'certified'. "
             "An independent review on 2026-08-02 refuted a claim that the empirical oracle "
             "'would clear the floor' -- it does at 0.2357 and does not once certified at 0.1139, "
-            "and the measured score certifies 0.0000. Infeasibility is OVERDETERMINED: base risk, "
-            "ranking quality and finite-sample penalty each independently forbid the target, so "
-            "no reading of any figure here supports 'the target was reachable'. AUROC is oriented "
+            "and the measured score certifies 0.0000. Infeasibility is OVERDETERMINED by three "
+            "separate barriers -- base risk, ranking quality, finite-sample penalty -- no one of "
+            "which could be removed to rescue it. They are NOT all active on every system, and "
+            "saying they each forbid the target is false: base risk alone settles zs and fs and "
+            "permits qa 0.4911, so qa is settled by the other two. "
+            "No reading of any figure here supports 'the target was reachable'. AUROC is oriented "
             "so higher is better and 0.5 is chance, and AUPRC must be read against "
             "failure_prevalence; where that prevalence is near 1 the AUROC rests on very few "
             "non-failing groups (3 for zs, 18 for fs) and is correspondingly unstable. The "

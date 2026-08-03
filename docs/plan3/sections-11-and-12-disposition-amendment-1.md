@@ -8,7 +8,19 @@
   “What it found” below. Nothing here may reach a public surface, and Plan 3 does not close on
   this document.
 - Artifact produced: [`../../evidence/plan3/calibration_diagnostics.json`](../../evidence/plan3/calibration_diagnostics.json)
-  (`sha256 4c2424457ca1212330f7a7eced0ac91c1c43e964b05ce62e11f85897a9062cfb`)
+  (`sha256 a69da67c5b014af71471feb834303b3bede19a8d2ef7142352719a3b83b75458` over **git-canonical
+  (LF) bytes**, `git show :evidence/plan3/calibration_diagnostics.json | sha256sum`)
+
+  > **Corrected 2026-08-03.** This line previously read
+  > `4c2424457ca1212330f7a7eced0ac91c1c43e964b05ce62e11f85897a9062cfb` **with no byte convention
+  > named**. That is the hash of a *Windows CRLF working copy*, so an independent verifier on any
+  > LF checkout would have computed a mismatch against a document written to be verified — the
+  > exact trap `certification-result.md` already records for the certification artifact, repeated
+  > here. A hash without its byte convention is the same defect as an acceptance bound without its
+  > δ allocation. The artifact was regenerated in the same commit (the `interpretation` string
+  > carried the withdrawn "each independently forbid" wording); **every number in it is unchanged**
+  > and the access chain head is unchanged at `ff5562419c…` with `final_reads: 0, shift_reads: 0`,
+  > so the new hash reflects one prose line and nothing else.
 - Command: `uv run conformalextract calibration-diagnostics`
 
 ## What is being reversed
@@ -171,6 +183,14 @@ These belong here rather than only in the write-up, because they are §11.3 find
   0.2017 — the same bound without the per-system δ/3 division — and concluded that only risk bound.
   Every allocation is now tabulated with its own δ, candidate count and n in
   `certification_sensitivity.json`.
+- **The "each forbid" correction was itself incomplete, and the commit that made it said
+  otherwise.** It was applied to five prose surfaces and the commit message claimed all of them.
+  A surface map run on 2026-08-03 found **three more**: the `calibration.py` module docstring, the
+  `interpretation` string that module bakes into its artifact, and the committed artifact carrying
+  that string. Eight, not five. The prose surfaces were found by grepping the write-up; the code
+  and the generated artifact were not in the search path, which is how a correction can be
+  *verified complete* against the wrong population — the same shape as checking that a claim's
+  evidence path exists without opening the file.
 
 **Three stratification findings**, QA at `mean`, over all groups rather than an accepted set:
 
