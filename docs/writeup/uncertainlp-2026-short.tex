@@ -37,8 +37,10 @@ accepted. We show these can diverge by an order of magnitude on the same system.
 frozen, sealed-split selective-certification protocol for document-level event-argument extraction
 on RAMS, with the source document as the independent unit, and run it once on a QLoRA-adapted
 Qwen3-4B and two prompted baselines. All three are infeasible at a 20\% risk target with 95\%
-confidence and a 20\% acceptance floor, and the infeasibility is \textbf{overdetermined}: base
-risk, ranking quality and the finite-sample penalty each independently forbid the target. The
+confidence and a 20\% acceptance floor, and the infeasibility is \textbf{overdetermined} by three
+separate barriers --- base risk, ranking quality, the finite-sample penalty --- no one of which
+could be removed to rescue it. They do not all bind everywhere: base risk settles the two baselines
+and not the adapted model, which the other two settle between them. The
 adapted system's confidence score is \emph{not} weak by selective-prediction standards --- group
 AUROC 0.796, Spearman $\rho = -0.403$, matching what log-probability achieves on structured
 generation elsewhere --- and it certifies \textbf{nothing at all}. Nor would a perfect ranking:
@@ -110,10 +112,9 @@ documents forming 1,396 groups --- under a hash-chained access log, with zero re
 on CPU at no cost; the GPU programme totalled about \$18.7--18.9.
 
 \paragraph{Three population sizes, kept distinct.} 1{,}396 groups form the coverage denominator;
-\textbf{1{,}392} can be scored and ranked, which is the population every AUROC here uses; and
-acceptance additionally requires every member to parse and ground, leaving 1{,}266 for QA and fewer
-for the baselines. The four-group difference is not incidental and is taken up in
-\S\ref{sec:three}.
+\textbf{1{,}392} can be scored and ranked, the population every AUROC here uses; acceptance
+additionally requires every member to parse and ground, leaving 1{,}266 for QA. The difference
+matters and is taken up in \S\ref{sec:three}.
 
 \section{The null, and three ways to reach it}
 \label{sec:three}
@@ -198,9 +199,9 @@ measured score certifies \textbf{0.0\%}.
 Hoeffding bound, not the primary certificate, whose risk test is an \textbf{empirical Bernstein}
 bound --- the natural objection here, since a loss-optimal prefix is almost all zero-loss and
 Bernstein is tighter on low variance. It does not rescue the result: run through the certifier
-itself with a single pre-chosen oracle candidate and no multiplicity penalty, the loss-optimal
-ranking certifies \textbf{0.0000} at every coverage tested. So 11.4\% is the \emph{most generous}
-certified reading available, and we report it as the bound on mechanism 3.
+itself with one pre-chosen oracle candidate and no multiplicity penalty, that ranking certifies
+\textbf{0.0000} at every coverage tested. So 11.4\% is the \emph{most generous} certified reading
+available.
 
 \paragraph{At the frozen configuration, both constraints fail.} A certificate must clear the
 acceptance floor \emph{and} the risk target, and at this corpus size the perfect ranking clears
@@ -250,8 +251,9 @@ be ranked, so 1{,}392 is what any score orders. \textbf{The standard corpus for 
 the edge of what the certificate can be run on at all}, for any model and any score --- a
 constraint on the benchmark, applying to work that has not run yet.
 
-\paragraph{Taken together: overdetermined.} Each mechanism independently forbids the target. This
-matters for what may be concluded. A reader shown only mechanism 2 would infer that a better score
+\paragraph{Taken together: overdetermined.} Every system is blocked by at least one mechanism and
+QA by two, so no single repair rescues any of them. Saying they \emph{each} forbid the target would
+be false --- base risk permits QA 49.1\%. This matters for what may be concluded. A reader shown only mechanism 2 would infer that a better score
 would have certified this system; it would not. A reader shown only mechanism 1 would infer that
 the model is simply too weak; that is false for QA. The honest statement is that
 \textbf{nothing could have certified this system --- not a better score, not a perfect one} --- and
@@ -304,25 +306,40 @@ specific to this model, score and task.
 \section{Conclusion}
 
 A score with AUROC 0.796 certified nothing here, and neither would a perfect ranking of the same
-data. Infeasibility was overdetermined --- base risk, ranking and the finite-sample penalty each
-forbid the target --- and only the second is the score's fault. Ranking quality alone distinguishes
+data. Infeasibility was overdetermined --- base risk settles the two baselines, ranking and the
+finite-sample penalty settle the adapted model, and no single repair rescues any of the three ---
+and only ranking is the score's fault. Ranking quality alone distinguishes
 none of them.
 
 \section*{Limitations}
 \label{sec:limitations}
 
-\textbf{We made this paper's own error three times, and no two were caught the same way.} The
-defect class is quoting a quantity that resembles a certified one and is not. (i) The
-$\alpha$-frontier point 0.406 was nearly reported as a threshold; caught by a claim-wording audit.
-(ii) The empirical oracle 0.2357 was reported as clearing the floor; caught by an independent
-methodological review, and false --- the certified figure is 11.4\%. (iii) That 11.4\% was then
-labelled ``certified'' without stating it is the conservative audit's bound rather than the primary
-construction; caught by a pre-submission audit. All three ran in the direction that flattered the
-result. We report this because it is the paper's own thesis happening to its authors: at each step
-a number that looked like evidence of certifiability was not, and the distance between those two
-things is what this paper is about. It is also the strongest argument we can offer that one
-ranking-quality figure is not enough --- we could not hold the distinction steady ourselves while
-writing the paper that draws it.
+\textbf{We made this paper's own error five times, and the last two were caught by reviewers
+rather than by our own checking.} The defect class is quoting a quantity that resembles a certified
+one and is not. (i) The $\alpha$-frontier point 0.406 was nearly reported as a threshold; caught by
+a claim-wording audit. (ii) The empirical oracle 0.2357 was reported as clearing the floor; caught
+by independent review, and false --- certified, it is 11.4\%. (iii) That 11.4\% was labelled
+``certified'' without saying it is the conservative audit's bound rather than the primary
+construction; caught by a pre-submission audit. (iv) A claim-narrowing correction was applied to a
+derived document and not to the claim ledger it derives from, so a byte-identity guard propagated
+the uncorrected text into the generated appendix --- caught by review. (v) An acceptance lower
+bound was quoted at an allocation the paper did not use, supporting a sentence that is false at the
+allocation it named --- caught by review.
+
+\textbf{All five erred in the direction that flattered the result.} A directional bias across five
+instances is not inattention; it is a mechanism, and it is the one this paper is about. Instances
+(iv) and (v) occurred inside passages written specifically to state a margin honestly, which is the
+part worth reporting: the intention to be careful did not prevent them, and two independent
+reviewers did.
+
+The proximate cause is a gap we can name precisely. Our publication gate checks that a claim's
+cited evidence exists and is version-controlled. It never opens the file, never compares a number
+against it, and never sees the configuration --- the confidence allocation, the candidate count,
+the sample size --- that produced either. A figure computed at one configuration and written into
+prose naming another passes that gate unchanged, because agreement between documents is what the
+gate measures and correctness is not. \textbf{Our gate certifies agreement, not correctness}, which
+is the same distinction, one level up, that the paper draws between ranking a population well and
+certifying anything about it.
 
 \textbf{Not production-grade}, and no deployment claim is made. \textbf{The certificate bounds
 average within-group loss, not the absence of error} in any document; certified $\neq$ safe.

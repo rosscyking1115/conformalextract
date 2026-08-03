@@ -131,8 +131,10 @@ is 0.174 against an upper bound of 0.267–0.283. This is the identical category
 makes such a point of avoiding for the 0.406 frontier point, three sections above, and it ran in
 the flattering direction.
 
-**Infeasibility is OVERDETERMINED, and that is the corrected result.** Three independent
-mechanisms each forbid the target, and a claim naming only one of them is wrong:
+**Infeasibility is OVERDETERMINED, and that is the corrected result.** Every system is forbidden
+by at least one of three mechanisms and QA by two, so no single repair rescues any of them. They
+are *not* all active everywhere — saying they **each** forbid the target is false, as bullet 1
+below says in the next breath — and a claim naming only one of them is wrong:
 
 1. **Base risk.** Forbids the floor outright for ZS (permits 0.96%) and FS (5.25%). Does **not**
    forbid it for QA, which is permitted 49.1% — so attributing QA's null to μ alone is the

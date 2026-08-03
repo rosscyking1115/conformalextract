@@ -10,18 +10,19 @@
 > week. One source. (Prior content is recoverable from git and from a `safe_ops` snapshot.)
 
 - **Status: DRAFT, 2026-08-02. Not submitted. Not submittable yet.**
-- Build: `pwsh -File scripts/build_paper.ps1` → 5 pages, content ending 77% down page 4, so within
-  the 4-page ACL limit (Limitations and References do not count). No overfull boxes; all citations
-  and cross-references resolve.
+- Build: `pwsh -File scripts/build_paper.ps1` → content ends 82% down page 4, so within the 4-page
+  ACL limit; Limitations and References follow and do not count toward it. All citations and
+  cross-references resolve.
 
 ## Gate status — both packets returned REVISE, neither is discharged
 
 | Packet | Commit reviewed | Verdict |
 |---|---|---|
-| [§11.3 calibration diagnostics](../plan3/sections-11-and-12-disposition-amendment-1.md) | `0d5100b` | **REVISE** |
-| [claim narrowing](../plan3/claim-narrowing-2026-08-02.md) | `d256ca5` | **REVISE** |
+| [§11.3 calibration diagnostics](../plan3/sections-11-and-12-disposition-amendment-1.md) | `0d5100b`, `ed3693b`, `3320af9` | **REVISE**, twice |
+| [claim narrowing](../plan3/claim-narrowing-2026-08-02.md) | `d256ca5`, `ed3693b` | **REVISE**, twice |
 
-Required corrections from both were applied on 2026-08-02 and are recorded in each packet.
+Both packets were reissued after their first REVISE and both returned REVISE again. The second
+round's corrections are applied and recorded in each packet; a third review has not been run.
 **Nothing here may be submitted, posted or quoted until both are re-reviewed and pass.** Every
 quantitative sentence is bound by
 [`../plan3/certification-result.md` → "What may and may not be claimed"](../plan3/certification-result.md).
@@ -37,7 +38,7 @@ itself (279 groups) empirical risk is 0.174 against an upper bound of 0.267–0.
 That was the same category error the paper takes care to avoid for the α\* = 0.406 frontier point,
 committed one section later, and it ran in the flattering direction. The paper now argues the
 stronger thing the arithmetic supports: **infeasibility is overdetermined** — base risk, ranking
-and the finite-sample penalty each independently forbid the target — and it says so in its
+and the finite-sample penalty are three separate barriers, no one of which could be removed to rescue the result (they do not all bind on every system: base risk settles the baselines and not QA) — and it says so in its
 Limitations, because that is the paper's own thesis happening to its authors.
 
 The 2.0% vs 23.6% comparison survives unchanged: both sides are empirical, so it is like-for-like
@@ -66,9 +67,9 @@ primary source and recorded here.
 
 1. **Both packets must be re-reviewed and pass.** The only blocking item.
 2. The RoSE reference needs its full author list.
-3. Decide whether Figure 1 stays full-width (`figure*`, as built) or is redrawn single-column; at
-   single-column width its annotations need larger relative type. The three crossing labels are
-   slightly tight even at full width.
+3. ~~Decide the figure's width.~~ **Done** — single-column, regenerated at 3.3×2.2in with type
+   sized for it. It was a full-width `figure*` costing about seven column-inches; in one column it
+   costs under two, which is what brought the content back inside four pages.
 4. Author block and acknowledgements — currently anonymous, which is correct for review.
 
 ## Build notes
