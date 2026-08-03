@@ -113,6 +113,30 @@
         "evidence/plan4/reviewer_record.readme-status.json": "historical — a reviewer record of the README as reviewed",
         "evidence/withdrawn_assertions.json": "this file, which necessarily contains the phrase it retires"
       }
+    },
+    {
+      "id": "capgap-not-a-methodological-artifact-reviewer-form",
+      "phrase": "capability gap rather than a methodological artifact",
+      "withdrawn_on": "2026-08-03",
+      "withdrawn_from": "CX-CAPGAP-01",
+      "what_it_asserted": "The reviewer-record form of the attribution. Registered separately because the register matches WORDS, and this phrasing shares no matchable span with either form already registered - 'rather than a limitation of the certification method' and 'capability gap, not a methodological artifact' both miss it.",
+      "why_withdrawn": "The claim covered two causes and attributed both to capability. Only the first is that: the score reaches 2.0% where a perfect ranking of the same population reaches 23.6%, and that gap is the score's. The second is the finite-sample penalty, which is a property of the corpus and the delta allocation and not of any model - at n = 1,396 with delta/3 the certifier's Hoeffding bound spends 0.0925 of the 0.20 risk budget before any data is seen, so a certificate at the acceptance floor needs an accepted set carrying mean loss at most 0.1075 whoever produced it. Calling that a capability gap ran in the flattering direction and folded a benchmark finding into a task finding, so the project reported one result where it had two. Owner ruling, 2026-08-03.",
+      "permitted_in": {
+        "evidence/plan3/reviewer_record.certification.json": "historical - a reviewer's own words at the time of the verdict, preserved as the record of what was reviewed and found sound on the evidence then available",
+        "evidence/withdrawn_assertions.json": "this file, which necessarily contains the phrase it retires"
+      }
+    },
+    {
+      "id": "capgap-inside-a-reassurance",
+      "phrase": "the failure is a capability gap on the evidence of a diagnostic",
+      "withdrawn_on": "2026-08-03",
+      "withdrawn_from": "CX-CAPGAP-01",
+      "what_it_asserted": "The same attribution surviving inside a passage keyed 'explicitly_not_a_finding_against_the_result' - a reassurance rather than a claim, which is the position the carrying-forward gate exists to detect.",
+      "why_withdrawn": "The claim covered two causes and attributed both to capability. Only the first is that: the score reaches 2.0% where a perfect ranking of the same population reaches 23.6%, and that gap is the score's. The second is the finite-sample penalty, which is a property of the corpus and the delta allocation and not of any model - at n = 1,396 with delta/3 the certifier's Hoeffding bound spends 0.0925 of the 0.20 risk budget before any data is seen, so a certificate at the acceptance floor needs an accepted set carrying mean loss at most 0.1075 whoever produced it. Calling that a capability gap ran in the flattering direction and folded a benchmark finding into a task finding, so the project reported one result where it had two. Owner ruling, 2026-08-03.",
+      "permitted_in": {
+        "evidence/plan3/reviewer_record.plan3-close.json": "historical - a reviewer record, not editable after the fact",
+        "evidence/withdrawn_assertions.json": "this file, which necessarily contains the phrase it retires"
+      }
     }
   ]
 }

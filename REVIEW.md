@@ -284,6 +284,31 @@ uv run pytest -q && uv run ruff check . && uv run mypy
 **Verdict vocabulary:** PASS · PASS-WITH-NITS · BLOCK. A BLOCK escalates to the human Reviewer seat.
 For Plan 2 specifically, the independent reviewer basis is `docs/plan2/reviewer-brief.md`.
 
+## A completeness claim must state the population it searched
+
+**Required, not advisory.** A reviewer rejects any claim of the form "all N surfaces are
+corrected", "the map is complete", or "no artifact carries this" that does not state, *before* the
+result, **which universe was searched** — prose, the paper, source, generated strings, committed
+artifacts, tests, routing packets, companion records, registry entries. Name the file suffixes and
+the count.
+
+**"I found none" is not a finding until "I looked in X, Y, Z" is stated beside it.** Three times in
+this project the query was correct and the population was wrong, and each ended in a verdict:
+
+| The search | Population used | What it missed | The verdict it produced |
+|---|---|---|---|
+| surfaces carrying "each forbid the target" | the write-up | source, generated strings, artifacts | "all five surfaces" — it was eight |
+| surfaces carrying the capability attribution | prose, source, artifacts, tests | required companion records | "the map is complete" — the withdrawn-assertions registry was not in it |
+| artifacts backing six programme figures | `evidence/*.json` | committed **Markdown** | "six figures are untraceable" — all six were recoverable |
+
+**The error is invisible from inside the search**, which is why re-running one never helps and why
+the population has to be declared rather than assumed. It is the same shape as a metric satisfied
+by absence, one level up: absence was never measured against a stated universe.
+
+**This lives here rather than in a routing packet** because an obligation recorded only in the
+document that raised it does not travel — the rule this file already applies to review findings,
+applied to itself.
+
 ## Why scope-matches-sentence is a gate and not a lesson
 
 It sits above because it fires at the *start* of a review. A lesson in a retrospective fires never.

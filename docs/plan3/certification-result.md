@@ -97,12 +97,30 @@ loss-optimal ranking weakly dominates every score-induced ordering at every pref
 upper-bounds what **any** score could certify — and it certifies 0.1139.
 
 **This is not the claim that no model could be certified on this corpus,** and it must not be
-written that way. A system whose accepted 20% carried mean loss ≤ 0.1075 would clear the risk test
-at n = 1,396 and δ/3. What is established is that the effective target here is roughly half the
-nominal one, and that this model clears neither.
+written that way. A system whose accepted 20% carried mean loss ≤ 0.1075 would clear **the risk
+test** at n = 1,396 and δ/3 — **and would still not be certified**, because a certificate must also
+clear the acceptance floor on its Clopper–Pearson *lower* bound, which 20% coverage does not: the
+frozen construction needs **332** accepted groups, not 280. Clearing one of two constraints is not
+a counter-example to infeasibility, and quoting it as one would repeat the error this section
+exists to correct. What is established is that the effective *risk* target here is roughly half
+the nominal one, and that this model clears neither constraint.
 
-Every figure in the table is stamped with its δ, allocation, candidate count and n in
-[`../../evidence/plan3/certification_sensitivity.json`](../../evidence/plan3/certification_sensitivity.json).
+**Which artifact carries which figure**, because an earlier version of this sentence said the
+sensitivity artifact stamped all five and it stamped two:
+
+| Figure | Artifact |
+|---|---|
+| 0.0925, ≤ 0.1075, k = 280 | [`derived_quantities.json`](../../evidence/plan3/derived_quantities.json) |
+| 0.1139 | [`calibration_diagnostics.json`](../../evidence/plan3/calibration_diagnostics.json) |
+| 0.1984, 3 candidates | [`certification_sensitivity.json`](../../evidence/plan3/certification_sensitivity.json) |
+
+**Name the construction, because "the certifier's bound" is not what produced 0.0925.** It is a
+Hoeffding radius at the per-system δ/3 allocation, which is a *diagnostic* pairing: the primary
+certificate's risk test is an **empirical Bernstein** bound, and the conservative audit ran
+Hoeffding with a **single candidate at the full δ** (`certification_result.json`,
+`systems.*.conservative_audit`: `candidate_count: 1`, `delta: 0.05`). So 0.0925 is neither
+construction's own number. It is the right figure for the question "what does a Hoeffding bound
+spend at this n and this allocation", and it must not be read as what either certifier applied.
 This section selects no threshold and certifies nothing.
 
 ## What this means, stated honestly
@@ -368,6 +386,7 @@ reported as two independent confirmatory comparisons. There is one finding, not 
 | Calling **0.406** a threshold, a certified operating point, or anything other than an empirical oracle frontier point measured on an already-opened split *(added 2026-08-02)* | — |
 | Describing grounding and certifiability as **orthogonal**, **independent**, or **unrelated**. The measured relation is a dissociation; independence was never tested *(added 2026-08-02)* | — |
 | Attributing the null to base risk **alone**. At μ = 0.6071 the bound permits 49.1%; infeasibility is overdetermined by base risk, ranking AND the finite-sample penalty — **and stating the conjunction without its qualifier is the opposite error**: the three are *not* all active on every system, base risk settles ZS and FS outright and does **not** forbid the floor for QA *(added 2026-08-02; qualifier added 2026-08-03, the ninth surface of that correction)* | — |
+| Attributing the whole infeasibility to **capability**. Only the ranking half is that; the finite-sample penalty is a property of n and the δ allocation and holds for any system. The oracle risk–coverage diagnostic is penalty-free and rules out the grid and the bounds, **not** the penalty *(added 2026-08-03. This is the enumeration of forbidden readings, so the ruling belongs here and not only in the permitted-claims bullet above)* | — |
 | Reading the **empirical** oracle acceptance (0.2357) as something that could have been certified, or saying the floor "was reachable". Certified, that oracle is 0.1139 at δ/3 — below the floor. Only `acceptance_certified_loss_optimal` licenses the word "certified" *(added 2026-08-02)* | — |
 
 ## Status

@@ -72,18 +72,19 @@
       "status": "verified",
       "scope": "in-domain RAMS; (1) oracle risk-coverage diagnostic on the certification and development splits, (2) the frozen n = 1,396 corpus at alpha = 0.20, delta/3 and a 20% acceptance floor",
       "evidence": [
-        "evidence/plan3/risk_coverage_diagnostic.json",
+        "docs/frontier-check/findings.md",
+        "docs/plan3/certification-result.md",
         "evidence/plan3/calibration_diagnostics.json",
         "evidence/plan3/certification_sensitivity.json",
-        "docs/plan3/certification-result.md",
-        "docs/frontier-check/findings.md"
+        "evidence/plan3/derived_quantities.json",
+        "evidence/plan3/risk_coverage_diagnostic.json"
       ],
-      "method": "(1) Oracle risk-coverage frontier over source-document groups via certification_run.risk_coverage_frontier, using the same aggregation, eligibility, loss and score as the certifier; no threshold is selected or certified. (2) The certifier's own Hoeffding upper bound at certified_delta = delta/3, via calibration.acceptance_certified_loss_optimal (the loss-sorted prefix, which weakly dominates every score-induced ordering at every k) and certification.largest_scorc_grid at n = 1,396; tabulated with its delta, allocation, candidate count and n in evidence/plan3/certification_sensitivity.json.",
+      "method": "(1) Oracle risk-coverage frontier over source-document groups via certification_run.risk_coverage_frontier, using the same aggregation, eligibility, loss and score as the certifier; no threshold is selected or certified. (2) The certifier's own Hoeffding upper bound at certified_delta = delta/3, via calibration.acceptance_certified_loss_optimal (the loss-sorted prefix, which weakly dominates every score-induced ordering at every k) and certification.largest_scorc_grid at n = 1,396. Each figure is stamped with its delta, allocation, candidate count and n in the artifact that carries it - 0.0925, 0.1075 and k = 280 in evidence/plan3/derived_quantities.json, 0.1139 in evidence/plan3/calibration_diagnostics.json, and the acceptance lower bound and grid capacity in evidence/plan3/certification_sensitivity.json. An earlier wording named the sensitivity artifact for all of them and it carried two. NOTE THE CONSTRUCTION: 0.0925 is a Hoeffding radius at the per-system delta/3, a DIAGNOSTIC pairing - the primary certificate's risk test is empirical Bernstein and the conservative audit ran Hoeffding with a single candidate at the full delta, so 0.0925 is neither construction's own number.",
       "limitations": [
         "A diagnostic, not a certificate: it selects no threshold and certifies nothing.",
         "The same oracle diagnostic on the development split gives 3.0%, so cause (1) reproduces out of sample.",
         "Cause (1) is specific to this model, this confidence score and this task. It is not evidence that event-argument extraction, or structured extraction generally, cannot be certified at 20% risk: 2606.29054's own datasets include base risks of 0.033 and 0.356, at which the arithmetic bound forbids nothing and permits up to 80.5% acceptance respectively (docs/frontier-check/findings.md, re-verified 2026-07-22).",
-        "Cause (2) is NOT the claim that no model could be certified on this corpus. A system whose accepted 20% carries mean loss at most 0.1075 would clear the risk test at n = 1,396 and delta/3. What cause (2) establishes is that the corpus and the allocation halve the effective target for every system, and that for THIS model no score whatsoever clears what remains.",
+        "Cause (2) is NOT the claim that no model could be certified on this corpus. A system whose accepted 20% carries mean loss at most 0.1075 would clear THE RISK TEST at n = 1,396 and delta/3 - and would still not be certified, because a certificate must also clear the acceptance floor on its Clopper-Pearson LOWER bound, which 20% coverage does not: the frozen construction needs 332 accepted groups, not 280. Clearing one of two constraints is not a counter-example to infeasibility. What cause (2) establishes is that the corpus and the allocation halve the effective target for every system, and that for THIS model no score whatsoever clears what remains.",
         "The two causes attach to different mechanisms of the three-way decomposition and must not be merged: cause (1) is ranking (mechanism 2), cause (2) is the finite-sample penalty (mechanism 3) plus grid capacity. Base risk (mechanism 1) belongs to neither - it settles ZS and FS outright and permits QA 49.1%.",
         "Narrowed 2026-08-03. This claim previously read 'a capability gap rather than a limitation of the certification method' and attributed BOTH causes to capability, which is the same flattering direction as the five quoting errors recorded in the write-up's limitations, expressed in attribution rather than in arithmetic."
       ],

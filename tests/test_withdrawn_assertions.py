@@ -44,7 +44,13 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 REGISTER = ROOT / "evidence" / "withdrawn_assertions.json"
 
-PROSE_SUFFIXES = frozenset({".md", ".json", ".txt", ".py", ".toml"})
+#: ``.tex`` was added on 2026-08-03, on a reviewer finding. The typeset paper is the most public
+#: surface in this repository and the scan had never reached it --- while ``permitted_in`` listed
+#: a ``.tex`` file, and the guard-the-guard test read that path directly and passed. **An
+#: exemption from a scan that cannot reach the file is inert, and its presence is affirmative
+#: evidence of coverage that does not exist.** Build products (``.aux``, ``.log``, ``.bbl``, the
+#: PDF) stay out: they are generated from the ``.tex`` and would double-count it.
+PROSE_SUFFIXES = frozenset({".md", ".json", ".txt", ".py", ".toml", ".tex"})
 
 
 def _register() -> list[dict[str, object]]:
