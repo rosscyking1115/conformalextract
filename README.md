@@ -146,19 +146,27 @@ than described.
   recorded spend), with a run ledger imposing R0→R1→R2 order. No single spend ledger exists and the
   figures are price×duration estimates, not billed amounts
   ([ADR 0012](docs/adr/0012-cost-claim-evidence-correction.md)).
-- **Claims cannot outrun their evidence.** `conformalextract verify-claims` fails closed if a
-  claim's evidence is not git-tracked, and a regression tripwire refuses a claim that holds a public
-  surface while its own verification literally reads as pending. The tripwire is not a verification
-  gate and does not claim to be — what it catches and what it misses is measured and written down in
-  ADR 0011 §6 rather than left implied by the function's name.
+- **Claims cannot outrun their evidence — as far as the paths, and no further.**
+  `conformalextract verify-claims` fails closed if a claim's cited evidence is missing or not
+  git-tracked, and a regression tripwire refuses a claim that holds a public surface while its own
+  verification literally reads as pending. **What it does not do is open the file.** It compares no
+  number and sees no configuration, so `verify-claims ok` means the paths resolve, not that the
+  claims check out — and a claim quoting a figure that appears nowhere in its own evidence passes
+  unchanged. That gap is the mechanism behind five quoting errors this project made and records
+  (`docs/plan4/open-release-decisions.md`, 2026-08-03; `docs/writeup/uncertainlp-2026-short.tex`,
+  Limitations). It is named rather than closed, which is the honest state of it. What *is* enforced
+  by reading files: the generated claims appendix must be byte-identical to what the ledger renders,
+  and every test named in the docs must exist.
 - **Sealed roles are guarded, not merely logged.** Only `development` and `certification` are
   reachable from the analysis commands; every other role raises before a file is opened. A test
   discovers the command list by introspection, so a *new* unguarded command fails rather than
   passing silently.
 
 Typing and tests are strict: **`mypy` runs with `strict = true`** over the package (which ships
-`py.typed`), `ruff` is clean, and the suite is 349 tests, all passing — a measurement taken at this
-commit, not a standing property. The green command below must pass before any hand-off.
+`py.typed`), `ruff` is clean, and **the suite is green — total not asserted.** It previously read
+"the suite is 349 tests, all passing"; that figure was stale and, being a count nothing re-checks,
+it is the same defect class as an unverified claim. Run the commands below and read your own
+number. The green command must pass before any hand-off.
 
 ## Local checks
 

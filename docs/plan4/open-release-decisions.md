@@ -64,6 +64,39 @@ a dated record — see `docs/release-check-2026-07-28.md` for the check that sur
 > Recorded here so it is a known exposure rather than a discovery waiting to happen, and so whoever
 > resumes Plan 4 finds it already enumerated.
 
+> ### Known exposure, recorded 2026-08-03 and deliberately not closed: the claims guard never opens the file
+>
+> `claims.verify_ledger` checks three things about a claim's cited evidence: that the **paths
+> exist**, that they are **git-tracked**, and that tracking is determinable. It never opens a file,
+> never compares a number against one, and never sees the configuration — the δ allocation, the
+> candidate count, the sample size — that produced either the number in the file or the number in
+> the prose. **A claim quoting a figure that appears nowhere in its own evidence passes unchanged,
+> because the metric is satisfied by absence.**
+>
+> **`verify-claims ok` therefore means the paths resolve.** It was reported as a green signal in
+> every status line of the 2026-08-03 session, and reading it as "the claims check out" — as that
+> seat did — is reading information that is not there. That reading is the exposure; the tool is
+> doing what it says, under a name that suggests more.
+>
+> **This is the mechanism behind the five quoting errors** recorded in the write-up's limitations,
+> not five separate lapses of attention. It also explains their direction: nothing was ever pushing
+> back, so the only filter on a wrong number was whether it looked plausible, and a number that
+> flatters the result looks plausible to the person who wants it. Contrast
+> `test_doc_references.py::test_every_test_named_in_the_docs_exists`, which *does* open the file and
+> compare — it caught a stale test name in the very commit that renamed it.
+>
+> **Attestation is not checking.** `evidence/plan3/certification_sensitivity.json` now stamps each
+> quoted quantity with its δ, allocation, candidate count and n. That narrows the four quantities it
+> covers and closes nothing: **nothing compares the prose against it.** The stamp is a place to look
+> up the right answer, not a gate that notices the wrong one.
+>
+> **Open item — a validity guard that reads its evidence.** First scope, deliberately small: the
+> four quantities in `certification_sensitivity.json` (the acceptance lower bound by allocation, the
+> empirical-Bernstein probe, the AUROC bootstrap interval, and grid capacity), asserted against the
+> surfaces that quote them. **Not built.** Building it before the overdue review round would repeat
+> the bundling problem the round exists to catch, and naming the gap is the disclosure the paper
+> carries. Whether to build it at all is the owner's call.
+
 ## Live list
 
 | # | Decision | Status |
