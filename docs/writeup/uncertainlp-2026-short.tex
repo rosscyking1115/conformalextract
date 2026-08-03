@@ -43,7 +43,8 @@ adapted system's confidence score is \emph{not} weak by selective-prediction sta
 AUROC 0.796, Spearman $\rho = -0.403$, matching what log-probability achieves on structured
 generation elsewhere --- and it certifies \textbf{nothing at all}. Nor would a perfect ranking:
 ranked by true loss, the same population certifies 11.4\%, still short of the floor, and the corpus
-would need to be roughly 13$\times$ larger before that gap could close. The third mechanism is
+would need to be roughly 13$\times$ larger before that gap could close --- the frozen candidate
+grid is already the largest this benchmark admits. The third mechanism is
 observable in only one of our three systems, because the other two fail at base risk first. Separating the
 three mechanisms is what makes the null diagnostic rather than merely negative, and only one of
 them is the score's fault.
@@ -196,13 +197,21 @@ measured score certifies \textbf{0.0\%}.
 \paragraph{Which bound, and why it matters.} The 11.4\% is the \emph{conservative audit's}
 Hoeffding bound, not the primary certificate, whose risk test is an \textbf{empirical Bernstein}
 bound --- the natural objection here, since a loss-optimal prefix is almost all zero-loss and
-Bernstein is tighter on low variance. It does not rescue the result. Run through the certifier
+Bernstein is tighter on low variance. It does not rescue the result: run through the certifier
 itself with a single pre-chosen oracle candidate and no multiplicity penalty, the loss-optimal
-ranking certifies \textbf{0.0000} at every coverage tested, and what binds is the risk bound, not
-acceptance: at 23.6\% coverage the acceptance bound clears 0.20 (0.2017 at the run's allocation ---
-a two-group margin, the smallest clearing prefix being 327 against 329) and the risk test still
-fails. The stricter construction is stricter, so we report 11.4\% as the \emph{most generous}
-certified reading available.
+ranking certifies \textbf{0.0000} at every coverage tested. So 11.4\% is the \emph{most generous}
+certified reading available, and we report it as the bound on mechanism 3.
+
+\paragraph{At the frozen configuration, both constraints fail.} A certificate must clear the
+acceptance floor \emph{and} the risk target, and at this corpus size the perfect ranking clears
+neither. The frozen allocation is three candidates per system at $\delta/3$ --- both divisions
+apply --- and there the oracle prefix's acceptance lower bound is \textbf{0.1984}, \emph{below} the
+0.20 floor; the smallest prefix that would clear it is 332 against the oracle's 329. The risk test
+fails independently. We state this because an earlier draft of this paragraph quoted 0.2017, which
+is the same bound computed without the per-system $\delta/3$ division, and concluded that
+acceptance cleared and only risk bound --- a stronger-sounding claim that is false at the
+configuration it named. Every figure in this paragraph is emitted with its allocation in the
+released sensitivity artifact.
 
 QA is the only system in which this mechanism is visible, because ZS and FS are already dead at
 mechanism 1. Figure~\ref{fig:rc} shows all three distances in one panel.
@@ -229,16 +238,17 @@ they are separate arguments rather than one restated.
 radius budget of 0.026 before the Hoeffding bound crosses $\alpha$ --- roughly 3{,}600 accepted
 groups, so about \textbf{18{,}000 in total, 12.9$\times$ this split}.
 
-\emph{From the certifier's own precondition, which binds far sooner.} The frozen configuration,
-three candidates per system at $\delta/3$, requires 1{,}386 groups. The split holds 1{,}396, but
-four contain a document that produced no generation at all, and since a group scores at its weakest
-member all four are unscorable --- the same four for every system, so a property of the corpus, not
-of any model. Against the 1{,}392 a ranking can actually order that is \textbf{a margin of six,
-under half a percent}; seven further unscorable groups and the certificate is inadmissible before
-any model runs. (Against the full 1{,}396 the margin is ten. The four are already ineligible and
-change no acceptance figure, so we report the conservative one.) \textbf{The standard corpus for this task sits at the edge of what
-the certificate can be run on at all}, for any model and any score --- a constraint on the
-benchmark, applying to work that has not run yet.
+\emph{From the certifier's own precondition, which binds far sooner.} At the frozen $\delta/3$
+allocation the theorem admits a grid of at most \textbf{three} candidates on this corpus: three
+require 1{,}386 groups and the split holds 1{,}396, but a fourth would require 1{,}432. \textbf{The
+frozen grid is the largest this benchmark can support}, and it is frozen at exactly that size. We
+state capacity rather than a margin in groups because the row count and the rankable count differ
+--- four groups contain a document that produced no generation at all, and since a group scores at
+its weakest member all four are unscorable, the same four for every system, so a property of the
+corpus rather than any model. They remain rows, so the precondition still sees 1{,}396; they cannot
+be ranked, so 1{,}392 is what any score orders. \textbf{The standard corpus for this task sits at
+the edge of what the certificate can be run on at all}, for any model and any score --- a
+constraint on the benchmark, applying to work that has not run yet.
 
 \paragraph{Taken together: overdetermined.} Each mechanism independently forbids the target. This
 matters for what may be concluded. A reader shown only mechanism 2 would infer that a better score
@@ -337,7 +347,9 @@ differently, and mechanism 3 would still apply to them.
 \section*{Reproducibility}
 
 Protocol, certifier, diagnostics and claim ledger are code, and every figure resolves to a
-committed artifact. Released with publication: source, the frozen group mapping, per-system
+committed artifact --- including a sensitivity artifact that stamps each quoted bound with the
+$\delta$, allocation, candidate count and $n$ that produced it, because a figure carrying no
+configuration is how three of the errors in Limitations happened. Released with publication: source, the frozen group mapping, per-system
 predictions with confidence candidates, and the certification and diagnostic artifacts. Raw corpus
 text and sealed labels are not redistributable.
 

@@ -104,11 +104,17 @@ check that the new command and the certifier agree about what a loss is:
 
 Certification split, α = 0.20, acceptance floor 0.20, group level:
 
-| System | base risk | arithmetic bound | oracle, **empirical** | oracle, **certified** (δ/3) | delivered, empirical | delivered, certified | AUROC | norm. AURC | Spearman ρ |
-|---|---|---|---|---|---|---|---|---|---|
-| QA | 0.6071 | 0.4911 | 0.2357 | **0.1139** | 0.0201 | **0.0000** | 0.796 | 0.531 | −0.403 |
-| FS | 0.9580 | 0.0525 | 0.0244 | **0.0000** | 0.0000 | **0.0000** | 0.727 | 0.920 | +0.073 |
-| ZS | 0.9923 | 0.0096 | 0.0036 | **0.0000** | 0.0000 | **0.0000** | 0.344 | 0.926 | −0.027 |
+| System | base risk | arithmetic bound | oracle, **empirical** | oracle, **certified** (δ/3) | delivered, empirical | delivered, certified | AUROC | *(non-failing groups)* | norm. AURC | Spearman ρ |
+|---|---|---|---|---|---|---|---|---|---|---|
+| QA | 0.6071 | 0.4911 | 0.2357 | **0.1139** | 0.0201 | **0.0000** | 0.796 | *90 of 1,392* | 0.531 | −0.403 |
+| FS | 0.9580 | 0.0525 | 0.0244 | **0.0000** | 0.0000 | **0.0000** | 0.727 | *18 of 1,392* | 0.920 | +0.073 |
+| ZS | 0.9923 | 0.0096 | 0.0036 | **0.0000** | 0.0000 | **0.0000** | 0.344 | ***3 of 1,392*** | 0.926 | −0.027 |
+
+**Read the AUROC column against the count beside it.** ZS's 0.344 rests on three non-failing
+groups and FS's 0.727 on eighteen; neither is a stable estimate and neither should be quoted
+without its count. Only QA's is worth interpreting, and its 95% bootstrap interval is
+[0.737, 0.850] — recorded, with its seed and resample count, in
+[`../../evidence/plan3/certification_sensitivity.json`](../../evidence/plan3/certification_sensitivity.json).
 
 The two oracle columns are the correction below. **Not one figure in the certified columns reaches
 the 0.20 floor**, and the acceptance floor is 0.20 for every row.
@@ -143,6 +149,26 @@ mechanisms each forbid the target, and a claim naming only one of them is wrong:
 nothing. **What is withdrawn:** every sentence of the form “the target was reachable” or “the floor
 would have been cleared”. Nothing could have certified this system — not a better score, not a
 perfect one.
+
+### Added 2026-08-03 — what the R7 reconciliation found
+
+These belong here rather than only in the write-up, because they are §11.3 findings.
+
+- **Three population sizes, not one.** 1,396 rows are passed to the certifier and the precondition
+  is checked against that count; 1,392 can be scored and ranked; 1,266 are eligible for acceptance
+  under QA. The four-group difference is groups containing a document that produced no generation
+  at all — the same four in every system, so a corpus property. **They remain rows**, so no number
+  of further unscorable groups reduces the n the precondition sees. An earlier draft claimed seven
+  more would make the certificate inadmissible; that is false against the code and is withdrawn.
+- **Grid capacity is the honest statement of "at the edge".** At δ/3 the theorem admits at most a
+  **three**-candidate grid on this corpus — three need 1,386 groups against 1,396, a fourth needs
+  1,432 — and the frozen configuration is exactly three. This replaces the margin-in-groups
+  framing, which was ambiguous between the row count and the rankable count.
+- **At the frozen allocation both constraints fail.** The oracle prefix's acceptance lower bound is
+  **0.1984**, below the 0.20 floor, and the risk test fails independently. An earlier draft quoted
+  0.2017 — the same bound without the per-system δ/3 division — and concluded that only risk bound.
+  Every allocation is now tabulated with its own δ, candidate count and n in
+  `certification_sensitivity.json`.
 
 **Three stratification findings**, QA at `mean`, over all groups rather than an accepted set:
 
