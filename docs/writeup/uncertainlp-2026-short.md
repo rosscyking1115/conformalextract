@@ -11,10 +11,17 @@
 
 - **Status: DRAFT, 2026-08-03. Not submitted. Not submittable yet.**
 - Build: `pwsh -File scripts/build_paper.ps1` → all citations and cross-references resolve.
-- **Within the 4-page limit — measured from a build, 2026-08-03.** Content ends **95% down page 4**;
-  the `Limitations` heading is the first thing on page 5. Limitations, References and the appendix
-  do not count toward the limit. **The margin is about 5% of one page**, so the next addition
-  overflows: re-measure from a build before adding anything, and do not trust this line.
+- **Targeting the FULL-PAPER format, up to 8 pages** (owner's decision, 2026-08-03). The venue's own
+  call — <https://uncertainlp.github.io/>, read from source that day — offers short "up to 4 pages"
+  and full "up to 8 pages", both archival and non-archival, **same review process**. Limitations,
+  References and appendices do not count. The provenance and the reasoning are in
+  [`reviewer_analysis.md`](reviewer_analysis.md) under Submission Readiness.
+- **Content: 4 pages plus part of page 5, measured from a build.** Comfortably inside 8. Re-measure
+  from a build before drawing any conclusion from this line — a stored measurement is what produced
+  instance six.
+- **Why the format changed, in one line:** after every legitimate structural lever the residual
+  overflow at 4 pages was still 10 lines, the paper grew *as it became more correct*, and
+  compression introduced a factual defect three times out of three.
 - **It was ten lines over, and the fix was structural rather than a compression pass.** Two levers,
   no prose compressed: the trigger-count and cross-sentence stratification moved to
   `Appendix A: The aggregation unit` (ACL appendices follow References and do not count), leaving a

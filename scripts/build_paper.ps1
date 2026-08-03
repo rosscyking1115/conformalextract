@@ -52,9 +52,14 @@ try {
     } else {
         'refs   : all citations and cross-references resolved'
     }
-    if ([int]$pages -gt 5) {
-        "NOTE: $pages pages. ACL short papers allow 4 pages of content; Limitations and References"
-        '      do not count toward it, so check where the content actually ends before cutting.'
+    # The limit is the venue's, read from https://uncertainlp.github.io/ on 2026-08-03: full
+    # papers up to 8 pages, short up to 4. THIS PAPER TARGETS THE FULL FORMAT. The number lived
+    # for weeks as an untraced assumption in reviewer_analysis.md and three factual defects came
+    # out of compressing to it, so the source is named here rather than the number repeated.
+    if ([int]$pages -gt 9) {
+        "NOTE: $pages pages. UncertaiNLP full papers allow 8 pages of CONTENT; Limitations,"
+        '      References and appendices do not count, so measure where the content actually'
+        '      ends (from this build, never from a stored figure) before cutting anything.'
     }
 }
 finally {

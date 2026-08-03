@@ -128,8 +128,29 @@ Confidence: 4/5 on methodology, 3/5 on the event-extraction literature.
 
 ## Submission Readiness
 
+> **Corrected 2026-08-03. This line read `UncertaiNLP 2026 (short, 4 pages)` and that number was
+> never traced to the call.** It was an assumption written here and then carried forward by every
+> later session as though it were the venue's rule. **Three factual defects came out of compressing
+> to it**, and the compression was the highest-risk edit available in this document each time.
+>
+> **The call's own wording, read from source on 2026-08-03** at
+> <https://uncertainlp.github.io/> (Third Workshop on Uncertainty-Aware NLP @ EMNLP 2026):
+> short papers **"up to 4 pages"**, full papers **"up to 8 pages"**, both archival and
+> non-archival, and non-archival submissions "go through the same review process as archival ones".
+> Formatting follows the EMNLP 2026 / ARR guidelines using the official ACL style templates.
+> Under those guidelines (<https://2026.eacl.org/calls/papers/>, read the same day) references and
+> appendices are **unlimited**, and the Limitations and ethics sections **do not count** toward the
+> limit. No separate appendix limit is specified.
+>
+> **Owner's decision, 2026-08-03: target the FULL-PAPER format, up to 8 pages, same review
+> process.** The reasoning, recorded so it can be argued with rather than around: after every
+> legitimate structural lever the residual overflow was still 10 lines, measured from a build; the
+> paper grew *as it became more correct*, through scoping, definitions and qualifiers; compression
+> introduced a factual defect three times out of three; and at four pages the Limitations section
+> needed explicit protection all session, which at eight it does not.
+
 ```text
-Target venue:            UncertaiNLP 2026 (short, 4 pages)
+Target venue:            UncertaiNLP 2026 (FULL paper, up to 8 pages; short is 4)
 Template:                ACL, acl.sty, unvendored (no upstream licence), pinned fetch recorded
 Main tex:                docs/writeup/uncertainlp-2026-short.tex
 Build status:            PASS — 5 pages, content ends 85% down page 4, 0 errors, 0 overfull,

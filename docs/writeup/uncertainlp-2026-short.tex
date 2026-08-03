@@ -1,4 +1,4 @@
-% UncertaiNLP 2026 short paper (4 pages). DRAFT — NOT SUBMITTED.
+% UncertaiNLP 2026 FULL paper (up to 8 pages). DRAFT — NOT SUBMITTED.
 %
 % Rewritten 2026-08-02 after an independent review returned REVISE and refuted the previous
 % central claim ("a perfect ranking would clear the 20% floor"). That claim is gone; the argument
@@ -113,10 +113,15 @@ on CPU at no cost; the GPU programme totalled \$18.7--18.9 --- a band rather tha
 there is no single spend ledger, and one job's cost is recovered by differencing running totals
 that admit two readings.
 
-\paragraph{Three population sizes, kept distinct.} 1{,}396 groups form the coverage denominator;
-\textbf{1{,}392} can be scored and ranked, the population every AUROC here uses; acceptance
-additionally requires every member to parse and ground, leaving 1{,}266 for QA. The difference
-matters and is taken up in \S\ref{sec:three}.
+\paragraph{Three population sizes, kept distinct.} 1{,}396 groups form the coverage denominator and
+are what the certificate's sample precondition is checked against; \textbf{1{,}392} can be scored
+and ranked, and that is the population every AUROC here uses; acceptance additionally requires
+every member to parse and ground, leaving 1{,}266 for QA. \textbf{The four-group difference is not
+incidental.} Each of the four contains a document that produced no generation at all, so it carries
+no confidence value, and since a group scores at its weakest member the whole group is unrankable.
+They are the \emph{same four in every system}, which makes them a property of the corpus rather
+than of any model, and they remain rows --- so the precondition still sees 1{,}396 while no score
+can order them.
 
 \section{The null, and three ways to reach it}
 \label{sec:three}
@@ -264,17 +269,30 @@ benchmark under this design, applying to work that has not run yet. A study cert
 at the full $\delta$ would face a laxer capacity, and we do not claim otherwise.
 
 \paragraph{Taken together: overdetermined.} Every system is blocked by at least one mechanism and
-QA by two, so no single repair rescues any of them. Saying they \emph{each} forbid the target would
-be false --- base risk permits QA 49.1\%. This matters for what may be concluded. A reader shown only mechanism 2 would infer that a better score
-would have certified this system; it would not. A reader shown only mechanism 1 would infer that
-the model is simply too weak; that is false for QA. The honest statement is that
-\textbf{nothing could have certified this system --- not a better score, not a perfect one} --- and
-that the score is nonetheless responsible for a 21.6-point share of the shortfall.
+QA by two, so no single repair rescues any of them. The three are \emph{not} all active on every
+system, and saying they \emph{each} forbid the target would be false: base risk permits QA 49.1\%
+and settles only the two baselines.
 
-\paragraph{The unit definition is also decisive}, and it is not separable from mechanism 3 ---
-the unit fixes the group count, which is what the capacity argument above turns on: acceptance
-vanishes with document complexity even where mean loss is flat, and a protocol reporting only
-aggregate loss sees none of it. Appendix~\ref{app:unit} gives the stratification.
+That distinction decides what a reader may conclude, and either half alone misleads. Shown only
+mechanism 2, a reader infers that a better score would have certified this system --- it would not;
+the perfect ranking of the same population certifies 11.4\%. Shown only mechanism 1, a reader
+infers that the model is simply too weak --- false for QA, whose base risk permits nearly half the
+corpus. The honest statement needs both: \textbf{nothing could have certified this system --- not a
+better score, not a perfect one} --- \emph{and} the score is still responsible for a 21.6-point
+share of the shortfall. A null that names only one mechanism is not a weaker version of this
+finding; it is a different and wrong one.
+
+\paragraph{The unit definition is also decisive}, and it is not separable from mechanism 3: the
+unit fixes the group count, which is exactly what the capacity argument above turns on. Stratifying
+QA's groups by triggers per document, mean group loss is essentially flat --- 0.606, 0.608, 0.589,
+0.634, 0.596 from one trigger to six or more --- but the share of groups within $\alpha$ collapses
+from \textbf{17.3\% to 0.7\% to zero}, and 23 of the 28 oracle-accepted groups are single-trigger.
+Groups with three or more triggers contribute \textbf{none}. Averaging frame loss across a document
+and scoring the group by its weakest member makes acceptance vanish with document complexity
+\emph{even where mean loss does not move}. Cross-sentence distance behaves the same way: 25 of 28
+acceptances have no cross-sentence argument. \textbf{A protocol reporting only aggregate loss sees
+neither effect}, and would read this corpus as uniformly hard rather than as hard in a way the
+aggregation choice creates.
 
 \section{What the adapter changed, and what it did not}
 \label{sec:grounding}
@@ -395,19 +413,5 @@ predictions with confidence candidates, and the certification and diagnostic art
 text and sealed labels are not redistributable.
 
 \bibliography{uncertainlp-2026-short}
-
-\appendix
-
-\section{The aggregation unit}
-\label{app:unit}
-
-Stratifying QA's groups by triggers per document, mean group loss is essentially flat (0.606,
-0.608, 0.589, 0.634, 0.596 from 1 to 6+) --- but the share of groups within $\alpha$ collapses from
-\textbf{17.3\% to 0.7\% to zero}, and 23 of the 28 oracle-accepted groups are single-trigger.
-Groups with three or more triggers contribute \textbf{none}. Averaging frame loss across a document
-and scoring the group by its weakest member makes acceptance vanish with document complexity even
-where mean loss does not move. Cross-sentence distance behaves the same way: 25 of 28 acceptances
-have no cross-sentence argument. Both are descriptive over all groups rather than an accepted set;
-neither selects a threshold and neither certifies anything.
 
 \end{document}
