@@ -193,7 +193,11 @@ empirical risk 0.174 at the floor --- and require it to \emph{certify} rather th
 average below $\alpha$. Its Hoeffding upper bound at the per-system $\delta/3$ allocation is
 0.267 at the floor, and the largest acceptance it can certify is \textbf{11.4\%} (8.4\%
 family-wide). \textbf{A perfect ranking of this population does not clear the floor either.} The
-measured score certifies \textbf{0.0\%}.
+measured score certifies \textbf{0.0\%}. This mechanism is not a fact about our system: at
+$n = 1{,}396$ and $\delta/3$ the bound spends \textbf{0.0925} of the 0.20 budget before any data is
+seen, so certifying at the floor needs an accepted set with mean loss $\leq 0.1075$, \emph{whoever}
+produced it. The benchmark halves the effective target for everyone --- though it forbids no one:
+a system under that figure would certify here.
 
 \paragraph{Which bound, and why it matters.} The 11.4\% is the \emph{conservative audit's}
 Hoeffding bound, not the primary certificate, whose risk test is an \textbf{empirical Bernstein}
@@ -314,32 +318,38 @@ none of them.
 \section*{Limitations}
 \label{sec:limitations}
 
-\textbf{We made this paper's own error five times, and the last two were caught by reviewers
-rather than by our own checking.} The defect class is quoting a quantity that resembles a certified
-one and is not. (i) The $\alpha$-frontier point 0.406 was nearly reported as a threshold; caught by
-a claim-wording audit. (ii) The empirical oracle 0.2357 was reported as clearing the floor; caught
-by independent review, and false --- certified, it is 11.4\%. (iii) That 11.4\% was labelled
-``certified'' without saying it is the conservative audit's bound rather than the primary
-construction; caught by a pre-submission audit. (iv) A claim-narrowing correction was applied to a
-derived document and not to the claim ledger it derives from, so a byte-identity guard propagated
-the uncorrected text into the generated appendix --- caught by review. (v) An acceptance lower
-bound was quoted at an allocation the paper did not use, supporting a sentence that is false at the
-allocation it named --- caught by review.
+\textbf{Our publication gate cannot see the error this paper is about, and we made that error five
+times.} Start with the gate's design, because the record below follows from it. The gate checks
+that a claim's cited evidence exists and is version-controlled. It never opens the file, never
+compares a number against it, and never sees the configuration --- the confidence allocation, the
+candidate count, the sample size --- that produced either. Three things follow immediately. The
+defect it is blind to is \emph{quoting a quantity that resembles a certified one and is not}: the
+citation resolves, so the claim passes, and a figure computed at one configuration and written into
+prose naming another is indistinguishable to it from a correct one. Nothing bounds how often that
+happens, because nothing is looking. And the only filter left is whether a number looks plausible
+to its author --- which is not a neutral filter, because a number that flatters the result looks
+plausible to the author who wants it.
 
-\textbf{All five erred in the direction that flattered the result.} A directional bias across five
-instances is not inattention; it is a mechanism, and it is the one this paper is about. Instances
-(iv) and (v) occurred inside passages written specifically to state a margin honestly, which is the
-part worth reporting: the intention to be careful did not prevent them, and two independent
-reviewers did.
+\textbf{The five instances are what that design predicts.} (i) The $\alpha$-frontier point 0.406
+was nearly reported as a threshold; caught by a claim-wording audit. (ii) The empirical oracle
+0.2357 was reported as clearing the floor; caught by independent review, and false --- certified,
+it is 11.4\%. (iii) That 11.4\% was labelled ``certified'' without saying it is the conservative
+audit's bound rather than the primary construction; caught by a pre-submission audit. (iv) A
+claim-narrowing correction was applied to a derived document and not to the claim ledger it derives
+from, so a byte-identity guard propagated the uncorrected text into the generated appendix ---
+caught by review. (v) An acceptance lower bound was quoted at an allocation the paper did not use,
+supporting a sentence that is false at the allocation it named --- caught by review. Every one of
+the five cites evidence that exists and is tracked. The gate returned \emph{ok} for all of them.
 
-The proximate cause is a gap we can name precisely. Our publication gate checks that a claim's
-cited evidence exists and is version-controlled. It never opens the file, never compares a number
-against it, and never sees the configuration --- the confidence allocation, the candidate count,
-the sample size --- that produced either. A figure computed at one configuration and written into
-prose naming another passes that gate unchanged, because agreement between documents is what the
-gate measures and correctness is not. \textbf{Our gate certifies agreement, not correctness}, which
-is the same distinction, one level up, that the paper draws between ranking a population well and
-certifying anything about it.
+\textbf{All five erred in the direction that flattered the result, and the last two were caught by
+reviewers rather than by our own checking.} That is the predicted bias, observed. Instances (iv)
+and (v) occurred inside passages written specifically to state a margin honestly: the intention to
+be careful did not prevent them, because intention is not the variable --- what varies is whether
+anything reads the evidence. We report this as a measurement rather than a confession. Five
+instances of one defect class, all in one direction, under a gate that by construction cannot see
+any of them, is a property of the gate. \textbf{Our gate certifies agreement, not correctness},
+which is the same distinction, one level up, that this paper draws between ranking a population
+well and certifying anything about it.
 
 \textbf{Not production-grade}, and no deployment claim is made. \textbf{The certificate bounds
 average within-group loss, not the absence of error} in any document; certified $\neq$ safe.

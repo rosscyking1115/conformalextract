@@ -9,10 +9,30 @@
 > rewritten argument is exactly the drift this repository has already been bitten by once this
 > week. One source. (Prior content is recoverable from git and from a `safe_ops` snapshot.)
 
-- **Status: DRAFT, 2026-08-02. Not submitted. Not submittable yet.**
-- Build: `pwsh -File scripts/build_paper.ps1` → content ends 82% down page 4, so within the 4-page
-  ACL limit; Limitations and References follow and do not count toward it. All citations and
-  cross-references resolve.
+- **Status: DRAFT, 2026-08-03. Not submitted. Not submittable yet.**
+- Build: `pwsh -File scripts/build_paper.ps1` → all citations and cross-references resolve.
+- **OVER THE PAGE LIMIT by 10 lines, measured 2026-08-03.** The Conclusion runs onto page 5: page 4
+  ends mid-sentence in §5 and lines 334–343 of content precede the `Limitations` heading. Limitations
+  and References do not count toward the limit; the Conclusion does.
+
+  > **This line previously read "content ends 82% down page 4, so within the 4-page ACL limit", and
+  > that was instance SIX of the defect class the paper's Limitations section is about.** The 82%
+  > figure was measured before the C1 and C3 corrections added text, and every status report after
+  > those commits repeated it from this file instead of from a build. It cites an artifact that
+  > exists — the PDF — and states a number the artifact does not contain, in the direction that
+  > flatters compliance, inside the one line whose whole job is to assert compliance. It was found
+  > by rebuilding, not by any guard.
+  >
+  > **The paper still says five, and that is a judgement call, not an oversight.** The class it
+  > names is *quoting a quantity that resembles a certified one and is not*; a page-position figure
+  > is the same mechanism — cite a document instead of the artifact, in the flattering direction —
+  > but not the same subject, and an ACL Limitations section is not the place to report a build
+  > measurement. Recorded here for the owner to overrule if he wants the count to read six.
+  >
+  > The fix is a ~10-line trim of counted prose and **has not been done**. It is not attempted in
+  > the same pass that found it: compression introduced a factual defect twice in this document's
+  > history, and the correct order is to trim once, deliberately, and re-measure. Recorded as
+  > blocking item 1 below.
 
 ## Gate status — both packets returned REVISE, neither is discharged
 
@@ -65,12 +85,15 @@ primary source and recorded here.
 
 ## Remaining work
 
-1. **Both packets must be re-reviewed and pass.** The only blocking item.
-2. The RoSE reference needs its full author list.
-3. ~~Decide the figure's width.~~ **Done** — single-column, regenerated at 3.3×2.2in with type
+1. **Trim ~10 lines of counted prose.** The Conclusion currently runs onto page 5. Re-measure from
+   a build, not from this file — that is how the overflow went unnoticed. **Blocking.**
+2. **Both packets must be re-reviewed and pass.** **Blocking.**
+3. The RoSE reference needs its full author list.
+4. ~~Decide the figure's width.~~ **Done** — single-column, regenerated at 3.3×2.2in with type
    sized for it. It was a full-width `figure*` costing about seven column-inches; in one column it
-   costs under two, which is what brought the content back inside four pages.
-4. Author block and acknowledgements — currently anonymous, which is correct for review.
+   costs under two. *(That trim did bring the content inside four pages; text added afterwards took
+   it back out, which item 1 records.)*
+5. Author block and acknowledgements — currently anonymous, which is correct for review.
 
 ## Build notes
 
