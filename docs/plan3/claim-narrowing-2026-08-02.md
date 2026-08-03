@@ -70,8 +70,14 @@ decision and every number left intact); `docs/progress.md`; `draft-2026-07-28.md
 **Was:** nothing asserted field-wide impossibility outright, but nothing ruled it out either, and
 several passages were readable that way.
 
-**Now:** stated explicitly wherever the null is stated: a 20% target **is** reachable on structured
-extraction. On the datasets 2606.29054 reports, `(μ−α)/(1−α)` forbids nothing at μ = 0.033
+**Now:** stated explicitly wherever the null is stated: a 20% target is **not excluded** on
+structured extraction.
+
+> **Corrected 2026-08-03 (finding F1).** This read "**is** reachable". Not being forbidden by a
+> necessary condition is not achievability, and 2606.29054 finds certification practical only at
+> α = 0.30–0.40 on its own tasks. The same correction was applied to the ledger, the forbidden
+> table and `draft-2026-07-28.md`.
+ On the datasets 2606.29054 reports, `(μ−α)/(1−α)` forbids nothing at μ = 0.033
 (JSON-Extract) and permits up to 80.5% acceptance at μ = 0.356 (its easiest NER dataset) —
 `docs/frontier-check/findings.md`, re-verified 2026-07-22. What is established here is that **this**
 model with **this** score on **this** task at μ = 0.6071 could not.

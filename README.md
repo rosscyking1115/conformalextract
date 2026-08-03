@@ -149,7 +149,7 @@ commit, not a standing property. The green command below must pass before any ha
 ## Local checks
 
 ```console
-uv sync --extra dev
+uv sync --extra dev --extra data
 uv run pytest -q
 uv run ruff check .
 uv run mypy

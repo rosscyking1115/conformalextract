@@ -93,7 +93,7 @@ ACCEPTED_PLAN_SHA256 = {
     # original paragraph is preserved above the note. Pin moved in the same commit, as the rule
     # above requires; previous digest bdad3b4f…
     "docs/plan4/accepted-plan.md": (
-        "2d957be07b96f454c6b88e9e7c76431e3e5a5212a574fefae34a3cda2754768c"
+        "c8c2414066c309f60ab16036510c07d36bde93a3938a11ee1b444fc52596bf94"
     ),
 }
 

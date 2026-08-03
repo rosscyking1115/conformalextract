@@ -810,3 +810,14 @@ Implementation begins at Plan 1 Gate 0—not at training and not at publication.
 - A clean replay validates the released artifact path; it cannot prove that every third-party environment will behave identically.
 - An arXiv identifier creates a paper page, not peer review.
 - Public usefulness depends on documentation, maintenance and contributor response after launch; this plan cannot promise adoption.
+
+---
+
+> **Wording note, 2026-08-03.** The shorthand "grounding⊥certifiability" above is **historical**.
+> `CX-GROUNDING-ORTHOGONAL-01` was narrowed on 2026-08-02: one intervention observed across three
+> systems cannot establish independence, and the claim now states a **dissociation** — QLoRA
+> sharply improved output validity and span grounding but did not make low-risk documents
+> identifiable using transition-logprobability confidence. The identifier is retained for
+> traceability to the reviewer records that ruled on it. This note is appended rather than the
+> text rewritten, per this file's own amendment convention, and its pin is moved in the same
+> commit. See [`../plan3/claim-narrowing-2026-08-02.md`](../plan3/claim-narrowing-2026-08-02.md).
