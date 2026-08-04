@@ -13,6 +13,7 @@
   "cost_usd": 0.0,
   "diagnostic_only": true,
   "interpretation": "False positives against false negatives over the content-bearing channel. The excess is what licenses calling the residual loss OVER-GENERATION rather than an error-category attribution -- the wording that replaced a withdrawn claim about 'naming the wrong entity'. It is descriptive: it selects no threshold, certifies nothing, and identifies no error category either. Counts come from the frozen scorer the certifier uses, not a second implementation.",
+  "normalisation_note": "The three channels are DIFFERENT POPULATIONS - the content-bearing channel is defined per system, and the baselines reach it on far fewer documents because most of their output is invalid or ungrounded. Raw excesses must therefore never sit side by side; the per-document rate is stored here so any comparison is normalised and no guard has to divide. The rate is also why the directional claim survives: the SIGN differs, not merely the magnitude.",
   "schema_version": "1",
   "split": "certification",
   "systems": {
@@ -22,6 +23,7 @@
       "documents_in_content_channel": 1130,
       "false_negatives": 2636,
       "false_positive_excess": -1501,
+      "false_positive_excess_per_document": -1.3283185840707965,
       "false_positives": 1135,
       "true_positives": 110
     },
@@ -31,6 +33,7 @@
       "documents_in_content_channel": 2847,
       "false_negatives": 3797,
       "false_positive_excess": 637,
+      "false_positive_excess_per_document": 0.2237442922374429,
       "false_positives": 4434,
       "true_positives": 2984
     },
@@ -40,6 +43,7 @@
       "documents_in_content_channel": 1238,
       "false_negatives": 2765,
       "false_positive_excess": -1446,
+      "false_positive_excess_per_document": -1.1680129240710824,
       "false_positives": 1319,
       "true_positives": 32
     }

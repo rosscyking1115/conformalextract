@@ -19,13 +19,25 @@ a model of the world that had moved. Instead a probe claim is built with a uniqu
 field, rendered, and the sentinels that survive *are* the rendered set. If the renderer changes,
 this guard's map changes with it.
 
-**The rule it enforces** (owner's ruling): *a figure may not be asserted in blind prose. Blind prose
-may reference a checked field; it may not restate a number.* Restating a figure where nothing
-checks it is the mechanism behind ``12.9x`` and behind ``1.3-1.8%``.
+**The rule it enforces** (owner's ruling): *no UNBACKED numeral in a blind field.* A numeral is
+permitted in ``method``, ``scope`` or ``verified_by`` if the same numeral appears in a **checked**
+field of the same claim --- ``wording`` or ``limitations``, which the appendix guard holds
+byte-identical --- or is **pinned in the paper manifest**, which ``check_paper_claims`` compares
+against a committed artifact under a declared configuration.
 
-Exemptions are **structural** --- notation, call signatures, identifiers, dates, ordinals --- and
-are matched on context, never on value. A rule keyed on the value would be an exemption list
-wearing a rule's clothes, which this project refuses everywhere else.
+**Backed, not exempted, and the distinction is the point.** Declared constants such as
+:math:`\alpha`, :math:`\delta`, the acceptance floor and *n* pass automatically because they are
+pinned, not because a list forgives them. So there is no exemption list to maintain, to mis-remember
+or to quietly widen --- and this project has already had a hand-written exemption list rejected by
+its own guard-the-guard for naming files that did not contain the phrase they exempted.
+
+Structural exclusions remain for tokens that are **not numerals in the first place** --- an
+identifier fragment, a date, a call signature, a formula operand, a list ordinal, a path. Those are
+matched on **context, never on value**, because a rule keyed on the value is an exemption list
+wearing a rule's clothes.
+
+Restating a figure where nothing checks it is the mechanism behind ``12.9x`` and behind
+``1.3-1.8%``.
 
 Usage::
 
@@ -36,6 +48,7 @@ Usage::
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from dataclasses import dataclass
@@ -48,6 +61,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from conformalextract.claims import Claim, ClaimLedger, load_ledger, render_surface  # noqa: E402
 
 LEDGER_PATH = ROOT / "evidence" / "plan4" / "claim_ledger.json"
+MANIFEST_PATH = ROOT / "evidence" / "plan4" / "paper_claims.json"
 
 #: Fields whose content is prose a reader could act on. ``evidence``/``surfaces``/``status`` are
 #: structural and are checked by other means.
@@ -122,9 +136,47 @@ def _exempt(before: str, numeral: str, after: str) -> str | None:
     return None
 
 
-def scan(ledger: ClaimLedger, blind: set[str]) -> list[Violation]:
+def _normalise(numeral: str) -> str:
+    """1,396 and 1396 are the same figure; 0.20 and 0.2 are not treated as the same token."""
+
+    return numeral.replace(",", "")
+
+
+def manifest_figures(path: Path = MANIFEST_PATH) -> set[str]:
+    """Every figure the paper manifest pins, in normalised form.
+
+    A numeral pinned there is compared against a committed artifact under a declared
+    configuration on every run, which is a stronger check than anything this guard could apply.
+    """
+
+    if not path.exists():
+        return set()
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return {_normalise(str(entry["figure"])) for entry in data.get("claims", [])}
+
+
+def backing_for(claim: Claim, rendered: set[str]) -> set[str]:
+    """Numerals this claim states in a CHECKED field.
+
+    ``wording`` and ``limitations`` are held byte-identical against the generated appendix, so a
+    figure appearing there is one a reader sees and a guard compares.
+    """
+
+    backed: set[str] = set()
+    for field in sorted(rendered):
+        value: Any = getattr(claim, field, None)
+        texts = value if isinstance(value, tuple) else (value,)
+        for text in texts:
+            if isinstance(text, str):
+                backed |= {_normalise(m.group(1)) for m in _NUMERAL.finditer(text)}
+    return backed
+
+
+def scan(ledger: ClaimLedger, blind: set[str], rendered: set[str]) -> list[Violation]:
+    pinned = manifest_figures()
     violations: list[Violation] = []
     for claim in ledger.claims:
+        backed = backing_for(claim, rendered) | pinned
         for field in sorted(blind):
             value: Any = getattr(claim, field)
             texts = value if isinstance(value, tuple) else (value,)
@@ -132,16 +184,15 @@ def scan(ledger: ClaimLedger, blind: set[str]) -> list[Violation]:
                 if not isinstance(text, str):
                     continue
                 for match in _NUMERAL.finditer(text):
+                    numeral = match.group(1)
                     before = text[max(0, match.start() - 44) : match.start()]
                     after = text[match.end() : match.end() + 14]
-                    if _exempt(before, match.group(1), after):
+                    if _exempt(before, numeral, after):
                         continue
-                    context = " ".join(
-                        (before[-40:] + "[" + match.group(1) + "]" + after).split()
-                    )
-                    violations.append(
-                        Violation(claim.claim_id, field, match.group(1), context)
-                    )
+                    if _normalise(numeral) in backed:
+                        continue  # BACKED, not exempted
+                    context = " ".join((before[-40:] + "[" + numeral + "]" + after).split())
+                    violations.append(Violation(claim.claim_id, field, numeral, context))
     return violations
 
 
@@ -179,17 +230,21 @@ def main() -> int:
             print(f"  {field:<14} {mark}")
         return 0
 
-    violations = scan(ledger, blind)
+    violations = scan(ledger, blind, emitted)
     for violation in violations:
         print(violation.line())
     if violations:
         print(
-            f"\nFAIL: {len(violations)} numerals asserted in blind prose "
-            f"({', '.join(sorted(blind))}). A figure there is checked by nothing. Move it to a "
-            "rendered field or an artifact and reference it; do not restate it."
+            f"\nFAIL: {len(violations)} UNBACKED numerals in blind prose "
+            f"({', '.join(sorted(blind))}). Each appears in no checked field of its own claim "
+            "and is pinned in no manifest entry, so nothing compares it to anything. Back it "
+            "or reference the claim that already does; do not restate it."
         )
         return 1
-    print(f"ok: no numerals asserted in the blind fields ({', '.join(sorted(blind))}).")
+    print(
+        f"ok: every numeral in the blind fields ({', '.join(sorted(blind))}) is backed by a "
+        "checked field of its own claim or by a manifest pin."
+    )
     return 0
 
 

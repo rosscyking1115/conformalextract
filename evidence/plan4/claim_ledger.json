@@ -12,7 +12,7 @@
         "docs/plan3/certification-result.md",
         "docs/plan4/open-release-decisions.md"
       ],
-      "method": "Authored for the one-line constraint rather than compressed from an existing claim, because render_surface emits limitations as sub-bullets and a single-string field can carry none. It is the conjunction of CX-GROUNDING-01 (a large improvement in grounding fidelity, stated qualitatively) and CX-H1-PRIMARY plus CX-H2-SECONDARY (no system certified), held in one clause because the claim boundaries require the grounding gain and the null to appear in the same passage. NO FIGURE IS QUOTED, deliberately: 95.7% is forbidden outside a passage carrying the null, and the ~16x ratio belongs to CX-GROUNDING-ORTHOGONAL-01 and is licensed only with the restricted-population caveat attached — a caveat this surface cannot carry. The first draft quoted it, cited it to the wrong claim, and also mis-stated it: ~16x is the reduction in ungrounded spans (5,355 to 340), not the grounding rate, which moved 39.4% to 95.7%, i.e. ~2.4x.",
+      "method": "Authored for the one-line constraint rather than compressed from an existing claim, because render_surface emits limitations as sub-bullets and a single-string field can carry none. It is the conjunction of CX-GROUNDING-01 (a large improvement in grounding fidelity, stated qualitatively) and CX-H1-PRIMARY plus CX-H2-SECONDARY (no system certified), held in one clause because the claim boundaries require the grounding gain and the null to appear in the same passage. THE DESCRIPTION ITSELF QUOTES NO FIGURE, deliberately - see its wording above, which carries none. The grounding rate is forbidden outside a passage carrying the null, and the ungrounded-span ratio belongs to CX-GROUNDING-ORTHOGONAL-01 and is licensed only with the restricted-population caveat attached, which a one-line surface cannot carry. The first draft of the description quoted that ratio, cited it to the wrong claim, and mis-stated what it measured: it is the reduction in UNGROUNDED SPANS, recorded in CX-GROUNDING-01, not the change in the GROUNDING RATE, which is a smaller multiple. Both figures are stated in CX-GROUNDING-01 and neither is restated here.",
       "limitations": [
         "In-domain RAMS only, at the frozen operating point (alpha 0.20, delta 0.05, acceptance floor 0.20), on the frozen vLLM 4-bit serving stack. None of that fits in the field, which is why the field must not be read as the claim's scope.",
         "The null is ALL THREE systems, not a QLoRA-versus-baseline comparison. H1 and H2 collapse to one finding and no numerical difference is computed against an infeasible baseline.",
@@ -235,10 +235,11 @@
       "status": "qualified",
       "scope": "in-domain RAMS certification split, 1,396 source-document groups, frozen vLLM 4-bit serving stack",
       "evidence": [
-        "evidence/plan3/loss_decomposition.json",
-        "evidence/plan3/certification_result.json#systems",
         "docs/adr/0011-reanalysis-frontier-and-loss-channels.md",
-        "docs/plan3/certification-result.md"
+        "docs/plan3/certification-result.md",
+        "evidence/plan3/argument_error_counts.json",
+        "evidence/plan3/certification_result.json#systems",
+        "evidence/plan3/loss_decomposition.json"
       ],
       "method": "Document loss decomposed into four channels (structural failure, grounding failure, valid-but-contentless, valid content-bearing); group-level channel contributions sum exactly to the unweighted mean of group means the certificate bounds under ADR 0009. Counterfactual: each system re-scored over content-bearing documents only, coverage measured against the restricted population. For the baselines the conclusion rests on an arithmetic ceiling rather than the counterfactual: accepting a fraction c at risk alpha requires population mean loss at most alpha*c + (1-c) = 0.84, and their restricted mean losses are 0.984 and 0.951.",
       "limitations": [
@@ -251,7 +252,8 @@
         "Scoped to in-domain RAMS under span-exact matching and to the frozen vLLM 4-bit serving stack (86.3% parsed-output parity); portability is not established.",
         "The certificate bounds average within-group loss, not the absence of error in any document (ADR 0009).",
         "The decomposition locates loss by CHANNEL; it does not identify the error category that produced it, and this claim no longer asserts one. Until 2026-07-29 the wording said the residual loss was output 'that names the wrong entity' — an attribution whose only source was ADR 0007's unquantified inspection of two development examples, which plan section 12.3 forbids generalising from. Removed on independent review (evidence/plan3/reviewer_record.plan3-close.json, finding O2).",
-        "A measurement points the other way and is recorded here rather than left in the review. On QA's content-bearing certification frames: tp 2,984, fp 4,434, fn 3,797 — false positives EXCEED false negatives by 637 arguments, i.e. systematic over-generation, which is not an entity-naming error. 2,003 of 2,515 error-bearing documents show both fp and fn, consistent with substitution, so 'mostly missing arguments' is ruled out. Wrong-role, boundary and coreference errors share that signature. Plan section 12.1's machine-coded taxonomy is what would separate them and has not been run."
+        "A measurement points the other way and is recorded here rather than left in the review. On QA's content-bearing certification frames: tp 2,984, fp 4,434, fn 3,797 — false positives EXCEED false negatives by 637 arguments, i.e. systematic over-generation, which is not an entity-naming error. 2,003 of 2,515 error-bearing documents show both fp and fn, consistent with substitution, so 'mostly missing arguments' is ruled out. Wrong-role, boundary and coreference errors share that signature. Plan section 12.1's machine-coded taxonomy is what would separate them and has not been run.",
+        "Directional, and specific to the adapted system: on the same channel and the same frozen scorer, the two baselines run the OTHER way - they under-generate where QA over-generates. Normalised per document in the content-bearing channel, the excess of false positives over false negatives is +0.224 for QA against -1.168 for zero-shot and -1.328 for few-shot. The figures must be read per document and not as raw counts: the content-bearing channel is defined per system and the baselines reach it on far fewer documents (2,847 for QA against 1,238 and 1,130), so the channel filter alone would make raw totals incomparable. What survives normalisation is the SIGN, which is the whole of the claim."
       ],
       "surfaces": [
         "README",

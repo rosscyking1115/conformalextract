@@ -112,8 +112,22 @@ a dated record — see `docs/release-check-2026-07-28.md` for the check that sur
 > |---|---|---|
 > | vii | the 0.1075 counter-example endorsed on the risk constraint alone, one turn after writing that both constraints bind | independent review |
 > | viii | "at δ/3 … the largest this benchmark can support" — qualified and then unqualified inside one sentence | independent review |
-> | ix | the validity guard's first scope defined as "the four stamped quantities" | the guard's own first run |
+> | ~~ix~~ | ~~the validity guard's first scope defined as "the four stamped quantities"~~ **WITHDRAWN — misclassified; the scope was proposed by this seat, not supplied** | — |
 > | x | the 0.0925 framing endorsed without asking which construction produced it | independent review |
+>
+> **Instance ix is withdrawn from this table.** *(Corrected 2026-08-04 on an independent review
+> finding.)* It recorded the validity guard's "four stamped quantities" first scope as having
+> arrived through an instruction. This document's own earlier text contradicts that: the scope was
+> proposed here by the seat, with the owner deciding **whether** to build the guard, not **what**
+> it should cover. Three instances, written as four. The row is struck rather than deleted, because
+> a table that quietly loses an entry is worse than one that shows its own correction.
+>
+> **Provenance caveat, and it applies to all of them.** `REVIEW.md` already carries exactly this
+> caveat for this class and this table lacked it: each attribution rests on conversation that
+> leaves no trace in the repository, and **the sole source for the attribution is the seat the
+> attribution favours** — this one. A reader should treat the *mechanisms* as the durable content
+> and the *routing* as unverified. Having the caveat in one file and not the other was itself the
+> twin-surface defect, on a passage about attribution.
 >
 > **A defect arriving through an instruction is a different path from one the author generates, and
 > nothing here distinguished them until now.** The seat's failure in each is the same and it is not
@@ -230,8 +244,16 @@ a dated record — see `docs/release-check-2026-07-28.md` for the check that sur
 > tokens — and none is a list of values to skip, because a rule keyed on the value is an exemption
 > wearing a rule's clothes.
 >
-> **The rules apply per OCCURRENCE, not per figure**, which also closes the token-collision limit
-> recorded above. A figure is dropped only when *every* place it is written is structural, so
+> **The rules apply per OCCURRENCE, not per figure**, which narrows the token-collision limit
+> recorded above but **does not close it, and an earlier version of this line said it did.**
+> Per-occurrence logic decides only whether a *figure is dropped* as structural; it does not change
+> how a surviving figure **binds**. `check_paper_claims` still keys the manifest on the normalised
+> value and iterates one entry per value, so `0.20` is written eight times and bound once — three
+> of those eight are the acceptance floor and one is the coverage multiplier in
+> $0.20 \times 1{,}396$, all satisfied by a single entry pointing at `alpha`. Closing it needs
+> per-occurrence *binding*, which is the same work as the inline-declaration design and belongs
+> with it. *(Corrected 2026-08-04 on an independent review finding: a premature closure claim in a
+> document whose subject is premature closure claims.)* A figure is dropped only when *every* place it is written is structural, so
 > `3` survives — it is a row label, an allocation divisor in $\delta/3$, **and** the number of
 > non-failing groups the ZS AUROC rests on. The test
 > `tests/test_paper_claims_guard.py::test_a_claim_is_not_hidden_behind_a_label_that_renders_the_same`
@@ -444,6 +466,26 @@ a dated record — see `docs/release-check-2026-07-28.md` for the check that sur
 > right — the defect this apparatus exists to refuse. **The prose is not corrected here**: the
 > figures were discovered in the session that built the instrument, and correcting a number in the
 > session that found it is the shape that produced three of the six instances.
+>
+> ### Reconciled 2026-08-04: two committed records give different Hoeffding radii, and both are right
+>
+> `evidence/plan4/reviewer_record.writeup-draft.json` records a radius of **0.0856** where the
+> paper and the code publish **0.0925**, for what is described as the same quantity. Nothing
+> reconciled them, and a reader finding both would have no way to tell which was wrong.
+>
+> **Neither is.** The reviewer computed `sqrt(ln(1/δ)/(2n))` — the tight **one-sided** constant,
+> which is the right form for an upper bound. `certification.hoeffding_upper` implements
+> `sqrt(ln(2/δ)/(2n))` — the **two-sided** constant, which is larger. The function's docstring said
+> "one-sided" while using the two-sided constant, which is how the two records diverged without
+> either being in error.
+>
+> **The implementation is unchanged and stays unchanged.** A wider radius yields a valid bound, so
+> every conclusion drawn from it holds a fortiori; recomputing would move published numbers to make
+> a null result *less* stark. The docstring now states the constant it actually uses and discloses
+> the size of the conservatism — about 8%, in the direction that makes the benchmark look more
+> forbidding and therefore flatters this paper's thesis. **The reviewer record is not touched**: it
+> is a verdict, it was correct on its own terms, and mutating a reviewer record to agree with a
+> later number would be the worst available fix.
 >
 > ### Carried forward from the 2026-08-03 review round, recorded and deliberately not fixed
 >
