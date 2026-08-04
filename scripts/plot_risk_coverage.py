@@ -272,21 +272,45 @@ def main() -> None:
         (attainable, ORACLE_COLOUR),
     ):
         ax.plot([x], [FROZEN_ALPHA], marker="o", ms=5, color=colour, zorder=5)
-    for x, text, colour, dy in (
-        # Staggered: the first two crossings sit close together on x, so a single row of labels
-        # collides once the figure is scaled into a two-column page.
-        (delivered, f"{delivered:.3f}", SCORE_COLOUR, -10),
-        (certifiable, f"{certifiable:.3f}", ORACLE_COLOUR, -19),
-        (attainable, f"{attainable:.3f}", ORACLE_COLOUR, -10),
+    # Placement only --- no plotted value, marker, axis range or tick moves here.
+    #
+    # All three labels used to sit BELOW the alpha rule in one staggered band, which is legible at
+    # the figure's native size and crowds once it is scaled into a two-column page: the two
+    # left-hand crossings close on each other, and the right-hand one lands on the dotted
+    # acceptance-floor line. So the score crossing goes below its marker and the two oracle
+    # crossings go above theirs, which uses the empty space on the other side of the rule and puts
+    # a label's nearest neighbour a whole line-height away instead of a few points.
+    #
+    # Each carries a white bbox because a label above the rule can pass over a curve, and a number
+    # a reader cannot separate from the line behind it is not a number they can check.
+    # The two oracle crossings are 0.122 apart on x, which is about one label's width once the
+    # panel is scaled into a column -- centring both put them edge to edge, and the compiled page
+    # extracted them as a single word. So they are anchored away from each other: the certified
+    # crossing's right edge sits left of its marker, the empirical crossing's left edge sits right
+    # of its own. That also walks the empirical label away from the dotted floor rule at 0.20.
+    for x, text, colour, dx, dy, ha, va in (
+        # The score crossing is at 0.020, hard against the y-axis, so a centred label puts half of
+        # itself over the axis and its "0.0" tick. Anchored left of the text instead, so it grows
+        # away from the spine.
+        (delivered, f"{delivered:.3f}", SCORE_COLOUR, 4, -13, "left", "top"),
+        (certifiable, f"{certifiable:.3f}", ORACLE_COLOUR, -3, 9, "right", "bottom"),
+        (attainable, f"{attainable:.3f}", ORACLE_COLOUR, 3, 9, "left", "bottom"),
     ):
         ax.annotate(
             text,
             xy=(x, FROZEN_ALPHA),
-            xytext=(3, dy),
+            xytext=(dx, dy),
             textcoords="offset points",
             fontsize=8,
             color=colour,
-            ha="left",
+            ha=ha,
+            va=va,
+            bbox={
+                "boxstyle": "square,pad=0.15",
+                "facecolor": "white",
+                "edgecolor": "none",
+                "alpha": 0.85,
+            },
         )
     # The two gap figures used to be drawn here as an arrow plus a caption. Removed: in a
     # shorter, full-width panel they crowded the x-axis, and a derived number belongs in the
