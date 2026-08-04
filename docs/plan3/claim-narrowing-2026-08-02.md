@@ -149,10 +149,25 @@ the repository a result: a benchmark finding was folded into a task finding and 
 support a certificate at this target for any model and any score". The second half holds and is
 now claimed — the loss-optimal ranking weakly dominates every score-induced ordering at every
 prefix length, so its 0.1139 upper-bounds what any score could certify for this model. **The first
-half does not.** A system whose accepted 20% carried mean loss ≤ 0.1075 clears the risk test at
-this n: `hoeffding_upper([0.10] * 280, δ/3) = 0.1925 ≤ 0.20`. Writing "for any model" would have
-been a sixth instance of the defect being corrected, so the claim says what is true instead — the
-corpus halves the *effective* target for everyone, and this model clears neither half.
+half does not**, and the witness below is the corrected one.
+
+> **Corrected 2026-08-04, on two independent review findings that arrived at the same replacement.**
+> This paragraph first offered `hoeffding_upper([0.10] * 280, δ/3) = 0.1925 ≤ 0.20` as the
+> counter-example. **That witness clears one of two constraints and is therefore not a
+> counter-example at all** — at k = 280 the acceptance floor is tested on a Clopper–Pearson *lower*
+> bound of **0.16566**, well under 0.20, so the hypothetical system passes the risk test and is not
+> certified. It is the exact error this document's own cause-(2) correction forbids by name:
+> *clearing one of two constraints is not a counter-example to infeasibility*. **The correction for
+> instance vii contained instance vii**, and it stood for a round with a green suite over it.
+
+**The corrected witness clears both tests.** The smallest prefix at n = 1,396 that clears the
+acceptance floor is **k = 332** (lower bound **0.2004**), where the Hoeffding radius is **0.0849**,
+so a system whose 332 best-ranked groups carried mean loss ≤ **0.1151** would certify here — risk
+upper **0.1999**, acceptance lower **0.2004**, both inside. Writing "for any model" would still
+have been a sixth instance of the defect being corrected, so the claim says what is true instead:
+this corpus tightens the *effective* target for everyone, and this model clears neither test. Every
+figure in this paragraph is emitted with its construction and allocation in
+[`../../evidence/plan3/corpus_size_requirement.json`](../../evidence/plan3/corpus_size_requirement.json).
 
 **Surfaces (all in one commit, per the twin-surface rule):** the ledger entry (authority);
 `claims-appendix.generated.md` (regenerated, not edited); `README.md`; `certification-result.md`
