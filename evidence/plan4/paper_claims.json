@@ -1457,6 +1457,21 @@
       },
       "kind": "computed",
       "note": "the 4-bit width of the frozen serving stack. Backed rather than excluded: a rule that swallowed '4-bit' would also swallow 'top-75%', which is a real threshold"
+    },
+    {
+      "figure": "21",
+      "artifact": "evidence/plan3/corpus_size_requirement.json",
+      "pointer": "smallest_corpus_admitting_a_certificate.profile_rounded_to_whole_group.multiple_of_observed_corpus",
+      "render": "int",
+      "configuration": {
+        "smallest_corpus_admitting_a_certificate.profile_rounded_to_whole_group.n": 29333,
+        "smallest_corpus_admitting_a_certificate.profile_interpolated.n": 29784,
+        "observed_n": 1396,
+        "acceptance_lower_bound_at_exactly_the_floor_coverage[0].clears_acceptance_floor": false,
+        "acceptance_lower_bound_at_exactly_the_floor_coverage[7].clears_acceptance_floor": false
+      },
+      "kind": "computed",
+      "note": "order of magnitude only. BOTH band endpoints are pinned, and so is the convergence curve at its smallest and largest n - the sentence's load-bearing half is that exactly-floor coverage clears at NEITHER end, which is exact and needs no extrapolation"
     }
   ]
 }

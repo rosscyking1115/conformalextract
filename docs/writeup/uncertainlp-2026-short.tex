@@ -44,9 +44,12 @@ and not the adapted model, which the other two settle between them. The
 adapted system's confidence score is \emph{not} weak by selective-prediction standards --- group
 AUROC 0.796, Spearman $\rho = -0.403$, matching what log-probability achieves on structured
 generation elsewhere --- and it certifies \textbf{nothing at all}. Nor would a perfect ranking:
-ranked by true loss, the same population certifies 11.4\%, still short of the floor, and the corpus
-would need to be roughly 13$\times$ larger before that gap could close --- the frozen candidate
-grid is already the largest this benchmark admits. The third mechanism is
+ranked by true loss, the same population certifies 11.4\%, short of the acceptance floor. Nor
+would more data at the same operating point, and the reason is structural rather than a matter of
+degree: acceptance is tested on a \emph{lower} confidence bound, so accepting exactly 20\% of a
+corpus never clears a 20\% floor \textbf{at any corpus size}. A certificate requires coverage
+strictly above the floor, and on this loss profile the smallest corpus admitting one is of order
+\textbf{21$\times$} this split. The third mechanism is
 observable in only one of our three systems, because the other two fail at base risk first. Separating the
 three mechanisms is what makes the null diagnostic rather than merely negative, and only one of
 them is the score's fault.
@@ -195,14 +198,18 @@ comparison --- theirs is instance-level and ours group-level, and our own interv
 performing about as its family does, not a straw man built to fail.
 
 \paragraph{Mechanism 3: the finite-sample penalty.} Ranking well is not enough, and this is the
-mechanism we had no vocabulary for. \emph{At the floor} means the smallest accepted prefix that
-meets the 20\% acceptance floor: $0.20 \times 1{,}396 = 279.2$, so the floor is met at
-$k = \mathbf{280}$ and missed at 279, and every figure below uses 280. Take the perfect ranking of
-mechanism 2 --- 23.6\% acceptance, empirical risk 0.175 at the floor --- and require it to
-\emph{certify} rather than merely to average below $\alpha$. Its Hoeffding upper bound at the
-per-system $\delta/3$ allocation is 0.267 at the floor, and the largest acceptance it can certify
-is \textbf{11.4\%} (8.4\% family-wide). \textbf{A perfect ranking of this population does not clear the floor either.} The
-measured score certifies \textbf{0.0\%}.
+mechanism we had no vocabulary for. \textbf{Two thresholds must be kept apart, and we name them
+separately because conflating them cost us three published figures.} The
+\emph{20\%-coverage prefix} is the smallest accepted set that is 20\% of the corpus:
+$0.20 \times 1{,}396 = 279.2$, so it is $k = \mathbf{280}$, and every figure in this paragraph uses
+it. The \emph{acceptance floor} is the protocol's own test, applied to a lower confidence bound
+rather than to raw coverage, and it is not met until $k = 332$ (\S\ref{sec:frozen-config}). Take
+the perfect ranking of mechanism 2 --- 23.6\% acceptance, empirical risk 0.175 at the
+20\%-coverage prefix --- and require it to \emph{certify} rather than merely to average below
+$\alpha$. Its Hoeffding upper bound at the per-system $\delta/3$ allocation is 0.267 there, and the
+largest acceptance it can certify is \textbf{11.4\%} (8.4\% family-wide). \textbf{A perfect ranking
+of this population does not reach the acceptance floor either.} The measured score certifies
+\textbf{0.0\%}.
 
 \paragraph{Which bound, and why it matters.} The 11.4\% is the \emph{conservative audit's}
 Hoeffding bound, not the primary certificate, whose risk test is an \textbf{empirical Bernstein}
@@ -212,9 +219,9 @@ itself with one pre-chosen oracle candidate and no multiplicity penalty, that ra
 \textbf{0.0000} at every coverage tested. So 11.4\% is the \emph{most generous} certified reading
 available.
 
-\paragraph{At the frozen configuration, both constraints fail.} A certificate must clear the
-acceptance floor \emph{and} the risk target, and at this corpus size the perfect ranking clears
-neither. The frozen allocation is three candidates per system at $\delta/3$ --- both divisions
+\paragraph{At the frozen configuration, both constraints fail.}\label{sec:frozen-config} A
+certificate must clear the acceptance floor \emph{and} the risk target, and at this corpus size the
+perfect ranking clears neither. The frozen allocation is three candidates per system at $\delta/3$ --- both divisions
 apply --- and there the oracle prefix's acceptance lower bound is \textbf{0.1984}, \emph{below} the
 0.20 floor; the smallest prefix that would clear it is 332 against the oracle's 329. The risk test
 fails independently. We state this because an earlier draft of this paragraph quoted 0.2017, which
