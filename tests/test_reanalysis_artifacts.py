@@ -408,3 +408,78 @@ def test_sensitivity_discloses_its_label_access(sensitivity: dict, calibration: 
 def test_sensitivity_declares_itself_diagnostic(sensitivity: dict) -> None:
     assert sensitivity["diagnostic_only"] is True
     assert sensitivity["certifies_nothing"] is True
+
+
+# --- the corpus-size requirement, registered on the same ruling ------------------------------
+# Caught by tests/test_evidence_artifact_registration.py on its first run: this artifact backs
+# the abstract's order-of-magnitude claim and was named by no test at all.
+
+
+@pytest.fixture(scope="module")
+def corpus_size() -> dict:
+    return _load("corpus_size_requirement.json")
+
+
+def test_exactly_floor_coverage_never_clears_the_floor(corpus_size: dict) -> None:
+    """The load-bearing half of the abstract's sentence, and the half that is exact.
+
+    Acceptance is tested on a LOWER confidence bound, so accepting exactly the floor share of a
+    corpus cannot clear the floor at any n. If this ever passes at some size, the abstract is
+    wrong and the sentence has to go.
+    """
+
+    curve = corpus_size["acceptance_lower_bound_at_exactly_the_floor_coverage"]
+    assert len(curve) >= 5, "too few sizes to say anything about convergence"
+    for row in curve:
+        assert row["clears_acceptance_floor"] is False, row
+        assert row["acceptance_lower_bound"] < FROZEN_ACCEPTANCE_FLOOR, row
+    # Monotone approach from below: more data narrows the gap and never closes it.
+    shortfalls = [row["shortfall"] for row in curve]
+    assert shortfalls == sorted(shortfalls, reverse=True), shortfalls
+    assert shortfalls[-1] > 0.0
+
+
+def test_the_corpus_requirement_is_published_as_a_band(corpus_size: dict) -> None:
+    """Both profile treatments are recorded, because the data does not settle the third digit."""
+
+    smallest = corpus_size["smallest_corpus_admitting_a_certificate"]
+    low, high = smallest["band_n"]
+    assert low < high, "a band whose endpoints coincide is a point wearing a band's clothes"
+    assert smallest["profile_rounded_to_whole_group"]["n"] == low
+    assert smallest["profile_interpolated"]["n"] == high
+    for treatment in ("profile_rounded_to_whole_group", "profile_interpolated"):
+        entry = smallest[treatment]
+        # Whatever the treatment, the answer must clear BOTH tests -- that is the whole point.
+        assert entry["risk_upper_bound"] <= FROZEN_ALPHA + 1e-12, treatment
+        assert entry["acceptance_lower_bound"] >= FROZEN_ACCEPTANCE_FLOOR, treatment
+        assert entry["coverage"] > FROZEN_ACCEPTANCE_FLOOR, (
+            f"{treatment}: a certificate at exactly the floor coverage is impossible"
+        )
+
+
+def test_the_witness_at_the_observed_corpus_clears_both_tests(corpus_size: dict) -> None:
+    """The corrected counter-example. The one it replaced cleared only the risk test."""
+
+    witness = corpus_size["witness_at_the_observed_corpus"]
+    assert witness["acceptance_lower_bound"] >= FROZEN_ACCEPTANCE_FLOOR
+    assert witness["mean_loss_a_certifying_prefix_may_carry"] < FROZEN_ALPHA
+    assert witness["exists_a_certifying_model"] is True
+    assert (
+        witness["observed_prefix_mean_loss"]
+        > witness["mean_loss_a_certifying_prefix_may_carry"]
+    ), (
+        "if the observed prefix already carried little enough loss, this system would certify"
+    )
+
+
+def test_corpus_size_agrees_with_the_certificate_it_extrapolates(
+    corpus_size: dict, certification: dict
+) -> None:
+    assert corpus_size["observed_n"] == certification["n_certification_groups"]
+    assert corpus_size["alpha"] == certification["alpha"] == FROZEN_ALPHA
+    assert corpus_size["acceptance_floor"] == certification["acceptance_floor"]
+    assert corpus_size["diagnostic_only"] is True
+    assert corpus_size["certifies_nothing"] is True
+    assert "extrapolation_assumption" in corpus_size, (
+        "the extrapolation must be declared, not implied"
+    )
