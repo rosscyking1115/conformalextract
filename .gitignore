@@ -43,6 +43,10 @@ docs/writeup/*.log
 docs/writeup/*.out
 docs/writeup/*.pdf
 !docs/writeup/fig/*.pdf
+# The bylined writing-sample variant is DERIVED from the submission .tex by
+# `scripts/build_paper.ps1 -Bylined`. Tracking it would create the second copy of the paper the
+# generation step exists to avoid.
+docs/writeup/*-bylined.tex
 # The greyscale proof is a check artefact, regenerated on demand with
 # `scripts/plot_risk_coverage.py --greyscale-check`. It is evidence that the figure's
 # encoding is redundant, not an input to the paper.

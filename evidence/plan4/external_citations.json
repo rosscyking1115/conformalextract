@@ -51,10 +51,12 @@
       }
     },
     "huang2026rose": {
-      "source": "Huang et al., RoSE",
-      "identifier": "RoSE benchmark paper",
+      "source": "Huang, Zhang, Zhou, Zhang Yi and Xu, RoSE: A Role Correlation Structure-Enhanced Model for Multi-Event Argument Extraction, AAAI 40(37):31131-31139",
+      "identifier": "doi:10.1609/aaai.v40i37.40374",
       "accessed": "2026-07-28",
-      "verification": "Read from source. Full author list still to be completed in the bibliography.",
+      "bibliography_verified": "2026-08-09",
+      "bibliography_source_url": "https://ojs.aaai.org/index.php/AAAI/article/view/40374",
+      "verification": "Value read from source 2026-07-28. The author list was outstanding until 2026-08-09 and is now DISCHARGED: the bibliography read 'Huang, Guang' - a wrong given name and four missing co-authors - and was corrected to the five authors, volume, issue, pages and DOI carried by the publisher's own citation_author/citation_* metadata at the URL above. DBLP and Semantic Scholar were tried first and were unavailable (HTTP 500 and 429); the publisher page is the primary source and is what was used. The 54.4 value itself was NOT re-opened on 2026-08-09 and rests on the 2026-07-28 reading.",
       "values": {
         "micro_arg_c_f1": {
           "value": 54.4,

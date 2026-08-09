@@ -1294,8 +1294,8 @@
       "pointer": "citations.huang2026rose.values.micro_arg_c_f1.value",
       "render": "round1",
       "configuration": {
-        "citations.huang2026rose.source": "Huang et al., RoSE",
-        "citations.huang2026rose.identifier": "RoSE benchmark paper",
+        "citations.huang2026rose.source": "Huang, Zhang, Zhou, Zhang Yi and Xu, RoSE: A Role Correlation Structure-Enhanced Model for Multi-Event Argument Extraction, AAAI 40(37):31131-31139",
+        "citations.huang2026rose.identifier": "doi:10.1609/aaai.v40i37.40374",
         "citations.huang2026rose.accessed": "2026-07-28"
       },
       "kind": "citation",
