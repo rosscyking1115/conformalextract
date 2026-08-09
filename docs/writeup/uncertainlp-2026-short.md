@@ -9,7 +9,11 @@
 > rewritten argument is exactly the drift this repository has already been bitten by once this
 > week. One source. (Prior content is recoverable from git and from a `safe_ops` snapshot.)
 
-- **Status: DRAFT, 2026-08-03. Not submitted. Not submittable yet.**
+- **Status: DRAFT, updated 2026-08-09. Not submitted, not under review, not submittable yet.** The
+  gate below is six steps from a Plan 3 close, five of which cannot be self-issued. The honest
+  external label is **"in preparation for UncertaiNLP 2026 (3rd Workshop on Uncertainty-Aware NLP,
+  EMNLP 2026)"** — never "submitted", "under review" or "accepted", and "certified" appears nowhere
+  until step 6 issues a PASS.
 - Build: `pwsh -File scripts/build_paper.ps1` → all citations and cross-references resolve.
 - **Targeting the FULL-PAPER format, up to 8 pages** (owner's decision, 2026-08-03). The venue's own
   call — <https://uncertainlp.github.io/>, read from source that day — offers short "up to 4 pages"
@@ -50,18 +54,80 @@
   > makes instance six worse than the other five, is in
   > [`../plan4/open-release-decisions.md`](../plan4/open-release-decisions.md).
 
-## Gate status — both packets returned REVISE, neither is discharged
+## Gate status — the real chain, not the two packets
 
-| Packet | Commit reviewed | Verdict |
-|---|---|---|
-| [§11.3 calibration diagnostics](../plan3/sections-11-and-12-disposition-amendment-1.md) | `0d5100b`, `ed3693b`, `3320af9` | **REVISE**, twice |
-| [claim narrowing](../plan3/claim-narrowing-2026-08-02.md) | `d256ca5`, `ed3693b` | **REVISE**, twice |
+> **This section used to list two REVISE packets and stop there.** That was true and it was not the
+> gate. The actual blocker is that **Plan 3 has never closed**: its close was *refused*, and the two
+> packets are two steps of six on the path back to a close. A reader taking the old table as the
+> remaining work would have seen **two of the six steps** — and not the one that governs them, the
+> refused close — in the direction that says the paper is nearly shippable. (Two-of-six is a count
+> of steps, not of effort: the omitted steps include the two heaviest, and no estimate of their cost
+> is asserted here.) **A status surface that understates its own gate is an attestation
+> that flatters** — the defect this repository exists to name, committed by the document whose only
+> job is to state the gate. Corrected 2026-08-09. The canonical machine-readable state is
+> [`../../evidence/gate_state.json`](../../evidence/gate_state.json); reconcile against that, not
+> against this prose.
 
-Both packets were reissued after their first REVISE and both returned REVISE again. The second
-round's corrections are applied and recorded in each packet; a third review has not been run.
-**Nothing here may be submitted, posted or quoted until both are re-reviewed and pass.** Every
-quantitative sentence is bound by
+**Where the gate actually stands.** Plan 1 closed; Plan 2 closed (independent reviewer PASS,
+2026-07-21). **Plan 3 is executed and independently reviewed but NOT closed** — its close record is
+[`reviewer_record.plan3-close.json`](../../evidence/plan3/reviewer_record.plan3-close.json), whose
+`review_kind` is `plan_close_refused` and whose verdict is *"Plan 3 may NOT be closed"*, blocking on
+findings O1, O2 and O3. **Plan 4 is PAUSED**, open only by owner override of the gated sequence.
+
+**The chain, step by step.** Every step's implementer work is *already applied*; what is outstanding
+is review. Steps marked 🔒 **may not be self-issued** — no seat may review its own work, and per
+`CLAUDE.md` a change to evaluation, label access, certification or release policy requires an
+independent review.
+
+| # | Step | State | Who |
+|---|---|---|---|
+| 1 | **O1** — [§11/§12 disposition](../plan3/sections-11-and-12-disposition.md) + [Amendment 1](../plan3/sections-11-and-12-disposition-amendment-1.md) (`0d5100b`, `ed3693b`, `3320af9`; **REVISE** twice, corrections applied) | awaiting independent review to the standard ADR 0010 and ADR 0011 §3 met | 🔒 |
+| 2 | **Ledger entries** for the §11.3 quantities that became stated claims (group AUROC, normalized AURC, Spearman ρ, the stratifications), each with its own review | not written | implementer, then 🔒 |
+| 3 | **The strict-failure indicator**, ruled on separately | **undefined** — a Plan 1 defect Amendment 1 surfaces and does not repair. A ruling to report the three named indicators as not predeclared is cheap; a ruling to define one is new analysis | 🔒 |
+| 4 | **O2/O3** — [`reviewer_record.o2-o3-claims-change.json`](../../evidence/plan4/reviewer_record.o2-o3-claims-change.json) returned **BLOCK** on 2026-07-29 | the 2026-08-02/04 work appears to address it; **no record discharges it**, and an undischarged BLOCK is not discharged by later commits that do not name it | verify, then 🔒 |
+| 5 | **Claim narrowing** — [packet](../plan3/claim-narrowing-2026-08-02.md) (`d256ca5`, `ed3693b`; **REVISE** twice, corrections applied) | awaiting independent review of its four questions. Two are judgement calls the packet deliberately refuses to make: whether to rename the `ORTHOGONAL` identifier with a redirect, and whether the narrowing discharges O2's remaining exposure **or is a separate finding of the same kind** | 🔒 |
+| 6 | **A fresh Plan 3 close record** — by an independent reviewer who did **not** implement Plan 3 and did **not** author this refusal's remedies, re-verifying the green command and the artifact hashes at its own commit | not started; blocked on 1–5 | 🔒 |
+| 7 | Plan 4's owner override lapses and the gate is satisfied on its merits | follows 6 | — |
+
+**Nothing here may be submitted, posted, published or quoted until step 6 issues a PASS.** That
+includes the public release of this repository: publishing the repo publishes its claims, and the
+claims are in an undischarged state. Every quantitative sentence is additionally bound by
 [`../plan3/certification-result.md` → "What may and may not be claimed"](../plan3/certification-result.md).
+
+**Do not read "corrections applied" as "nearly done".** Across the four review events above, the
+first-pass clean rate is **zero for four** — REVISE twice, REVISE twice, REFUSED, BLOCK — and
+Amendment 1 records an instance where *the correction for a defect contained that same defect*.
+Budget for a further round on each step rather than assuming one passes.
+
+## The venue route, and why no deadline applies
+
+**Decision, 2026-08-09: the UncertaiNLP 2026 direct deadline is deliberately not targeted.** The
+paper is blocked on the chain above, and submitting against this project's own gate would be the
+paper refuting itself — its subject is instruments that return `ok` when they should fail.
+
+**That cliff was the only cliff, so this is a non-event rather than a miss.** ACL Rolling Review is
+*rolling*: it runs recurring ~10-week cycles, roughly five a year, and — read from
+<https://aclrollingreview.org/dates> on 2026-08-09 — *"Once authors have reviews they may choose to
+revise and resubmit for another round of reviews, or commit their paper and reviews to a publication
+venue."* So when the gate clears, the paper enters ARR with no deadline and commits to a venue with
+reviews already in hand. **There is no next window to miss**, which is what lets the review chain run
+at its proper pace instead of against a clock.
+
+(The workshop's own ARR-commitment track was never available here: it accepts only papers that
+already carry ARR reviews, and this one carries none.)
+
+## The two build artifacts
+
+Both are produced by `scripts/build_paper.ps1` and neither is tracked.
+
+| File | What it is |
+|---|---|
+| `uncertainlp-2026-short.pdf` | **Submission artifact.** `\usepackage[review]{acl}` — anonymous, line-numbered. Built by the bare script. |
+| `uncertainlp-2026-short-bylined.pdf` | **Writing sample.** Bylined, no line numbers. Built by `-Bylined`, which *derives* `uncertainlp-2026-short-bylined.tex` from the submission `.tex` by substitution. It is generated, never hand-edited, and gitignored — a second copy of this paper is the drift that already cost this file its Markdown duplicate. |
+
+The writing sample is **not gated by the chain above**, because it makes no publication claim. It
+carries the status *"in preparation for UncertaiNLP 2026 (3rd Workshop on Uncertainty-Aware NLP,
+EMNLP 2026)"* — pre-submission, not submitted, not under review.
 
 ## The correction that rewrote the paper
 
@@ -103,13 +169,34 @@ primary source and recorded here.
 
 1. ~~Trim ~10 lines of counted prose.~~ **Done** — see the build note above. Any future addition
    must be re-measured from a build, not from this file; that is how the overflow went unnoticed.
-2. **Both packets must be re-reviewed and pass.** The only blocking item.
-3. The RoSE reference needs its full author list.
+2. **The six-step chain in "Gate status" must run to a Plan 3 close.** The only blocking item — and
+   it is six steps, not the two packets this list used to name. Five of the six may not be
+   self-issued. **Resumes on the owner's word, not on momentum**; it has no deadline (see "The
+   venue route") and must not compete with work that does.
+3. ~~The RoSE reference needs its full author list.~~ **Done, 2026-08-09.** It read `Huang, Guang`:
+   a wrong given name *and* four missing co-authors, in a paper about citation integrity. Corrected
+   from the publisher's own `citation_*` metadata to Huang, Zhang, Zhou, `{Zhang Yi}` and Xu, with
+   volume, pages and DOI. The braces on `{Zhang Yi}` are load-bearing — that author publishes
+   surname-first while his co-authors are listed given-name-first, and unbraced BibTeX renders him
+   "Z. Yi". `external_citations.json`'s standing "author list still to be completed" note is
+   discharged rather than left open. The **54.4 value itself was not re-opened** and still rests on
+   the 2026-07-28 reading.
 4. ~~Decide the figure's width.~~ **Done** — single-column, regenerated at 3.3×2.2in with type
    sized for it. It was a full-width `figure*` costing about seven column-inches; in one column it
    costs under two. *(That trim did bring the content inside four pages; text added afterwards took
    it back out, which item 1 records.)*
-5. Author block and acknowledgements — currently anonymous, which is correct for review.
+5. Author block and acknowledgements — the submission artifact stays anonymous, which is correct for
+   review; the bylined writing-sample variant is generated from it by `-Bylined` and is not a second
+   source. Acknowledgements remain to be written for a camera-ready that does not yet exist.
+6. **The build script's two blind spots are closed, and both had shipped.** It grepped for
+   *undefined* references, which is a different condition from *unsettled* ones — this paper needs a
+   fourth pdflatex pass, and every build before 2026-08-09 reported "all citations and
+   cross-references resolved" over a warning saying they were not. It also sent `bibtex` output to
+   `Out-Null`, so a malformed entry that rendered a citation as `[hua()]` passed a check that only
+   knew how to see "undefined". Both now fail the build; `-SelfTest` proves the first in **both**
+   directions, asserting a cold single pass *is* detected as unsettled before asserting a settled
+   build passes. Recorded here because they are the same defect class as the five in the paper's
+   Limitations: a gate that returns `ok` on the wrong property.
 
 ## Build notes
 
