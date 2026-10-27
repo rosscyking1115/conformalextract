@@ -522,9 +522,18 @@ def run_certification(
 
 
 def certification_artifact(
-    run: CertificationRun, *, provenance: Mapping[str, object]
+    run: CertificationRun,
+    *,
+    provenance: Mapping[str, object],
+    gold_reads_by_role: Mapping[str, int],
 ) -> dict[str, object]:
-    """Assemble the immutable §7.4 certification artifact (text-free)."""
+    """Assemble the immutable §7.4 certification artifact (text-free).
+
+    ``gold_reads_by_role`` is the count, per split role, of documents whose gold the caller
+    actually used. ``final_reads`` and ``shift_reads`` are taken from it, so a nonzero read is
+    reported rather than masked. The 2026-07-22 artifact predates this and wrote both as the
+    constant 0 (independent review 2026-10-27, finding B2).
+    """
 
     def result_dict(result: CertificationResult) -> dict[str, object]:
         parsed: dict[str, object] = json.loads(result.model_dump_json())
@@ -593,8 +602,9 @@ def certification_artifact(
             "head_hash": run.access_log.head_hash,
             "documents_read": run.access_log.document_count,
             "verified": run.access_log.verify(),
-            "final_reads": 0,
-            "shift_reads": 0,
+            "final_reads": int(gold_reads_by_role.get("final", 0)),
+            "shift_reads": int(gold_reads_by_role.get("shift", 0)),
+            "gold_reads_by_role": dict(sorted(gold_reads_by_role.items())),
         },
         **dict(provenance),
     }

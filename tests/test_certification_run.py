@@ -183,7 +183,7 @@ def test_boundary_crossing_when_only_qa_certifies_and_collapse_is_flagged() -> N
     assert run.h2.outcome == "boundary_crossing"
     # Pre-registered: this is one test stated twice, and the artifact must say so.
     assert run.hypotheses_collapsed is True
-    artifact = certification_artifact(run, provenance={})
+    artifact = certification_artifact(run, provenance={}, gold_reads_by_role={"certification": 1})
     assert artifact["hypotheses"]["collapsed_to_single_test"] is True
     assert "ONE test stated twice" in artifact["hypotheses"]["collapse_note"]
 
@@ -191,7 +191,10 @@ def test_boundary_crossing_when_only_qa_certifies_and_collapse_is_flagged() -> N
 def test_no_collapse_flag_when_a_baseline_also_certifies() -> None:
     run = _run(qa_loss=0.0, baseline_loss=0.0)
     assert run.hypotheses_collapsed is False
-    assert certification_artifact(run, provenance={})["hypotheses"]["collapse_note"] is None
+    artifact = certification_artifact(
+        run, provenance={}, gold_reads_by_role={"certification": 1}
+    )
+    assert artifact["hypotheses"]["collapse_note"] is None  # type: ignore[index]
 
 
 def test_delta_allocation_must_exhaust_delta() -> None:
@@ -248,7 +251,7 @@ def test_groups_with_an_invalid_member_cap_acceptance_before_thresholding(  # A4
         acceptance_floor=0.20,
         material_gain=0.05,
     )
-    artifact = certification_artifact(run, provenance={})
+    artifact = certification_artifact(run, provenance={}, gold_reads_by_role={"certification": 1})
     qa = artifact["systems"]["qa"]  # type: ignore[index]
     assert qa["never_acceptable_groups"] == 1
     assert qa["acceptance_ceiling"] == pytest.approx(1999 / 2000)
@@ -299,7 +302,9 @@ def test_risk_coverage_frontier_counts_ineligible_groups_against_coverage() -> N
 
 def test_artifact_is_text_free_and_records_zero_final_shift_reads() -> None:
     run = _run(qa_loss=0.0, baseline_loss=1.0)
-    artifact = certification_artifact(run, provenance={"git_commit": "abc"})
+    artifact = certification_artifact(
+        run, provenance={"git_commit": "abc"}, gold_reads_by_role={"certification": 1}
+    )
     serialized = str(artifact)
     for banned in ("raw_output", "prompt", "sentences", "text"):
         assert banned not in serialized

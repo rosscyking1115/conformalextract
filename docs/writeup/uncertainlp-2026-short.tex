@@ -42,7 +42,7 @@ separate barriers --- base risk, ranking quality, the finite-sample penalty --- 
 could be removed to rescue it. They do not all bind everywhere: base risk settles the two baselines
 and not the adapted model, which the other two settle between them. The
 adapted system's confidence score is \emph{not} weak by selective-prediction standards --- group
-AUROC 0.796, Spearman $\rho = -0.403$, matching what log-probability achieves on structured
+AUROC 0.796, Spearman $\rho = -0.403$, in the range log-probability scores reach on structured
 generation elsewhere --- and it certifies \textbf{nothing at all}. Nor would a perfect ranking:
 ranked by true loss, the same population certifies 11.4\%, short of the acceptance floor. Nor
 would more data at the same operating point, and the reason is structural rather than a matter of
@@ -111,7 +111,9 @@ log-probability over the parsed object; two alternatives were pre-registered and
 
 \paragraph{Discipline.} The certification split was opened \textbf{exactly once} --- 3,152
 documents forming 1,396 groups --- under a hash-chained access log, with zero reads of the held-out
-\texttt{final} and \texttt{shift} splits, which remain sealed. Certification and all analysis ran
+\texttt{final} and \texttt{shift} splits, which remain sealed. ``Zero reads'' means no such document
+entered the access log or scoring; RAMS stores text and labels together, so the archive itself was
+parsed whole. Certification and all analysis ran
 on CPU at no cost; the GPU programme totalled \$18.7--18.9 --- a band rather than a figure because
 there is no single spend ledger, and one job's cost is recovered by differencing running totals
 that admit two readings.

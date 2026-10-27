@@ -1,0 +1,34 @@
+{
+  "_notice": "Retrospective: the section 3.2 input preflight run on 2026-10-27 over the inputs the 2026-07-22 certificate used. It did NOT run on 2026-07-22; certify never called it (independent review 2026-10-27, B1). Label-free: the RAMS archive was not opened and no gold was read. Produced by scripts/certification_preflight_retrospective.py.",
+  "certification_access": {
+    "archive_opened": false,
+    "gold_read": false
+  },
+  "inputs_sha256": {
+    "fs.v1.jsonl": "07b886bc37e8fe484dbaad023964b4e1dd93da3409144ab2ba1346dd08c02225",
+    "qa.v1.jsonl": "036f8f08dcbe7587c19def951f81e62e4be0a5de1485b406c64514d03bf721f3",
+    "rams_roles.jsonl": "17718598eb279e668cf56eb33b4936a09a6898367d79838e7107c0a83906aaf3",
+    "zs.v1.jsonl": "ac5f7c31549c33fa5dc0fb0530ebc1c8066f7bfd3aea7763460482c3464dc862"
+  },
+  "prediction_records_by_system": {
+    "fs": 9124,
+    "qa": 9124,
+    "zs": 9124
+  },
+  "preflight": {
+    "certification_documents": 3152,
+    "certification_groups": 1396,
+    "not_checked_at_run_time": {
+      "synthetic_coverage": "the certifier's synthetic coverage tests are a test-suite property of the commit (tests/test_scorc_coverage.py, run by CI), not something the command re-runs",
+      "system_identity_fields": "model, adapter, tokenizer, prompt and decoding identity are attested through the hash of the prediction file those settings produced, not compared field by field: no per-field frozen system manifest was ever committed"
+    },
+    "status": "ready"
+  },
+  "role_map_records_by_role": {
+    "certification": 3152,
+    "development": 933,
+    "final": 971,
+    "train": 4068
+  },
+  "schema_version": "1"
+}

@@ -37,6 +37,7 @@ the next round reads a green suite as coverage. This register is where a paraphr
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -51,6 +52,16 @@ REGISTER = ROOT / "evidence" / "withdrawn_assertions.json"
 #: evidence of coverage that does not exist.** Build products (``.aux``, ``.log``, ``.bbl``, the
 #: PDF) stay out: they are generated from the ``.tex`` and would double-count it.
 PROSE_SUFFIXES = frozenset({".md", ".json", ".txt", ".py", ".toml", ".tex"})
+
+
+def _is_gitignored(relative: str) -> bool:
+    """True if git would ignore the path. A missing git fails the test rather than skipping."""
+    result = subprocess.run(
+        ["git", "check-ignore", "-q", relative], cwd=ROOT, capture_output=True, check=False
+    )
+    if result.returncode not in (0, 1):
+        raise RuntimeError(f"git check-ignore failed: {result.stderr!r}")
+    return result.returncode == 0
 
 
 def _register() -> list[dict[str, object]]:
@@ -190,6 +201,11 @@ def test_every_exemption_still_earns_its_place(entry: dict[str, object]) -> None
     assert isinstance(permitted, dict)
     for relative, reason in permitted.items():
         path = ROOT / relative
+        if not path.exists() and _is_gitignored(relative):
+            # A derived, gitignored file (the bylined paper) exists only where it was built. The
+            # scan walks the working tree, so where it exists it needs the exemption and must
+            # earn it below; where it does not -- a fresh clone, CI -- there is nothing to scan.
+            continue
         assert path.exists(), f"permitted_in names a file that does not exist: {relative}"
         text = path.read_text(encoding="utf-8", errors="replace")
         assert phrase in _flat(text), (

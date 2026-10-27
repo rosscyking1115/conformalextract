@@ -1,0 +1,25 @@
+{
+  "schema_version": "1",
+  "_notice": "The frozen identity of every input certify reads, in one machine-readable place. Written 2026-10-27, after the one certification run of 2026-07-22, when an independent review found that the Plan 3 section 3.2 preflight had never been wired into certify. Every value restates a record that already existed and was reviewed: the prediction and role-map hashes are the 'Input identity and provenance' table of docs/plan3/section-12-1-certification-only-scope-addendum-2026-07-30.md, the grid hashes are evidence/plan2/threshold_grids.json, the candidates are FROZEN_CONFIDENCE_CANDIDATES and evidence/plan2/development_gate_summary.json, and the operating point is ADR 0007. tests/test_certify_hardening.py fails if any value drifts from its source. This file creates no new fact.",
+  "alpha": 0.2,
+  "delta": 0.05,
+  "acceptance_floor": 0.2,
+  "role_map_sha256": "17718598eb279e668cf56eb33b4936a09a6898367d79838e7107c0a83906aaf3",
+  "systems": {
+    "zs": {
+      "predictions_sha256": "ac5f7c31549c33fa5dc0fb0530ebc1c8066f7bfd3aea7763460482c3464dc862",
+      "confidence_candidate": "mean",
+      "grid_hash": "5535b186c3d9a6b9641e8220dccb16520d7dfd44cfbbbc71a2880cbc21680ca1"
+    },
+    "fs": {
+      "predictions_sha256": "07b886bc37e8fe484dbaad023964b4e1dd93da3409144ab2ba1346dd08c02225",
+      "confidence_candidate": "tenth_percentile",
+      "grid_hash": "0b74704acfa3d27eeb7eb719ac7586c09c769a64e28615a0f385888ec9f98b5a"
+    },
+    "qa": {
+      "predictions_sha256": "036f8f08dcbe7587c19def951f81e62e4be0a5de1485b406c64514d03bf721f3",
+      "confidence_candidate": "mean",
+      "grid_hash": "676f0e04b133d74ca3f77cba1cb5a68878774b9f4576f5be8bf14b56a28d8d6d"
+    }
+  }
+}

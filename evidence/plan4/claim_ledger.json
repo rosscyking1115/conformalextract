@@ -96,6 +96,49 @@
       "verified_by": "conformalextract risk-coverage-diagnostic; reviewer re-derived 2.01% independently through the implementer's own aggregation, 2026-07-22"
     },
     {
+      "claim_id": "CX-RANKING-01",
+      "wording": "The adapted system's confidence score ranks certification groups by error well above chance and still certifies nothing: group AUROC 0.796 for any error (95% bootstrap interval 0.737 to 0.850), Spearman rho -0.403 against loss, normalized AURC 0.531.",
+      "status": "verified",
+      "scope": "QA system, mean transition-log-probability candidate, certification split, group level (ADR 0009 groups), in-domain RAMS",
+      "evidence": [
+        "evidence/plan3/calibration_diagnostics.json#splits.certification.qa.mean",
+        "evidence/plan3/certification_sensitivity.json#auroc_interval"
+      ],
+      "method": "Plan 3 calibration-diagnostics (group-level) discrimination diagnostics over the 1,392 scored certification groups: AUROC for the any-error target, Spearman correlation of score against loss, and AURC normalized between the loss-optimal ranking (0) and a random one (1); bootstrap interval from 10,000 resamples.",
+      "limitations": [
+        "Descriptive only: it selects no threshold and certifies nothing. At the frozen operating point the same score certifies no acceptance at all (CX-H1-PRIMARY).",
+        "The interval is wide because only 90 of the 1,392 scored groups are error-free. AUROC for the zero-shot and few-shot systems rests on 3 and 18 such groups and is not comparable with it.",
+        "Ranking quality is not certifiability: ranked by true loss, the same population certifies 11.4%, still short of the 20% floor (CX-CAPGAP-01).",
+        "Comparisons with log-probability scores reported elsewhere are not matched: those are instance-level and these are group-level. They support only that this is an ordinary score for its family, not that it equals any published figure.",
+        "On the development split the same three figures are 0.834, -0.313 and 0.568. The certification-split values are the ones quoted."
+      ],
+      "surfaces": [
+        "report",
+        "abstract"
+      ],
+      "verified_by": "computed into evidence/plan3/calibration_diagnostics.json, which the independent calibration-diagnostics review of 2026-08-02 (v2) reproduced byte-identically at its pinned hash; that review's REVISE concerned a different figure, the acceptance bound"
+    },
+    {
+      "claim_id": "CX-STRATIFICATION-01",
+      "wording": "Stratifying the adapted system's certification groups by triggers per document, mean group loss is essentially flat (0.606, 0.608, 0.589, 0.634 and 0.596 from one trigger to six or more), but the share of groups within the 20% risk target falls from 17.3% to 0.7% to zero; 23 of the 28 oracle-accepted groups are single-trigger, and 25 of the 28 have no cross-sentence argument.",
+      "status": "verified",
+      "scope": "QA system, mean candidate, certification split, ADR 0009 groups, in-domain RAMS; descriptive",
+      "evidence": [
+        "evidence/plan3/calibration_diagnostics.json#splits.certification.qa.mean.stratified",
+        "evidence/plan3/derived_ratios.json#counts"
+      ],
+      "method": "Group-level stratification from the calibration diagnostics: groups binned by trigger count, with mean loss and the share of groups whose loss is within the risk target per bin; oracle acceptances are those of the loss-optimal ranking.",
+      "limitations": [
+        "Descriptive only: it selects no threshold and certifies nothing, and the oracle acceptances are a counterfactual ranking by true loss, not a policy any system ran.",
+        "The intermediate bins are omitted from the falling share as written: two triggers 8.3%, three 2.7%.",
+        "It shows that the aggregation unit interacts with document complexity under ADR 0009's weakest-member rule; it does not show that another unit would certify, which was not tested."
+      ],
+      "surfaces": [
+        "report"
+      ],
+      "verified_by": "computed into evidence/plan3/calibration_diagnostics.json and evidence/plan3/derived_ratios.json; the diagnostics artifact was reproduced byte-identically by the independent calibration-diagnostics review of 2026-08-02 (v2)"
+    },
+    {
       "claim_id": "CX-GROUNDING-01",
       "wording": "QLoRA adaptation produced a large improvement in grounding fidelity: 95.7% of the adapted system's outputs parse and ground to the source document, against 39.4% zero-shot and 68.1% few-shot, with ungrounded spans falling from 5,355 to 340.",
       "status": "verified",
@@ -186,11 +229,15 @@
       "scope": "data governance",
       "evidence": [
         "evidence/plan3/certification_result.json#certification_access",
-        "docs/adr/0010-descope-final-and-shift.md"
+        "docs/adr/0010-descope-final-and-shift.md",
+        "evidence/plan3/certification_preflight_retrospective.json"
       ],
-      "method": "Certification-only access chain that raises on any other role by construction; final and shift are structurally unreachable from the certification path.",
+      "method": "Certification-only access chain that raises on any other role; only certification-role documents entered the access chain or scoring. RAMS stores source text and gold in one record, so the certify command decompressed and parsed the whole archive and discarded every non-certification record unused.",
       "limitations": [
-        "The final and shift splits are descoped because no selected policy exists to audit or transport, not for reasons of cost or effort; both commands are free to run."
+        "The final and shift splits are descoped because no selected policy exists to audit or transport, not for reasons of cost or effort; both commands are free to run.",
+        "'Zero reads' means no final or shift document entered the access record, scoring or any computed quantity. It does not mean those records were never decompressed: RAMS stores text and gold in one record, and the certify command parsed the whole archive.",
+        "The final_reads and shift_reads fields of the 2026-07-22 artifact were written as the constant 0, not counted. The code path made them true, because gold was looked up only for certification-role documents, but the artifact did not measure it. The command now counts the gold it uses, by role.",
+        "The Plan 3 section 3.2 preflight did not run before the 2026-07-22 read, because certify never called it. Run afterwards on the hash-identical inputs, label-free, it passes (evidence/plan3/certification_preflight_retrospective.json)."
       ],
       "surfaces": [
         "README",
