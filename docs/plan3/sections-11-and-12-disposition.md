@@ -62,6 +62,10 @@ an uncorrected p-value. ADR 0011 §1 engages §8.5 explicitly on the sweep.
 
 ## §12.1 Machine-coded taxonomy — **TO BE EXECUTED**
 
+> **Superseded 2026-10-27.** This ruling never ran. [Amendment 2](sections-11-and-12-disposition-amendment-2.md) descopes §12.1
+> from Plan 3, disposes §11.2 axis by axis, and re-disposes §12.2's two computable strata.
+> The text below is kept as the record of the 2026-07-29 ruling.
+
 **Ruled: execute.** It runs against committed prediction artifacts and RAMS gold, needs no accepted
 policy set, and is the only route to substantiating an error-category claim.
 

@@ -183,8 +183,11 @@ output that is simply wrong.**
 > missing arguments". Wrong-role, boundary and coreference errors share **this** signature — not the
 > one above.
 >
-> §12.1's machine-coded taxonomy is what would separate them and is ruled for execution
-> ([`sections-11-and-12-disposition.md`](sections-11-and-12-disposition.md)) but has not been run.
+> §12.1's machine-coded taxonomy is what would separate them. It was ruled for execution
+> ([`sections-11-and-12-disposition.md`](sections-11-and-12-disposition.md)), never ran, and was
+> **descoped from Plan 3 on 2026-10-27** ([Amendment 2](sections-11-and-12-disposition-amendment-2.md)): no live claim depends on it
+> since O2 was narrowed, so **no error-category claim is made.** (This sentence previously
+> ended "is ruled for execution … but has not been run"; updated 2026-10-27.)
 
 The counterfactual states it directly. Give each system a **grounding oracle** — drop every
 document outside the content-bearing channel, so the system is scored as though it never emitted

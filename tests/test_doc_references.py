@@ -75,8 +75,11 @@ def _referenced_identifiers() -> dict[str, set[str]]:
 #: to match what was built. If one of these legitimately gains an amendment, update the hash in
 #: the same commit and say why in the message.
 ACCEPTED_PLAN_SHA256 = {
+    # Amended 2026-10-27 with a dated note under the strict-document-failure sentence recording that
+    # its definition was never frozen before calibration (Plan 3 disposition Amendment 2). The
+    # sentence is preserved above the note. Pin moved in the same commit; previous digest afb55e4c…
     "docs/gate0/accepted-plan.md": (
-        "afb55e4c89300cdb2559587e29b43601a13c30b1638049918691a6ed509ac6fe"
+        "7bf43a6d6c4eb19a570319aeace2c3d268084a63f42a0e7d64e076bcadc64883"
     ),
     "docs/plan2/accepted-plan.md": (
         "a6b4c69fad14cd56c866cbd204b9312aefb1a4fe578bb437af8cd5e3ac97fdbf"
@@ -85,8 +88,11 @@ ACCEPTED_PLAN_SHA256 = {
     # independently reviewed 2026-07-30 certification-only addendum. The original sentence and its
     # eleven-category list are preserved above the note. Pin moved in the same commit, as the rule
     # above requires; previous digest 83313d47…
+    # Amended again 2026-10-27 with dated notes under §12.1 (descoped), §12.2 (disposed) and the §22
+    # checklist (taxonomy/audit half waived), all pointing at disposition Amendment 2. The text above
+    # each note is unchanged. Pin moved in the same commit; previous digest 34bc6b4d…
     "docs/plan3/accepted-plan.md": (
-        "34bc6b4dabd226215804c4a9f99144d41d161fc3bb916cb8eac86c1829ee371e"
+        "560eee3d08d18d212ae2286f07b1c1528c66b27f83c5468aa40d804fb912fa0b"
     ),
     # Amended 2026-07-29 with a dated note reconciling its inherited-status line against the
     # records (Plan 1 complete, Plan 2 closed, Plan 3 executed but not formally closed). The

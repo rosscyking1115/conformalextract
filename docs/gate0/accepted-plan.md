@@ -236,6 +236,13 @@ This retains partial extraction quality while penalising ungrounded structure. P
 
 A secondary binary **strict document failure** loss is also reported. Its exact definition is frozen before calibration—for example, any parse/grounding failure or grounded F1 below a predeclared task threshold.
 
+> **Noted 2026-10-27.** This definition was never frozen, and calibration ran on 2026-07-22, so
+> the programme has no predeclared strict-failure loss. It is not repairable after calibration:
+> a definition written now would be chosen among seen results. The dependent Plan 3 items are
+> disposed as unavailable in
+> [`../plan3/sections-11-and-12-disposition-amendment-2.md`](../plan3/sections-11-and-12-disposition-amendment-2.md).
+> The sentence above is unchanged.
+
 ### 6.2 Confidence/nonconformity signal
 
 The score must be available from the model itself, deterministic under the frozen inference stack and computable for all three comparison systems.

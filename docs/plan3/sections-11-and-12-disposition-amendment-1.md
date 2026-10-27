@@ -111,6 +111,8 @@ check that the new command and the certifier agree about what a loss is:
   and call it predeclared, the artifact reports three named indicators (`above_alpha`, `any_error`,
   `not_all_valid`) and describes none of them as predeclared. **This is a Plan 1 defect this
   amendment surfaces but does not repair**, and a reviewer should treat it as its own finding.
+  *(Ruled 2026-10-27: unavailable, not repairable after calibration; item by item in
+  [Amendment 2](sections-11-and-12-disposition-amendment-2.md).)*
 
 ## What it found
 
