@@ -1,0 +1,103 @@
+{
+  "schema_version": "1",
+  "_record_notice": "Independent Reviewer/QA delta ruling on f3edc6d (claimed discharge of R1-R5 from evidence/plan4/reviewer_record.certify-hardening-and-claims.json) and on the later ledger changes in 44ed212 and 6b3ff7c, at HEAD 39b7350. The reviewer wrote none of this code and edited nothing. Read-only: data/ was not read, no split was opened, certify was not run, $0 spent. Per the load rule, the full pytest suite, ruff and mypy were not run; only the named test files below were. This record authorises nothing beyond what it rules on.",
+  "review_kind": "certify_hardening_and_claims_delta",
+  "plan": "Plan 3 close chain, step 2 (ledger entries for the section 11.3 quantities), plus certify hardening (B1-B4)",
+  "reviewed_commit": "39b735036ba0f0c8aa2f382303da7628d3bf67ac",
+  "reviewed_commit_note": "Diff ae1b963..39b7350. src/ and scripts/ change only in f3edc6d; 44ed212, 6b3ff7c and 39b7350 touch ledger, prose, appendix, reviewer records and tests/test_doc_references.py. All commits after 907c107 are local and unpushed. Working tree clean at start and finish.",
+  "reviewed_branch": "release/public-prep-2026-10-27",
+  "reviewed_date": "2026-10-27",
+  "reviewer_identity": "Reviewer/QA (Claude), independent; not the author of ae1b963, f3edc6d, 44ed212 or 6b3ff7c, and not the author of the prior record",
+  "prior_records": [
+    "evidence/plan4/reviewer_record.certify-hardening-and-claims.json (BLOCK, R1-R5, N1-N12)",
+    "C:/dev/_pmo/team/reviews/2026-10-27-conformalextract-certify-hardening-and-claims.md",
+    "evidence/plan3/reviewer_record.plan3-close-chain.json (step 3 ruling, S1-B1/S1-B2, S4-B2)"
+  ],
+  "verdict": "PASS-WITH-NITS. R1-R5 are discharged in code and text, with two residues recorded as nits rather than blockers. (a) R1's CLI count-path test was not delivered. (b) R4's verified_by does not name Amendment 1 as undischarged. The added guard fails closed, so the missing test can only hide a false refusal, never a wrong count in an artifact. The 44ed212 and 6b3ff7c ledger changes match their sources. No claim number is unbacked. The frozen 2026-07-22 inputs remain certifiable by the hardened path. Governance carry-forward: the manager-escalate half of R4 (CX-RANKING-01 on the abstract surface against Amendment 1's 'Nothing here may reach a public surface') has no recorded decision. This review does not decide it.",
+  "per_item_rulings": {
+    "R1": {
+      "ruling": "discharged (code and docstring); test clause not delivered (N-A)",
+      "basis": "certification_run.py:524 count_gold_reads counts over set(gold_used). It raises SealedRoleError for any role other than certification, including documents missing from the role map (mapped to 'unknown'). It raises RuntimeError when the certification count differs from expected_documents. cli.py:805 passes access_log.document_count, the len(sorted(groups)) from cli.py:752, and runs before the artifact is built or written. Equality holds on consistent inputs: the preflight coverage check (certification_preflight.py, 'missing' branch) requires every role-map certification document to be predicted identically by zs/fs/qa, and parse_arm emits one PredictionRecord per distinct instance_key. So distinct gold reads = 3,152 = access-log count, matching certification_result.json documents_read 3152 and the retrospective's certification_documents. The docstring says the non-certification zero holds by construction of the filter (R1 clause 3). Unit tests for all four branches are in tests/test_certify_hardening.py:165-182. Not delivered: the required 'CLI test with a monkeypatched archive that pins the counts'. The CLI tests still stop at the archive guard (test_consistent_inputs_reach_the_archive_only_after_the_preflight), so the cli.py:805 wiring is checked by inspection only. CX-SEALED-01 limitation 3 (claim_ledger.json:240) ends 'The command now counts the gold it uses, by role', which does not repeat that the final/shift zero is still by construction (N-B)."
+    },
+    "R2": {
+      "ruling": "discharged",
+      "basis": "certification_preflight.py:221-225 recomputes grid_hash_from_certifiable_thresholds(system_id, thresholds) and refuses on mismatch with the grid's declared hash. That hash is separately required to equal the frozen manifest's, so the thresholds certify uses (cli.py reads the same certifiable_thresholds) are now transitively bound to the frozen hash. threshold_grid.py:157 rebuilds the candidate tuple build_threshold_grid hashes; the extraction into _hash_candidates changes no behaviour. Tests: test_thresholds_that_do_not_hash_to_the_declared_grid_refuse (edited thresholds, untouched hash, as R2 asked) and test_the_committed_grids_hash_to_their_declared_hashes (all three committed grids reproduce). Both pass; test_threshold_grid.py passes (10)."
+    },
+    "R3": {
+      "ruling": "discharged",
+      "basis": "CX-STRATIFICATION-01 method and limitation 1 now describe the oracle-accepted set as the largest best-scoring prefix whose running risk stays within the target, with a label-chosen cut-off, 'not a ranking by true loss'. This matches risk_coverage_frontier (certification_run.py:328-356: sorted by score, last index with running_risk <= alpha). The appendix is regenerated; test_claims.py passes."
+    },
+    "R4": {
+      "ruling": "discharged on the wording half; the governance half remains a manager escalation with no recorded decision",
+      "basis": "Both claims are now status 'qualified'. verified_by states the byte-identical reproduction, the v2 REVISE, F-D naming the bootstrap interval, its later commit to certification_sensitivity.json, and 'no review of that chain has yet passed'. It does not state that Amendment 1 is 'Not discharged' (amendment-1 lines 6-9), which R4 listed (N-C). CX-RANKING-01 still carries surface 'abstract' (uncertainlp-2026-short.tex:45-46). No Manager/Ross ruling on that surface was found in docs/, evidence/ or the PMO reviews directory. verify-claims accepts it, so the guard does not enforce Amendment 1's restriction."
+    },
+    "R5": {
+      "ruling": "discharged",
+      "basis": "CX-SEALED-01 limitation 2 (claim_ledger.json:239) and README.md:109-112 drop 'or any computed quantity'. They now say no final/shift gold entered the access record or scoring, and that the whole archive was parsed and the 2026-07-22 run parsed the final split's predictions against source text. The paper (tex:114) says 'no gold from those splits'. 'The role map assigns no shift documents at all' is backed by evidence/gate0/split_validation.json role_document_counts (certification 3152, development 933, final 971, train 4068; no shift role)."
+    }
+  },
+  "later_ledger_changes": {
+    "44ed212_CX-RANKING-01_exploratory_limitation": {
+      "ruling": "accurate",
+      "basis": "Matches reviewer_record.plan3-close-chain.json step_3_strict_failure_indicator.text_changes_required[1] and Amendment 2's S1-R4 table (above_alpha, any_error, not_all_valid are exploratory and not predeclared). It omits the 'Plan 1 section 237' citation the ruling named (trivial, folded into N-C)."
+    },
+    "6b3ff7c_CX-GROUNDING-ORTHOGONAL-01_12.1_limitation": {
+      "ruling": "accurate as to the decision; slightly ahead of its review status (N-D)",
+      "basis": "claim_ledger.json:303 says section 12.1 'was descoped from Plan 3 on 2026-10-27 (disposition Amendment 2) rather than run, so no error-category claim is made'. That matches Amendment 2's 12.1 section and Ross's quoted choice. Amendment 2:11 is 'Status: proposed, pending independent review', which the limitation does not mention. The 637 / 2,003-of-2,515 figures are unchanged. 'Share that signature' reads against the nearer fp-and-fn co-occurrence signature, so it does not repeat the S4-B2 error corrected in the draft."
+    },
+    "appendix_matches_ledger": "yes: tests/test_claims.py 27 passed; verify-claims ok, 17 claims, 15 publishable, no unresolved or untracked evidence"
+  },
+  "new_findings": {
+    "blocking": [],
+    "required": [],
+    "nits": {
+      "N-A": {
+        "where": "tests/test_certify_hardening.py (CLI section, after line 372); src/conformalextract/cli.py:805",
+        "issue": "R1's required CLI test pinning the counts through certify_command (monkeypatched read_rams_instances/read_ontology returning synthetic certification instances) was not added. The commit message does not say it was dropped.",
+        "discharge": "Add that test, asserting gold_reads_by_role == {'certification': N} in the written artifact, or record in the delta's commit or this record's follow-up that the clause was waived and why."
+      },
+      "N-B": {
+        "where": "evidence/plan4/claim_ledger.json:240 (CX-SEALED-01 limitation 3)",
+        "issue": "'The command now counts the gold it uses, by role' can read as the final/shift zero now being measured. It is still by construction, and the count is the check that the construction held, as the count_gold_reads docstring says.",
+        "discharge": "Append: 'the zero for other roles still holds by construction of the certification filter; the count checks that it held.' Regenerate the appendix."
+      },
+      "N-C": {
+        "where": "claim_ledger.json CX-RANKING-01 and CX-STRATIFICATION-01 verified_by; CX-RANKING-01 last limitation",
+        "issue": "verified_by omits that Amendment 1, the document that executed these section 11.3 rows, is 'Not discharged' and restricted from public surfaces. The exploratory-indicator limitation omits its Plan 1 section 237 citation.",
+        "discharge": "Add 'Amendment 1 is not discharged' to both verified_by strings and '(Plan 1 section 237)' to the limitation. Regenerate the appendix."
+      },
+      "N-D": {
+        "where": "claim_ledger.json:303; docs/plan3/certification-result.md; docs/writeup/draft-2026-07-28.md",
+        "issue": "The surfaces state the section 12.1 descope as done, while Amendment 2 is 'proposed, pending independent review'.",
+        "discharge": "Qualify as 'descoped on Ross's decision of 2026-10-27 (Amendment 2, pending review)', or let the Amendment 2 delta review settle it."
+      },
+      "N-E": {
+        "where": "tests/test_reanalysis.py:46-58 (outside this delta)",
+        "issue": "The intermittent failure in test_curve_read_at_alpha_reproduces_the_frontier cannot be numerical. Both sides read the same _curve_arrays output with the same '<= alpha' comparison, and the float64 -> tuple -> float64 round trip is exact. The likely cause is Hypothesis's default 200 ms deadline (DeadlineExceeded/Flaky) under the concurrent GPU load. The file passed 35/35 here.",
+        "discharge": "Add @settings(deadline=None) and capture the error next time it appears. Not a claims risk."
+      },
+      "carried_open_from_prior_record": "N4, N5, N6, N7, N8, N10, N11 and N12 were not addressed in this delta and remain open as nits. N1, N2, N3 and N9 are addressed (N3: tex:45-46 'close to the one log-probability figure reported elsewhere for structured generation')."
+    },
+    "governance_escalation_still_open": "R4's manager-escalate half: whether Amendment 1's 'Nothing here may reach a public surface' still binds CX-RANKING-01's abstract surface, or whether the section 11.3 packet chain needs a PASS first. For Manager/Ross; not decided by this review."
+  },
+  "frozen_inputs_still_certifiable": {
+    "ruling": "yes, by inspection plus committed evidence (certify not run)",
+    "basis": "Recomputed grid hashes equal the committed and frozen hashes (test passes). The coverage guarantee makes the distinct-gold count equal the access-log count (3,152). The operating point, candidates and hashes are unchanged and pinned by test_the_committed_frozen_inputs_agree_with_every_record_they_restate. certify would still refuse at cli.py:652 because evidence/plan3/certification_result.json exists, which is intended."
+  },
+  "claim_numbers_backed": "Yes for every number touched in scope. The delta changes no CX-RANKING-01 or CX-STRATIFICATION-01 figure. The README CX-CAPGAP-01 witness (k = 332, LCB 0.2004, mean loss <= 0.1151) traces to evidence/plan3/corpus_size_requirement.json witness_at_the_observed_corpus (k 332, acceptance_lower_bound 0.200406, mean_loss_a_certifying_prefix_may_carry 0.115088) and certification_sensitivity.json smallest_k_clearing_floor 332. check_paper_claims: all 117 figures resolve.",
+  "external_signal": {
+    "ran": "CUDA_VISIBLE_DEVICES=-1 uv run --frozen pytest -q on single files; uv run --frozen conformalextract verify-claims; uv run --frozen python scripts/check_paper_claims.py",
+    "tests/test_certify_hardening.py": "23 passed in 10.57s",
+    "tests/test_ci_guard.py": "2 passed in 0.75s",
+    "tests/test_claims.py": "27 passed in 4.50s",
+    "tests/test_certify_cli_contracts.py": "7 passed in 0.65s",
+    "tests/test_threshold_grid.py": "10 passed in 6.92s",
+    "tests/test_doc_references.py": "9 passed in 2.54s",
+    "tests/test_paper_claims_guard.py": "15 passed in 1.25s",
+    "tests/test_reanalysis.py": "35 passed in 12.86s",
+    "verify_claims": "publishable 15, tracking_verifiable true, unresolved_evidence {}, untracked_evidence {}",
+    "check_paper_claims": "ok: all 117 figures resolve to an artifact carrying value and configuration.",
+    "not_run": "full pytest, ruff, mypy (load rule); certify (immutable result, sealed data); nothing under data/ read. Producer-reported: full pytest 510 passed / 9 skipped at 6b3ff7c, ruff and mypy clean at 39b7350."
+  },
+  "what_this_record_does_and_does_not_authorise": "Rules that R1-R5 are discharged, with nits N-A to N-E. Does not close Plan 3, does not review Amendment 2 as a whole, does not decide the abstract-surface escalation, does not clear going public, and authorises no paid or $0 run."
+}

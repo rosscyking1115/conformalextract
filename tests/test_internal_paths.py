@@ -110,6 +110,16 @@ ALLOWED: dict[str, str] = {
         "reports its own provenance -- the same mention-not-use ground already granted to the "
         "three sibling reviewer records above."
     ),
+    "evidence/plan4/reviewer_record.certify-hardening-and-claims-delta.json": (
+        "A 2026-10-27 independent record filed verbatim. Its prior_records list names where the "
+        "earlier review's prose copy lives -- the same mention-not-use ground as the sibling "
+        "reviewer records above. Redacting it would make the filed copy differ from the verdict."
+    ),
+    "evidence/plan3/reviewer_record.c1-2026-08-03-packets.json": (
+        "A 2026-10-27 independent record filed verbatim. It reviews routing packets and prior "
+        "reviews that live outside this repository, and naming where they live is how it states "
+        "what it read. Same mention-not-use ground as the sibling reviewer records above."
+    ),
 }
 # `REVIEW.md` was on this list on first writing, pre-emptively, and the stale-exception test below
 # rejected it before the change was committed: the gate there is written descriptively and quotes
