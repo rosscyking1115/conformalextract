@@ -54,12 +54,20 @@ def _reviewer_records() -> list[dict[str, object]]:
     return records
 
 
+#: Record kinds that rule on a plan close. ``plan_close`` is Plan 2's. Plan 3 closed on 2026-10-27
+#: through a fresh close review (``plan3_close_fresh``, BLOCK) and its delta
+#: (``plan3_close_fresh_delta``, PASS-WITH-NITS); both are filed verbatim, so the derivation names
+#: their kinds rather than the records being relabelled. A kind not listed here escapes silently,
+#: which is the known limit recorded in gate_state.json's ``_two_mechanisms_notice``.
+CLOSE_REVIEW_KINDS = frozenset({"plan_close", "plan3_close_fresh", "plan3_close_fresh_delta"})
+
+
 def _closed_plans_from_records() -> set[str]:
-    """Plans with a close record. Mechanism two of the two this repository uses."""
+    """Plans with a passing close record. Mechanism two of the two this repository uses."""
 
     closed: set[str] = set()
     for record in _reviewer_records():
-        if record.get("review_kind") != "plan_close":
+        if record.get("review_kind") not in CLOSE_REVIEW_KINDS:
             continue
         plan = record.get("plan")
         verdict = str(record.get("verdict", ""))
@@ -111,6 +119,19 @@ def test_declared_gate_state_matches_the_records() -> None:
             "The records are the authority. Update gate_state.json to match them — and if a plan "
             "has just been closed, update it in the same commit as the close record."
         )
+
+
+def test_the_fresh_close_delta_attests_plan_3_closed() -> None:
+    """Plan 3 closed through a fresh close review and its delta, not a ``plan_close`` record.
+
+    The 2026-10-27 records are filed verbatim, so their ``review_kind`` cannot be relabelled to
+    fit this derivation; the derivation has to know the kind instead. The fresh record itself
+    (BLOCK) must not count -- only the delta's PASS-WITH-NITS does.
+    """
+
+    assert "Plan 3" in _closed_plans_from_records()
+    fresh = _load(ROOT / "evidence" / "plan3" / "reviewer_record.plan3-close-fresh.json")
+    assert str(fresh["verdict"]).upper().startswith("BLOCK")
 
 
 def test_an_override_is_only_declarable_while_the_prior_plan_is_unclosed() -> None:

@@ -69,10 +69,7 @@
 > against this prose.
 
 **Where the gate actually stands.** Plan 1 closed; Plan 2 closed (independent reviewer PASS,
-2026-07-21). **Plan 3 is executed and independently reviewed but NOT closed** — its close record is
-[`reviewer_record.plan3-close.json`](../../evidence/plan3/reviewer_record.plan3-close.json), whose
-`review_kind` is `plan_close_refused` and whose verdict is *"Plan 3 may NOT be closed"*, blocking on
-findings O1, O2 and O3. **Plan 4 is PAUSED**, open only by owner override of the gated sequence.
+2026-07-21). **Plan 3 is closed** (2026-10-27): the 2026-07-29 close was refused on findings O1, O2 and O3 ([`reviewer_record.plan3-close.json`](../../evidence/plan3/reviewer_record.plan3-close.json)); the chain below repaired them, and a fresh close review's delta returned PASS-WITH-NITS at `d8d2223` ([`reviewer_record.plan3-close-fresh-delta.json`](../../evidence/plan3/reviewer_record.plan3-close-fresh-delta.json)). **Plan 4 is open on its merits**: its owner override lapsed the same day.
 
 **The chain, step by step.** Every step's implementer work is *already applied*; what is outstanding
 is review. Steps marked 🔒 **may not be self-issued** — no seat may review its own work, and per
@@ -87,7 +84,7 @@ independent review.
 | 4 | **O2/O3** — [`reviewer_record.o2-o3-claims-change.json`](../../evidence/plan4/reviewer_record.o2-o3-claims-change.json) returned **BLOCK** on 2026-07-29 | verified by the 2026-10-27 [close-chain review](../../evidence/plan3/reviewer_record.plan3-close-chain.json), which returned **BLOCK** on S4-B1/S4-B2; `44ed212` answers both and the [delta review](../../evidence/plan3/reviewer_record.plan3-close-chain-delta.json) ruled them discharged | 🔒 (ruled) |
 | 5 | **Claim narrowing** — [packet](../plan3/claim-narrowing-2026-08-02.md) (`d256ca5`, `ed3693b`; **REVISE** twice, plus v3/v4 rounds whose verdicts were never filed) | the close-chain review ruled its questions (keep the identifier, no redirect; the narrowing is a separate finding, O2-S1, discharged) and returned **BLOCK** on S5-B1, since discharged; the [C1 review](../../evidence/plan3/reviewer_record.c1-2026-08-03-packets.json) then returned **BLOCK** on B1/B2 (naming the construction; the 0.1075 wording), answered 2026-10-27 and awaiting verification | 🔒 |
 | 6 | **A fresh Plan 3 close record** — by an independent reviewer who did **not** implement Plan 3 and did **not** author this refusal's remedies, re-verifying the green command and the artifact hashes at its own commit | [fresh close](../../evidence/plan3/reviewer_record.plan3-close-fresh.json) **BLOCK** at `7629e34` on one paper heading; its [delta](../../evidence/plan3/reviewer_record.plan3-close-fresh-delta.json) **PASS-WITH-NITS at `d8d2223`: Plan 3 may be closed** | 🔒 (ruled) |
-| 7 | Plan 4's owner override lapses and the gate is satisfied on its merits | follows 6 | — |
+| 7 | Plan 4's owner override lapses and the gate is satisfied on its merits | **done 2026-10-27** on the owner's instruction ([`evidence/gate_state.json`](../../evidence/gate_state.json)) | owner |
 
 **Nothing here may be submitted, posted, published or quoted until step 6 issues a PASS.** That
 includes the public release of this repository: publishing the repo publishes its claims, and the
