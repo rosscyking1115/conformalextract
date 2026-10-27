@@ -41,9 +41,7 @@ confidence and a 20\% acceptance floor, and the infeasibility is \textbf{overdet
 separate barriers --- base risk, ranking quality, the finite-sample penalty --- no one of which
 could be removed to rescue it. They do not all bind everywhere: base risk settles the two baselines
 and not the adapted model, which the other two settle between them. The
-adapted system's confidence score is \emph{not} weak by selective-prediction standards --- its
-ranking quality is close to the one log-probability figure reported elsewhere for structured
-generation (Table~\ref{tab:main}) --- and it certifies \textbf{nothing at all}. Nor would a perfect ranking:
+adapted system's confidence score certifies \textbf{nothing at all}. Nor would a perfect ranking:
 ranked by true loss, the same population certifies at most 11.4\% under a Hoeffding bound at
 $\delta/3$, and nothing under the primary certifier, short of the acceptance floor. Nor
 would more data at the same operating point, and the reason is structural rather than a matter of

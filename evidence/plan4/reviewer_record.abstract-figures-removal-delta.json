@@ -1,0 +1,52 @@
+{
+  "schema_version": "1",
+  "review_kind": "abstract_figures_removal_delta",
+  "reviewed_commit": "79ad6c2",
+  "parent_commit": "7b662d6",
+  "reviewed_date": "2026-10-27",
+  "reviewer_identity": "independent Reviewer/QA subagent (orch-pipeline review phase); did not author the change",
+  "verdict": "PASS-WITH-NITS",
+  "findings": [
+    {
+      "id": "N1",
+      "severity": "nit (arguably blocking if the owner reads Amendment 1's restriction strictly)",
+      "where": "docs/writeup/uncertainlp-2026-short.tex:44-46",
+      "issue": "The abstract no longer quotes numbers, but the sentence 'its ranking quality is close to the one log-probability figure reported elsewhere for structured generation' is still a qualitative restatement of the CX-RANKING-01 result. It implies AUROC of roughly 0.79 against Kotte's 0.793. The body (lines 196-200) itself says 0.796 vs 0.793 is not a matched comparison: that figure is instance-level and ours is group-level, and our CI spans 0.737-0.850. The abstract drops those caveats, so the claim reads stronger than the body allows. This also contradicts the ledger change: CX-RANKING-01 is now report-only, yet the abstract still carries its substance.",
+      "discharge": "Preferred: weaken it to a claim with no comparison, e.g. 'the adapted system's confidence score is not at chance on error detection (details in Section X)', or just 'is not obviously weak'. Alternative: keep the sentence but add the caveat ('though not a matched comparison') and cite Section/Table 5 of Kotte. Or the owner explicitly rules that a qualitative restatement is acceptable."
+    },
+    {
+      "id": "N2",
+      "severity": "nit",
+      "where": "docs/writeup/uncertainlp-2026-short.tex:44-46 and 164 (\\label{tab:main})",
+      "issue": "Table~\\ref{tab:main} does NOT contain 'the one log-probability figure reported elsewhere'. It holds only this paper's own rows (AUROC 0.344/0.727/0.796 etc.). Kotte's 0.793 appears only in prose at lines 196-198. The pointer is therefore misleading: a reader who follows it finds the paper's own figures, not the external benchmark. The abstract also names no source for 'reported elsewhere'.",
+      "discharge": "Cite \\citet{kotte2026crc} in the abstract and point to the section that states the comparison, or point to the table for our figures only, e.g. 'ranking quality is reported in Table 1'."
+    },
+    {
+      "id": "N3",
+      "severity": "informational, out of scope for remedy",
+      "where": "docs/writeup/uncertainlp-2026-short.tex:345 (also the body at 164-166, 191-200, 300)",
+      "issue": "The body still quotes AUROC 0.796 in the conclusion-like line ('A score with AUROC 0.796 certified nothing here'). If that line is in a conclusion or summary section rather than the claim's report surface, it may be read as abstract-adjacent.",
+      "discharge": "Owner to confirm that body or conclusion mentions count as the 'report' surface."
+    },
+    {
+      "id": "N4",
+      "severity": "informational",
+      "where": "docs/writeup/uncertainlp-2026-short.md:85; README.md",
+      "issue": "Question 5 result: README.md has no AUROC, rho, AURC or stratification figures and no 'abstract' claim for them. uncertainlp-2026-short.md:85 only mentions that the ledger entries CX-RANKING-01 and CX-STRATIFICATION-01 exist (names the quantities, quotes no values). Line 162 quotes Kotte's 0.793, an external figure, not Amendment-1-derived. No public surface quotes the figures at abstract level. Remedy not required."
+    }
+  ],
+  "rulings_by_question": {
+    "1_figures_gone_from_abstract": "PASS. The abstract environment is lines 32 (\\begin{abstract}) to 57 (\\end{abstract}). Within it there is no 0.796, -0.403, normalized AURC/0.531, 0.737-0.850, 17.3%, 0.7% or '23 of 28'. The words 'AUROC, AURC, rank correlation' at line 34 are generic metric names in a framing sentence, not figures. Remaining abstract numbers (20% target, 95%, 20% floor, 11.4% Hoeffding perfect-ranking, 21x) are not Amendment 1 figures; this is not independently verified here beyond the claim ledger's wording for CX-CAPGAP-01.",
+    "2_honest_and_complete": "Mostly honest; see N1 and N2. The null result, the three barriers and the structural argument are intact. Only the 'close to the one log-probability figure' clause overreaches and points to the wrong place.",
+    "3_other_abstract_claims": "PASS. Claims whose surfaces include 'abstract' after the change: CX-H1-PRIMARY, CX-CAPGAP-01, CX-GROUNDING-ORTHOGONAL-01. CX-STRATIFICATION-01 is report-only (it was never on the abstract). CX-CAPGAP-01 wording uses the 2.0% and 23.6% figures and the 21.6-point gap, which come from the ADR/certification result, not from Amendment 1 section 11.3 calibration_diagnostics. CX-GROUNDING-ORTHOGONAL-01 cites ADR 0011 and argument_error_counts, not the Amendment 1 artifacts. The cited evidence paths were read, not traced to source, so the independence of those claims from Amendment 1 rests on the evidence lists.",
+    "4_consistency": "PASS. Ledger, appendix (generated), tests/test_claims.py, verify-claims and check_paper_claims all agree. The generated appendix at HEAD still lists CX-RANKING-01 and CX-STRATIFICATION-01 (lines 23 and 30), which are report claims. The commit stat shows only 2 files changed (the .tex and the ledger), not claims-appendix.generated.md; the commit message and brief say it was regenerated, but the appendix has no per-claim surface line to change, so no regeneration was needed. test_claims.py only asserts 'abstract' for H1 (line 139) and that the CAPGAP-style claims are not quotable on CV/slide/abstract (line 150)."
+  },
+  "external_signal": [
+    {"cmd": "git show 79ad6c2 --stat; git show 79ad6c2 -- docs/writeup/uncertainlp-2026-short.tex evidence/plan4/claim_ledger.json", "output": "2 files changed, 4 insertions, 5 deletions; abstract sentence rewritten; CX-RANKING-01 surfaces ['report','abstract'] -> ['report']"},
+    {"cmd": "CUDA_VISIBLE_DEVICES=-1 uv run --frozen pytest -q tests/test_claims.py", "output": "27 passed in 0.84s"},
+    {"cmd": "uv run --frozen conformalextract verify-claims", "output": "claims: 17, ok: true, publishable: 15, tracking_verifiable: true, unresolved_evidence: {}, untracked_evidence: {}"},
+    {"cmd": "uv run --frozen python scripts/check_paper_claims.py", "output": "ok: all 117 figures resolve to an artifact carrying value and configuration."},
+    {"cmd": "grep -n for AUROC|0.796|0.403|AURC|0.737|0.850|17.3|0.7%|23 of 28|rho|Spearman over uncertainlp-2026-short.tex, README.md, uncertainlp-2026-short.md; python scan of ledger surfaces", "output": "No hits within tex lines 32-57 besides generic metric names at line 34. Body hits at 62,69,124,164-166,173,191-200,300,323,345,409. Abstract-surface claims: CX-H1-PRIMARY, CX-CAPGAP-01, CX-GROUNDING-ORTHOGONAL-01. README has no figure hits."}
+  ],
+  "summary_note": "Nothing was edited, staged, committed or pushed, nothing under data/ was read, and spend was $0. The full test suite and uv sync were not run."
+}
