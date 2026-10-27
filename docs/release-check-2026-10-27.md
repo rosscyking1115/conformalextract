@@ -22,16 +22,20 @@ is the predecessor; this one re-runs it at a later commit and adds history, CI a
 | 6 | Internal paths and planning references | **pass under decision 1**; disclosed — see §6 |
 | 7 | Claims against the ledger, per surface | README **pass**; paper and abstract **open, already known** — see §7 |
 | 8 | Gates | `verify-claims` ok; pytest 484 passed, 8 skipped; ruff clean; mypy strict clean |
-| 9 | CI | **was failing on every push since 2026-07-17; fixed locally, unverified until pushed** — see §9 |
+| 9 | CI | **was failing on every push since 2026-07-15; fixed locally, unverified until pushed** — see §9 |
 | 10 | README links | **pass** — 14 relative links, all resolve |
 | 11 | Gate state | **Plan 4's release gate is not open** — see §11 |
 
 ## 1. Secrets
 
-`gitleaks git . --redact` over all 172 commits on every branch: 10 findings, all rule
-`generic-api-key`, all in three evidence files, all false positives. Each match is a 64-character
-SHA-256 hex digest under a key whose name contains `key` or `token` (`doc_key_sha256`,
-`generated_token_sha256`). No value is a credential. A pattern grep over `git log --all -p` for
+`gitleaks git . --redact --log-opts="--all"` (gitleaks 8.30.1) over every commit on every branch:
+23 findings in 3 commits and 3 evidence files, all rule `generic-api-key`, all false positives.
+Each match is a 64-character SHA-256 hex digest: `doc_key_sha256` (20),
+`generated_token_sha256` (2) and `label_access_head_hash` (1). No value is a credential.
+
+> **Corrected on independent review.** The first version of this section said 10 findings. That
+> was a count of a truncated listing, not the scanner's total, and it named only two of the three
+> keys. A pattern grep over `git log --all -p` for
 Hugging Face, OpenAI, AWS, GitHub and Slack token shapes and PEM private keys returned nothing.
 No `.env`, key or credential file has ever been tracked (`git log --all --name-only`). The CI guard
 refuses tracked `data/raw`, `data/private` and `.env` files.
@@ -107,13 +111,17 @@ against the claim ledger". This is step 2 of the chain in
 
 ## 9. CI
 
-`gh run list` showed every run failing, on `main` as well as the release branch, since 2026-07-17.
-The failing step is mypy: `uv sync --locked --extra dev` installs neither datasketch nor transformers
+`gh run list` shows the last successful run on 2026-07-15 (17:21Z) and 94 failures since, on `main`
+as well as the release branch. The first version of this section, and the message of `9b09bf3`,
+said 2026-07-17; corrected on independent review. Logs older than about 2026-07-28 have expired
+(HTTP 410), so the cause below is confirmed for the runs from then on and inferred for the earlier
+ones. The failing step is mypy: `uv sync --locked --extra dev` installs neither datasketch nor transformers
 nor torch, so the run ends with 7 `import-not-found` / `unused-ignore` errors in `data.py`,
 `profiles.py` and `model_smoke.py`. This is the prune gotcha in `CLAUDE.md`. The workflow now syncs
 `--extra dev --extra data --extra train`. Locally, `uv lock --check` is consistent and the locked
 export resolves torch, transformers and datasketch. **Whether the Linux run passes is unverified
-until a push.** It also downloads the CUDA wheels, which is slow but inside the 20-minute timeout.
+until a push.** It also downloads several GB of CUDA wheels; whether the job fits the 20-minute timeout is not
+measured. pytest has not run on Linux since 2026-07-15, because mypy fails first.
 
 ## 11. Gate state
 
@@ -136,6 +144,18 @@ One local commit on `release/public-prep-2026-10-27`:
 - `.github/workflows/ci.yml`: sync every extra the gates import (§9).
 - `README.md`: the Plan 3 and Plan 4 status rows say what the records say, and the write-up
   paragraph names the current paper and its status. No claim, figure or surface grant changes.
+
+## Code findings from the independent review, not repaired here
+
+These predate this sweep, and none is shown to change a published number. They are recorded for
+the Plan 3 close chain, not fixed in a hygiene branch.
+
+| # | Severity | Finding |
+|---|---|---|
+| B1 | high | The Plan 3 §3.2 preflight is never called by `certify` (`cli.py`), only from tests, although its docstring says it must hold before sealed labels open. Nothing at run time checks that the three systems cover the same groups. |
+| B2 | medium | `CX-SEALED-01`'s "zero reads" rests on zeros hard-coded in `certification_run.py` and on a log of the document IDs the caller supplies, while every RAMS split is parsed into memory. Rewording it is a ledger change and needs its own review. |
+| B3 | medium | The "already exists" check in `certify` runs after the sealed read. |
+| B4 | medium | The CI data guard does not cover `data/sealed/**`. |
 
 ## Not done here
 
