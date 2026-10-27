@@ -86,7 +86,7 @@ independent review.
 | 3 | **The strict-failure indicator**, ruled on separately | **ruled 2026-10-27** (the cheap ruling): no predeclared strict-failure loss exists; the three indicators are exploratory; the dependent items are disposed as unavailable in Amendment 2 | 🔒 (ruled) |
 | 4 | **O2/O3** — [`reviewer_record.o2-o3-claims-change.json`](../../evidence/plan4/reviewer_record.o2-o3-claims-change.json) returned **BLOCK** on 2026-07-29 | verified by the 2026-10-27 [close-chain review](../../evidence/plan3/reviewer_record.plan3-close-chain.json), which returned **BLOCK** on S4-B1/S4-B2; `44ed212` answers both and the [delta review](../../evidence/plan3/reviewer_record.plan3-close-chain-delta.json) ruled them discharged | 🔒 (ruled) |
 | 5 | **Claim narrowing** — [packet](../plan3/claim-narrowing-2026-08-02.md) (`d256ca5`, `ed3693b`; **REVISE** twice, plus v3/v4 rounds whose verdicts were never filed) | the close-chain review ruled its questions (keep the identifier, no redirect; the narrowing is a separate finding, O2-S1, discharged) and returned **BLOCK** on S5-B1, since discharged; the [C1 review](../../evidence/plan3/reviewer_record.c1-2026-08-03-packets.json) then returned **BLOCK** on B1/B2 (naming the construction; the 0.1075 wording), answered 2026-10-27 and awaiting verification | 🔒 |
-| 6 | **A fresh Plan 3 close record** — by an independent reviewer who did **not** implement Plan 3 and did **not** author this refusal's remedies, re-verifying the green command and the artifact hashes at its own commit | not started; may be attempted once the 2026-10-27 corrections, including C1's B1/B2, are applied | 🔒 |
+| 6 | **A fresh Plan 3 close record** — by an independent reviewer who did **not** implement Plan 3 and did **not** author this refusal's remedies, re-verifying the green command and the artifact hashes at its own commit | [fresh close](../../evidence/plan3/reviewer_record.plan3-close-fresh.json) **BLOCK** at `7629e34` on one paper heading; its [delta](../../evidence/plan3/reviewer_record.plan3-close-fresh-delta.json) **PASS-WITH-NITS at `d8d2223`: Plan 3 may be closed** | 🔒 (ruled) |
 | 7 | Plan 4's owner override lapses and the gate is satisfied on its merits | follows 6 | — |
 
 **Nothing here may be submitted, posted, published or quoted until step 6 issues a PASS.** That
@@ -135,9 +135,11 @@ EMNLP 2026)"* — pre-submission, not submitted, not under review.
 
 The first draft's central sentence — *"a perfect ranking would clear the 20% floor"* — was
 **false**, and the review caught it. 23.6% is an *empirical* oracle acceptance carrying no
-finite-sample penalty; under the certifier's own `hoeffding_upper` the same perfect ranking
-certifies **0.1139** at δ/3 and **0.0838** family-wide, both below the 0.20 floor. At the floor
-itself (279 groups) empirical risk is 0.174 against an upper bound of 0.267–0.283.
+finite-sample penalty; under a Hoeffding diagnostic (`hoeffding_upper`, neither certifier's
+construction) the same perfect ranking certifies **0.1139** at δ/3 and **0.0838** family-wide, both
+below the 0.20 floor. At the floor itself (280 groups) empirical risk is 0.175 against an upper
+bound of 0.267 at δ/3 (`derived_quantities.json`; *corrected 2026-10-27* from "the certifier's own",
+"279 groups", "0.174" and "0.267–0.283", as in Amendment 1).
 
 That was the same category error the paper takes care to avoid for the α\* = 0.406 frontier point,
 committed one section later, and it ran in the flattering direction. The paper now argues the

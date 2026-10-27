@@ -1,0 +1,57 @@
+{
+ "schema_version": "1",
+ "_record_notice": "Independent Reviewer/QA delta ruling on the fresh Plan 3 close. It verifies d8d2223 against evidence/plan3/reviewer_record.plan3-close-fresh.json (BLOCK at 7629e34 on B1 alone). The reviewer is the same one who wrote that record. It did not author d8d2223 or any remedy in it. Read-only throughout: nothing under the repository was edited, staged or committed, the working tree was clean, data/ was not opened, $0 was spent, and no network write was made.",
+ "review_kind": "plan3_close_fresh_delta",
+ "plan": "Plan 3",
+ "reviewed_commit": "d8d2223",
+ "reviewed_branch": "release/public-prep-2026-10-27",
+ "reviewed_date": "2026-10-27",
+ "reviewer_identity": "Reviewer/QA (Claude Code, Opus 5.5), independent. Not the Plan 3 implementer and not the author of 7629e34 or d8d2223. Author of the fresh-close record this delta closes.",
+ "prior_records": [
+  "evidence/plan3/reviewer_record.plan3-close-fresh.json (BLOCK at 7629e34 on B1; R1, N1-N6)",
+  "evidence/plan3/reviewer_record.plan3-close.json (REFUSED at 4bb9be3; O1-O3 ruled discharged in the fresh record)"
+ ],
+ "verdict": "PASS-WITH-NITS. Plan 3 MAY BE CLOSED at d8d2223. The one blocking item (B1) and the required item (R1) are discharged. Every precondition the fresh record established still holds at this commit: the git diff 7629e34..d8d2223 touches no evidence artifact other than the newly filed reviewer record, and the green command is clean. The nits below are non-blocking. N4 and N7 must land before any external or public use of the surfaces they name. This PASS closes Plan 3 only. It does not decide the governance escalation and does not authorise any public release, submission, push or visibility change.",
+ "per_item_rulings": {
+  "B1": "DISCHARGED. uncertainlp-2026-short.tex:253 reads '\\paragraph{The finite-sample penalty is a fact about the benchmark.}'. The paragraph's body (:256-279) argues only the penalty and capacity at this n and δ/3 split. No tracked .tex/.md now carries 'too small to certify this target' (git grep at d8d2223). tex:67's 'can be too small to certify' is general and hedged.",
+  "R1": "DISCHARGED. README.md:67 reads 'Under the Hoeffding diagnostic at this δ/3 allocation, the corpus halves the risk test's target, for every system.' That matches ledger L4's scoping and the body below it.",
+  "N1": "DISCHARGED, with one wording residue (N8). tex:47-48 and :288-289, certification-result.md:107-109 and :117-118, and Amendment 1:146 now name the construction. 'Nothing under the primary certifier' is true at the frozen allocation: acceptance needs k ≥ 332 (Clopper-Pearson at δ/144; recomputed), and the 332 best eligible groups average 0.2012 > α, so the empirical-Bernstein z-mean is positive and the certificate is infeasible.",
+  "N2": "DISCHARGED. The ledger CX-CAPGAP-01 wording reads 'independently of the score and of the risk bound (for any risk bound never below the accepted set's empirical mean): at the frozen allocation ...'. README.md:75 reads 'of the risk bound, at this frozen allocation'. The appendix is regenerated and test_claims passes in the full suite.",
+  "N3": "DISCHARGED. tex:300 reads 'the 28 groups the score's best within-$\\alpha$ prefix accepts'.",
+  "N4": "NOT DONE, declared. The gitignored bylined build still reads 'halves the effective risk target, for any system'. Owner action: rebuild before any external use, including as a writing sample.",
+  "N5": "DISCHARGED. calibration.py:75 cites Plan 1 §6.1.",
+  "N6": "NOT DONE, declared (optional). The §22 line-by-line mapping stands in the fresh record's close_preconditions.s22_checklist.",
+  "README_status_row": "ACCURATE as of d8d2223. README.md:21 cites the fresh record and says 'awaiting its delta review'. It goes stale once this record is filed; update it then.",
+  "record_filed_verbatim": "CONSISTENT. evidence/plan3/reviewer_record.plan3-close-fresh.json at d8d2223 has the fields, review_kind, reviewed_commit 7629e34, the BLOCK verdict, the B1 location and the external_signal lines of the record I issued. Spot-checked by field, not byte-compared, because my draft was never written to disk."
+ },
+ "preconditions_reconfirmed_at_d8d2223": {
+  "O1_O2_O3": "Still discharged. The ledger diff in d8d2223 is confined to the CX-CAPGAP-01 wording (N2). CX-GROUNDING-ORTHOGONAL-01 and CX-SERVING-01 are untouched.",
+  "artifacts_and_access_chain": "Unchanged since 7629e34: the only evidence/plan3 file in the diff is the new reviewer record. certification_result.json sha256 71c0de3e..., calibration_diagnostics a69da67c..., head ff5562419c..., final_reads 0, shift_reads 0, as verified in the fresh record.",
+  "s22": "As mapped in the fresh record. Unchanged.",
+  "no_live_surface_overclaims": "MET for tracked claim surfaces. Residues N7 and N8 are below."
+ },
+ "new_findings": {
+  "blocking": [],
+  "N7": "docs/writeup/uncertainlp-2026-short.md:138-140, the paper's status page, section 'The correction that rewrote the paper', still carries the pre-correction Amendment 1 text: 'under the certifier's own `hoeffding_upper`' and 'At the floor itself (279 groups) empirical risk is 0.174 against an upper bound of 0.267–0.283'. Those are the very phrases fixed in Amendment 1 under C1 s11.3 R2 and the fresh record's N1. 279 does not meet the floor, and 0.283 is carried by no artifact. Discharge: mirror Amendment 1:146-150 (280 groups, 0.175, 0.267 at δ/3, Hoeffding diagnostic named). Required before any public surface; not blocking the close, since this is a narrative status page and no ledger claim cites it.",
+  "N8": "tex:47-48 '... certifies 11.4% even under a Hoeffding bound at $\\delta/3$, and nothing under the primary certifier' — 'even under' reads as if Hoeffding were the stricter construction, but here it is the more permissive one. Suggest 'certifies at most 11.4% under a Hoeffding bound at $\\delta/3$, and nothing under the primary certifier', matching tex:288-289. Cosmetic.",
+  "carried_residues": "N-A (CLI count test, declared not delivered; the guard fails closed). C1 s11.3 N3 (no construction field on derived_quantities 'mean_loss_an_accepted_set_may_carry'). Certify-hardening N4-N8 and N10-N12 (carried open by that delta). N4 and N6 above."
+ },
+ "governance_escalation": {
+  "restated": "Amendment 1 (sections-11-and-12-disposition-amendment-1.md:7-13) says 'Nothing here may reach a public surface', and its 2026-10-27 update keeps that restriction after the C1 PASS-WITH-NITS. CX-RANKING-01 carries the 'abstract' surface, and the paper's abstract (tex:44-46) quotes group AUROC 0.796 and Spearman ρ -0.403 from the §11.3 work Amendment 1 executed. Open question: does the restriction still bind, so that the abstract surface is dropped or the figures stay off public surfaces, or does the reviewed chain (C1 PASS-WITH-NITS, nits verified in the fresh close) lift it?",
+  "decided": "NOT decided here. It belongs to Manager/Ross, and no ruling is on file.",
+  "effect": "It does not block the Plan 3 close. It blocks any public release, submission or quotation of the abstract, and therefore Plan 4's release gate, until an owner ruling is recorded."
+ },
+ "plan4_release_gate_as_far_as_plan3_is_concerned": "Plan 3 no longer blocks it on the merits. With this record filed, Plan 3 is closed. The gate may open once the governance escalation is decided and N4 and N7 land before the surfaces they name go public. All other conditions are Plan 4's own.",
+ "external_signal": {
+  "ran_once_sequentially_at_d8d2223": [
+   "CUDA_VISIBLE_DEVICES=-1 uv run --frozen pytest -q -> '510 passed, 9 skipped in 56.48s' (8 skips test_evidence_artifact_registration.py:86, 1 skip test_ledger_prose_debt.py:81)",
+   "uv run --frozen ruff check . -> 'All checks passed!'",
+   "uv run --frozen mypy -> 'Success: no issues found in 25 source files'",
+   "uv run --frozen conformalextract verify-claims -> ok true, claims 17, publishable 15, unresolved_evidence {}, untracked_evidence {}",
+   "uv run --frozen python scripts/check_paper_claims.py -> 'ok: all 117 figures resolve to an artifact carrying value and configuration.'"
+  ],
+  "also_ran": "git diff 7629e34..d8d2223 (8 files), git grep for residual overclaim phrases at d8d2223, and a field-level parse of the filed fresh-close record.",
+  "matches_producer_gate": "yes",
+  "not_run_not_read": "certify; nothing under data/; no secrets printed; $0."
+ }
+}
