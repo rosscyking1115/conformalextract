@@ -18,7 +18,7 @@ independent reviewer PASSes the one before it.
 |---|---|---|
 | **Plan 1** (Gate 0) | feasibility, licences, evaluator, statistics, paid smoke tests | **complete** — gates 0A–0F pass, Gate 0 decision `go`, consolidated reviewer PASS 2026-07-17 |
 | **Plan 2** | QLoRA training, prediction generation for three systems | **closed** — independent reviewer PASS 2026-07-21 (`evidence/plan2/reviewer_record.plan2-close.json`) |
-| **Plan 3** | certification against the sealed split | **executed and independently reviewed; close refused** — the close review ([`reviewer_record.plan3-close.json`](evidence/plan3/reviewer_record.plan3-close.json)) refused on findings O1–O3; the repairs are partly applied and none has yet passed independent review |
+| **Plan 3** | certification against the sealed split | **executed and independently reviewed; close refused** — the close review ([`reviewer_record.plan3-close.json`](evidence/plan3/reviewer_record.plan3-close.json)) refused on findings O1–O3; on 2026-10-27 a fresh close review ([`reviewer_record.plan3-close-fresh.json`](evidence/plan3/reviewer_record.plan3-close-fresh.json)) found O1–O3 discharged and blocked on one paper heading, since corrected and awaiting its delta review |
 | **Plan 4** | verification, public release, write-up | **opened by owner override on 2026-07-29, then paused** — Plan 3 has not closed, so this gate has not opened on its merits ([`evidence/gate_state.json`](evidence/gate_state.json)) |
 
 Plan 3's certification ran once, on 2026-07-22, and returned infeasibility for all three systems.
@@ -64,7 +64,7 @@ extraction cannot be certified at 20% risk** — the datasets `2606.29054` repor
 of 0.033 and 0.356, at which the same arithmetic forbids nothing and permits up to 80.5%
 acceptance respectively.
 
-*The corpus halves the risk target, for every system certified under this δ/3 allocation.* At n = 1,396
+*Under the Hoeffding diagnostic at this δ/3 allocation, the corpus halves the risk test's target, for every system.* At n = 1,396
 groups with δ/3, a Hoeffding bound spends 0.0925 of the 0.20 risk budget on the finite-sample
 penalty before any data is seen. That pairing is a diagnostic belonging to neither certifier: the
 primary risk test is empirical Bernstein, and the conservative audit ran Hoeffding at a single
@@ -72,7 +72,7 @@ candidate on the full δ. Under it, passing the *risk test* at exactly the 20% a
 needs mean loss ≤ 0.1075, whoever produced it. That is a property of this benchmark and this
 allocation, not of any model, and it is the risk test's requirement under one bound, not every
 certificate's: what the primary test needs depends on the loss distribution. For *this* model
-the question is settled independently of the score and of the bound: acceptance needs at least
+the question is settled independently of the score and of the risk bound, at this frozen allocation: acceptance needs at least
 332 groups, and even the loss-optimal ranking's 332 best groups average 0.2012 loss, above the
 target, so **no** score could certify it.
 Separately, δ/3 at this n admits at most a three-candidate grid, which the frozen configuration

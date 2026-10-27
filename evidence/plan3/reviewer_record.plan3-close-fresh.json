@@ -1,0 +1,124 @@
+{
+ "schema_version": "1",
+ "_record_notice": "Independent Reviewer/QA ruling on whether Plan 3 may be CLOSED at 7629e34 (step 6 of the close chain in docs/writeup/uncertainlp-2026-short.md). The reviewer did not implement Plan 3. It authored no remedy, amendment, ledger entry or artifact, and issued no prior verdict in this chain. Read-only throughout: nothing under the repository was edited, staged or committed, data/ was not opened, $0 was spent, and no network write was made. The record was drafted outside the repository so that the producer can file it verbatim.",
+ "review_kind": "plan3_close_fresh",
+ "plan": "Plan 3",
+ "reviewed_commit": "7629e34",
+ "reviewed_branch": "release/public-prep-2026-10-27",
+ "reviewed_date": "2026-10-27",
+ "reviewer_identity": "Reviewer/QA (Claude Code, Opus 5.5), fresh independent session. Not the Plan 3 implementer. Not the author of 7629e34 or of any earlier commit, amendment, ledger entry or reviewer record in this chain. Same engine family as the earlier 2026-10-27 reviewers, but in a separate session with no access to their working.",
+ "prior_records": [
+  "evidence/plan3/reviewer_record.plan3-close.json (REFUSED at 4bb9be3 on O1, O2, O3)",
+  "evidence/plan3/reviewer_record.plan3-close-chain.json (BLOCK on steps 1, 4, 5 at ae1b963; step 3 ruled; C1, C2)",
+  "evidence/plan3/reviewer_record.plan3-close-chain-delta.json (PASS-WITH-NITS at 39b7350; R1-R5, N1-N6, carried items)",
+  "evidence/plan4/reviewer_record.certify-hardening-and-claims.json (BLOCK R1-R5)",
+  "evidence/plan4/reviewer_record.certify-hardening-and-claims-delta.json (PASS-WITH-NITS; N-A to N-E; governance escalation open)",
+  "evidence/plan3/reviewer_record.c1-2026-08-03-packets.json (claim-narrowing BLOCK on B1/B2 plus R1, R2, N1, N2 and a flag on tex:259; s11.3 PASS-WITH-NITS R1-R4)"
+ ],
+ "verdict": "BLOCK. Plan 3 may NOT be closed at 7629e34, on one item: new finding B1, a live claim surface that says more than the evidence carries. Everything else needed for the close holds. (a) Every named open item from the five prior records is discharged at 7629e34, except two declared residues and one small partial, and none of the three blocks. (b) O1, O2 and O3 of the original refusal are each discharged against their own required_before_close. (c) The green command is clean at this commit. (d) The artifact hashes and the access chain verify. B1 is the paper's paragraph heading 'The corpus is too small to certify this target, and that is a fact about the benchmark' (docs/writeup/uncertainlp-2026-short.tex:252). It states the 'no model could be certified here' reading that CX-CAPGAP-01 limitation 4 explicitly refuses ('Cause (2) is NOT the claim that no model could be certified on this corpus'). The committed witness refutes it: corpus_size_requirement.json witness_at_the_observed_corpus, exists_a_certifying_model true. So does the C1 reviewer's probe of the primary certifier: a zero-loss or constant-0.1151 set of 332 groups certifies at the frozen configuration. The heading predates the 2026-08-04 witness correction and was never propagated or ruled. A close PASS is the event that makes the paper quotable ('Nothing here may be submitted, posted, published or quoted until step 6 issues a PASS'). This review therefore cannot pass over it, whatever the size of the fix. The prior chain treated the same overclaim class as blocking on the README (S5-B1) and the ledger (C1 B2), and consistency requires the same here. The fix is one phrase at $0 and moves no number. A delta review of that edit, together with R1 below, is sufficient for a close. A full re-review is not required.",
+ "per_item_rulings": {
+  "C1_claim_narrowing": {
+   "B1_construction_named": "DISCHARGED. certification-result.md:37 ('a Hoeffding bound (a diagnostic pairing of neither certifier; see below)') carries its dated note at :44-49. draft-2026-07-28.md:87 is fixed, with its dated note at :92-95. claim-narrowing-2026-08-02.md :139/:157 and :168/:186 are corrected by the dated block at :10-26 (lines 17-18 and 23). Live prose: no 'certifier's (Hoeffding) bound' remains outside dated quotations and docs/plan4/ledger-rendered-surface-enumeration.md, a read-only historical enumeration.",
+   "B2_0.1075_and_0.1151_wording": "DISCHARGED. Ledger CX-CAPGAP-01 wording (claim_ledger.json:71) now reads 'passing the RISK test at exactly the 20% acceptance floor (k = 280) requires ... 0.1075 ... not what every certificate requires'. L4 (:88) reads 'would pass both tests under that Hoeffding diagnostic' and states that the primary EB condition is distribution-dependent, citing the C1 probe. The README (:71-74, :80-83), certification-result.md (:38-39, :94, :108-110), the draft (:88), the packet (:19-22) and the appendix (regenerated; test_claims passes) agree. Residual tone on the same surfaces is recorded as R1 and N1, not as B2.",
+   "R1_packet_stale_lines": "DISCHARGED. claim-narrowing-2026-08-02.md:13-26 covers the status ('Reviewed 2026-10-27'), 15 of 17 publishable, the 'No number changed' scope (§1-§3), and 'achievable in principle' and 'reachable elsewhere' (as F1 wording).",
+   "R2_two_sided_constant_disclosed": "DISCHARGED. New CX-CAPGAP-01 limitation at claim_ledger.json:91, rendered at claims-appendix.generated.md:22. Checked against certification.py:35-45: 0.0925 against a one-sided 0.0855 is 7.6% wider, so 'about 8%' holds.",
+   "N1_above_below": "DISCHARGED. withdrawn_assertions.json:67 reads 'directly below'.",
+   "N2_cause2_heading_scoped": "DISCHARGED. certification-result.md:85 '... under this δ/3 allocation', with a dated note at :88-90.",
+   "tex_259_flag": "DISCHARGED in the tracked .tex (uncertainlp-2026-short.tex:259-260, 'Under this bound and allocation the risk test's effective target is halved ... the primary empirical-Bernstein test's requirement depends on the loss distribution'). Not discharged on the twin README heading (R1) or in the gitignored locally built bylined .tex/.pdf (N4)."
+  },
+  "C1_s11_3": {
+   "R1_strict_failure_row": "DISCHARGED. Amendment 1:37 reads 'executed with three exploratory indicators; the plan's predeclared indicator is unavailable (ruled 2026-10-27, Amendment 2)'.",
+   "R2_k280_figures": "DISCHARGED. Amendment 1:147-150 now reads '280 groups ... 0.175 ... 0.267 at δ/3', with 0.283 dropped. Matches derived_quantities.json at_the_acceptance_floor (k 280, 0.17473, 0.26719).",
+   "R3_status_line": "DISCHARGED. Amendment 1:10-13 is an updated note citing the C1 PASS-WITH-NITS. It correctly keeps the public-surface restriction.",
+   "R4_two_oracles": "DISCHARGED in Amendment 1:207-209 and :218. Not propagated to the paper (N3)."
+  },
+  "close_chain_delta": {
+   "R1_seen_unseen": "DISCHARGED. Amendment 2:64 re-disposes the row as 'descoped' on §10.3/§3.4(2) and ADR 0010, and withdraws the unevidenced sentence by dated note.",
+   "R2_doc_length_quartile": "DISCHARGED. Amendment 2:62 rests on the applicable ground.",
+   "R3_chain_table": "DISCHARGED. uncertainlp-2026-short.md:85-89: rows 1-5 cite the 2026-10-27 records, and the tally at :96-101 counts the three 2026-10-27 BLOCKs. Row 5 'awaiting verification' and row 6 'not started' are accurate up to this record.",
+   "R4_0.1075_necessity": "DISCHARGED. README:71-74, ledger :71, draft :87-89 and certification-result.md :38-39/:94 each give 0.1075 as the risk-test requirement under the Hoeffding diagnostic at exactly 20%, consistent with the k = 332 witness.",
+   "R5_12.1_dependents": "DISCHARGED. Amendment 2:124-133: §14.2 figure 4 is moot and descoped, and §17 Phase E.1 is descoped.",
+   "N1_2003_of_2515_citation": "DISCHARGED. Amendment 2:39-40 cites reviewer_record.plan3-close.json.",
+   "N2_plan1_s237": "PARTIAL. Corrected to 'Plan 1 §6.1' in Amendment 1:113, Amendment 2:109/:145 and ledger :116. Still 'Plan 1 §237' at src/conformalextract/calibration.py:75 (named in N2). Comment only; see N5.",
+   "N3_strata_ground": "DISCHARGED. Amendment 2:83-85 gives one ground: no policy selected, §3.3.",
+   "N4_base_pointers": "DISCHARGED. sections-11-and-12-disposition.md:45 and :100-101, which also notes the 'six strata' miscount.",
+   "N5_s12_3_limits_phrasing": "DISCHARGED. Amendment 2:78-79. The recommended owner acknowledgement of the 12.2 descope was not added; it was recommended, not required.",
+   "N6_status_line": "DISCHARGED. Amendment 2:11-15 'Status: reviewed' cites the delta record. The §24 'Addenda: None yet.' line (accepted-plan.md:865-867) is unchanged; that was out of scope by the delta's own terms.",
+   "carried_step4_open_release_decisions_57": "DISCHARGED. open-release-decisions.md:57-59, dated.",
+   "carried_step4_register_status_and_range_form": "DISCHARGED. carried-forward-from-plan2.md:86-88 and :103-107. Cosmetic residue: row B2 still reads 'discharged 2026-07-29 as O3' without mentioning the S4-B1 regression and its 2026-10-27 re-discharge.",
+   "carried_step5_Q2_dated_line": "DISCHARGED. claim-narrowing-2026-08-02.md:24-26.",
+   "carried_step5_header_scope": "DISCHARGED. claim-narrowing-2026-08-02.md:15-16.",
+   "S1-N1_amendment1_status": "DISCHARGED (see C1 s11.3 R3)."
+  },
+  "certify_delta": {
+   "N-A_cli_count_test": "NOT DELIVERED. Disclosed in the 7629e34 commit message with its reason, which meets the nit's alternative discharge limb ('record ... that the clause was waived and why'). The residual risk stands as the delta stated it: the guard fails closed, so the gap can hide only a false refusal, never a wrong count. Carried as a non-blocking residue.",
+   "N-B": "DISCHARGED. claim_ledger.json:242 'The zero for other roles still holds by construction of the certification filter; the count checks that it held.'",
+   "N-C": "DISCHARGED. Both verified_by fields (:122, :142) cite the C1 PASS-WITH-NITS and say Amendment 1 is not discharged until the close verifies its nits. This record verifies them (above). The limitation cites Plan 1 §6.1 (:116).",
+   "N-D": "DISCHARGED. claim_ledger.json:305 cites the delta review's ruling, and Amendment 2 is now 'reviewed'.",
+   "N-E": "DISCHARGED. tests/test_reanalysis.py:46-48 @settings(deadline=None). In this run the full suite passed with no intermittent failure."
+  },
+  "claims_changes_in_7629e34_ruled": {
+   "CX-CAPGAP-01": "ACCURATE, with one scope nit (N2). The new sentence is TRUE. Acceptance at the frozen allocation is Clopper-Pearson at δ/(16·3) with δ = 0.05/3, i.e. tail δ/144, exactly as scorc_certificate computes it (certification.py:302-307). I recomputed with scipy: the smallest k clearing 0.20 at n = 1,396 is 332. The 'loss-optimal 332-group prefix' is the 332 lowest-loss ELIGIBLE groups (scripts/corpus_size_requirement.py:124-150; position = 332 because coverage is rescaled to the eligible pool), and its mean is 0.20121 (corpus_size_requirement.json:125). Prefix means of a sorted list are nondecreasing in k, so every accepted set of size ≥ 332 has mean ≥ 0.2012 > α. Any set below 332 fails acceptance. Both risk tests then fail: the primary EB test bounds mean(z) with z = accepted·(loss−α), whose mean is (k/n)(m−α) > 0, plus nonnegative variance and 7·log/(3(n−1)) terms (certification.py:293-299), and Hoeffding is mean + radius. DOES IT HOLD FOR ANY BOUND CONSTRUCTION? For any RISK bound that is never below the accepted set's empirical mean, yes, which covers both certifier constructions and the Hoeffding diagnostic. Not for an arbitrary valid bound. And NOT under any other acceptance allocation: the smallest clearing k is 327 (3 candidates, full δ), 322 (1 candidate, full δ) and 310 (conservative audit, δ/2), and the loss-optimal prefix is within α up to 329 groups (0.2357 oracle), so there the construction-free argument fails and the conclusion rests on the bound again. The ledger correctly scopes it 'at the frozen allocation'. 'Independently ... of the bound' should say 'of the risk bound' (N2). The new two-sided limitation, the corpus_size_requirement.json evidence entry and the method naming fix are accurate.",
+   "CX-SEALED-01": "ACCURATE (N-B).",
+   "CX-RANKING-01": "ACCURATE (N-C). The 'abstract' surface remains subject to the governance escalation.",
+   "CX-STRATIFICATION-01": "ACCURATE (N-C).",
+   "CX-GROUNDING-ORTHOGONAL-01": "ACCURATE (N-D). Limitation 10 states the descope and its review.",
+   "tex_wording_change": "ACCURATE at tex:259-260. It does not reach tex:252 (B1).",
+   "README_and_paper_agree_with_ledger": "MOSTLY. README:67-84 agrees with the ledger's wording and L4 except its italic heading (R1). The paper agrees except tex:252 (B1), and in passing reports the 11.4% Hoeffding-diagnostic figure as 'certifies' (tex:47, :288; N1) and the unqualified 'oracle-accepted' (tex:299; N3)."
+  }
+ },
+ "O1_O3_rulings": {
+  "O1": "DISCHARGED against required_before_close. §11 and §12 are disposed item by item across sections-11-and-12-disposition.md, Amendment 1 (§11.3 executed; reviewed PASS-WITH-NITS, nits verified here) and Amendment 2. Amendment 2 records §12.1 descoped on Ross's verbatim choice 'go with a, descope 12.1' (:9-10), §11.2 axis by axis, the §12.2 strata, the strict-failure items, figure 4 and Phase E.1. It separates moot-for-no-accepted-set, moot-for-sealed-shift and computable-but-descoped-with-stated-reason, and it has been independently reviewed (delta PASS-WITH-NITS).",
+  "O2": "DISCHARGED. The CX-GROUNDING-ORTHOGONAL-01 wording (ledger) stops at 'is scored wrong anyway', with no error-category attribution. Limitations 9-11 carry the 637 over-generation fact and the §12.1 descope. O2-S1 is recorded as a separate, discharged successor finding, not as 'O2 completed'.",
+  "O3": "DISCHARGED. CX-SERVING-01 limitation 4 carries the flip rate in the corrected two-denominator form (1.33% / 1.78%), the survives-into-the-accepted-set clause and 'stack-dependent at the margin'. The appendix renders it (claims-appendix.generated.md:45). The S4-B1 regression is repaired."
+ },
+ "close_preconditions": {
+  "s11_s12_disposed_on_true_grounds": "MET. Grounds checked against accepted-plan.md §11-§12 text. The two grounds the delta found partial (R1, R2) are corrected.",
+  "s22_checklist": "MET OR WAIVED WITH AUTHORITY, line by line; the boxes in accepted-plan.md:806-816 are unticked. (1) Plans 1-2 gates: Plan 2 close PASS. (2) Frozen analysis: ADR 0007. (3) Certifiers pass simulations and preflight: preflight run retrospectively on hash-identical inputs and passing (certification_preflight_retrospective.json), disclosed in CX-SEALED-01 limitation 4 and ruled by the certify-hardening delta. (4) Immutable results or explicit infeasibility: met (both_infeasible). (5) Final in-domain evaluation: waived, ADR 0010 (reviewer-instructed). (6) H1/H2 rules: met. (7) Paired bootstrap: waived, ADR 0010 §9. Sensitivity analyses: disposed by the base disposition and Amendments 1-2 (reviewed). (8) Shift: waived, ADR 0010. (9) Taxonomy/manual-audit half: waived by Amendment 2 (Ross's option (a) plus the reviewed 12.2 re-disposition). All-result-artifacts half: met; figure 4 is disposed and render-report is descoped by ADR 0010. (10) Reproduction: the diagnostics reproduce from committed commands (prior close record), and table/figure rendering is descoped by ADR 0010. (11) No post-test configuration in the headline evidence: met; certification_result.json is unchanged since f13591d, and the sensitivity artifacts are diagnostic_only. Only line 9 carries an in-plan note; see N6.",
+  "green_command": "CLEAN at 7629e34. Ran once, sequentially (see external_signal).",
+  "artifact_hashes_and_access_chain": "VERIFIED. certification_result.json git-canonical sha256 71c0de3e953d758684b9bf88bef0f15ec5baa02967ac442f578f33a7f35af30f equals the pin at certification-result.md:5. It was last changed in f13591d. calibration_diagnostics.json a69da67c5b01... equals the Amendment 1 pin. Every plan3 artifact carrying an access block (alpha_frontier, argument_error_counts, calibration_diagnostics, certification_result, certification_sensitivity, corpus_size_requirement, derived_quantities, loss_decomposition) has head_hash ff5562419c7d..., final_reads 0, shift_reads 0. risk_coverage_diagnostic, derived_ratios and the preflight retrospective carry no block, as before; this is pre-existing and was accepted by the prior close. No evidence/plan3 artifact other than reviewer records changed in 907c107..7629e34.",
+  "no_live_surface_overclaims": "NOT MET: B1 (tex:252). Also R1 (README:67) and nits N1 and N3."
+ },
+ "new_findings": {
+  "B1": {
+   "blocking": true,
+   "where": "docs/writeup/uncertainlp-2026-short.tex:252-253",
+   "finding": "Paragraph heading 'The corpus is too small to certify this target, and that is a fact about the benchmark.' asserts that no system could be certified on this corpus. That contradicts CX-CAPGAP-01 limitation 4 (claim_ledger.json:88), the README (:79 'This is not the claim that no model could be certified here') and the committed witness (corpus_size_requirement.json witness_at_the_observed_corpus.exists_a_certifying_model: true). The paragraph body is about this loss distribution and this δ split; the heading universalises it. It runs in the direction that strengthens the repository's own benchmark finding, which is the defect class the claim-narrowing chain exists to correct. No prior record ruled this line.",
+   "discharge": "Reword the heading to what the paragraph shows, e.g. 'At this allocation the corpus is too small for this loss profile to certify the target, and the penalty is a fact about the benchmark', or 'The finite-sample penalty is a fact about the benchmark'. Delta review of that edit. No number moves."
+  },
+  "R1": {
+   "blocking": false,
+   "where": "README.md:67",
+   "finding": "The italic heading 'The corpus halves the risk target, for every system certified under this δ/3 allocation' is the README twin of the tex:259 line that 7629e34 scoped to 'Under this bound'. It is unscoped to the Hoeffding diagnostic, while the body directly below says the primary test's requirement depends on the distribution. Under the primary certifier the effective target varies with k and distribution: constant-loss sets certify at about 0.117 at k = 332 and about 0.133 at k = 400.",
+   "discharge": "Scope it as ledger L4 does ('under the Hoeffding diagnostic at this allocation, the corpus halves the risk test's target'). Land it with B1, before any public surface."
+  },
+  "N1": "certification-result.md:104-107 and :115-116 ('holds whoever produced the outputs ... it certifies 0.1139'; 'the effective risk target here is roughly half'), tex:47 and :288 ('certifies 11.4%'), and Amendment 1:146 ('the certifier's own hoeffding_upper'). These state Hoeffding-δ/3 diagnostic figures as what 'certifies', without naming the construction. Under the primary certifier the loss-optimal ranking certifies nothing at this allocation, so the direction is not flattering, but the construction should be named, or the construction-free 332/0.2012 argument used, as the ledger now does.",
+  "N2": "claim_ledger.json:71 and README.md:74-75: 'independently of the score and of the bound'. Scope it to the RISK bound, and say it holds for risk bounds at or above the empirical accepted mean, at the frozen 3-candidate δ/3 acceptance allocation only (it fails at 327/322/310).",
+  "N3": "tex:299 '23 of the 28 oracle-accepted groups' carries the ambiguity Amendment 1:207-209 and CX-STRATIFICATION-01 L1 corrected (the score's best within-α prefix, label-chosen cut-off).",
+  "N4": "The gitignored local builds docs/writeup/uncertainlp-2026-short-bylined.tex:257 (and the built PDFs) still read 'At this allocation the benchmark halves the effective risk target, for any system'. The bylined PDF is used as a writing sample. Rebuild before any external use.",
+  "N5": "src/conformalextract/calibration.py:75 still says 'Plan 1 §237' (delta N2 residue).",
+  "N6": "accepted-plan.md §22 carries a note only for line 9. A one-line dated §22 note mapping lines 5, 7, 8 and 10 to ADR 0010 and the dispositions, as this record does, would let a later reader see the waivers in place. README.md:21 ('none has yet passed independent review') is stale and understates; update it when the close issues.",
+  "residues_carried": "N-A (CLI count test, declared not delivered). C1 s11.3 N3 (derived_quantities 'mean_loss_an_accepted_set_may_carry' has no construction field). Certify-hardening N4-N8 and N10-N12 (carried open by that delta)."
+ },
+ "governance_escalation": {
+  "question": "Amendment 1 (sections-11-and-12-disposition-amendment-1.md:7-13) says 'Nothing here may reach a public surface', and keeps saying so after its PASS-WITH-NITS. CX-RANKING-01 carries the 'abstract' surface, and the paper's abstract (tex:44-46) quotes group AUROC 0.796 and Spearman ρ -0.403 from the §11.3 work Amendment 1 executed. Does the restriction still bind, or does the reviewed chain lift it?",
+  "decided": "NOT decided by this review. It belongs to Manager/Ross. No ruling exists in docs/, evidence/ or the PMO reviews.",
+  "effect": "It does NOT block a Plan 3 close, which is not a public act. Amendment 1's 'Plan 3 does not close on this document' means only that the amendment is not sufficient on its own. It DOES block any public release, submission or quotation of the abstract, and therefore Plan 4's release gate, until decided: either drop the 'abstract' surface or record an owner ruling that lifts the restriction."
+ },
+ "plan4_release_gate_as_far_as_plan3_is_concerned": "NOT YET. It may open on its merits once (1) B1 and R1 land and a delta review confirms them, which issues the close, and (2) the governance escalation above is decided. Nothing else from Plan 3 stands in its way. The negative result, the certificate, the sealed-label discipline and every committed number are sound.",
+ "external_signal": {
+  "ran_once_sequentially_at_7629e34": [
+   "CUDA_VISIBLE_DEVICES=-1 uv run --frozen pytest -q -> '510 passed, 9 skipped in 63.09s' (8 skips test_evidence_artifact_registration.py:86, 1 skip test_ledger_prose_debt.py:81); no intermittent failure, including test_withdrawn_assertions.py and test_reanalysis.py",
+   "uv run --frozen ruff check . -> 'All checks passed!'",
+   "uv run --frozen mypy -> 'Success: no issues found in 25 source files'",
+   "uv run --frozen conformalextract verify-claims -> ok true, claims 17, publishable 15, by_status {infeasible 3, negative 2, planned 2, qualified 4, verified 6}, tracking_verifiable true, unresolved_evidence {}, untracked_evidence {}",
+   "uv run --frozen python scripts/check_paper_claims.py -> 'ok: all 117 figures resolve to an artifact carrying value and configuration.'"
+  ],
+  "also_ran": [
+   "git show HEAD:<artifact> | sha256sum for every evidence/plan3 artifact, plus a parse of their access blocks (results under close_preconditions)",
+   "uv run --frozen python (scipy only, no data): smallest k with Clopper-Pearson lower ≥ 0.20 at n = 1,396 -> 332 (tail δ/144), 327 (δ/48), 322 (δ/16), 310 (δ/2); 329/1396 = 0.23567"
+  ],
+  "matches_producer_gate": "yes",
+  "not_run_not_read": "certify (immutable result); nothing under data/. The 0.2012 prefix mean is taken from the committed artifact and the script that produced it was read, not re-run. No secret was printed. $0."
+ }
+}

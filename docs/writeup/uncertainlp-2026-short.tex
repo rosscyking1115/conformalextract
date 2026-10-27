@@ -44,7 +44,8 @@ and not the adapted model, which the other two settle between them. The
 adapted system's confidence score is \emph{not} weak by selective-prediction standards --- group
 AUROC 0.796, Spearman $\rho = -0.403$, close to the one log-probability figure reported elsewhere
 for structured generation --- and it certifies \textbf{nothing at all}. Nor would a perfect ranking:
-ranked by true loss, the same population certifies 11.4\%, short of the acceptance floor. Nor
+ranked by true loss, the same population certifies 11.4\% even under a Hoeffding bound at
+$\delta/3$, and nothing under the primary certifier, short of the acceptance floor. Nor
 would more data at the same operating point, and the reason is structural rather than a matter of
 degree: acceptance is tested on a \emph{lower} confidence bound, so accepting exactly 20\% of a
 corpus never clears a 20\% floor \textbf{at any corpus size}. A certificate requires coverage
@@ -249,8 +250,7 @@ comparison survives greyscale printing.}
 \label{fig:rc}
 \end{figure}
 
-\paragraph{The corpus is too small to certify this target, and that is a fact about the
-benchmark.} Mechanism 3 is not a property of this run. Two independent calculations say so, and
+\paragraph{The finite-sample penalty is a fact about the benchmark.} Mechanism 3 is not a property of this run. Two independent calculations say so, and
 they are separate arguments rather than one restated.
 
 \emph{From the bound.} At $n = 1{,}396$ and this study's $\delta/3$ allocation, the Hoeffding
@@ -285,7 +285,8 @@ and settles only the two baselines.
 
 That distinction decides what a reader may conclude, and either half alone misleads. Shown only
 mechanism 2, a reader infers that a better score would have certified this system --- it would not;
-the perfect ranking of the same population certifies 11.4\%. Shown only mechanism 1, a reader
+the perfect ranking of the same population certifies at most 11.4\% under a Hoeffding bound,
+and nothing under the primary certifier. Shown only mechanism 1, a reader
 infers that the model is simply too weak --- false for QA, whose base risk permits nearly half the
 corpus. The honest statement needs both: \textbf{nothing could have certified this system --- not a
 better score, not a perfect one} --- \emph{and} the score is still responsible for a 21.6-point
@@ -296,7 +297,7 @@ finding; it is a different and wrong one.
 unit fixes the group count, which is exactly what the capacity argument above turns on. Stratifying
 QA's groups by triggers per document, mean group loss is essentially flat --- 0.606, 0.608, 0.589,
 0.634, 0.596 from one trigger to six or more --- but the share of groups within $\alpha$ collapses
-from \textbf{17.3\% to 0.7\% to zero}, and 23 of the 28 oracle-accepted groups are single-trigger.
+from \textbf{17.3\% to 0.7\% to zero}, and 23 of the 28 groups the score's best within-$\alpha$ prefix accepts are single-trigger.
 Groups with three or more triggers contribute \textbf{none}. Averaging frame loss across a document
 and scoring the group by its weakest member makes acceptance vanish with document complexity
 \emph{even where mean loss does not move}. Cross-sentence distance behaves the same way: 25 of 28

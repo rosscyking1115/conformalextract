@@ -104,7 +104,9 @@ Read together: **the benchmark spends nearly half the nominal risk budget on the
 penalty before any system is evaluated.** That is a property of n and the δ allocation and holds
 whoever produced the outputs. For this model it is decisive independently of the score, because the
 loss-optimal ranking weakly dominates every score-induced ordering at every prefix length and so
-upper-bounds what **any** score could certify — and it certifies 0.1139.
+upper-bounds what **any** score could certify — and under a Hoeffding bound at δ/3 it certifies
+0.1139, while under the primary certifier it certifies nothing, since its 332 best groups already
+average 0.2012 loss *(construction named 2026-10-27)*.
 
 **This is not the claim that no model could be certified on this corpus,** and it must not be
 written that way. A system whose accepted 20% carried mean loss ≤ 0.1075 would clear **the risk
@@ -112,8 +114,8 @@ test** at n = 1,396 and δ/3 — **and would still not be certified**, because a
 clear the acceptance floor on its Clopper–Pearson *lower* bound, which 20% coverage does not: the
 frozen construction needs **332** accepted groups, not 280. Clearing one of two constraints is not
 a counter-example to infeasibility, and quoting it as one would repeat the error this section
-exists to correct. What is established is that the effective *risk* target here is roughly half
-the nominal one, and that this model clears neither constraint.
+exists to correct. What is established is that, under that Hoeffding diagnostic, the effective *risk* target here is
+roughly half the nominal one, and that this model clears neither constraint.
 
 **Which artifact carries which figure**, because an earlier version of this sentence said the
 sensitivity artifact stamped all five and it stamped two:

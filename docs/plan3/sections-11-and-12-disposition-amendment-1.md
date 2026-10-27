@@ -143,7 +143,7 @@ selected. All nine system × candidate combinations are in the artifact.)
 **Refuted on review, and the correction is the finding.** This document originally read
 “QA — score discrimination, and the floor really was reachable”, on the strength of the 0.2357
 empirical oracle. **That was wrong.** 0.2357 carries no finite-sample penalty. Under the
-certifier's own `hoeffding_upper`, the same perfect ranking certifies **0.1139** at δ/3 and
+Hoeffding diagnostic (`hoeffding_upper`, neither certifier's construction; *named 2026-10-27*), the same perfect ranking certifies **0.1139** at δ/3 and
 **0.0838** family-wide — both below the 0.20 floor; at the floor itself (280 groups) empirical risk
 is 0.175 against an upper bound of 0.267 at δ/3 (`derived_quantities.json`,
 `at_the_acceptance_floor`; *corrected 2026-10-27* from "279 groups … 0.174 … 0.267–0.283": 279

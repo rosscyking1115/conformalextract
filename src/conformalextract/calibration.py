@@ -72,7 +72,7 @@ from conformalextract.reanalysis import CONTENT_CHANNEL, SplitSystemData
 COVERAGE_GRID: tuple[float, ...] = (0.05, 0.10, 0.20, 0.30, 0.50)
 
 #: Group-level binary indicators the discrimination statistics are computed against. §11.3 asks
-#: for "the predeclared strict-failure indicator", but Plan 1 §237 froze only that such a loss
+#: for "the predeclared strict-failure indicator", but Plan 1 §6.1 froze only that such a loss
 #: *would* be frozen -- the exact definition never was, and inventing one now and calling it
 #: predeclared would be the overclaim this repository exists to avoid. So three indicators are
 #: reported, each named for what it is, and none is described as predeclared:
