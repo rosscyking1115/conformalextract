@@ -7,6 +7,10 @@
   **REVISE** and refuted one of this document's own findings; the correction is in
   “What it found” below. Nothing here may reach a public surface, and Plan 3 does not close on
   this document.
+  - *Updated 2026-10-27.* After the unfiled v3 and v4 rounds, the fresh independent review of
+    this document (`../../evidence/plan3/reviewer_record.c1-2026-08-03-packets.json`) returned **PASS-WITH-NITS**; its four nits are applied below
+    by dated note. This note does not lift the public-surface restriction above: whether
+    `CX-RANKING-01` may stay on the paper's abstract is an open owner decision.
 - Artifact produced: [`../../evidence/plan3/calibration_diagnostics.json`](../../evidence/plan3/calibration_diagnostics.json)
   (`sha256 a69da67c5b014af71471feb834303b3bede19a8d2ef7142352719a3b83b75458` over **git-canonical
   (LF) bytes**, `git show :evidence/plan3/calibration_diagnostics.json | sha256sum`)
@@ -30,7 +34,7 @@ The 2026-07-29 disposition descoped three of the four §11.3 sub-items:
 | Sub-item | 2026-07-29 | Now |
 |---|---|---|
 | score–loss Spearman association | descoped | **executed** |
-| AUROC/AUPRC for the strict-failure indicator | descoped | **executed** |
+| AUROC/AUPRC for the strict-failure indicator | descoped | **executed with three exploratory indicators**; the plan's predeclared indicator is unavailable (ruled 2026-10-27, [Amendment 2](sections-11-and-12-disposition-amendment-2.md)) |
 | binned confidence/risk diagrams with counts | descoped | **executed** (risk at fixed coverage) |
 | selective-risk curves | executed | unchanged |
 
@@ -106,7 +110,7 @@ check that the new command and the certifier agree about what a loss is:
 ## What was NOT reversed
 
 - §11.1's four descoped rows and §12.2's audit sample stay descoped on their original grounds.
-- The strict-failure indicator remains **undefined**. Plan 1 §237 froze only that such a loss
+- The strict-failure indicator remains **undefined**. Plan 1 §6.1 (its line 237) froze only that such a loss
   *would* be frozen before calibration; the exact definition never was. Rather than invent one now
   and call it predeclared, the artifact reports three named indicators (`above_alpha`, `any_error`,
   `not_all_valid`) and describes none of them as predeclared. **This is a Plan 1 defect this
@@ -140,8 +144,10 @@ selected. All nine system × candidate combinations are in the artifact.)
 “QA — score discrimination, and the floor really was reachable”, on the strength of the 0.2357
 empirical oracle. **That was wrong.** 0.2357 carries no finite-sample penalty. Under the
 certifier's own `hoeffding_upper`, the same perfect ranking certifies **0.1139** at δ/3 and
-**0.0838** family-wide — both below the 0.20 floor; at the floor itself (279 groups) empirical risk
-is 0.174 against an upper bound of 0.267–0.283. This is the identical category error the amendment
+**0.0838** family-wide — both below the 0.20 floor; at the floor itself (280 groups) empirical risk
+is 0.175 against an upper bound of 0.267 at δ/3 (`derived_quantities.json`,
+`at_the_acceptance_floor`; *corrected 2026-10-27* from "279 groups … 0.174 … 0.267–0.283": 279
+groups is one short of the floor, and the 0.283 family-wide figure is carried by no artifact). This is the identical category error the amendment
 makes such a point of avoiding for the 0.406 frontier point, three sections above, and it ran in
 the flattering direction.
 
@@ -198,7 +204,9 @@ These belong here rather than only in the write-up, because they are §11.3 find
 
 - **The document unit is doing much of the damage.** Mean group loss barely moves with trigger
   count (**0.606** → 0.634 from 1 trigger to 4–5), but the share of groups within α collapses from
-  17.3% to 0.7%, and 23 of the 28 oracle-accepted groups are single-trigger (lift 1.68). Groups
+  17.3% to 0.7%, and 23 of the 28 groups the score's best within-α prefix accepts (cut-off chosen
+  with labels; not the loss-optimal oracle above — *wording corrected 2026-10-27*) are
+  single-trigger (lift 1.68). Groups
   with 3+ triggers contribute **zero** acceptances. Averaging frame loss across a whole document
   and scoring the group by its weakest member makes acceptance fall away with document complexity
   even where mean loss is flat.
@@ -207,7 +215,7 @@ These belong here rather than only in the write-up, because they are §11.3 find
   > **0.6064**; 0.589 is the all-valid / fully-grounded figure from a different row of the same
   > artifact, spliced in by mistake. It made the stratum look flatter than it is.
 - **Cross-sentence distance behaves the same way.** 16.1% of groups with no cross-sentence argument
-  are within α (25 of 28 acceptances); groups with 3+ cross-sentence arguments contribute none.
+  are within α (25 of those same 28 acceptances); groups with 3+ cross-sentence arguments contribute none.
 - **Grounding is necessary and nowhere near sufficient.** Group grounded-share against group loss
   gives ρ = −0.206 (p ≈ 8e-15) — a real association, so "orthogonal" was wrong — but the 1,266
   fully-grounded QA groups still average **0.589** loss, roughly 3× α. This is direct group-level

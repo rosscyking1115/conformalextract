@@ -7,6 +7,24 @@
 - Verification: `uv run conformalextract verify-claims` → `ok: true`, 13 publishable claims, no
   unresolved or untracked evidence.
 
+> **Corrected 2026-10-27** on independent review (`../../evidence/plan3/reviewer_record.c1-2026-08-03-packets.json`, claim-narrowing B1, B2 and R1;
+> also `../../evidence/plan3/reviewer_record.plan3-close-chain-delta.json`). The text below is kept as the 2026-08-02/04 record; read it with these:
+>
+> - **Status.** Reviewed 2026-10-27: BLOCK on B1/B2, both answered by this note and the surfaces
+>   it names, pending verification. `verify-claims` now reports 15 publishable claims of 17.
+> - **"No number changed anywhere"** holds for the three narrowings (§1–§3); the 2026-08-04
+>   correction below adds the k = 332 witness.
+> - **"The certifier's Hoeffding bound"** (cause 2) is a Hoeffding bound at δ/3, a diagnostic
+>   pairing of neither certifier.
+> - **"A certificate at the acceptance floor needs … ≤ 0.1075, whoever produced it"** is the
+>   *risk test's* requirement under that bound at exactly the floor, not every certificate's. And
+>   the 0.1151 witness **"would certify here"** only under that Hoeffding diagnostic; under the
+>   primary empirical-Bernstein test the requirement depends on the loss distribution.
+> - **"Tightens the effective target for everyone"** is scoped to this δ/3 allocation.
+> - **"Achievable in principle on other populations"** (§3's direction check) and **"reachable
+>   elsewhere"** (review question 2) are the wording finding F1 withdrew: a 20% target is *not
+>   excluded* on those populations, which is not achievability.
+
 ## Why these three, and why none of them is a re-scoring
 
 All three narrow what is asserted. **No number changed anywhere.** No artifact was re-run, no split

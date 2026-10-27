@@ -64,7 +64,7 @@
       "_why_this_phrase_and_not_the_bare_word": "The bare word 'orthogonal' appears in about 40 files because it is inside the RETAINED claim identifier CX-GROUNDING-ORTHOGONAL-01, which is deliberately kept for traceability. Registering the bare word would flag every legitimate mention of the identifier and would train readers to ignore this check. The phrase registered here is the assertion, not the word.",
       "_the_shorthand_this_phrase_does_not_catch": "The symbol forms 'grounding perp certifiability' and 'grounding perp certifiability' (spaced and unspaced) are the same assertion in shorthand and are NOT matched by a literal search for this phrase. They were located by hand on 2026-08-02 and dealt with individually: ADR 0011 line 189 reworded with a pointer to Amendment 1, docs/plan3/HANDOFF-2026-07-22-reanalysis.md given a superseded-wording banner, and docs/plan4/accepted-plan.md left untouched as a frozen hash-pinned accepted plan. This is the literal-match limit this register already records, recurring.",
       "permitted_in": {
-        "docs/adr/0011-reanalysis-frontier-and-loss-channels.md": "historical - the original decision text, preserved unedited, with Amendment 1 attached directly above it",
+        "docs/adr/0011-reanalysis-frontier-and-loss-channels.md": "historical - the original decision text, preserved unedited, with Amendment 1 attached directly below it",
         "docs/plan3/certification-result.md": "reporting - the dated narrowing note quotes the retired heading in order to retire it",
         "docs/plan3/claim-narrowing-2026-08-02.md": "reporting - the review packet that proposed the narrowing quotes the old wording",
         "docs/progress.md": "reporting - the dated log entry states the wording was narrowed",

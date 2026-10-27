@@ -81,12 +81,12 @@ independent review.
 
 | # | Step | State | Who |
 |---|---|---|---|
-| 1 | **O1** — [§11/§12 disposition](../plan3/sections-11-and-12-disposition.md) + [Amendment 1](../plan3/sections-11-and-12-disposition-amendment-1.md) (`0d5100b`, `ed3693b`, `3320af9`; **REVISE** twice, corrections applied) + [Amendment 2](../plan3/sections-11-and-12-disposition-amendment-2.md) (2026-10-27: §12.1 descoped on Ross's choice, §11.2 disposed axis by axis) | the 2026-10-27 [close-chain review](../../evidence/plan3/reviewer_record.plan3-close-chain.json) returned **BLOCK** on S1-B1/S1-B2; Amendment 2 answers both and awaits its delta review | 🔒 |
-| 2 | **Ledger entries** for the §11.3 quantities that became stated claims (group AUROC, normalized AURC, Spearman ρ, the stratifications), each with its own review | written 2026-10-27 (`CX-RANKING-01`, `CX-STRATIFICATION-01`); first review **BLOCK**, corrections applied, delta review pending | implementer, then 🔒 |
+| 1 | **O1** — [§11/§12 disposition](../plan3/sections-11-and-12-disposition.md) + [Amendment 1](../plan3/sections-11-and-12-disposition-amendment-1.md) (`0d5100b`, `ed3693b`, `3320af9`; **REVISE** twice, plus v3/v4 rounds whose verdicts were never filed) + [Amendment 2](../plan3/sections-11-and-12-disposition-amendment-2.md) (2026-10-27: §12.1 descoped on Ross's choice, §11.2 disposed axis by axis) | the 2026-10-27 [close-chain review](../../evidence/plan3/reviewer_record.plan3-close-chain.json) returned **BLOCK** on S1-B1/S1-B2; Amendment 2 answers both; the [delta review](../../evidence/plan3/reviewer_record.plan3-close-chain-delta.json) ruled them discharged (**PASS-WITH-NITS**) and the [C1 review](../../evidence/plan3/reviewer_record.c1-2026-08-03-packets.json) passed Amendment 1 with nits; nits applied 2026-10-27, for the close review to verify | 🔒 (ruled) |
+| 2 | **Ledger entries** for the §11.3 quantities that became stated claims (group AUROC, normalized AURC, Spearman ρ, the stratifications), each with its own review | written 2026-10-27 (`CX-RANKING-01`, `CX-STRATIFICATION-01`); first review **BLOCK**; [delta review](../../evidence/plan4/reviewer_record.certify-hardening-and-claims-delta.json) **PASS-WITH-NITS**, nits applied | 🔒 (ruled) |
 | 3 | **The strict-failure indicator**, ruled on separately | **ruled 2026-10-27** (the cheap ruling): no predeclared strict-failure loss exists; the three indicators are exploratory; the dependent items are disposed as unavailable in Amendment 2 | 🔒 (ruled) |
-| 4 | **O2/O3** — [`reviewer_record.o2-o3-claims-change.json`](../../evidence/plan4/reviewer_record.o2-o3-claims-change.json) returned **BLOCK** on 2026-07-29 | the 2026-08-02/04 work appears to address it; **no record discharges it**, and an undischarged BLOCK is not discharged by later commits that do not name it | verify, then 🔒 |
-| 5 | **Claim narrowing** — [packet](../plan3/claim-narrowing-2026-08-02.md) (`d256ca5`, `ed3693b`; **REVISE** twice, corrections applied) | awaiting independent review of its four questions. Two are judgement calls the packet deliberately refuses to make: whether to rename the `ORTHOGONAL` identifier with a redirect, and whether the narrowing discharges O2's remaining exposure **or is a separate finding of the same kind** | 🔒 |
-| 6 | **A fresh Plan 3 close record** — by an independent reviewer who did **not** implement Plan 3 and did **not** author this refusal's remedies, re-verifying the green command and the artifact hashes at its own commit | not started; blocked on 1–5 | 🔒 |
+| 4 | **O2/O3** — [`reviewer_record.o2-o3-claims-change.json`](../../evidence/plan4/reviewer_record.o2-o3-claims-change.json) returned **BLOCK** on 2026-07-29 | verified by the 2026-10-27 [close-chain review](../../evidence/plan3/reviewer_record.plan3-close-chain.json), which returned **BLOCK** on S4-B1/S4-B2; `44ed212` answers both and the [delta review](../../evidence/plan3/reviewer_record.plan3-close-chain-delta.json) ruled them discharged | 🔒 (ruled) |
+| 5 | **Claim narrowing** — [packet](../plan3/claim-narrowing-2026-08-02.md) (`d256ca5`, `ed3693b`; **REVISE** twice, plus v3/v4 rounds whose verdicts were never filed) | the close-chain review ruled its questions (keep the identifier, no redirect; the narrowing is a separate finding, O2-S1, discharged) and returned **BLOCK** on S5-B1, since discharged; the [C1 review](../../evidence/plan3/reviewer_record.c1-2026-08-03-packets.json) then returned **BLOCK** on B1/B2 (naming the construction; the 0.1075 wording), answered 2026-10-27 and awaiting verification | 🔒 |
+| 6 | **A fresh Plan 3 close record** — by an independent reviewer who did **not** implement Plan 3 and did **not** author this refusal's remedies, re-verifying the green command and the artifact hashes at its own commit | not started; may be attempted once the 2026-10-27 corrections, including C1's B1/B2, are applied | 🔒 |
 | 7 | Plan 4's owner override lapses and the gate is satisfied on its merits | follows 6 | — |
 
 **Nothing here may be submitted, posted, published or quoted until step 6 issues a PASS.** That
@@ -94,8 +94,10 @@ includes the public release of this repository: publishing the repo publishes it
 claims are in an undischarged state. Every quantitative sentence is additionally bound by
 [`../plan3/certification-result.md` → "What may and may not be claimed"](../plan3/certification-result.md).
 
-**Do not read "corrections applied" as "nearly done".** Across the four review events above, the
-first-pass clean rate is **zero for four** — REVISE twice, REVISE twice, REFUSED, BLOCK — and
+**Do not read "corrections applied" as "nearly done".** Across the review events above, the
+first-pass clean rate is **zero** — REVISE twice, REVISE twice, REFUSED, BLOCK, then on 2026-10-27
+three more BLOCKs (the close chain, the certify hardening, the claim-narrowing packet), with the
+two packets' unfiled v3/v4 rounds not counted — and
 Amendment 1 records an instance where *the correction for a defect contained that same defect*.
 Budget for a further round on each step rather than assuming one passes.
 

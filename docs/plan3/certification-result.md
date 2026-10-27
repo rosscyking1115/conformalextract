@@ -34,12 +34,19 @@ floor) with risk UCB 0.5157 (far over α = 0.20).
 > diagnostic is penalty-free — which is exactly what makes it clean evidence about the *score*, and
 > exactly what blinds it to the finite-sample penalty. The penalty is a second barrier, on the
 > method-and-benchmark side, and it forbids a certificate here that the empirical curve permits: at
-> n = 1,396 with δ/3 the certifier's Hoeffding bound spends **0.0925** of the 0.20 risk budget
-> before any data is seen, so a certificate at the acceptance floor requires an accepted set
-> carrying mean loss ≤ **0.1075** — whoever produced it. Attributing both causes to capability ran
+> n = 1,396 with δ/3 a Hoeffding bound (a diagnostic pairing of neither certifier; see below)
+> spends **0.0925** of the 0.20 risk budget before any data is seen, so passing the *risk test*
+> at the acceptance floor requires mean loss ≤ **0.1075** under that bound. Attributing both causes to capability ran
 > in the flattering direction, and it cost the repository a benchmark finding by folding it into a
 > task finding. The numbers below are unchanged; the heading and the attribution are not. See
 > `CX-CAPGAP-01` and the second sub-section added below.
+>
+> **Corrected 2026-10-27** on independent review (`../../evidence/plan3/reviewer_record.c1-2026-08-03-packets.json`, claim-narrowing B1/B2). This
+> note said "the certifier's Hoeffding bound" and that "a certificate at the acceptance floor
+> requires" mean loss ≤ 0.1075 "whoever produced it". The bound is a diagnostic pairing, and
+> 0.1075 is what the risk test under it requires at exactly the floor, not what every
+> certificate requires: under the primary empirical-Bernstein test the requirement depends on
+> the loss distribution. No number moved.
 
 ### Cause 1 — the score cannot rank (capability, this model and task)
 
@@ -75,9 +82,12 @@ So the infeasibility is **not** caused by:
 The confidence score simply cannot isolate a 20%-sized subset of documents on which the model is
 80% correct. At 20% acceptance QA's error is 0.405 — **twice the target**.
 
-### Cause 2 — the corpus halves the target (method and benchmark, for every system)
+### Cause 2 — the corpus halves the risk target under this δ/3 allocation (method and benchmark)
 
 *Added 2026-08-03. Nothing above is retracted; this is the barrier the diagnostic above cannot see.*
+*Corrected 2026-10-27: the heading said "for every system" without its allocation, and the
+second table row said what "an accepted set may carry"; both are scoped to the Hoeffding
+diagnostic at δ/3.*
 
 The oracle curve carries no δ, which is what makes it clean evidence about the score. A certificate
 does carry δ, and at this corpus size the penalty is not a rounding term:
@@ -85,7 +95,7 @@ does carry δ, and at this corpus size the penalty is not a rounding term:
 | Quantity | Value | Configuration |
 |---|---|---|
 | Hoeffding penalty at the floor | **0.0925** | n = 1,396, k = 280, δ/3 = 0.016667 |
-| mean loss an accepted set may carry | **≤ 0.1075** | α = 0.20 less the penalty |
+| mean loss the risk test allows at the floor, under that bound | **≤ 0.1075** | α = 0.20 less the penalty |
 | certified acceptance, loss-optimal ranking | **0.1139** | δ/3; below the 0.20 floor |
 | acceptance lower bound, oracle prefix | **0.1984** | frozen allocation, 3 candidates, δ/3 |
 | largest admissible grid | **3 candidates** | δ/3 at n = 1,396; a fourth needs 1,432 |
@@ -354,7 +364,8 @@ reported as two independent confirmatory comparisons. There is one finding, not 
   the bounds** — and, from 2026-08-03, only that. It is penalty-free, so it is silent on the
   finite-sample penalty and may not be cited as evidence that the failure is capability rather than
   method. Both causes must travel together: the score cannot rank (2.0% against a 23.6% oracle) and
-  the corpus halves the target (0.0925 of the 0.20 budget spent on the penalty at n = 1,396, δ/3).
+  the corpus halves the risk test's target under a Hoeffding bound (0.0925 of the 0.20 budget
+  spent on the penalty at n = 1,396, δ/3).
 - **(ADR 0011)** The α-frontier, stated as: below α ≈ 0.406 no certificate at any threshold could
   have cleared the 20% floor for the best system. It is an oracle upper bound and may only be used
   in that ruling-out direction — never to suggest what *would* certify above it. 0.406 is an

@@ -6,7 +6,7 @@ import typing
 from pathlib import Path
 
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from conformalextract.certification_run import (
@@ -43,6 +43,9 @@ def _rows(losses: list[float], scores: list[float] | None = None) -> list[GroupR
     ]
 
 
+# No deadline: this failed intermittently only under concurrent GPU load and never alone, which
+# is Hypothesis's 200 ms default deadline tripping, not a numerical difference.
+@settings(deadline=None)
 @given(
     losses=st.lists(st.floats(min_value=0.0, max_value=1.0), min_size=2, max_size=40),
     alpha=st.floats(min_value=0.0, max_value=1.0),

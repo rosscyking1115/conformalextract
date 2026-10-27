@@ -82,8 +82,9 @@ Plan 2's close directed it into "Plan 4 limitations and any model/report card". 
 neither. `CX-SERVING-01` holds the `report` and `model_card` surfaces — the exact two named — and
 carried the two reassuring limitations without it.
 
-The finding: the abstain/extract decision itself flips between serving stacks at **1.3–1.8% of
-frames at plausible operating points**, and two of the four empty-versus-nonempty flips sit just
+The finding: the abstain/extract decision itself flips between serving stacks on **1.33% of
+frames at full acceptance and 1.78% under tightening** (the same four flips over two denominators,
+not a band; *range form corrected 2026-10-27*), and two of the four empty-versus-nonempty flips sit just
 above the median confidence percentile, so they **survive into the accepted set** rather than being
 abstained away. The flip rate can therefore exceed the 1.3% raw rate. The abstention mechanism is
 stack-dependent at the margin.
@@ -99,11 +100,11 @@ Directed to "Plan 4 limitations and any model/report card, scoped to the exact s
 | # | Element | Status |
 |---|---|---|
 | B1 | 13.67% raw divergence | **arrived** — the claim's headline is its complement, 86.3% agreement |
-| B2 | 1.3–1.8% abstain/extract flip rate at plausible operating points | **dropped, discharged 2026-07-29 as O3** |
+| B2 | abstain/extract flip rate, 1.33% / 1.78% over two denominators (range form corrected 2026-10-27) | **dropped, discharged 2026-07-29 as O3** |
 | B3 | quality-neutrality | **arrived** — limitation 2 |
-| B4 | confidence-concentration **with its 4.80% upper bound in the top quartile** | **half-arrived — the bound never came** |
+| B4 | confidence-concentration **with its 4.80% upper bound in the top quartile** | **arrived** — limitation 6 *(corrected 2026-10-27; this read "half-arrived — the bound never came")* |
 | B5 | probe frames are train-split only | **arrived** — limitation 1 |
-| B6 | cause is not isolated to a specific kernel | **never arrived** |
+| B6 | cause is not isolated to a specific kernel | **arrived** — limitation 7 *(corrected 2026-10-27; this read "never arrived")* |
 
 ### B4 — the reassurance travelled, its bound did not
 

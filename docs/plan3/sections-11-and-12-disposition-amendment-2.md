@@ -8,9 +8,11 @@
   blocking items S1-B1 and S1-B2, required items S1-R1 to S1-R4
 - **The §12.1 choice was made by Ross on 2026-10-27:** "go with a, descope 12.1" — option (a) of
   S1-B1.
-- **Status: proposed, pending independent review.** Plan 3 does not close on this document.
-  Nothing here creates a claim; one ledger limitation and three prose surfaces change to match it
-  (listed at the end).
+- **Status: reviewed.** The independent delta review of 2026-10-27
+  ([`../../evidence/plan3/reviewer_record.plan3-close-chain-delta.json`](../../evidence/plan3/reviewer_record.plan3-close-chain-delta.json))
+  ruled S1-B1, S1-B2 and S1-R1 to S1-R4 discharged (PASS-WITH-NITS); its R1, R2, R5 and N1–N5
+  are applied below by dated note. Plan 3 does not close on this document. Nothing here creates
+  a claim; one ledger limitation and three prose surfaces change to match it (listed at the end).
 
 ## §12.1 Machine-coded taxonomy — **descoped from Plan 3** (S1-B1)
 
@@ -35,8 +37,8 @@ of an open item.
 
 **Consequence, stated once so no surface states it differently:** *Plan 3 makes no error-category
 claim.* The two measured signatures — the 637-argument false-positive excess, and the co-occurrence
-of a false positive and a false negative in 2,003 of 2,515 error-bearing documents — stay recorded
-as measurements. What would separate the error types they are consistent with is not run.
+of a false positive and a false negative in 2,003 of 2,515 error-bearing documents, recomputed in
+`../../evidence/plan3/reviewer_record.plan3-close.json` — stay recorded as measurements. What would separate the error types they are consistent with is not run.
 
 **The 2026-07-30 scope addendum** stays in the repository unedited — it is admitted byte-for-byte
 and may not be edited — as a reviewed scope text. It is now inert: it constrained an execution that
@@ -57,9 +59,9 @@ The base document disposed §11.2 as a whole ("moot — empty input"), and Amend
 |---|---|---|
 | event type | **descoped** | Computable on all predictions, but §11.2 makes every subgroup interval exploratory and reportable only above a displayed minimum, and no minimum was predeclared. Choosing one now, after the result, decides which event types are shown. No claim depends on a per-event-type figure, and none could change an infeasibility that holds on the whole split. |
 | role | **descoped** | The certified unit is the document group and its loss is not decomposed by role; a per-role reading needs argument-level scoring by role, which is new analysis rather than reporting. The committed `argument_error_counts.json` aggregates over roles and is not offered as this item. |
-| document-length quartile | **descoped** | Computable; same ground as event type. Two correlates of document complexity were executed — cross-sentence distance below, and trigger count — which bear on the question but are **not** this item and are not offered as it. |
+| document-length quartile | **descoped** | Computable, and every quartile is large enough to clear any displayed minimum, so the event-type ground does not apply *(corrected 2026-10-27)*. Descoped because no claim depends on it and no subgroup figure can change an infeasibility that holds on the whole split. Two correlates of document complexity were executed — cross-sentence distance below, and trigger count — which bear on the question but are **not** this item and are not offered as it. |
 | cross-sentence distance | **executed** | Amendment 1, stratification finding 2, over all groups rather than an accepted set. Exploratory, as §11.2 requires. |
-| seen/unseen schema | **moot — split descoped** | The seen/unseen-schema distinction belongs to the shift stress test (§10), and shift is descoped and sealed by ADR 0010. The certification split has no unseen-schema stratum to report. |
+| seen/unseen schema | **descoped** | The plan treats seen/unseen-schema coverage as a shift descriptor (§10.3, §3.4 item 2), and shift is descoped and sealed by ADR 0010. The in-domain version is not computed. *(Corrected 2026-10-27: this row was "moot" and said the certification split "has no unseen-schema stratum to report", which no committed count shows; the RAMS roles are a random grouped split.)* |
 
 **Trigger count is an addition, not a §11.2 item.** Amendment 1's first stratification finding
 groups by trigger count, which §11.2 does not list. It is reported as exploratory and must not be
@@ -73,12 +75,14 @@ acceptance (`accepted-plan.md` §12.2), and the refusal record listed both as co
 mootness claim is withdrawn and the five strata are re-disposed:
 
 - *10 QA improvements over both baselines*, *10 QA regressions* — **computable, descoped.** The
-  audit "explains failure mechanisms"; its output is attribution of the kind §12.3 limits, and with
+  audit "explains failure mechanisms"; its output is attribution, which §12.3 requires to be phrased as association rather than cause
+  *(corrected 2026-10-27: this said §12.3 "limits" the audit; it limits phrasing)*, and with
   §12.1 descoped there is no category vocabulary to sample "all categories" across and no
   error-category claim for it to explain. A ten-case sample would add examples without adding a
   finding the plan could state.
-- *10 high-confidence/high-loss accepted cases* — moot: nothing is accepted.
-- *10 abstained low-loss cases* — moot: no threshold was selected, so nothing is abstained.
+- *10 high-confidence/high-loss accepted cases* and *10 abstained low-loss cases* — moot: no
+  policy was selected (every system is infeasible, §3.3), so there is neither an accepted nor an
+  abstained set. *(Corrected 2026-10-27: these were given two separate grounds.)*
 - *10 shift-only failures* — moot: shift is descoped and sealed (ADR 0010).
 
 Three strata are empty and two are descoped, so the frozen stratified sample is not constructed.
@@ -102,7 +106,7 @@ The base document's "five of six strata" miscounted: §12.2 lists five strata an
 ## The strict-failure indicator — the step 3 ruling, item by item (S1-R4)
 
 The close-chain review took the cheap ruling: **there is no predeclared strict-failure loss in this
-programme.** Plan 1 §237 required its exact definition to be frozen before calibration; it never
+programme.** Plan 1 §6.1 required its exact definition to be frozen before calibration; it never
 was, and calibration ran on 2026-07-22. A definition written now would be chosen after the labels
 opened and after three indicators' AUROCs were committed, which §8.5 forbids. It is a Plan 1 defect,
 not repairable after calibration, and the dependent Plan 3 items are disposed accordingly:
@@ -117,6 +121,17 @@ not repairable after calibration, and the dependent Plan 3 items are disposed ac
 The `CX-RANKING-01` limitation recording that its AUROC uses an exploratory indicator was added in
 `44ed212`. Amendment 1's "What was NOT reversed" now points here.
 
+## Two items that depend on §12.1 (delta review R5)
+
+*Added 2026-10-27.*
+
+- §14.2 figure 4, *failure-type composition for accepted errors* — **moot and descoped**: no
+  accepted set exists, and its categories are §12.1's.
+- §17 Phase E step 1, *generate deterministic taxonomy counts and manual-audit sample* —
+  **descoped** with §12.1 and §12.2.
+
+With both disposed, no artifact under the unwaived half of the §22 line depends on the taxonomy.
+
 ## What changes to match this amendment
 
 - `evidence/plan4/claim_ledger.json`, `CX-GROUNDING-ORTHOGONAL-01`: the limitation saying §12.1
@@ -126,15 +141,15 @@ The `CX-RANKING-01` limitation recording that its AUROC uses an exploratory indi
 - [`../writeup/draft-2026-07-28.md`](../writeup/draft-2026-07-28.md): the "open decision" sentence
   is closed by dated note.
 - [`accepted-plan.md`](accepted-plan.md) §12.1, §12.2 and §22: an appended, dated note pointing
-  here, with the pin in `tests/test_doc_references.py` moved in the same commit. Plan 1 §237
+  here, with the pin in `tests/test_doc_references.py` moved in the same commit. Plan 1 §6.1
   ([`../gate0/accepted-plan.md`](../gate0/accepted-plan.md)) gets a dated note recording the
   strict-failure defect, likewise re-pinned.
 - The base disposition's §12.1 heading and Amendment 1's "What was NOT reversed" gain pointers here.
 
 ## What this document does not do
 
-- It does not close Plan 3. Steps 2, 4 and 5 have their own open items, C1 (the two 2026-08-03
-  packets whose verdicts were never filed) is not addressed here, and step 6 has not started.
+- It does not close Plan 3, and step 6 has not started. C1 (the two 2026-08-03 packets whose
+  verdicts were never filed) is ruled in a separate record.
 - It does not run anything. Every disposition above is a ruling on existing evidence; no number in
   it is new.
 - It does not descope on cost. Every descoped item is $0 to compute, and each carries the

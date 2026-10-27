@@ -54,7 +54,9 @@ a dated record — see `docs/release-check-2026-07-28.md` for the check that sur
 > **Two of the three walks still carry a floor, and it is worse than the one that was replaced.**
 > `test_internal_paths.py` and `test_withdrawn_assertions.py` bound at `> 50` against **202** files —
 > **75% headroom**, against the 51% the floor rule was derived from. Each of the three walks now has
-> exactly one of the two guards; **none has both.**
+> at least one of the two guards, and the markdown walk has both *(corrected 2026-10-27: this read
+> "exactly one … none has both", false since `73283cc` added the untracked-file probe; review of
+> `73283cc`, B1)*.
 >
 > **The deferral rule, stated because "Plan 4 is paused" does not distinguish these from what has
 > been changed.** Three commits of test changes have landed during the pause, so the pause alone is

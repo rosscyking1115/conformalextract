@@ -42,6 +42,8 @@ exploratory unless separately predeclared. With no accepted set there are no sub
 report. **Note what is *not* claimed here:** subgroup analysis of *loss* across all predictions is
 possible and is not being done — it is descoped as out of scope for a null, not impossible.
 
+> **Superseded 2026-10-27.** Disposed axis by axis in [Amendment 2](sections-11-and-12-disposition-amendment-2.md).
+
 ## §11.3 Calibration diagnostics
 
 | Sub-item | Disposition | Reasoning |
@@ -94,6 +96,9 @@ that is a new claim requiring its own review.
 - The remaining audit — **descoped**. With five of six strata empty, the frozen stratified sample
   the section requires cannot be constructed as specified, and constructing a different sample after
   seeing the result is precisely what "frozen before reading examples" exists to prevent.
+
+> **Superseded 2026-10-27.** [Amendment 2](sections-11-and-12-disposition-amendment-2.md) re-disposes the two computable strata. The
+> counts above are also wrong: §12.2 lists five strata and one sampling rule, not six strata.
 
 ## §12.3 Error attribution limits
 
