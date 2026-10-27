@@ -23,7 +23,7 @@ is the predecessor; this one re-runs it at a later commit and adds history, CI a
 | 7 | Claims against the ledger, per surface | README **pass**; paper and abstract **open, already known** — see §7 |
 | 8 | Gates | `verify-claims` ok; pytest 484 passed, 8 skipped; ruff clean; mypy strict clean |
 | 9 | CI | **was failing on every push since 2026-07-15; fixed locally, unverified until pushed** — see §9 |
-| 10 | README links | **pass** — 14 relative links, all resolve |
+| 10 | README links | **pass** — 14 relative links at `1bed6b3`, all resolve |
 | 11 | Gate state | **Plan 4's release gate is not open** — see §11 |
 
 ## 1. Secrets
@@ -35,8 +35,9 @@ Each match is a 64-character SHA-256 hex digest: `doc_key_sha256` (20),
 
 > **Corrected on independent review.** The first version of this section said 10 findings. That
 > was a count of a truncated listing, not the scanner's total, and it named only two of the three
-> keys. A pattern grep over `git log --all -p` for
-Hugging Face, OpenAI, AWS, GitHub and Slack token shapes and PEM private keys returned nothing.
+> keys.
+
+A pattern grep over `git log --all -p` for Hugging Face, OpenAI, AWS, GitHub and Slack token shapes and PEM private keys returned nothing.
 No `.env`, key or credential file has ever been tracked (`git log --all --name-only`). The CI guard
 refuses tracked `data/raw`, `data/private` and `.env` files.
 
@@ -139,7 +140,8 @@ and the act cannot be rolled back.
 
 ## What this sweep changed
 
-One local commit on `release/public-prep-2026-10-27`:
+Local commits on `release/public-prep-2026-10-27`: `9b09bf3` (below), `e07fde9` (this report) and
+`8b7996b` (the four corrections the independent review required). `9b09bf3` changed:
 
 - `.github/workflows/ci.yml`: sync every extra the gates import (§9).
 - `README.md`: the Plan 3 and Plan 4 status rows say what the records say, and the write-up
