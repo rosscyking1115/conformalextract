@@ -110,6 +110,10 @@ selection), not extraction-policy or grounding failures.
 > a false positive and a false negative, which is consistent with substitution — wrong-role,
 > boundary and coreference errors share *that* signature. §12.1's taxonomy is what would separate
 > them. **Do not cite this paragraph as evidence for an error-category claim.**
+>
+> **Corrected 2026-10-27** on independent review (Plan 3 close chain, step 4, R2). "A handful"
+> states a count the record does not have: an unknown number of high-loss documents was inspected,
+> and two are quoted.
 
 **ZS and FS are near-vacuous at this operating point: the target is structurally unanswerable.**
 Even abstaining on literally every document, their base risk is high enough that the forced

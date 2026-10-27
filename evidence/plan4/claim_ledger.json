@@ -110,7 +110,8 @@
         "The interval is wide because only 90 of the 1,392 scored groups are error-free. AUROC for the zero-shot and few-shot systems rests on 3 and 18 such groups and is not comparable with it.",
         "Ranking quality is not certifiability: ranked by true loss, the same population certifies 11.4%, still short of the 20% floor (CX-CAPGAP-01).",
         "Comparisons with log-probability scores reported elsewhere are not matched: those are instance-level and these are group-level. They support only that this is an ordinary score for its family, not that it equals any published figure.",
-        "On the development split the same three figures are 0.834, -0.313 and 0.568. The certification-split values are the ones quoted."
+        "On the development split the same three figures are 0.834, -0.313 and 0.568. The certification-split values are the ones quoted.",
+        "The 'any error' indicator is one of three chosen after calibration. The plan's predeclared strict-failure indicator was never defined, so this AUROC is exploratory, not a predeclared test."
       ],
       "surfaces": [
         "report",
@@ -192,7 +193,7 @@
         "Measured on train-split frames only; the rate may differ on other splits.",
         "Divergence is quality-neutral against gold and concentrates in low-confidence frames.",
         "No threshold was pre-registered for this probe, so 86.3% is reported, not judged as a pass.",
-        "The abstain/extract decision itself flips between stacks on 1.33% of frames at full acceptance (4 of 300) and on 1.78% under tightening (the SAME four flips over the top-75% denominator, 4 of 225). These are two measurements of different things, not an interval: an earlier wording printed them as '1.3-1.8%', which reads as a confidence interval and asserts a sampling uncertainty neither figure carries. Both values are correct, so no value check could see the defect - the form was wrong, not the number.",
+        "The abstain/extract decision itself flips between stacks on 1.33% of frames at full acceptance (4 of 300) and on 1.78% under tightening (the SAME four flips over the top-75% denominator, 4 of 225). These are two measurements of different things, not an interval: an earlier wording printed them as '1.3-1.8%', which reads as a confidence interval and asserts a sampling uncertainty neither figure carries. Both values are correct, so no value check could see the defect - the form was wrong, not the number. Two of the four flips sit just above the median confidence percentile, so at plausible operating points (above about 50% acceptance) they survive into the accepted set rather than being abstained away: the abstention mechanism is stack-dependent at the margin.",
         "The reassurance in limitation 2 is operating-point-dependent and must not be carried forward alone: at top-90% acceptance divergence is 12.59%, barely below the 13.67% raw rate. The near-zero top-quartile result holds only under aggressive abstention.",
         "The top-quartile concentration result is 0 of 75, which is not zero: it carries a two-sided Clopper-Pearson 95% upper bound of 4.80%. Quote the bound whenever the concentration is quoted.",
         "The CAUSE of the divergence is not isolated to a specific kernel, quantisation path or sampler. Nothing about it may be assumed fixed by changing any one of them."

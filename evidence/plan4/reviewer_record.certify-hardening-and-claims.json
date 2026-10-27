@@ -1,0 +1,101 @@
+{
+  "schema_version": "1",
+  "_record_notice": "Independent Reviewer/QA ruling on commit ae1b963 (certify hardening B1-B4, CX-RANKING-01, CX-STRATIFICATION-01, CX-SEALED-01 qualification). Produced by a reviewer who did not write the commit. Read-only: no split was opened, no gold or sealed label was read, certify was not run. It authorises nothing beyond the repairs it names.",
+  "review_kind": "certification_label_access_and_claims_change_review",
+  "reviewed_commit": "ae1b963c305d332f0f6a5a1d5c942e817b28d5dc",
+  "reviewed_commit_note": "Diff 907c107..ae1b963 on branch release/public-prep-2026-10-27; working tree clean at start and finish.",
+  "reviewer_identity": "Reviewer/QA (Claude) - independent; not the author of ae1b963",
+  "reviewed_date": "2026-10-27",
+  "verdict": "BLOCK - five required items (R1-R5), none of which changes a certified number or needs any split re-opened. Disposition: bounded-repair; R4's surface question is manager-escalate.",
+  "external_signal": {
+    "pytest": "504 passed, 9 skipped in 159.32s (0:02:39)",
+    "ruff": "All checks passed!",
+    "mypy": "Success: no issues found in 25 source files",
+    "verify_claims": "exit 0, ok true, 17 claims, 15 publishable",
+    "check_paper_claims": "ok: all 117 figures resolve to an artifact carrying value and configuration.",
+    "retrospective_rerun": "preflight ready, rc 0, output byte-identical to the committed artifact (written to a scratchpad, not the repo)",
+    "grid_hash_recompute": "zs, fs, qa grid hashes recomputed from certifiable_thresholds all match the committed grid_hash"
+  },
+  "question_1_b1_preflight": {
+    "runs_before_archive": true,
+    "basis": "cli.py:652 immutability, 656-678 ADR gate, 701-716 preflight, 720 archive; test_consistent_inputs_reach_the_archive_only_after_the_preflight",
+    "real_checks": [
+      "prediction and role-map sha256 vs manifest",
+      "identical certification coverage across zs/fs/qa",
+      "certification groups disjoint from train/development",
+      "selected candidates vs manifest"
+    ],
+    "not_real": "grid check compares the self-declared grid_hash field, not the thresholds certify uses (certification_preflight.py:208-219, cli.py:788-791) - R2",
+    "manifest_faithful": true,
+    "manifest_basis": "every value matches addendum lines 40-43, threshold_grids.json, FROZEN_CONFIDENCE_CANDIDATES and the gate summary; prediction hashes first committed 2026-07-21 and the role map 2026-07-15, both before the run",
+    "not_checked_at_run_time": "honest disclosure, recorded on every result; 'cannot' overstates 'does not' (N1); section 3.2 bullet 7 neither checked nor named (N12)",
+    "new_function_right_design": true
+  },
+  "question_2_b2_reads_counted": {
+    "genuinely_counted": false,
+    "basis": "gold_used appends per gold_frames call, once per document per system (cli.py:727, 754, 784), so the certification count is about 3x the documents while documented as documents; the guard at cli.py:806-809 is unreachable because instances and predictions are pre-filtered to certification (720-722, 773); no CLI test of the count path - R1",
+    "filtering_changes_certification_numbers": false,
+    "filtering_basis": "build_document_contexts and parse_arm are per-document; instance keys are unique; ArmSummary is discarded"
+  },
+  "question_3_b3_immutability_first": {
+    "ruling": true,
+    "basis": "cli.py:652 precedes every read; re-checked at 830"
+  },
+  "question_4_b4_ci_guard": {
+    "covers_data_sealed": true,
+    "test_derived": true,
+    "basis": "ci.yml:18; tests/test_ci_guard.py derives the directories from .gitignore",
+    "nit": "regex is hyphen-blind; the test checks the string, not the guard's behaviour"
+  },
+  "question_5_retrospective": {
+    "label_free": true,
+    "pass_means": "today's files hash to values pinned before 2026-07-22 and satisfy the checkable preconditions (less R2's content gap); not that the preflight ran on 2026-07-22, which the ledger states",
+    "nits": [
+      "docstring says the certificate recorded the input hashes; it records none (N2)",
+      "certification_access is a literal (N7)",
+      "prediction_records_by_system counts unique keys (N8)"
+    ]
+  },
+  "question_6_claims": {
+    "cx_ranking_01_figures_correct": true,
+    "cx_stratification_01_figures_correct": true,
+    "cx_stratification_01_method_correct": false,
+    "cx_stratification_01_basis": "the 28 'oracle-accepted' groups are the best-scoring prefix with a label-chosen cut-off (calibration.py:630-647, = max_acceptance_within_alpha 2.01%), not the loss-optimal ranking (23.6%) - R3",
+    "verified_status_honest": false,
+    "verified_status_basis": "the 2026-08-02 v2 REVISE's F-D named the bootstrap CI 0.737-0.850 that this claim quotes; the section 11.3 packet chain (v1, v2 and v3 REVISE; no v4 verdict found) has no PASS on record; amendment-1 lines 6-9 read 'Not discharged ... Nothing here may reach a public surface' - R4",
+    "ledger_entry_vs_removal": "a ledger entry is the more honest instrument; its status and verified_by are what is wrong",
+    "abstract_in_the_range": "an improvement on 'matching', still imprecise: the only structured-generation comparator is a single cell, 0.793 (N3)",
+    "cx_sealed_01_new_limitations": "limitations 3 and 4 accurate; limitation 2 and README:105-106 'or any computed quantity' are false for 2026-07-22, when contexts and parse_arm ran over every RAMS instance and all 9,124 prediction records (907c107 cli.py:674-675, 711-712) - R5; the paper's wording is accurate"
+  },
+  "question_7_withdrawn_assertions_skip": {
+    "safe": true,
+    "basis": "the skip requires the file to be absent and git check-ignore to exit 0; the rglob scan checks the file wherever it exists",
+    "nit": "silent continue; report it as a skip (N4)"
+  },
+  "question_8_0589_pointer": {
+    "matters": "minor",
+    "ruling": "nit N5: check_paper_claims keys by figure string, so the three-trigger 0.589 (tex:296) is backed only by coincidence with the grounding 0.589 (tex:322); both are correct today"
+  },
+  "required_items": {
+    "R1": "Count distinct documents (Counter over set(gold_used)); assert len(set(gold_used)) == access_log.document_count; state that the final/shift zeros hold by construction of the line-720 filter, not as a measurement of archive access (docstring and CX-SEALED-01 limitation 3); add a CLI test with a monkeypatched archive that pins the counts.",
+    "R2": "Recompute each grid hash from certifiable_thresholds in run_certification_input_preflight and compare it to the manifest; add a test with edited thresholds and an untouched label.",
+    "R3": "CX-STRATIFICATION-01 method and limitation 1: describe the oracle-accepted set as the best-scoring prefix within alpha with a label-chosen cut-off, not a ranking by true loss; regenerate the appendix.",
+    "R4": "State the verification basis exactly in both new claims' verified_by (byte-identical reproduction; F-D named this CI; the section 11.3 chain has no PASS; amendment-1 is not discharged); set CX-RANKING-01 to qualified or obtain a PASS on the v4 packet; the abstract-surface question goes to the Manager/Ross.",
+    "R5": "CX-SEALED-01 limitation 2 and README.md:105-106: replace 'or any computed quantity' with wording saying no final or shift gold entered the access record or scoring, and that on 2026-07-22 their text and predictions were parsed and discarded."
+  },
+  "nits": {
+    "N1": "'cannot discharge' -> 'does not discharge' (certification_preflight.py:213 and the test docstring).",
+    "N2": "Retrospective docstring and manifest _notice: cite the pre-run hash records (2026-07-21, 2026-07-15), not 'the ones the certificate recorded'.",
+    "N3": "Abstract: 'in the range' rests on one cell (0.793); say 'close to the one structured-generation figure'.",
+    "N4": "test_withdrawn_assertions.py:204-209: the silent continue should be a reported skip.",
+    "N5": "paper_claims keys 0.589 by value; record the two sources or make the checker occurrence-aware.",
+    "N6": "test_certify_hardening retrospective test: the documents_read comparison is circular (both come from the role map).",
+    "N7": "Retrospective certification_access literal: label it 'by construction'.",
+    "N8": "prediction_records_by_system counts unique keys, not records.",
+    "N9": "claims-appendix.generated.md lost its trailing newline.",
+    "N10": "A preflight failure gives a traceback, not refusal JSON; the test_ci_guard regex is hyphen-blind.",
+    "N11": "The operating-point check compares the manifest to constants certify uses regardless; it is a consistency check.",
+    "N12": "Section 3.2 bullet 7 is neither checked nor named in not_checked_at_run_time."
+  },
+  "what_this_review_does_and_does_not_authorise": "Authorises nothing. Does not rule on going public, does not clear any paid or $0 cloud run, does not close any plan."
+}

@@ -64,15 +64,19 @@ extraction cannot be certified at 20% risk** — the datasets `2606.29054` repor
 of 0.033 and 0.356, at which the same arithmetic forbids nothing and permits up to 80.5%
 acceptance respectively.
 
-*The corpus halves the target, for everyone.* At n = 1,396 groups with δ/3, the certifier's
-Hoeffding bound spends 0.0925 of the 0.20 risk budget on the finite-sample penalty before any data
-is seen — so a certificate at the 20% acceptance floor needs an accepted set carrying mean loss
+*The corpus halves the target, for every system certified under this δ/3 allocation.* At n = 1,396
+groups with δ/3, a Hoeffding bound spends 0.0925 of the 0.20 risk budget on the finite-sample
+penalty before any data is seen. That pairing is a diagnostic belonging to neither certifier: the
+primary risk test is empirical Bernstein, and the conservative audit ran Hoeffding at a single
+candidate on the full δ. So a certificate at the 20% acceptance floor needs an accepted set carrying mean loss
 ≤ 0.1075, whoever produced it. That is a property of this benchmark and this allocation, not of any
 model. For *this* model it settles the question independently of the score: the loss-optimal
 ranking upper-bounds what **any** score could certify and it certifies 0.1139, below the floor.
 Separately, δ/3 at this n admits at most a three-candidate grid, which the frozen configuration
-exactly fills. **This is not the claim that no model could be certified here** — one whose accepted
-20% carried mean loss ≤ 0.1075 would clear the risk test at this n.
+exactly fills. **This is not the claim that no model could be certified here**, but the witness has
+to clear both tests: at the smallest prefix that clears acceptance, k = 332 groups (acceptance lower
+bound 0.2004), a system carrying mean loss ≤ 0.1151 over those groups would certify. A single-system
+entrant at the full δ inherits neither figure.
 
 **QLoRA produced a large, real gain — in the wrong property** (`CX-GROUNDING-01`). 95.7% of the
 adapted system's outputs parse and ground to the source document, against 39.4% zero-shot and 68.1%
