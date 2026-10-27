@@ -89,8 +89,8 @@ ACCEPTED_PLAN_SHA256 = {
     # eleven-category list are preserved above the note. Pin moved in the same commit, as the rule
     # above requires; previous digest 83313d47…
     # Amended again 2026-10-27 with dated notes under §12.1 (descoped), §12.2 (disposed) and the §22
-    # checklist (taxonomy/audit half waived), all pointing at disposition Amendment 2. The text above
-    # each note is unchanged. Pin moved in the same commit; previous digest 34bc6b4d…
+    # checklist (taxonomy/audit half waived), all pointing at disposition Amendment 2. The text
+    # above each note is unchanged. Pin moved in the same commit; previous digest 34bc6b4d…
     "docs/plan3/accepted-plan.md": (
         "560eee3d08d18d212ae2286f07b1c1528c66b27f83c5468aa40d804fb912fa0b"
     ),
