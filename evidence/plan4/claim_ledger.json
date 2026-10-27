@@ -116,8 +116,7 @@
         "The 'any error' indicator is one of three chosen after calibration. The plan's predeclared strict-failure indicator was never defined (Plan 1 section 6.1), so this AUROC is exploratory, not a predeclared test."
       ],
       "surfaces": [
-        "report",
-        "abstract"
+        "report"
       ],
       "verified_by": "computed into evidence/plan3/calibration_diagnostics.json; the independent calibration-diagnostics review of 2026-08-02 (v2) reproduced that artifact byte-identically and returned REVISE, its finding F-D being that this claim's bootstrap interval then resolved to no committed artifact; the interval was committed to evidence/plan3/certification_sensitivity.json afterwards; the fresh independent review of that chain, filed as evidence/plan3/reviewer_record.c1-2026-08-03-packets.json, returned PASS-WITH-NITS, and Amendment 1, which executed these rows, is not discharged until the close review verifies its nits"
     },
