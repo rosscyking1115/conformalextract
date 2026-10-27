@@ -27,6 +27,12 @@ a dated record — see `docs/release-check-2026-07-28.md` for the check that sur
 > **Resumes when O1, O2 and O3 are discharged and Plan 3 closes on its merits.** Nothing below is
 > withdrawn, and the Plan 4 work already done stands: the gate-state derivation, the privacy review,
 > the link audit, decisions 1–4, and the rejection of the staged-release amendment.
+>
+> **Resumed 2026-10-27.** Both conditions are met: O1–O3 are discharged and Plan 3 closed on its
+> merits ([`../../evidence/plan3/reviewer_record.plan3-close-fresh-delta.json`](../../evidence/plan3/reviewer_record.plan3-close-fresh-delta.json)).
+> The owner override lapsed the same day; Plan 4 is open on its merits
+> ([`../../evidence/gate_state.json`](../../evidence/gate_state.json)). The banner above is kept as
+> the record of the pause.
 
 > ### Known exposure, recorded and deliberately not addressed: unnamed conventions
 >

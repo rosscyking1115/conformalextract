@@ -126,6 +126,11 @@ measured. pytest has not run on Linux since 2026-07-15, because mypy fails first
 
 ## 11. Gate state
 
+> **Updated 2026-10-27, later the same day.** Superseded by the close: Plan 3 closed on an
+> independent fresh close review's delta (PASS-WITH-NITS at `d8d2223`), and Plan 4's owner override
+> lapsed on the owner's instruction (`evidence/gate_state.json`). The paragraph below is the state
+> at the time of the sweep.
+
 [`evidence/gate_state.json`](../evidence/gate_state.json) is the authority: Plan 3 is executed but
 not closed (its close was refused on O1–O3), and Plan 4 is open by owner override and paused. The
 paper's companion states the consequence: nothing may be "submitted, posted, published or quoted

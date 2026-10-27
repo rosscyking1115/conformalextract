@@ -62,11 +62,11 @@ def _reviewer_records() -> list[dict[str, object]]:
 CLOSE_REVIEW_KINDS = frozenset({"plan_close", "plan3_close_fresh", "plan3_close_fresh_delta"})
 
 
-def _closed_plans_from_records() -> set[str]:
+def _closed_plans_from_records(records: list[dict[str, object]] | None = None) -> set[str]:
     """Plans with a passing close record. Mechanism two of the two this repository uses."""
 
     closed: set[str] = set()
-    for record in _reviewer_records():
+    for record in _reviewer_records() if records is None else records:
         if record.get("review_kind") not in CLOSE_REVIEW_KINDS:
             continue
         plan = record.get("plan")
@@ -132,6 +132,12 @@ def test_the_fresh_close_delta_attests_plan_3_closed() -> None:
     assert "Plan 3" in _closed_plans_from_records()
     fresh = _load(ROOT / "evidence" / "plan3" / "reviewer_record.plan3-close-fresh.json")
     assert str(fresh["verdict"]).upper().startswith("BLOCK")
+    # The BLOCK and the 2026-07-29 refusal must not close Plan 3 on their own: without the delta's
+    # PASS, the derivation has to say open.
+    without_delta = [
+        r for r in _reviewer_records() if r.get("review_kind") != "plan3_close_fresh_delta"
+    ]
+    assert "Plan 3" not in _closed_plans_from_records(without_delta)
 
 
 def test_an_override_is_only_declarable_while_the_prior_plan_is_unclosed() -> None:
