@@ -102,9 +102,10 @@ the claim's `limitations` field before citing it.
 
 **Sealed-label discipline held** (`CX-SEALED-01`). Certification opened the sealed split exactly
 once, over 3,152 documents, with a verified hash-chained access record and zero reads of the `final`
-or `shift` splits, which remain sealed. "Zero reads" means no `final` or `shift` document entered the
-access record, scoring or any computed quantity. RAMS keeps text and labels in one record, so the
-archive itself was parsed whole. In the 2026-07-22 artifact those zeros were written as constants
+or `shift` splits, which remain sealed. "Zero reads" means no `final` or `shift` gold entered the
+access record or scoring. It does not mean those records went untouched: RAMS keeps text and labels
+in one record, so the archive itself was parsed whole, and the run also parsed the `final` split's
+predictions against their source text, which uses no gold. In the 2026-07-22 artifact those zeros were written as constants
 rather than counted, and the Plan 3 §3.2 preflight did not run before the read; run afterwards on
 the hash-identical inputs, it passes.
 

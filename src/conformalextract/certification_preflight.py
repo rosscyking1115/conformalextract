@@ -14,6 +14,7 @@ from dataclasses import dataclass
 
 from conformalextract.certification import FROZEN_ACCEPTANCE_FLOOR, FROZEN_ALPHA, FROZEN_DELTA
 from conformalextract.contracts import PredictionRecord, SystemManifest
+from conformalextract.threshold_grid import grid_hash_from_certifiable_thresholds
 
 
 class CertificationPreflightError(ValueError):
@@ -216,6 +217,11 @@ def run_certification_input_preflight(
         ):
             raise CertificationPreflightError(
                 f"{system_id} grid has no committed, unique tie order"
+            )
+        # The declared hash is only evidence if it is the hash of the thresholds certify uses.
+        if grid_hash_from_certifiable_thresholds(system_id, thresholds) != grid.get("grid_hash"):
+            raise CertificationPreflightError(
+                f"{system_id} grid's thresholds do not hash to its declared grid_hash"
             )
 
     # Coverage: every certification document is predicted, identically, by all three systems.

@@ -624,7 +624,6 @@ def certify_command(
     """
 
     import hashlib
-    from collections import Counter
 
     from conformalextract.certification import (
         FROZEN_ACCEPTANCE_FLOOR,
@@ -637,6 +636,7 @@ def certify_command(
         aggregate_to_groups,
         build_certification_access_log,
         certification_artifact,
+        count_gold_reads,
         run_certification,
     )
     from conformalextract.contracts import Argument, EventFrame, Span
@@ -802,14 +802,12 @@ def certify_command(
         acceptance_floor=FROZEN_ACCEPTANCE_FLOOR,
         material_gain=FROZEN_MATERIAL_GAIN,
     )
-    gold_reads_by_role = Counter(roles[document_id][0] for document_id in gold_used)
-    if set(gold_reads_by_role) - {"certification"}:
-        raise RuntimeError(
-            f"gold outside the certification role was used: {dict(gold_reads_by_role)}"
-        )
+    gold_reads_by_role = count_gold_reads(
+        gold_used, roles, expected_documents=access_log.document_count
+    )
     artifact = certification_artifact(
         run,
-        gold_reads_by_role=dict(gold_reads_by_role),
+        gold_reads_by_role=gold_reads_by_role,
         provenance={
             "certification_preflight": {
                 "status": preflight.status,

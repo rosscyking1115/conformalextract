@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 
 import numpy as np
@@ -519,6 +519,37 @@ def run_certification(
     return CertificationRun(
         systems=systems, h1=h1, h2=h2, hypotheses_collapsed=collapsed, access_log=access_log
     )
+
+
+def count_gold_reads(
+    gold_used: Iterable[str],
+    roles: Mapping[str, tuple[str, str]],
+    *,
+    expected_documents: int,
+) -> dict[str, int]:
+    """Count, per split role, the distinct documents whose gold was used. Fail closed.
+
+    ``gold_used`` may repeat a document -- ``certify`` reads each document's gold once per
+    system -- so the count is over distinct ids. Any role other than ``certification``, or a
+    document the role map does not know, raises; so does a certification count different from
+    ``expected_documents``, the access record's own count. ``certify`` filters its inputs to the
+    certification role before scoring, so the zero for every other role holds by construction;
+    this is the check that the construction held, not a second source of the zero.
+    """
+
+    counts: dict[str, int] = {}
+    for document_id in set(gold_used):
+        role = roles.get(document_id, ("unknown", ""))[0]
+        counts[role] = counts.get(role, 0) + 1
+    outside = sorted(set(counts) - {CERTIFICATION_ONLY_ROLE})
+    if outside:
+        raise SealedRoleError(f"gold outside the certification role was used: {counts}")
+    if counts.get(CERTIFICATION_ONLY_ROLE, 0) != expected_documents:
+        raise RuntimeError(
+            f"gold was used for {counts.get(CERTIFICATION_ONLY_ROLE, 0)} certification documents "
+            f"but the access record covers {expected_documents}"
+        )
+    return counts
 
 
 def certification_artifact(

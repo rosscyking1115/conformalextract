@@ -24,10 +24,13 @@ from conformalextract.certification_preflight import (
     run_certification_input_preflight,
 )
 from conformalextract.certification_run import (
+    SealedRoleError,
     build_certification_access_log,
     certification_artifact,
+    count_gold_reads,
     run_certification,
 )
+from conformalextract.threshold_grid import grid_hash_from_certifiable_thresholds
 
 ROOT = Path(__file__).parents[1]
 FROZEN_INPUTS = ROOT / "manifests" / "plan3" / "certification_inputs.json"
@@ -47,18 +50,25 @@ def _frozen() -> dict[str, object]:
             s: {
                 "predictions_sha256": s * 32,
                 "confidence_candidate": {"zs": "mean", "fs": "tenth_percentile", "qa": "mean"}[s],
-                "grid_hash": f"grid-{s}",
+                "grid_hash": _grid_hash(s),
             }
             for s in SYSTEMS
         },
     }
 
 
+THRESHOLDS: list[float | str] = ["-inf", -0.1, -0.05]
+
+
+def _grid_hash(system_id: str) -> str:
+    return grid_hash_from_certifiable_thresholds(system_id, THRESHOLDS)
+
+
 def _grids() -> dict[str, object]:
     return {
         "delta": 0.05 / 3,
         "grids": {
-            s: {"grid_hash": f"grid-{s}", "certifiable_thresholds": ["-inf", -0.1, -0.05]}
+            s: {"grid_hash": _grid_hash(s), "certifiable_thresholds": list(THRESHOLDS)}
             for s in SYSTEMS
         },
     }
@@ -130,6 +140,46 @@ def test_a_grid_that_is_not_the_frozen_one_refuses() -> None:
     grids["grids"]["qa"]["grid_hash"] = "other"  # type: ignore[index]
     with pytest.raises(CertificationPreflightError, match="grid"):
         _preflight(grids=grids)
+
+
+def test_thresholds_that_do_not_hash_to_the_declared_grid_refuse() -> None:
+    """The declared hash matches the frozen one, but the thresholds certify would use do not."""
+    grids = _grids()
+    grids["grids"]["qa"]["certifiable_thresholds"] = ["-inf", -0.2, -0.05]  # type: ignore[index]
+    with pytest.raises(CertificationPreflightError, match="do not hash"):
+        _preflight(grids=grids)
+
+
+def test_the_committed_grids_hash_to_their_declared_hashes() -> None:
+    grids = json.loads((ROOT / "evidence/plan2/threshold_grids.json").read_text(encoding="utf-8"))
+    for s in SYSTEMS:
+        entry = grids["grids"][s]
+        assert grid_hash_from_certifiable_thresholds(s, entry["certifiable_thresholds"]) == (
+            entry["grid_hash"]
+        )
+
+
+# --- B2: counting distinct gold reads ----------------------------------------------------------
+
+
+def test_gold_read_once_per_system_counts_each_document_once() -> None:
+    used = ["c1", "c2"] * 3  # certify reads each document's gold once per system
+    assert count_gold_reads(used, ROLES, expected_documents=2) == {"certification": 2}
+
+
+def test_gold_outside_the_certification_role_refuses() -> None:
+    with pytest.raises(SealedRoleError, match="outside the certification role"):
+        count_gold_reads(["c1", "c2", "f1"], ROLES, expected_documents=2)
+
+
+def test_gold_for_a_document_the_role_map_does_not_know_refuses() -> None:
+    with pytest.raises(SealedRoleError):
+        count_gold_reads(["c1", "c2", "zz"], ROLES, expected_documents=2)
+
+
+def test_a_certification_count_that_differs_from_the_access_record_refuses() -> None:
+    with pytest.raises(RuntimeError, match="access record covers 3"):
+        count_gold_reads(["c1", "c2"], ROLES, expected_documents=3)
 
 
 def test_a_threshold_order_with_duplicates_refuses() -> None:

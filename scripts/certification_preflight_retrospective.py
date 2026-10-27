@@ -12,7 +12,7 @@ group. No prediction text is kept or printed. **The RAMS archive is not opened a
 read**, so no split is touched and the label-access record is unchanged.
 
 **What a pass does not show.** It cannot show the preflight ran on 2026-07-22, because it did not.
-It shows that the inputs, which are hash-identical to the ones the certificate recorded, satisfy
+It shows that the inputs, whose hashes match those frozen in the reviewed §12.1 addendum, satisfy
 the checkable preconditions. The two bullets a run-time check cannot discharge are carried on
 the artifact as ``not_checked_at_run_time``.
 

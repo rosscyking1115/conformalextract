@@ -119,7 +119,19 @@ def build_threshold_grid(
     certifiable.sort(key=lambda candidate: candidate.threshold)
     candidates = (*certifiable, ThresholdCandidate(float("inf"), "abstain_all", False))
 
-    grid_hash = sha256_bytes(
+    grid_hash = _hash_candidates(system_id, candidates)
+    return ThresholdGrid(
+        system_id=system_id,
+        candidates=candidates,
+        grid_hash=grid_hash,
+        requested_grid_size=grid_size,
+        realized_certifiable_size=sum(1 for c in candidates if c.certifiable),
+        non_finite_scores=non_finite,
+    )
+
+
+def _hash_candidates(system_id: str, candidates: Sequence[ThresholdCandidate]) -> str:
+    return sha256_bytes(
         canonical_json_bytes(
             {
                 "system_id": system_id,
@@ -140,11 +152,24 @@ def build_threshold_grid(
             }
         )
     )
-    return ThresholdGrid(
-        system_id=system_id,
-        candidates=candidates,
-        grid_hash=grid_hash,
-        requested_grid_size=grid_size,
-        realized_certifiable_size=sum(1 for c in candidates if c.certifiable),
-        non_finite_scores=non_finite,
-    )
+
+
+def grid_hash_from_certifiable_thresholds(
+    system_id: str, certifiable_thresholds: Sequence[float | str]
+) -> str:
+    """Recompute ``grid_hash`` from a grid's serialized certifiable thresholds.
+
+    Rebuilds the candidate list ``build_threshold_grid`` hashes: ``"-inf"`` is the always-answer
+    candidate, every other entry a quantile, and the non-certifiable abstain-all candidate closes
+    the list. Lets a reader check a committed grid's hash against the thresholds actually used,
+    rather than trusting the ``grid_hash`` field the same file declares.
+    """
+
+    candidates = [
+        ThresholdCandidate(float("-inf"), "always_answer", True)
+        if threshold == "-inf"
+        else ThresholdCandidate(float(threshold), "quantile", True)
+        for threshold in certifiable_thresholds
+    ]
+    candidates.append(ThresholdCandidate(float("inf"), "abstain_all", False))
+    return _hash_candidates(system_id, candidates)
