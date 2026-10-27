@@ -23,7 +23,9 @@ jobs:
         with:
           python-version: "3.12"
           enable-cache: true
-      - run: uv sync --locked --extra dev
+      # Every extra the gates import, in one sync: `--extra dev` alone leaves mypy without
+      # datasketch, transformers and torch, and `uv sync` prunes any extra it is not given.
+      - run: uv sync --locked --extra dev --extra data --extra train
       - run: uv run ruff check .
       - run: uv run mypy
       - run: uv run pytest

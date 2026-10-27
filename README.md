@@ -18,8 +18,8 @@ independent reviewer PASSes the one before it.
 |---|---|---|
 | **Plan 1** (Gate 0) | feasibility, licences, evaluator, statistics, paid smoke tests | **complete** — gates 0A–0F pass, Gate 0 decision `go`, consolidated reviewer PASS 2026-07-17 |
 | **Plan 2** | QLoRA training, prediction generation for three systems | **closed** — independent reviewer PASS 2026-07-21 (`evidence/plan2/reviewer_record.plan2-close.json`) |
-| **Plan 3** | certification against the sealed split | **executed and independently reviewed; not formally closed** — no Plan 3 close record exists |
-| **Plan 4** | verification, public release, write-up | **not started** — Plan 3 has no close record, so this gate has not opened |
+| **Plan 3** | certification against the sealed split | **executed and independently reviewed; close refused** — the close review ([`reviewer_record.plan3-close.json`](evidence/plan3/reviewer_record.plan3-close.json)) refused on findings O1–O3; the repairs are partly applied and none is yet independently reviewed |
+| **Plan 4** | verification, public release, write-up | **opened by owner override on 2026-07-29, then paused** — Plan 3 has not closed, so this gate has not opened on its merits ([`evidence/gate_state.json`](evidence/gate_state.json)) |
 
 Plan 3's certification ran once, on 2026-07-22, and returned infeasibility for all three systems.
 `evaluate-final` and `evaluate-shift` are descoped ([ADR 0010](docs/adr/0010-descope-final-and-shift.md))
@@ -28,8 +28,10 @@ re-analysis ([ADR 0011](docs/adr/0011-reanalysis-frontier-and-loss-channels.md))
 four independent passes, opening at BLOCK and closing with the publication condition lifted and no
 blocking items.
 
-The write-up is at first draft ([`docs/writeup/draft-2026-07-28.md`](docs/writeup/draft-2026-07-28.md)),
-independently reviewed. No venue is chosen and nothing is formatted for one. What it may claim is
+The paper is a draft, [`docs/writeup/uncertainlp-2026-short.tex`](docs/writeup/uncertainlp-2026-short.tex),
+in preparation for UncertaiNLP 2026 and not submitted; its status and the review steps that still
+gate it are in [`uncertainlp-2026-short.md`](docs/writeup/uncertainlp-2026-short.md). The first draft
+([`draft-2026-07-28.md`](docs/writeup/draft-2026-07-28.md)) is kept as a record. What it may claim is
 fixed by the list in [`docs/plan3/certification-result.md`](docs/plan3/certification-result.md)
 ("What may and may not be claimed"), and that list is narrower than the results might suggest.
 
