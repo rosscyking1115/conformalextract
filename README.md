@@ -57,14 +57,16 @@ uv run conformalextract verify-claims
 uv run python scripts/check_paper_claims.py
 ```
 
-`verify-claims` checks that every claim's cited evidence exists and is tracked in git. It does not
+`verify-claims` checks that every claim's cited evidence exists and is tracked in git, and that no
+planned claim, or claim without limitations, sits on a public surface. It does not
 open those files or compare any number, so passing it means the paths resolve, not that the claims
 are right. `check_paper_claims.py` checks that each figure in the paper draft traces to a committed
 artifact carrying that value and its configuration.
 
 Running the pipeline itself (`uv run conformalextract --help`) needs RAMS, which this repository does
 not redistribute; its terms are in [`docs/gate0/licences/rams.md`](docs/gate0/licences/rams.md). GPU
-training and inference ran as Hugging Face Jobs, and the `train` extra installs only on Linux.
+training and inference ran as Hugging Face Jobs, and the `train` extra's 4-bit dependency
+(bitsandbytes) installs only on Linux.
 
 ## Results
 
@@ -150,7 +152,7 @@ Limitations:
 | [`docs/adr/`](docs/adr/) | One decision record per material decision |
 | [`docs/domain-glossary.md`](docs/domain-glossary.md) | Definitions of the terms used here |
 | [`src/conformalextract/`](src/conformalextract/) | The package: data roles, parsing, scoring, the certifier and the claim checks |
-| [`tests/`](tests/) | The test suite, including the checks that keep prose in line with the ledger |
+| [`tests/`](tests/) | The test suite, including the checks that keep the generated claims appendix and the paper's figures in line with the ledger |
 
 Raw RAMS and WikiEvents text, held-out labels, model checkpoints, credentials and predictions from
 which the text could be recovered are never committed. [`SECURITY.md`](SECURITY.md) covers data
@@ -165,7 +167,7 @@ Its status, where each external number came from, and the remaining work are in
 
 ## Related work
 
-The certification method follows conformal risk control
+The certification is a form of distribution-free risk control
 ([Angelopoulos et al., 2024](https://arxiv.org/abs/2208.02814)). The closest prior work,
 [Kotte (2026)](https://arxiv.org/abs/2606.29054), asks when conformal risk control can certify
 language-model outputs for structured generation. This project puts that question to event-argument

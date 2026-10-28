@@ -6,7 +6,7 @@ README could start with what the project is. The authority for gate state is
 [`evidence/gate_state.json`](../evidence/gate_state.json); if this page and that file disagree, the
 file wins.
 
-Contributor and agent rules (approvals, review gates, spend) are in
+Contributor and agent rules — approvals, review gates, spend — are in
 [`CONTRIBUTING.md`](../CONTRIBUTING.md) and [`AGENTS.md`](../AGENTS.md). The review standard is
 [`REVIEW.md`](../REVIEW.md).
 
@@ -87,5 +87,5 @@ than described.
 Typing and tests are strict: **`mypy` runs with `strict = true`** over the package (which ships
 `py.typed`), `ruff` is clean, and **the suite is green — total not asserted.** It previously read
 "the suite is 349 tests, all passing"; that figure was stale and, being a count nothing re-checks,
-it is the same defect class as an unverified claim. Run the commands below and read your own
+it is the same defect class as an unverified claim. Run the commands in the README's [Quick start](../README.md#quick-start) and read your own
 number. The green command must pass before any hand-off.

@@ -120,6 +120,11 @@ ALLOWED: dict[str, str] = {
         "reviews that live outside this repository, and naming where they live is how it states "
         "what it read. Same mention-not-use ground as the sibling reviewer records above."
     ),
+    "evidence/plan4/reviewer_record.readme-public-rewrite.json": (
+        "A 2026-10-28 independent record filed verbatim. Its external_signal names the patterns "
+        "its hygiene scan searched for, which is how it states what it checked. Same "
+        "mention-not-use ground as the sibling reviewer records above."
+    ),
 }
 # `REVIEW.md` was on this list on first writing, pre-emptively, and the stale-exception test below
 # rejected it before the change was committed: the gate there is written descriptively and quotes
