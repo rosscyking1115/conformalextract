@@ -75,17 +75,31 @@ def _referenced_identifiers() -> dict[str, set[str]]:
 #: to match what was built. If one of these legitimately gains an amendment, update the hash in
 #: the same commit and say why in the message.
 ACCEPTED_PLAN_SHA256 = {
+    # Amended 2026-10-27 with a dated note under the strict-document-failure sentence recording that
+    # its definition was never frozen before calibration (Plan 3 disposition Amendment 2). The
+    # sentence is preserved above the note. Pin moved in the same commit; previous digest afb55e4c…
     "docs/gate0/accepted-plan.md": (
-        "afb55e4c89300cdb2559587e29b43601a13c30b1638049918691a6ed509ac6fe"
+        "7bf43a6d6c4eb19a570319aeace2c3d268084a63f42a0e7d64e076bcadc64883"
     ),
     "docs/plan2/accepted-plan.md": (
         "a6b4c69fad14cd56c866cbd204b9312aefb1a4fe578bb437af8cd5e3ac97fdbf"
     ),
+    # Amended 2026-08-02 with a dated scope-amendment note under §12.1, pointing at the
+    # independently reviewed 2026-07-30 certification-only addendum. The original sentence and its
+    # eleven-category list are preserved above the note. Pin moved in the same commit, as the rule
+    # above requires; previous digest 83313d47…
+    # Amended again 2026-10-27 with dated notes under §12.1 (descoped), §12.2 (disposed) and the §22
+    # checklist (taxonomy/audit half waived), all pointing at disposition Amendment 2. The text
+    # above each note is unchanged. Pin moved in the same commit; previous digest 34bc6b4d…
     "docs/plan3/accepted-plan.md": (
-        "83313d47ec2a9869dcc580bda8cc543a606b5a894be269c9fdd6a229308a07e9"
+        "560eee3d08d18d212ae2286f07b1c1528c66b27f83c5468aa40d804fb912fa0b"
     ),
+    # Amended 2026-07-29 with a dated note reconciling its inherited-status line against the
+    # records (Plan 1 complete, Plan 2 closed, Plan 3 executed but not formally closed). The
+    # original paragraph is preserved above the note. Pin moved in the same commit, as the rule
+    # above requires; previous digest bdad3b4f…
     "docs/plan4/accepted-plan.md": (
-        "bdad3b4fcb2879d0c13499e4f6eded99e5f33269598e96776090c775bd35d2b1"
+        "c8c2414066c309f60ab16036510c07d36bde93a3938a11ee1b444fc52596bf94"
     ),
 }
 
@@ -120,6 +134,52 @@ def test_every_accepted_plan_on_disk_is_pinned() -> None:
         for path in ROOT.joinpath("docs").rglob("accepted-plan.md")
     }
     assert on_disk == set(ACCEPTED_PLAN_SHA256)
+
+
+#: Documents admitted byte-for-byte from an out-of-repo reviewed artifact, where hash equality with
+#: that artifact IS the document's authority. Deliberately a SEPARATE dict from the accepted-plan
+#: pins above: those are set-checked against `docs/**/accepted-plan.md` by the test above, so an
+#: entry of this kind added there would fail it.
+#:
+#: Why a stored constant is the right instrument here, when the standing rule in REVIEW.md prefers a
+#: cross-check against a second source of truth: that rule targets a bound with SLACK in it, and it
+#: warns against a constant that must be hand-edited whenever the guarded thing legitimately
+#: changes. Neither applies. SHA-256 has no slack, and these files can never legitimately change --
+#: an amendment would be a NEW dated document, not an edit to this one. Nothing inside this
+#: repository can tie these bytes to the review that approved them, because that review lives
+#: outside it; the transcribed digest is the only available link, which is exactly the case a pin is
+#: for. `tests/test_internal_paths.py` grants this file an exemption whose stated reason is its
+#: byte-fidelity, so without this pin that reason would be asserted and unenforced.
+FROZEN_DOCUMENT_SHA256 = {
+    # The Plan 3 §12.1 certification-only scope addendum, independently PASSed 2026-07-30 and
+    # admitted unchanged. Its authority record is
+    # evidence/plan3/reviewer_record.s12-1-certification-scope-addendum.json.
+    "docs/plan3/section-12-1-certification-only-scope-addendum-2026-07-30.md": (
+        "5be8b8cf164a5ad58a54335ce3b829e6b250433b2c47e871763c177a8730fcf7"
+    ),
+}
+
+
+@pytest.mark.parametrize("relative_path", sorted(FROZEN_DOCUMENT_SHA256))
+def test_the_frozen_documents_are_byte_identical(relative_path: str) -> None:
+    """A frozen document whose bytes drift has lost the only authority it had."""
+
+    import hashlib
+    import subprocess
+
+    completed = subprocess.run(
+        ["git", "show", f"HEAD:{relative_path}"],
+        cwd=ROOT,
+        capture_output=True,
+        check=False,
+    )
+    if completed.returncode != 0:  # pragma: no cover - only outside a git checkout
+        pytest.skip(f"{relative_path} is not retrievable from git")
+    digest = hashlib.sha256(completed.stdout).hexdigest()
+    assert digest == FROZEN_DOCUMENT_SHA256[relative_path], (
+        f"{relative_path} no longer matches the reviewed artifact it was admitted as. It is "
+        f"byte-frozen: correct it back, or admit a new dated document and pin that instead."
+    )
 
 
 def test_the_scan_finds_something_to_check() -> None:

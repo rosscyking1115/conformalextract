@@ -1,0 +1,135 @@
+{
+  "acceptance_lower_bound_by_allocation": {
+    "frozen_run_three_candidates_delta_over_three": {
+      "acceptance_lower_bound": 0.19839010681283342,
+      "candidate_count": 3,
+      "clears_acceptance_floor": false,
+      "clopper_pearson_tail_mass": 0.00034722222222222224,
+      "delta": 0.016666666666666666,
+      "k_at_oracle_prefix": 329,
+      "margin_in_groups": -3,
+      "n": 1396,
+      "note": "THE FROZEN CONFIGURATION, per evidence/plan3/certification_result.json: three systems share delta so each gets delta/3, and each grid holds three candidates. Both divisions apply.",
+      "smallest_k_clearing_floor": 332
+    },
+    "single_candidate_full_delta": {
+      "acceptance_lower_bound": 0.20531511986135473,
+      "candidate_count": 1,
+      "clears_acceptance_floor": true,
+      "clopper_pearson_tail_mass": 0.003125,
+      "delta": 0.05,
+      "k_at_oracle_prefix": 329,
+      "margin_in_groups": 7,
+      "n": 1396,
+      "note": "What scorc_certificate itself prints for a one-candidate verification run. Correct FOR THAT RUN and for nothing else.",
+      "smallest_k_clearing_floor": 322
+    },
+    "three_candidates_full_delta": {
+      "acceptance_lower_bound": 0.20167926427979826,
+      "candidate_count": 3,
+      "clears_acceptance_floor": true,
+      "clopper_pearson_tail_mass": 0.0010416666666666667,
+      "delta": 0.05,
+      "k_at_oracle_prefix": 329,
+      "margin_in_groups": 2,
+      "n": 1396,
+      "note": "NOT a configuration this project ever ran. Recorded because a draft quoted its value, 0.2017, while naming the frozen allocation. It omits the per-system delta/3 division.",
+      "smallest_k_clearing_floor": 327
+    }
+  },
+  "auroc_interval": {
+    "ci_lower": 0.7374392161215406,
+    "ci_upper": 0.8498721320060747,
+    "indicator": "any_error",
+    "non_failing_groups": 90,
+    "point": 0.7964072367298174,
+    "resamples": 10000,
+    "scored_groups": 1392,
+    "seed": 20260802
+  },
+  "certification_access": {
+    "certification_gold_read": true,
+    "documents_read": 3152,
+    "final_reads": 0,
+    "head_hash": "ff5562419c7ddd543e06fdf656114a26cf79cdbf12063e906002b1024b423d9f",
+    "shift_reads": 0,
+    "verified": true
+  },
+  "certifies_nothing": true,
+  "diagnostic_only": true,
+  "empirical_bernstein_probe": {
+    "candidate_count": 1,
+    "construction": "scorc_certificate, one pre-chosen oracle candidate, no multiplicity",
+    "delta": 0.05,
+    "results": [
+      {
+        "acceptance_lower": 0.07886054973616317,
+        "coverage": 0.0995702005730659,
+        "feasible": false,
+        "k": 139,
+        "reasons": [
+          "no_jointly_feasible_candidate"
+        ],
+        "status": "infeasible"
+      },
+      {
+        "acceptance_lower": 0.17142680797245355,
+        "coverage": 0.1998567335243553,
+        "feasible": false,
+        "k": 279,
+        "reasons": [
+          "no_jointly_feasible_candidate"
+        ],
+        "status": "infeasible"
+      },
+      {
+        "acceptance_lower": 0.20531511986135473,
+        "coverage": 0.2356733524355301,
+        "feasible": false,
+        "k": 329,
+        "reasons": [
+          "no_jointly_feasible_candidate"
+        ],
+        "status": "infeasible"
+      },
+      {
+        "acceptance_lower": 0.36465115398942793,
+        "coverage": 0.4004297994269341,
+        "feasible": false,
+        "k": 559,
+        "reasons": [
+          "no_jointly_feasible_candidate"
+        ],
+        "status": "infeasible"
+      }
+    ]
+  },
+  "frozen": {
+    "acceptance_floor": 0.2,
+    "alpha": 0.2,
+    "candidates_per_system": 3,
+    "delta": 0.05,
+    "systems": 3
+  },
+  "grid_capacity": {
+    "delta_allocation": 0.016666666666666666,
+    "largest_grid_at_rows": 3,
+    "note": "The frozen three-candidate grid is the largest this corpus admits at delta/3: a fourth candidate requires more groups than the split holds. This states 'at the edge' without expressing it as a margin in groups, which the row/scorable distinction makes ambiguous.",
+    "required_n_by_candidate_count": {
+      "1": 1210,
+      "2": 1321,
+      "3": 1386,
+      "4": 1432,
+      "9": 1562
+    }
+  },
+  "interpretation": "Sensitivity quantities the write-up quotes, each stamped with the configuration that produced it. Written because claims.verify_ledger checks only that a claim's cited evidence paths exist and are tracked - it never opens the file, compares a number, or sees a configuration - so a prose figure computed at the wrong allocation passes the publication gate unchanged. That is how an acceptance lower bound of 0.2017 was quoted against the frozen allocation, which gives 0.198390 and does NOT clear the floor. Every figure here names its delta, its allocation, its candidate count and its n. Nothing here selects a threshold or certifies anything.",
+  "population": {
+    "eligible_all_valid_and_finite": 1266,
+    "note": "The precondition is checked against the ROW COUNT. Unscorable groups remain rows, so n stays at rows_passed_to_certifier however many of them cannot be ranked.",
+    "rows_passed_to_certifier": 1396,
+    "scorable_finite_score": 1392,
+    "unscorable_groups": 4
+  },
+  "schema_version": "1"
+}

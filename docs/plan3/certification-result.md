@@ -27,7 +27,28 @@ The conservative Bonferroni audit (Construction B) agrees: infeasible for all th
 the closest any system came — 296 groups accepted, acceptance LCB 0.1825 (just under the 0.20
 floor) with risk UCB 0.5157 (far over α = 0.20).
 
-## The failure is a capability gap, not a methodological artifact
+## Two separable causes: a score that cannot rank, and a corpus that halves the target
+
+> **Narrowed 2026-08-03.** This section was headed "The failure is a capability gap, not a
+> methodological artifact", and the section below establishes only half of that. The oracle
+> diagnostic is penalty-free — which is exactly what makes it clean evidence about the *score*, and
+> exactly what blinds it to the finite-sample penalty. The penalty is a second barrier, on the
+> method-and-benchmark side, and it forbids a certificate here that the empirical curve permits: at
+> n = 1,396 with δ/3 a Hoeffding bound (a diagnostic pairing of neither certifier; see below)
+> spends **0.0925** of the 0.20 risk budget before any data is seen, so passing the *risk test*
+> at the acceptance floor requires mean loss ≤ **0.1075** under that bound. Attributing both causes to capability ran
+> in the flattering direction, and it cost the repository a benchmark finding by folding it into a
+> task finding. The numbers below are unchanged; the heading and the attribution are not. See
+> `CX-CAPGAP-01` and the second sub-section added below.
+>
+> **Corrected 2026-10-27** on independent review (`../../evidence/plan3/reviewer_record.c1-2026-08-03-packets.json`, claim-narrowing B1/B2). This
+> note said "the certifier's Hoeffding bound" and that "a certificate at the acceptance floor
+> requires" mean loss ≤ 0.1075 "whoever produced it". The bound is a diagnostic pairing, and
+> 0.1075 is what the risk test under it requires at exactly the floor, not what every
+> certificate requires: under the primary empirical-Bernstein test the requirement depends on
+> the loss distribution. No number moved.
+
+### Cause 1 — the score cannot rank (capability, this model and task)
 
 This is the important question, and the answer is unambiguous. Reproduce with:
 
@@ -61,6 +82,59 @@ So the infeasibility is **not** caused by:
 The confidence score simply cannot isolate a 20%-sized subset of documents on which the model is
 80% correct. At 20% acceptance QA's error is 0.405 — **twice the target**.
 
+### Cause 2 — the corpus halves the risk target under this δ/3 allocation (method and benchmark)
+
+*Added 2026-08-03. Nothing above is retracted; this is the barrier the diagnostic above cannot see.*
+*Corrected 2026-10-27: the heading said "for every system" without its allocation, and the
+second table row said what "an accepted set may carry"; both are scoped to the Hoeffding
+diagnostic at δ/3.*
+
+The oracle curve carries no δ, which is what makes it clean evidence about the score. A certificate
+does carry δ, and at this corpus size the penalty is not a rounding term:
+
+| Quantity | Value | Configuration |
+|---|---|---|
+| Hoeffding penalty at the floor | **0.0925** | n = 1,396, k = 280, δ/3 = 0.016667 |
+| mean loss the risk test allows at the floor, under that bound | **≤ 0.1075** | α = 0.20 less the penalty |
+| certified acceptance, loss-optimal ranking | **0.1139** | δ/3; below the 0.20 floor |
+| acceptance lower bound, oracle prefix | **0.1984** | frozen allocation, 3 candidates, δ/3 |
+| largest admissible grid | **3 candidates** | δ/3 at n = 1,396; a fourth needs 1,432 |
+
+Read together: **the benchmark spends nearly half the nominal risk budget on the finite-sample
+penalty before any system is evaluated.** That is a property of n and the δ allocation and holds
+whoever produced the outputs. For this model it is decisive independently of the score, because the
+loss-optimal ranking weakly dominates every score-induced ordering at every prefix length and so
+upper-bounds what **any** score could certify — and under a Hoeffding bound at δ/3 it certifies
+0.1139, while under the primary certifier it certifies nothing, since its 332 best groups already
+average 0.2012 loss *(construction named 2026-10-27)*.
+
+**This is not the claim that no model could be certified on this corpus,** and it must not be
+written that way. A system whose accepted 20% carried mean loss ≤ 0.1075 would clear **the risk
+test** at n = 1,396 and δ/3 — **and would still not be certified**, because a certificate must also
+clear the acceptance floor on its Clopper–Pearson *lower* bound, which 20% coverage does not: the
+frozen construction needs **332** accepted groups, not 280. Clearing one of two constraints is not
+a counter-example to infeasibility, and quoting it as one would repeat the error this section
+exists to correct. What is established is that, under that Hoeffding diagnostic, the effective *risk* target here is
+roughly half the nominal one, and that this model clears neither constraint.
+
+**Which artifact carries which figure**, because an earlier version of this sentence said the
+sensitivity artifact stamped all five and it stamped two:
+
+| Figure | Artifact |
+|---|---|
+| 0.0925, ≤ 0.1075, k = 280 | [`derived_quantities.json`](../../evidence/plan3/derived_quantities.json) |
+| 0.1139 | [`calibration_diagnostics.json`](../../evidence/plan3/calibration_diagnostics.json) |
+| 0.1984, 3 candidates | [`certification_sensitivity.json`](../../evidence/plan3/certification_sensitivity.json) |
+
+**Name the construction, because "the certifier's bound" is not what produced 0.0925.** It is a
+Hoeffding radius at the per-system δ/3 allocation, which is a *diagnostic* pairing: the primary
+certificate's risk test is an **empirical Bernstein** bound, and the conservative audit ran
+Hoeffding with a **single candidate at the full δ** (`certification_result.json`,
+`systems.*.conservative_audit`: `candidate_count: 1`, `delta: 0.05`). So 0.0925 is neither
+construction's own number. It is the right figure for the question "what does a Hoeffding bound
+spend at this n and this allocation", and it must not be read as what either certifier applied.
+This section selects no threshold and certifies nothing.
+
 ## What this means, stated honestly
 
 **QLoRA produced a large, real improvement that did not reach the certification bar.** Plan 2
@@ -70,7 +144,12 @@ survives. It is simply not sufficient for a *certified selective* guarantee at t
 well-formed and grounded is a much weaker property than being *correct*, and the certificate
 scores correctness.
 
-### Grounding and certifiability are orthogonal here — measured, not asserted
+### Grounding improved sharply and certifiability not at all — measured, not asserted
+
+> **Narrowed 2026-08-02.** This section was headed "Grounding and certifiability are orthogonal
+> here". One intervention observed across three systems cannot establish that two properties are
+> independent, and "orthogonal" asserted exactly that. What is measured is a **dissociation**: a
+> large gain in the first produced almost none in the second. The numbers below are unchanged.
 
 That last sentence was an interpretation when this document was first written. It is now a
 measurement: `uv run conformalextract loss-decomposition` →
@@ -87,10 +166,40 @@ table above, so this decomposes the certificate itself rather than a proxy for i
 | mean loss *within* the content-bearing channel | **0.579** | 0.947 | 0.986 |
 | group-level loss contributed by that channel | **0.530** / 0.607 | 0.354 / 0.958 | 0.404 / 0.992 |
 
-The 16× grounding separation lives in the first three rows. The certificate scores the fourth.
-**87% of QA's remaining loss (0.530 of 0.607) is grounded, well-formed, content-bearing output
-that is simply wrong** — the coreference and entity-selection errors ADR 0007 catalogued
-(`victim = "she"` for `"Mrs. Clinton"`).
+The ~16× separation in ungrounded spans lives in the first three rows. The certificate scores the
+fourth. **87% of QA's remaining loss (0.530 of 0.607) is grounded, well-formed, content-bearing
+output that is simply wrong.**
+
+> **Corrected 2026-07-29.** That sentence continued "— the coreference and entity-selection errors
+> ADR 0007 catalogued (`victim = "she"` for `"Mrs. Clinton"`)". The appositive attributed the 87% to
+> two named §12.1 error categories on the strength of an unquantified inspection of two development
+> examples, which §12.3 forbids. It was a **stronger** form of the attribution withdrawn from
+> `CX-GROUNDING-ORTHOGONAL-01` the same day, and it survived that correction because the search was
+> for the retired phrasing and this is a paraphrase — the O2 mechanism reappearing inside the fix
+> for O2.
+>
+> **The decomposition locates loss by channel and identifies no error category.** Two separate
+> measurements point elsewhere, and they must not be run together — an earlier version of this note
+> conflated them and stated a falsehood as a result.
+>
+> **Signature one, the excess.** False positives exceed false negatives by 637 arguments (4,434
+> against 3,797): the system predicts more arguments than the gold contains. Both baselines run the
+> other way, so it is QA-specific rather than a metric artefact. Note what this signature *cannot*
+> show: `fp = predictions − tp` and `fn = gold − tp`, so `fp − fn = predictions − gold` identically,
+> and **a substitution — wrong role, wrong boundary, wrong entity via coreference — produces one
+> false positive and one false negative and contributes exactly zero.** The 637 is over-generation
+> and nothing else.
+>
+> **Signature two, the co-occurrence.** 2,003 of 2,515 error-bearing documents show both a false
+> positive and a false negative, which *is* consistent with substitution and rules out "mostly
+> missing arguments". Wrong-role, boundary and coreference errors share **this** signature — not the
+> one above.
+>
+> §12.1's machine-coded taxonomy is what would separate them. It was ruled for execution
+> ([`sections-11-and-12-disposition.md`](sections-11-and-12-disposition.md)), never ran, and was
+> **descoped from Plan 3 on 2026-10-27** ([Amendment 2](sections-11-and-12-disposition-amendment-2.md)): no live claim depends on it
+> since O2 was narrowed, so **no error-category claim is made.** (This sentence previously
+> ended "is ruled for execution … but has not been run"; updated 2026-10-27.)
 
 The counterfactual states it directly. Give each system a **grounding oracle** — drop every
 document outside the content-bearing channel, so the system is scored as though it never emitted
@@ -119,12 +228,33 @@ reaches the floor for them. QA sits below the ceiling at 0.582, so for QA the ce
 and the measured curve is what leaves it short. Both readings are recorded as
 `excluded_by_ceiling` and `groups_worsened_by_restriction` in the artifact.
 
-So the QLoRA adapter's principal learned behaviour — grounding fidelity — is **orthogonal to the
-property the certificate measures**. A 16× grounding gain bought no certifiable coverage. This is
-the finding that does not appear in the prior work: 2606.29054 tests neither event-argument
-extraction nor the grounding/correctness distinction. Its one extraction task (JSON-Extract,
-μ = 0.033) is a much easier regime than this one — a different task under a different metric, so
-the comparison marks out a new operating regime rather than contradicting their measurement.
+So the QLoRA adapter's principal learned behaviour — grounding fidelity — **did not make low-risk
+documents identifiable by the confidence score the certificate uses**. A 16× grounding gain left
+certified acceptance where it was. This is the finding that does not appear in the prior work:
+2606.29054 tests neither event-argument extraction nor the grounding/correctness distinction. Its
+one extraction task (JSON-Extract, μ = 0.033) is a much easier regime than this one — a different
+task under a different metric, so the comparison marks out a new operating regime rather than
+contradicting their measurement.
+
+**This is a dissociation, not an orthogonality result, and the difference is not pedantic.**
+Orthogonality asserts independence, which one intervention across three systems cannot establish
+and which nothing here tested. The measured statement is narrower and is all the evidence carries:
+the gain in grounding was large and the change in certifiability was not.
+
+**Nor is it a task-wide impossibility.** On the datasets 2606.29054 reports,
+`(μ−α)/(1−α)` **forbids nothing** at μ = 0.033 and permits up to 80.5% acceptance at μ = 0.356
+(`docs/frontier-check/findings.md`, re-verified 2026-07-22), so a 20% target is **not excluded** on
+structured extraction at those base risks.
+
+> **Corrected 2026-08-02 (review finding F1).** This paragraph said "demonstrably reachable". It is
+> not: the impossibility bound is a **necessary** condition, and not being forbidden by it is not
+> achievability — the same ruling-in direction this document forbids for the 0.406 frontier point
+> three sections above. 2606.29054 in fact reports certification becoming practical only at
+> α = 0.30–0.40 on its own tasks. "Not excluded" is what the evidence carries.
+
+What is established here is that **this** model with **this** score on **this** task could not —
+a model-and-score-specific result, not a statement about the task or the field. Any sentence that
+reads otherwise is an overclaim of the kind finding O2 was raised about.
 
 Caveats that travel with this: conditional coverage under the grounding oracle is **not** a
 deployable acceptance rate — the restricted population differs per system, so those numbers are
@@ -196,11 +326,17 @@ reported as two independent confirmatory comparisons. There is one finding, not 
   (`uv run conformalextract alpha-frontier`, ADR 0011) reports the oracle risk–coverage curve
   read at every α, and no certificate is issued at any of them.
 
-  | System | α at which the 20% floor first becomes oracle-reachable (certification split) |
+  | System | **empirical oracle frontier point** — α at which the 20% floor first becomes oracle-reachable (certification split) |
   |---|---|
   | **QA** | **0.406** |
   | FS | 0.930 |
   | ZS | 0.981 |
+
+  **These are empirical oracle frontier points, not thresholds.** They were computed *after* the
+  certification split was opened, from that split's own labels, so each describes where this
+  measured population's curve crosses the floor and nothing more. No threshold was selected at
+  0.406 or anywhere else, and no certificate was issued at any of them. Calling 0.406 a threshold
+  would imply a certificate that does not exist.
 
   Read that as the answer to "you picked the one α where it fails": you did not need to pick.
   The curve is an oracle **upper** bound on what any threshold rule could achieve, so below
@@ -226,13 +362,32 @@ reported as two independent confirmatory comparisons. There is one finding, not 
   guarantee**, because well-formed-and-grounded is a much weaker property than correct, and the
   certificate scores correctness.
 - **One** finding, not two (H1/H2 collapsed).
-- The oracle risk–coverage diagnostic, as evidence the failure is capability rather than method.
+- The oracle risk–coverage diagnostic, as evidence the failure is **not an artifact of the grid or
+  the bounds** — and, from 2026-08-03, only that. It is penalty-free, so it is silent on the
+  finite-sample penalty and may not be cited as evidence that the failure is capability rather than
+  method. Both causes must travel together: the score cannot rank (2.0% against a 23.6% oracle) and
+  the corpus halves the risk test's target under a Hoeffding bound (0.0925 of the 0.20 budget
+  spent on the penalty at n = 1,396, δ/3).
 - **(ADR 0011)** The α-frontier, stated as: below α ≈ 0.406 no certificate at any threshold could
   have cleared the 20% floor for the best system. It is an oracle upper bound and may only be used
-  in that ruling-out direction — never to suggest what *would* certify above it.
-- **(ADR 0011)** Grounding ⊥ certifiability: a ~16× grounding gain moved the certifiable frontier
-  by +0.017 for QA and by 0.000 for both baselines, with 87% of QA's residual loss in grounded,
-  content-bearing output. Reported with the restricted-population caveat attached.
+  in that ruling-out direction — never to suggest what *would* certify above it. 0.406 is an
+  **empirical oracle frontier point, never a threshold**.
+- **(ADR 0011)** The grounding **dissociation**: a ~16× grounding gain moved the certifiable
+  frontier by +0.017 for QA and by 0.000 for both baselines, with 87% of QA's residual loss in
+  grounded, content-bearing output. Reported with the restricted-population caveat attached.
+- That the null is **model-and-score-specific**: a 20% target is **not excluded** on structured
+  extraction at the base risks prior work reports (μ = 0.033, μ = 0.356). **What put it out of
+  reach here is not μ alone** — at μ = 0.6071 the bound still permits 49.1% acceptance, far above
+  the floor. Infeasibility here is **overdetermined**, and all three parts must be stated together:
+  (i) base risk, which alone forbids the floor for ZS and FS but *not* for QA; (ii) **ranking** —
+  the score reached 2.0% where a perfect ranking of the same population reaches 23.6%; and
+  (iii) the **finite-sample penalty** — that same perfect ranking certifies only 11.4% at δ/3
+  (8.4% family-wide), still below the floor, and the measured score certifies 0.0%.
+
+  > **Corrected 2026-08-02 (review finding F1).** This bullet read "this system's μ = 0.6071 is
+  > what put it out of reach here". That is false on this repository's own bound and re-commits
+  > exactly the base-risk-as-forecast error `CX-FEASIBILITY-LESSON-01` exists to record — the
+  > ceiling bounds what an ORACLE score could do and is not a forecast of certifiability.
 
 **Forbidden — in both directions:**
 
@@ -243,6 +398,12 @@ reported as two independent confirmatory comparisons. There is one finding, not 
 | Generalising past the frozen vLLM 4-bit stack (86.3% parity) or past in-domain RAMS | Calling grounding validity "accuracy" |
 | Presenting the α-frontier or the grounding oracle as a certificate — both are oracle diagnostics that select no threshold | Quoting grounding-oracle coverage as a deployable acceptance rate, or comparing it across systems |
 | Claiming we discovered that CRC cannot certify extraction — that is 2606.29054's result, not ours | Claiming μ ≈ 0.60 replicates their extraction base risk, or that it refutes it — their JSON-Extract 0.033 is a different task under a different metric, so ours marks out a harder regime and settles nothing about their number |
+| Any **task-wide or field-wide** impossibility reading. α ≤ 0.20 is **not excluded** on structured extraction at the base risks prior work reports — not the same as reachable — and this is a model-and-score-specific result *(added 2026-08-02; "is reachable" corrected to "not excluded" 2026-08-03, finding F1)* | — |
+| Calling **0.406** a threshold, a certified operating point, or anything other than an empirical oracle frontier point measured on an already-opened split *(added 2026-08-02)* | — |
+| Describing grounding and certifiability as **orthogonal**, **independent**, or **unrelated**. The measured relation is a dissociation; independence was never tested *(added 2026-08-02)* | — |
+| Attributing the null to base risk **alone**. At μ = 0.6071 the bound permits 49.1%; infeasibility is overdetermined by base risk, ranking AND the finite-sample penalty — **and stating the conjunction without its qualifier is the opposite error**: the three are *not* all active on every system, base risk settles ZS and FS outright and does **not** forbid the floor for QA *(added 2026-08-02; qualifier added 2026-08-03, the ninth surface of that correction)* | — |
+| Attributing the whole infeasibility to **capability**. Only the ranking half is that; the finite-sample penalty is a property of n and the δ allocation and holds for any system. The oracle risk–coverage diagnostic is penalty-free and rules out the grid and the bounds, **not** the penalty *(added 2026-08-03. This is the enumeration of forbidden readings, so the ruling belongs here and not only in the permitted-claims bullet above)* | — |
+| Reading the **empirical** oracle acceptance (0.2357) as something that could have been certified, or saying the floor "was reachable". Certified, that oracle is 0.1139 at δ/3 — below the floor. Only `acceptance_certified_loss_optimal` licenses the word "certified" *(added 2026-08-02)* | — |
 
 ## Status
 

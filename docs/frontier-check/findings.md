@@ -166,7 +166,7 @@ Actioned in this repo now (no spend, no approval needed): findings recorded here
 | https://arxiv.org/abs/2208.02814 | Conformal Risk Control — monotone bounded-loss E[L]≤α, tight O(1/n) | 2026-07-18 | yes |
 | https://arxiv.org/html/2606.08517v1 | Joint finite-sample certificate (PRIMARY): EB ratio + CP + 2 Chernoff + utility; n≥32log(32m/δ)/π_min; argmax-U_LCB | 2026-07-18 | yes |
 | https://arxiv.org/html/2604.01502v2 | Non-monotone CRC: union+Hoeffding grid, α'=α−D(m,n) — formalizes the conservative audit | 2026-07-18 | yes |
-| https://arxiv.org/html/2606.29054v1 | When Can CRC Certify LLM Outputs — impossibility bound (μ−α)/(1−α); Table 3 per-dataset μ (NER 0.356/0.540/0.480, QA 0.441/0.804, MMLU 0.516/0.333, **JSON-Extract 0.033**); no EAE/RAMS/WikiEvents; α=0.30–0.40 unlocks practical certification; static CRC violates 71% of configs under shift, ACI 21% | 2026-07-18; **re-verified 2026-07-22** | yes |
+| https://arxiv.org/html/2606.29054v1 | When Can CRC Certify LLM Outputs — impossibility bound (μ−α)/(1−α); Table 3 per-dataset μ (NER 0.356/0.540/0.480, QA 0.441/0.804, MMLU 0.516/0.333, **JSON-Extract 0.033**); no EAE/RAMS/WikiEvents; α=0.30–0.40 unlocks practical certification; static CRC violates 71% of configs under shift, ACI 21% | 2026-07-18; **re-verified 2026-07-22**; **Table 5 read 2026-08-02, below** | yes |
 | https://arxiv.org/abs/2411.05895 | LLM ZS≪supervised EAE: GPT-4o ZS Arg-C 35.7 RAMS / 23.4 WikiEvents | 2026-07-18 | yes |
 | https://aclanthology.org/2021.naacl-main.69/ | BART-Gen + WikiEvents; Head/Coref F1 protocol | 2026-07-18 | yes |
 | https://nlp.jhu.edu/rams/ | RAMS official: v1.0c span-exact scorer; creators don't own source text (annotations CC-BY-SA-4.0) | 2026-07-18 | yes |
@@ -174,3 +174,37 @@ Actioned in this repo now (no spend, no approval needed): findings recorded here
 | https://huggingface.co/docs/hub/en/model-cards | HF model cards: library_name/base_model/base_model_relation adapter linkage | 2026-07-18 | yes |
 | https://huggingface.co/docs/hub/jobs-pricing | HF Jobs GPU $/hr (T4 $0.40, L4 $0.80, A10G-small $1.00, A100 $2.50), per-minute billing | 2026-07-18 | yes |
 | https://docs.vllm.ai/en/latest/cli/bench/throughput.html | vllm bench throughput — benchmark at real length distribution, batch sweep | 2026-07-18 | yes |
+
+---
+
+## Addendum, 2026-08-02 — arXiv:2606.29054 Table 5, read from the primary source
+
+Recorded because the write-up compares our measured confidence AUROC against this paper's, and
+under this repository's own standard a comparison figure has to be traceable here before it can be
+used. Read directly from `https://arxiv.org/html/2606.29054v1` on **2026-08-02**. Table 5 caption:
+*"AUROC of confidence scores for risk discrimination. Higher values indicate better ability to
+distinguish correct from incorrect outputs."*
+
+| Score | CoNLL | Few-NERD | WNUT | TriviaQA | NQ Open | MMLU-STEM | MMLU-Hum. | **JSON** |
+|---|---|---|---|---|---|---|---|---|
+| Token margin | 0.539 | 0.517 | 0.521 | 0.616 | 0.583 | 0.491 | 0.531 | **0.818** |
+| Self-consistency | 0.708 | 0.721 | 0.653 | 0.816 | 0.805 | 0.600 | 0.672 | **0.732** |
+| NLL | 0.536 | 0.514 | 0.514 | 0.604 | 0.588 | 0.485 | 0.542 | **0.793** |
+
+Also reported: semantic entropy **0.496–0.677** across all datasets; entity agreement 0.616–0.690
+on the NER sets; field completeness 0.734 on JSON.
+
+**A correction this addendum forced.** A summary relayed to this project gave "NLL / mean logprob
+0.485–0.604" as *the* NLL AUROC band. That range is NLL over the **NER, QA and classification** sets
+only — it excludes **JSON at 0.793**, which is this paper's one structured-generation task and
+therefore the single most relevant comparison for our own work. A draft sentence reading "above the
+0.485–0.604 band Kotte reports for NLL" was **false as written** and has been rewritten. The
+self-consistency band 0.600–0.816 relayed in the same summary **is** correct across all eight
+datasets.
+
+**Not verified, and dropped rather than used.** The same summary attributed a mean AUROC of 0.790
+for semantic entropy to Farquhar et al. (Nature 630). The Nature full text is behind
+authentication, the earlier arXiv:2302.09664 abstract states no AUROC, and the authors' own blog
+post gives none. It is not recorded here and is not used anywhere. Note that this paper measures
+semantic entropy itself at 0.496–0.677, well below 0.790; the two are different setups and this
+addendum does not adjudicate between them.

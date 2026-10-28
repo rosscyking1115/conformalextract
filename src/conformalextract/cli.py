@@ -596,6 +596,9 @@ def certify_command(
     aggregation_adr: Annotated[Path, typer.Option()] = Path(
         "docs/adr/0009-within-group-aggregation.md"
     ),
+    frozen_inputs: Annotated[Path, typer.Option()] = Path(
+        "manifests/plan3/certification_inputs.json"
+    ),
     result_out: Annotated[Path, typer.Option()] = Path("evidence/plan3/certification_result.json"),
     i_have_reviewer_approval: Annotated[
         bool,
@@ -611,6 +614,13 @@ def certify_command(
     (within-group aggregation) records an accepted status **and** the operator passes
     ``--i-have-reviewer-approval`` -- the aggregation rule materially determines the
     certificate, so it may not be chosen by code alone.
+
+    Order, each step before the next (independent review 2026-10-27, B1-B3; the one run of
+    2026-07-22 predates all three): refuse if the result already exists; the ADR gate; the
+    label-free §3.2 input preflight against ``frozen_inputs``; only then the RAMS archive.
+    RAMS stores text and gold in one record, so the archive is decompressed and parsed whole;
+    every non-certification instance is discarded before any use, and the gold actually used
+    is counted by role and written to the artifact rather than asserted.
     """
 
     import hashlib
@@ -621,10 +631,12 @@ def certify_command(
         FROZEN_DELTA,
         FROZEN_MATERIAL_GAIN,
     )
+    from conformalextract.certification_preflight import run_certification_input_preflight
     from conformalextract.certification_run import (
         aggregate_to_groups,
         build_certification_access_log,
         certification_artifact,
+        count_gold_reads,
         run_certification,
     )
     from conformalextract.contracts import Argument, EventFrame, Span
@@ -635,6 +647,10 @@ def certify_command(
         read_prediction_jsonl,
     )
     from conformalextract.profiles import read_ontology, read_rams_instances
+
+    # --- Immutable: a rerun refuses before anything is read (B3) ---------------------------
+    if result_out.exists():
+        raise RuntimeError(f"certification result already exists and is immutable: {result_out}")
 
     # --- Gate: the aggregation rule must be reviewed before sealed labels open -----------
     adr_text = aggregation_adr.read_text(encoding="utf-8")
@@ -671,15 +687,44 @@ def certify_command(
             f"delta={FROZEN_DELTA}. Rebuild grids at delta/3 before certifying."
         )
 
-    instances = {i.instance_key: i for i in read_rams_instances(rams_archive)}
-    contexts = build_document_contexts(list(instances.values()), read_ontology(rams_archive))
     groups: dict[str, str] = {}
+    roles: dict[str, tuple[str, str]] = {}
     for line in role_map.read_text(encoding="utf-8").splitlines():
         record = json.loads(line)
+        roles[str(record["document_id"])] = (str(record["role"]), str(record["group_id"]))
         if record["role"] == "certification":
             groups[str(record["document_id"])] = str(record["group_id"])
 
+    # --- §3.2 preflight, label-free, before the archive is opened (B1) ---------------------
+    prediction_paths = {s: predictions_dir / f"{s}.v1.jsonl" for s in ("zs", "fs", "qa")}
+    raw_by_system = {s: read_prediction_jsonl(path) for s, path in prediction_paths.items()}
+    preflight = run_certification_input_preflight(
+        prediction_sha256={
+            s: hashlib.sha256(path.read_bytes()).hexdigest() for s, path in prediction_paths.items()
+        },
+        prediction_document_ids={
+            s: frozenset(str(r["instance_key"]) for r in records)
+            for s, records in raw_by_system.items()
+        },
+        role_map_sha256=hashlib.sha256(role_map.read_bytes()).hexdigest(),
+        roles=roles,
+        grids=grid_data,
+        selected_candidates={
+            s: str(gate["per_system"][s]["selected_candidate"]) for s in ("zs", "fs", "qa")
+        },
+        frozen=json.loads(frozen_inputs.read_text(encoding="utf-8")),
+    )
+
+    # Text and gold share a RAMS record, so the whole archive is parsed; nothing outside the
+    # certification role is kept past this line (B2).
+    instances = {
+        i.instance_key: i for i in read_rams_instances(rams_archive) if i.instance_key in groups
+    }
+    contexts = build_document_contexts(list(instances.values()), read_ontology(rams_archive))
+    gold_used: list[str] = []
+
     def gold_frames(instance: RamsInstance) -> list[EventFrame]:
+        gold_used.append(instance.instance_key)
         tokens = instance.tokens
         return [
             EventFrame(
@@ -708,7 +753,7 @@ def certify_command(
     rows_by_system, thresholds_by_system, candidates_by_system = {}, {}, {}
     for system_id in ("zs", "fs", "qa"):
         candidate = str(gate["per_system"][system_id]["selected_candidate"])
-        raw_records = read_prediction_jsonl(predictions_dir / f"{system_id}.v1.jsonl")
+        raw_records = [r for r in raw_by_system[system_id] if str(r["instance_key"]) in groups]
         parsed, _ = parse_arm(raw_records, contexts, confidence_candidate=candidate)
         confidence: dict[object, object] = {
             r["instance_key"]: r["confidence_candidates"] for r in raw_records
@@ -757,9 +802,19 @@ def certify_command(
         acceptance_floor=FROZEN_ACCEPTANCE_FLOOR,
         material_gain=FROZEN_MATERIAL_GAIN,
     )
+    gold_reads_by_role = count_gold_reads(
+        gold_used, roles, expected_documents=access_log.document_count
+    )
     artifact = certification_artifact(
         run,
+        gold_reads_by_role=gold_reads_by_role,
         provenance={
+            "certification_preflight": {
+                "status": preflight.status,
+                "certification_documents": preflight.certification_documents,
+                "certification_groups": preflight.certification_groups,
+                "not_checked_at_run_time": dict(preflight.not_checked_at_run_time),
+            },
             "alpha": FROZEN_ALPHA,
             "delta": FROZEN_DELTA,
             "acceptance_floor": FROZEN_ACCEPTANCE_FLOOR,
@@ -804,10 +859,12 @@ def risk_coverage_diagnostic_command(
 ) -> None:
     """Oracle risk-coverage frontier per system and split — DIAGNOSTIC, certifies nothing.
 
-    Answers the question that decides how the certification result must be reported: is
-    infeasibility a capability gap or an artifact of the grid/bounds? Applies no finite-sample
-    penalty, no grid and no multiplicity correction, so if the acceptance floor is unreachable
-    here it is unreachable by any threshold rule.
+    Answers one half of the question that decides how the certification result must be reported:
+    is infeasibility an artifact of the grid/bounds? Applies no finite-sample penalty, no grid and
+    no multiplicity correction, so if the acceptance floor is unreachable here it is unreachable by
+    any threshold rule. It cannot answer the other half -- being penalty-free blinds it to the
+    finite-sample penalty, which forbids a certificate here that this curve permits. See
+    ``calibration.acceptance_certified_loss_optimal`` and ``CX-CAPGAP-01``.
 
     Run it on ``development`` **before** certifying: it settles feasibility at $0 with no sealed
     access, which the base-risk ceiling `(1-r)/(1-alpha)` does not (that ceiling assumes an
@@ -1136,6 +1193,115 @@ def loss_decomposition_command(
     )
     write_artifact(artifact, out)
     typer.echo(json.dumps({"out": str(out)}, sort_keys=True))
+
+
+@app.command("calibration-diagnostics")
+def calibration_diagnostics_command(
+    predictions_dir: Annotated[Path, typer.Option()] = Path("data/private/plan2/predictions"),
+    rams_archive: Annotated[Path, typer.Option()] = Path("data/raw/rams/RAMS_1.0c.tar.gz"),
+    role_map: Annotated[Path, typer.Option()] = Path("data/private/splits/rams_roles.jsonl"),
+    development_gate: Annotated[Path, typer.Option()] = Path(
+        "evidence/plan2/development_gate_summary.json"
+    ),
+    roles: Annotated[str, typer.Option(help="Comma-separated split roles.")] = (
+        "development,certification"
+    ),
+    out: Annotated[Path, typer.Option()] = Path("evidence/plan3/calibration_diagnostics.json"),
+) -> None:
+    """Plan 3 §11.3 group-level calibration diagnostics — DIAGNOSTIC, certifies nothing.
+
+    AUROC/AUPRC, AURC and its normalized form, Spearman score-loss association, risk at fixed
+    coverage, and the stratifications §11.2 asks for — for all THREE confidence candidates on all
+    three systems, not only the candidate the development gate selected.
+
+    Its purpose is to separate two explanations of the null that the certification artifact
+    cannot tell apart: a population too hard to certify, versus a score that fails to rank the
+    certifiable part to the top. The arithmetic minimum abstention (mu-alpha)/(1-alpha) settles
+    the first; the gap between the acceptance that permits and the acceptance the score reached
+    is the second.
+
+    Reverses three descoped rows of `docs/plan3/sections-11-and-12-disposition.md` and says so on
+    the artifact. The reversal is not independently reviewed; nothing here is publishable yet.
+    """
+
+    from conformalextract.calibration import (
+        build_group_features,
+        calibration_artifact,
+        headline,
+        read_sentence_offsets,
+        system_readout,
+    )
+    from conformalextract.certification import FROZEN_ACCEPTANCE_FLOOR, FROZEN_ALPHA
+    from conformalextract.predictions import CONFIDENCE_CANDIDATES
+    from conformalextract.reanalysis import (
+        SYSTEM_IDS,
+        access_block,
+        assert_reanalysis_role,
+        certification_access_for,
+        load_split_system_data,
+        write_artifact,
+    )
+
+    # Refuse an unauthorised --roles value before ANY file is opened, exactly as the two ADR 0011
+    # commands do. A sealed split must not be read and then disclosed as unread (reviewer R1).
+    requested = [r.strip() for r in roles.split(",") if r.strip()]
+    for split_role in requested:
+        assert_reanalysis_role(split_role)
+
+    instances, contexts, assignments, gold_frames, _gate = _reanalysis_inputs(
+        rams_archive, role_map, development_gate
+    )
+    sentence_offsets = read_sentence_offsets(rams_archive)
+
+    readouts: dict[str, dict[str, dict[str, dict[str, object]]]] = {}
+    certification_documents: set[str] = set()
+    for split_role in requested:
+        groups = {
+            str(a["document_id"]): str(a["group_id"])
+            for a in assignments
+            if a["role"] == split_role
+        }
+        per_system: dict[str, dict[str, dict[str, object]]] = {}
+        for system_id in SYSTEM_IDS:
+            per_candidate: dict[str, dict[str, object]] = {}
+            for candidate in CONFIDENCE_CANDIDATES:
+                data = load_split_system_data(
+                    split_role=split_role,
+                    system_id=system_id,
+                    confidence_candidate=candidate,
+                    predictions_path=predictions_dir / f"{system_id}.v1.jsonl",
+                    contexts=contexts,
+                    instances=instances,
+                    group_by_document=groups,
+                    gold_frames=gold_frames,
+                )
+                features = build_group_features(
+                    data, instances=instances, sentence_offsets=sentence_offsets
+                )
+                per_candidate[candidate] = system_readout(data, features, alpha=FROZEN_ALPHA)
+                if split_role == "certification":
+                    certification_documents.update(data.loss_by_document)
+            per_system[system_id] = per_candidate
+        readouts[split_role] = per_system
+
+    log = certification_access_for(
+        "certification" if certification_documents else "development",
+        sorted(certification_documents),
+    )
+    artifact = calibration_artifact(
+        readouts,
+        alpha=FROZEN_ALPHA,
+        acceptance_floor=FROZEN_ACCEPTANCE_FLOOR,
+        access=access_block(log),
+    )
+    write_artifact(artifact, out)
+    # Echo the headline this command exists to produce, per system on the certification split:
+    # what base risk permitted, what the score delivered, and how well it ranked.
+    echoed = {
+        system: {candidate: headline(readout) for candidate, readout in candidates.items()}
+        for system, candidates in readouts.get("certification", {}).items()
+    }
+    typer.echo(json.dumps({"out": str(out), "certification": echoed}, sort_keys=True))
 
 
 @app.command("verify-claims")

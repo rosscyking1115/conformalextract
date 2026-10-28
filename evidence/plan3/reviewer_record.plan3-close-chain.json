@@ -1,0 +1,252 @@
+{
+  "schema_version": "1",
+  "_record_notice": "Independent Reviewer/QA rulings on steps 1, 3, 4 and 5 of the Plan 3 close chain ('The chain, step by step' in docs/writeup/uncertainlp-2026-short.md). Produced by a reviewer who did not implement Plan 3, did not author any remedy under review, and issued no prior verdict in this chain. Drafted outside the repository for the producer to commit verbatim; no source, test, doc, ledger or evidence artifact was edited by this review. Step 2 (ledger entries, ae1b963) and step 6 (the fresh close) are other reviewers' and are not ruled here. This record is NOT a plan close and must not be read as one.",
+  "review_kind": "plan3_close_chain_review_steps_1_3_4_5",
+  "plan": "Plan 3",
+  "reviewed_commit": "ae1b963",
+  "reviewed_branch": "release/public-prep-2026-10-27",
+  "reviewed_date": "2026-10-27",
+  "reviewer_identity": "Reviewer/QA (Claude Code, Opus 5.5), independent. Not the Plan 3 implementer; not the author of evidence/plan3/reviewer_record.plan3-close.json, evidence/plan4/reviewer_record.o2-o3-claims-change.json, evidence/plan3/reviewer_record.b1-primary-document.json or of any remedy, ADR, ledger entry or artifact in this repository.",
+  "prior_records": [
+    "evidence/plan3/reviewer_record.plan3-close.json (REFUSED at 4bb9be3 on O1, O2, O3; the chain this record serves)",
+    "evidence/plan4/reviewer_record.o2-o3-claims-change.json (BLOCK at 20af838 on B1; R1-R5 required)",
+    "evidence/plan3/reviewer_record.b1-primary-document.json (BLOCK at a522a76 on B2-B4; three discharge passes, each BLOCK; last on F1)",
+    "evidence/plan3/reviewer_record.s12-1-certification-scope-addendum.json (attests the 2026-07-30 section 12.1 scope addendum review; grants no execution)",
+    "PMO review of 73283cc, 2026-07-30, Reviewer (Codex): BLOCK on its B1-B4; no record discharges it",
+    "PMO reviews of the section 11.3 packet, 2026-08-02 v1 and v2: REVISE, REVISE",
+    "PMO reviews of the claim-narrowing packet, 2026-08-02 v1 and v2: REVISE, REVISE",
+    "v3 and v4 rounds of both packets (governance packets dated 2026-08-03): verdicts NOT ON FILE; see cross_cutting.C1"
+  ],
+  "verdict": "BLOCK on steps 1, 4 and 5; step 3 RULED (the cheap ruling). Step 6 (a fresh Plan 3 close) may NOT be attempted yet. Every blocking item is a $0 text edit except the owner's choice under S1-B1, where running section 12.1 is the expensive alternative to descoping it. Nothing here casts doubt on the negative result, the certificate, the decomposition or any committed number; every figure checked reproduced from committed evidence.",
+  "external_signal": {
+    "load_rule": "Per the brief, the full suite, ruff and mypy were NOT run (a parallel reviewer is running them; step 6 must rerun the green command at its own commit).",
+    "single_named_test_file": "CUDA_VISIBLE_DEVICES=-1 uv run --frozen pytest -q tests/test_reanalysis_artifacts.py -> 45 passed in 1.72s.",
+    "artifact_hash": "git show HEAD:evidence/plan3/calibration_diagnostics.json | sha256sum -> a69da67c5b014af71471feb834303b3bede19a8d2ef7142352719a3b83b75458, matching the LF-byte hash Amendment 1 pins.",
+    "access_chain": "head_hash ff5562419c7ddd543e06fdf656114a26cf79cdbf12063e906002b1024b423d9f with final_reads 0 and shift_reads 0 in calibration_diagnostics, certification_sensitivity, certification_result, loss_decomposition, alpha_frontier, argument_error_counts and corpus_size_requirement.",
+    "figures_read_from_evidence": "certification_sensitivity.json: frozen-allocation acceptance lower bound 0.198390 (k 332 clears, margin -3), single-candidate 0.205315, never-run allocation 0.201679, empirical_bernstein_probe present, auroc_interval 0.7374-0.8499 at seed 20260802 and 10,000 resamples, grid capacity 3 with 1,432 required for a fourth. corpus_size_requirement.json witness: k 332, acceptance lower 0.20041, radius 0.08491, mean loss at most 0.11509. argument_error_counts.json: QA tp 2,984, fp 4,434, fn 3,797, excess +637 (+0.2237 per document); ZS -1,446 (-1.168); FS -1,501 (-1.328).",
+    "not_read": "data/ (raw text, sealed labels, predictions). No secret printed. $0; no network write."
+  },
+  "step_1_O1_disposition": {
+    "verdict": "BLOCK",
+    "disposition": "bounded-repair; the S1-B1 choice is ross-escalate",
+    "prior_required_corrections_at_head": {
+      "v1_D1_D2_N1_N2_N3": "Discharged (v2 verified; the artifact is unchanged since, hash matches; tests/test_reanalysis_artifacts.py passes).",
+      "v1_Q1_caveat": "Discharged: the amendment table now carries 90, 18 and 3 non-failing groups of 1,392.",
+      "v2_F-A": "Discharged. Paper (uncertainlp-2026-short.tex:226-232), amendment and certification-result.md quote 0.1984 and 332 at the frozen three-candidate delta/3 allocation and drop the acceptance-clears clause; 0.2053 is absent from the paper; 0.2017 survives only inside a dated self-correction labelled as the wrong figure.",
+      "v2_F-B": "Discharged: the seven-groups consequence is withdrawn; the four unscorable groups are stated to remain rows.",
+      "v2_F-C": "Discharged: the margin framing is replaced by grid capacity.",
+      "v2_F-D": "Discharged: empirical-Bernstein probe and AUROC bootstrap interval are committed in certification_sensitivity.json.",
+      "v2_Q1_remainder": "Discharged.",
+      "v2_F-G": "PARTIALLY discharged. The four-group reconciliation, grid capacity and the 0.1984 bound are in the amendment's 'Added 2026-08-03'. The empirical-Bernstein verification is not in the amendment (the word does not occur); it lives in the artifact and the paper only.",
+      "v3_six_as_restated_in_the_v4_packet": "Reflected at HEAD (0.1075 qualified as risk-test-only, delta/3 scoping, derived_quantities.json, Forbidden-table qualifier, sensitivity artifact access block). Checked against the implementer's restatement only, because the v3 verdict is not on file (C1)."
+    },
+    "item_by_item_against_accepted_plan_sections_11_and_12": {
+      "11.1_rows": "All six disposed on true grounds (max-frame descoped on the harsher-loss ground; normalized matching descoped under 8.5; strict certificate moot, see step 3; NLL score descoped; accepted-output quality moot; constrained decoding moot).",
+      "11.2": "NOT disposed item by item. The plan names five axes (event type, role, document-length quartile, cross-sentence distance, seen/unseen schema). Amendment 1 reverses the base document's 'not being done' note and executes cross-sentence distance (plus trigger count, which 11.2 does not list); the other four axes have no stated disposition.",
+      "11.3": "Executed by Amendment 1, with an unstated deviation: the plan says development/final data, the computation is on certification with a development replication (final sealed by ADR 0010). ECE, optional, unmentioned.",
+      "11.4": "Executed and observed.",
+      "12.1": "NEITHER EXECUTED NOR DESCOPED. Ruled 'TO BE EXECUTED' on 2026-07-29; the 2026-07-30 scope addendum passed review but authorises no execution, lists seven preconditions and states the command does not exist; no failure-taxonomy command exists in src/ and no taxonomy artifact exists; certification-result.md:186 and ledger limitation 10 of the grounding claim say it has not been run. O1 accepted running the remainder in place of a descope; a ruling to run that has not run is neither, and a close cannot be issued over it.",
+      "12.2": "Moot/descoped stratum by stratum, but the mootness of '10 QA improvements over both baselines' and '10 QA regressions' is asserted ('defined relative to an accepted set') without a plan-text citation, and the refusal record listed both as computable now. accepted-plan.md:512-513 does not say 'accepted'.",
+      "12.3": "Executed as a binding constraint."
+    },
+    "required_items": {
+      "S1-B1": {
+        "blocking": true,
+        "what": "Re-dispose section 12.1 in a dated Amendment 2: either (a) descoped from Plan 3, computable at $0 but dropped, reason stated (no live claim depends on it since O2 was narrowed), with certification-result.md:186 and the grounding claim's limitation 10 changed from 'has not been run' to the descope, and the section 22 checklist line on the failure taxonomy recorded as waived; or (b) executed: command implemented and independently reviewed, the addendum's preconditions met, artifact produced and reviewed. The choice is the owner's."
+      },
+      "S1-B2": {
+        "blocking": true,
+        "what": "Dispose the four undisposed 11.2 axes (event type, role, document-length quartile, seen/unseen schema) one by one, and record that trigger count is an addition rather than an 11.2 item."
+      },
+      "S1-R1": {
+        "blocking": false,
+        "what": "Ground the 12.2 improvements/regressions mootness in plan text, or re-dispose both as computable-but-descoped with a reason."
+      },
+      "S1-R2": {
+        "blocking": false,
+        "what": "Carry the empirical-Bernstein verification into the amendment as one bullet (single pre-chosen oracle candidate through scorc_certificate, 0.0000 at every coverage tested, one-sided by construction), completing v2 F-G."
+      },
+      "S1-R3": {
+        "blocking": false,
+        "what": "State the 11.3 split deviation."
+      },
+      "S1-R4": {
+        "blocking": false,
+        "what": "Record the step 3 ruling, item by item, in Amendment 2 (the receiving document)."
+      },
+      "S1-N1": {
+        "blocking": false,
+        "what": "Amendment 1's status line predates the v3/v4 rounds; correct it when C1 closes."
+      }
+    }
+  },
+  "step_3_strict_failure_indicator": {
+    "ruling": "THE CHEAP RULING. There is no predeclared strict-failure loss in this programme. Plan 1 section 237 required its exact definition to be frozen before calibration; it never was, and calibration ran on 2026-07-22. The dependent Plan 3 items are disposed as unavailable (Plan 1 defect, not repairable after calibration): section 5.2's secondary strict-loss certificate, section 11.1 row 3, section 11.3's predeclared strict-failure indicator, and section 9's strict failure rate (also moot under ADR 0010). The three indicators in calibration_diagnostics.json (above_alpha, any_error, not_all_valid) are reported as exploratory and not predeclared, and none may be called the strict-failure indicator.",
+    "why_not_the_expensive_ruling": "A definition written now is chosen after the certification labels were opened and after all three indicators' AUROCs were computed and committed, so it would be a fourth exploratory indicator carrying a predeclared label: a choice among seen results, which section 8.5 forbids. It buys nothing: no claim depends on a strict-failure figure, and the strict loss dominates the continuous loss pointwise, so it cannot change the infeasibility.",
+    "text_changes_required": [
+      "Record the ruling item by item in the O1 receiving document (S1-R4), with a pointer from Amendment 1's 'What was NOT reversed' bullet.",
+      "CX-RANKING-01 (added in ae1b963, step 2's scope) gains one limitation: the any-error indicator is one of three chosen after calibration, the plan's predeclared strict-failure indicator was never defined (Plan 1 section 237), and this AUROC is exploratory. A claims change; flagged to the step 2 reviewer."
+    ],
+    "text_change_recommended_not_required": "A dated note under Plan 1 section 237 recording the defect, moving that plan's pin by the file's own convention.",
+    "disposition": "bounded-repair"
+  },
+  "step_4_O2_O3": {
+    "verdict": "BLOCK",
+    "disposition": "bounded-repair",
+    "discharging_commits_read": "a522a76 (B1, R1-R5), 98b4ba3 (B2-B4, R6), c7005e8, b1381b5, 73283cc; and 8549a96, which touches O3 without naming it.",
+    "items_at_head": {
+      "B1": "DISCHARGED. certification-result.md:159 ends at the defensible form; the withdrawn appositive survives only inside the dated correction at :161; withdrawn_assertions.json registers both paraphrases.",
+      "R1": "DISCHARGED (nit: the handoff amendment does not cite the o2-o3 record).",
+      "R2": "PARTIALLY. Present: unquantified, development split, section 12.3, withdrawal, counter-measurement, do-not-cite. Absent: the count element; ADR 0007's note still says 'a handful of high-loss documents' where every other surface says two.",
+      "R3": "DISCHARGED: descoped on the harsher-loss ground; A2 no longer offered as its execution.",
+      "R4": "DISCHARGED in the ledger (CX-SERVING-01 limitations 6 and 7); register section B exists. Nit: its status column still reads 'half-arrived' and 'never arrived' (carried-forward-from-plan2.md:104,106).",
+      "R5": "DISCHARGED: plan3-close N1 is registered by name in section E, status open."
+    },
+    "new_blocking_findings": {
+      "S4-B1_O3_regressed": {
+        "blocking": true,
+        "commit": "8549a96 (2026-08-04)",
+        "finding": "The commit rewrote CX-SERVING-01 limitation 4 to stop printing the flip rate as an interval (that form correction is right) and deleted the two clauses that were O3's substance: that two of the four flips sit just above the median confidence percentile and so survive into the accepted set, and that the abstention mechanism is stack-dependent at the margin. The plan3-close record required the finding in the form Plan 2's close fixed, naming those clauses, and called it the one probe result that is not reassuring. At HEAD no limitation carries it, the generated appendix renders the shortened form, and carried-forward-from-plan2.md:84-91 still states the full finding is 'Now carried as limitation 4'.",
+        "smallest_fix": "Restore one sentence to limitation 4 (two of the four flips sit just above the median confidence percentile, so they survive into the accepted set at plausible operating points, above about 50% acceptance; the abstention mechanism is stack-dependent at the margin), regenerate the appendix, and make the register's statements true at HEAD. Claims change: independent delta review."
+      },
+      "S4-B2_O2_surface_states_the_B3_falsehood": {
+        "blocking": true,
+        "file": "docs/writeup/draft-2026-07-28.md:126-129",
+        "finding": "The draft still says the 637-argument over-generation is 'rather than entity-naming, and wrong-role, boundary and coreference errors share that signature'. The only antecedent is the excess, and the evaluator makes fp minus fn equal predictions minus gold, so substitutions contribute exactly zero to it. The draft is one of the four O2 propagation surfaces the refusal named. This is the 73283cc review's B3, undischarged. The same sentence says section 12.1 'is scheduled', which is false.",
+        "smallest_fix": "Use the B1 record's option (b) wording, as certification-result.md:177-183 already does, and state section 12.1's true status."
+      }
+    },
+    "required_non_blocking": [
+      "R2's count element: 'an unknown number, of which two are quoted', or 'two'.",
+      "docs/plan4/open-release-decisions.md:57 still says each walk has one guard and none has both; false since the markdown walk gained its kind probe (the 73283cc review's B1, undischarged).",
+      "Register section B status column, as under R4."
+    ]
+  },
+  "step_5_claim_narrowing": {
+    "verdict": "BLOCK (on the README); the packet's four questions are ruled",
+    "disposition": "bounded-repair",
+    "round_history": "v1 REVISE, v2 REVISE, v3 BLOCK (six required, claimed applied in 7e1ffa6), v4 verdict not on file (7c35bd0 responds to items F1-F4 of some verdict). The chain table's 'REVISE twice' understates it.",
+    "v2_items_at_head": "G1 discharged (ledger CX-ALPHA-FRONTIER-01 limitation 8 reads 'NOT EXCLUDED' with a dated note; forbidden row at certification-result.md:385 reads 'not excluded'; appendix regenerated; draft corrected). Q2 discharged in form: a dated note on the shorthand is appended at docs/plan4/accepted-plan.md:816-823 with its pin moved (nit: about 790 lines below the sentence it qualifies at :29).",
+    "v3_items_at_head": "(1) per-figure carrier: done. (2) construction named: done in the ledger and certification-result.md, NOT in README. (3) existence example qualified on every surface: NOT in README. (4) .tex in PROSE_SUFFIXES: done. (5) Forbidden row: done. (6) population gate in REVIEW.md: done.",
+    "S5-B1_readme_capgap_paragraph": {
+      "blocking": true,
+      "file": "README.md:66-75",
+      "finding": "Three defects the packet's own 2026-08-03 section and the v3 BLOCK corrected elsewhere: (a) 'the certifier's Hoeffding bound spends 0.0925' misnames a diagnostic pairing at delta/3 that belongs to neither certifier; (b) the sentence declining the no-model claim offers the risk-test-only witness at mean loss 0.1075 as its reason, the one-of-two-constraints error the packet calls instance vii, where the corrected witness is k 332, acceptance lower 0.2004, mean loss at most 0.1151; (c) 'for everyone' contradicts the paper's scoping that a single-system entrant at the full delta inherits neither constraint.",
+      "smallest_fix": "Three phrase edits mirroring the ledger's CX-CAPGAP-01 wording. No number moves."
+    },
+    "rulings_on_the_four_questions": {
+      "Q1_every_change_a_narrowing_no_number_moved": "YES for sections 1-3. The 2026-08-03 CAPGAP section is an attribution narrowing that adds backed figures (0.0925, 0.1075, 0.2004, 0.0849, 0.1151, each checked in a committed artifact); the header 'No number changed anywhere' should be scoped to sections 1-3 (nit). Ledger limitation 11 of the grounding claim (directional sign, 7c35bd0) is a strengthening, within its evidence and exactly reproduced from argument_error_counts.json, whose review sits in the unfiled v4 verdict (C1).",
+      "Q2_direction_check": "RIGHT IN SUBSTANCE: 'not excluded elsewhere' makes this system's failure more specifically its own and cannot be read as a laxer-alpha hint. But the paragraph's premise ('achievable in principle on other populations', claim-narrowing-2026-08-02.md:90-91) and question 2 itself (:189, 'reachable elsewhere') still use the wording F1 withdrew. Required, non-blocking: one dated line correcting both to 'not excluded'.",
+      "Q3_rename_the_identifier": "RETAIN; NO REDIRECT. The identifier is an opaque handle keyed by 25 tracked files, eight of them immutable reviewer records; a redirect gives one object two names, and diverging copies are this repository's recurring defect; the retired assertion is registered in withdrawn_assertions.json and disclaimed in ledger limitations 1-2, the appendix, the README and the paper. Condition: wherever the identifier is displayed on a public surface, the dissociation-not-orthogonality sentence sits in the same paragraph, as it does at HEAD.",
+      "Q4_O2_remaining_exposure_or_separate_finding": "A SEPARATE FINDING OF THE SAME KIND. O2 is discharged against its own text: the refusal scoped it to the trailing error-category clause and named that remedy. Folding this in would make O2 undischarged at the time it was ruled discharged, the relabelling defect run backwards. Same limb (no claim exceeds its evidence), same claim, missed the same way. The v1 reviewer required its own identifier and a carried_forward entry; neither existed at HEAD. This record assigns it: O2-S1."
+    },
+    "O2-S1": {
+      "name": "O2-S1 — the orthogonality overclaim on CX-GROUNDING-ORTHOGONAL-01",
+      "class": "successor of O2, same limb: a claim exceeding its evidence on README/report/abstract surfaces",
+      "status": "DISCHARGED by the 2026-08-02 narrowing at HEAD: wording states a dissociation; limitations 1-2 disclaim independence and mark the identifier historical; the retired wording is registered; every surface checked carries the dissociation form.",
+      "must_not_be_recorded_as": "O2 completed"
+    },
+    "required_non_blocking": [
+      "Q2's dated line in the packet.",
+      "Scope the packet header's 'No number changed anywhere' to sections 1-3."
+    ]
+  },
+  "cross_cutting": {
+    "C1_unfiled_verdicts": {
+      "blocking_for": "step 6",
+      "what": "The v3 and v4 verdicts of both packets are filed neither in the PMO reviews desk nor in the repository, though 107d692, 7e1ffa6, 7c35bd0 and 8549a96 each claim to discharge their items. File them, or record that they are unrecoverable and map each claimed item to its commit. Without them the close's 'confirm every outstanding ruling from every prior record' limb cannot be performed."
+    },
+    "C2_status_surface_understates_rounds": "The chain table in docs/writeup/uncertainlp-2026-short.md says 'REVISE twice' for steps 1 and 5; packet 2's v3 was BLOCK and both packets had a v4. Correct the table and its first-pass tally.",
+    "C3_73283cc_block": "The 73283cc review's BLOCK is undischarged; its live parts are S4-B2 and step 4's open-release-decisions item. Its mypy/datasketch and README-status items appear fixed by 9b09bf3 and 8b7996b; the step 6 reviewer should confirm by running the green command."
+  },
+  "step_6_may_be_attempted": false,
+  "what_must_happen_before_step_6": [
+    "S1-B1 and S1-B2 (one dated Amendment 2 to the disposition; the S1-B1 choice is the owner's), with S1-R1 to S1-R4 in the same amendment.",
+    "S4-B1 (one sentence back into CX-SERVING-01 limitation 4, appendix regenerated, register made true) and S4-B2 (one sentence in draft-2026-07-28.md).",
+    "S5-B1 (three README phrases).",
+    "The step 3 text change on CX-RANKING-01, reviewed with step 2.",
+    "An independent delta review of exactly those items (claims changes require it).",
+    "C1 closed. Then the step 6 reviewer re-runs the green command and the artifact hashes at its own commit."
+  ],
+  "carried_forward": {
+    "_why_this_key_exists": "Every item this record hands on is listed here by name, with its direction.",
+    "items": [
+      {
+        "name": "S1-B1_section_12_1_undisposed",
+        "direction": "states a risk",
+        "for": "Ross (choice), implementer (text)",
+        "discharged_when": "section 12.1 is descoped with a stated reason or executed and reviewed, and the surfaces saying 'has not been run' agree",
+        "blocking": true
+      },
+      {
+        "name": "S1-B2_section_11_2_axes",
+        "direction": "states a risk",
+        "for": "implementer",
+        "discharged_when": "event type, role, document-length quartile and seen/unseen schema each carry a disposition",
+        "blocking": true
+      },
+      {
+        "name": "S4-B1_O3_regression",
+        "direction": "qualifies a reassurance",
+        "what_it_qualifies": "the serving-stack claim's abstention behaviour",
+        "for": "implementer",
+        "discharged_when": "limitation 4 again states that two flips survive into the accepted set and that abstention is stack-dependent at the margin, the appendix renders it, and the register is true",
+        "blocking": true
+      },
+      {
+        "name": "S4-B2_draft_signature_sentence",
+        "direction": "states a risk",
+        "for": "implementer",
+        "discharged_when": "draft-2026-07-28.md no longer attaches substitution errors to the over-generation excess and states section 12.1's true status",
+        "blocking": true
+      },
+      {
+        "name": "S5-B1_readme_capgap_paragraph",
+        "direction": "states a risk",
+        "for": "implementer",
+        "discharged_when": "README.md:66-75 names the construction, uses the two-constraint witness or none, and scopes the penalty to delta/3",
+        "blocking": true
+      },
+      {
+        "name": "step3_CX-RANKING-01_limitation",
+        "direction": "qualifies a reassurance",
+        "what_it_qualifies": "the AUROC 0.796 ranking claim",
+        "for": "implementer, reviewed with step 2",
+        "discharged_when": "CX-RANKING-01 states its indicator was chosen after calibration and is not predeclared",
+        "blocking": false
+      },
+      {
+        "name": "O2-S1",
+        "direction": "states a risk",
+        "for": "the step 6 reviewer",
+        "discharged_when": "already discharged at HEAD; the close records it as O2-S1, a successor of O2, not as 'O2 completed'",
+        "blocking": false
+      },
+      {
+        "name": "C1_unfiled_v3_v4_verdicts",
+        "direction": "states a risk",
+        "for": "Manager / implementer",
+        "discharged_when": "the verdicts are filed or recorded as unrecoverable with an item-to-commit map",
+        "blocking": true
+      },
+      {
+        "name": "C2_chain_table_round_count",
+        "direction": "states a risk",
+        "for": "implementer",
+        "discharged_when": "the chain table records every round, including packet 2's v3 BLOCK",
+        "blocking": false
+      }
+    ]
+  },
+  "what_this_record_does_and_does_not_do": {
+    "does": "Rules on steps 1, 3, 4 and 5 of the Plan 3 close chain at ae1b963; assigns O2-S1; rules the strict-failure indicator.",
+    "does_not": "Does not close Plan 3 and is not a plan_close record (review_kind is deliberately different so tests/test_gate_state.py does not count it). Does not review step 2. Does not rule on going public, visibility, Plan 4 resumption, any spend, or the opening of final or shift. Does not alter any claim or figure.",
+    "explicitly_not_a_finding_against_the_result": "The negative result, the certificate, the decomposition and every committed figure checked are untouched by every finding here."
+  },
+  "reviewer_disclosures": {
+    "files_written": "Two files outside the repository (a PMO review file and this draft) and one PMO log line. Nothing under the repository was created, edited or committed; the working tree was clean at start and at finish.",
+    "restricted_reads": "None. data/ was not opened; no sealed label was read; no access chain was written.",
+    "what_i_verified_versus_what_i_took_on_trust": "Verified by execution: the artifact hash, seven access-chain heads, the figures listed under external_signal, and one named test file. Verified by reading at HEAD: every file:line cited. Taken on the implementer's restatement: the content of the v3 required lists (C1)."
+  },
+  "acceptance_rule": "A remedy in the Plan 3 close chain is discharged only when, at the reviewed commit, the receiving documents state it and every surface it reaches agrees; a later commit that does not name an undischarged item does not discharge it, and a later commit that silently removes a discharged item re-opens it. The implementer of a remedy may not complete this record."
+}

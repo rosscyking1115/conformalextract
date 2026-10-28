@@ -1,0 +1,84 @@
+{
+  "acceptance_floor": 0.2,
+  "alpha": 0.2,
+  "candidates_per_system": 3,
+  "certification_access": {
+    "certification_gold_read": true,
+    "documents_read": 3152,
+    "final_reads": 0,
+    "head_hash": "ff5562419c7ddd543e06fdf656114a26cf79cdbf12063e906002b1024b423d9f",
+    "shift_reads": 0,
+    "verified": true
+  },
+  "certifies_nothing": true,
+  "confidence_candidate": "mean",
+  "delta": 0.05,
+  "diagnostic_only": true,
+  "eligible_groups": 1266,
+  "interpretation": "Quantities the write-up derives in prose rather than reading off an artifact. The first paper-scoped claims guard found 53 of 120 figures resolving to nothing, including the headline 21.6-point ranking gap and the 8.4% family-wide certified acceptance; these are those figures, computed once, in a committed script, each stamped with the construction, delta, allocation, n and prefix length that produced it. Two prefix lengths are emitted because the write-up is NOT internally consistent about which one 'at the floor' means: 0.0925 is the figure at k = 280, the smallest prefix meeting the 0.20 floor, while the 18,000-group and 12.9x extrapolation reconciles at k = 279, which does not meet it. Selecting one here would conceal that. Nothing here selects a threshold or issues a certificate.",
+  "n": 1396,
+  "quantities": {
+    "at_the_acceptance_floor": {
+      "corpus_multiple": 13.42406876790831,
+      "coverage": 0.20057306590257878,
+      "empirical_risk_of_loss_optimal_prefix": 0.17472660889752728,
+      "hoeffding_radius": 0.0924613021637976,
+      "hoeffding_upper_bound": 0.2671879110613252,
+      "k": 280,
+      "k_definition": "ceil(acceptance_floor * n) -- the smallest prefix that MEETS the 0.20 floor",
+      "mean_loss_an_accepted_set_may_carry": 0.10753869783620242,
+      "radius_budget_before_the_bound_crosses_alpha": 0.02527339110247273,
+      "required_accepted_groups": 3748,
+      "required_total_groups": 18740.0
+    },
+    "certified_acceptance_by_allocation": {
+      "family_wide": {
+        "acceptance": 0.083810888252149,
+        "construction": "hoeffding_upper on the loss-optimal prefix",
+        "delta": 0.002777777777777778,
+        "delta_allocation": "delta/(2*9) -- the family-wide Bonferroni allocation",
+        "k": 117,
+        "n": 1396
+      },
+      "per_system": {
+        "acceptance": 0.11389684813753581,
+        "construction": "hoeffding_upper on the loss-optimal prefix",
+        "delta": 0.016666666666666666,
+        "delta_allocation": "delta/3 -- three systems share delta",
+        "k": 159,
+        "n": 1396
+      }
+    },
+    "one_group_below_the_floor": {
+      "corpus_multiple": 12.84025787965616,
+      "coverage": 0.1998567335243553,
+      "empirical_risk_of_loss_optimal_prefix": 0.1741581260142448,
+      "hoeffding_radius": 0.0926268552098203,
+      "hoeffding_upper_bound": 0.26678498122406546,
+      "k": 279,
+      "k_definition": "ceil(acceptance_floor * n) - 1 -- does NOT meet the floor. Emitted because the write-up's 18,000-group and 12.9x figures reconcile here and not at the floor.",
+      "mean_loss_an_accepted_set_may_carry": 0.10737314479017972,
+      "radius_budget_before_the_bound_crosses_alpha": 0.025841873985755215,
+      "required_accepted_groups": 3585,
+      "required_total_groups": 17925.0
+    },
+    "shortfalls": {
+      "acceptance_delivered_empirical": 0.02005730659025788,
+      "acceptance_empirical_oracle": 0.2356733524355301,
+      "finite_sample_penalty_cost": 0.12177650429799428,
+      "note": "Differences between three committed acceptance readings, all over the same n. Each input is itself stamped in calibration_diagnostics.json.",
+      "ranking_cost": 0.21561604584527222,
+      "ranking_cost_points": 21.56160458452722
+    },
+    "the_floor_in_groups": {
+      "acceptance_floor": 0.2,
+      "construction": "acceptance_floor * n, before the ceiling is taken",
+      "n": 1396,
+      "note": "The floor falls between two whole groups, which is the whole reason 'at the floor' was ambiguous: it is MET at ceil(this) and MISSED at floor(this). The write-up now states the definition where it is first used.",
+      "value": 279.2
+    }
+  },
+  "schema_version": "1",
+  "system": "qa",
+  "systems_sharing_delta": 3
+}

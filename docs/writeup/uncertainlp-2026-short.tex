@@ -1,0 +1,426 @@
+% UncertaiNLP 2026 FULL paper (up to 8 pages). DRAFT — NOT SUBMITTED.
+%
+% Rewritten 2026-08-02 after an independent review returned REVISE and refuted the previous
+% central claim ("a perfect ranking would clear the 20% floor"). That claim is gone; the argument
+% is now the three-way decomposition below, which is stronger and which the arithmetic supports.
+%
+% Blocked on two review packets, both REVISE, neither discharged. See uncertainlp-2026-short.md
+% for the status banner, provenance notes and remaining-work list.
+%
+% BUILD: pwsh -File scripts/build_paper.ps1   (acl.sty is NOT vendored — no upstream licence)
+
+\documentclass[11pt]{article}
+\usepackage[review]{acl}
+
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+\usepackage{inconsolata}
+\usepackage{graphicx}
+\usepackage{booktabs}
+
+\title{A well-ranked score that certifies nothing:\\
+selective risk control for document-level event-argument extraction}
+
+\author{Anonymous submission}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Selective prediction is usually judged by how well a confidence score \emph{ranks} correct outputs
+above incorrect ones --- AUROC, AURC, rank correlation. Distribution-free risk control asks a
+different question: how much output can be accepted while provably bounding error on what is
+accepted. We show these can diverge by an order of magnitude on the same system. We define a
+frozen, sealed-split selective-certification protocol for document-level event-argument extraction
+on RAMS, with the source document as the independent unit, and run it once on a QLoRA-adapted
+Qwen3-4B and two prompted baselines. All three are infeasible at a 20\% risk target with 95\%
+confidence and a 20\% acceptance floor, and the infeasibility is \textbf{overdetermined} by three
+separate barriers --- base risk, ranking quality, the finite-sample penalty --- no one of which
+could be removed to rescue it. They do not all bind everywhere: base risk settles the two baselines
+and not the adapted model, which the other two settle between them. The
+adapted system's confidence score certifies \textbf{nothing at all}. Nor would a perfect ranking:
+ranked by true loss, the same population certifies at most 11.4\% under a Hoeffding bound at
+$\delta/3$, and nothing under the primary certifier, short of the acceptance floor. Nor
+would more data at the same operating point, and the reason is structural rather than a matter of
+degree: acceptance is tested on a \emph{lower} confidence bound, so accepting exactly 20\% of a
+corpus never clears a 20\% floor \textbf{at any corpus size}. A certificate requires coverage
+strictly above the floor, and on this loss profile the smallest corpus admitting one is of order
+\textbf{21$\times$} this split. The third mechanism is
+observable in only one of our three systems, because the other two fail at base risk first. Separating the
+three mechanisms is what makes the null diagnostic rather than merely negative, and only one of
+them is the score's fault.
+\end{abstract}
+
+\section{Introduction}
+
+Two literatures measure confidence and rarely meet. Selective prediction and hallucination
+detection report \textbf{ranking quality}: AUROC for separating correct from incorrect outputs,
+area under the risk-coverage curve, rank correlation against loss. Distribution-free risk control
+\cite{angelopoulos2024crc} reports \textbf{certified acceptance}: the fraction of inputs a policy
+may accept while a finite-sample bound holds on the error rate among accepted inputs.
+
+These are not the same quantity. A score can order a population well on average and still fail to
+isolate a clean prefix, and even a perfectly ordered prefix can be too small to certify. This paper
+reports a case where a respectable AUROC coexists with zero certified acceptance, and separates the
+reasons.
+
+\paragraph{What we contribute.}\label{sec:intro-contrib} We state up front what is \emph{not} new. That conformal risk
+control frequently cannot certify LLM outputs, that base risk $\mu$ forces abstention of at least
+$(\mu-\alpha)/(1-\alpha)$, and that this bites across multiple systems, are all established by
+\citet{kotte2026crc}, which we read on 2026-07-18 and folded into this study's design three days
+before its parameters were frozen. Most of what we measure replicates that work in a new task.
+Three things are ours:
+
+\begin{enumerate}
+\item \textbf{A protocol} (\S\ref{sec:protocol}): a frozen, sealed-split certification for
+  event-argument extraction at the \textbf{source-document} unit. \citet{kotte2026crc} evaluates no
+  event-argument extraction, and we found no prior application of distribution-free risk control at
+  this unit for this task, though we ran no systematic survey.
+\item \textbf{A three-way decomposition of the failure} (\S\ref{sec:three}), which is the paper's
+  main finding. The third mechanism --- a well-ranked score defeated by the finite-sample penalty
+  alone --- appears in only one of our three systems and is the one we had no vocabulary for.
+\item \textbf{A dissociation between grounding and certifiability} (\S\ref{sec:grounding}),
+  measured rather than asserted.
+\end{enumerate}
+
+\section{Protocol}
+\label{sec:protocol}
+
+\paragraph{Task and unit.} RAMS \cite{ebner2020rams}, in-domain. A system may \textbf{abstain} on a
+document rather than emit event frames. The independent unit is the \textbf{source document}, which
+we call a \emph{group} because one source document carries one or more trigger instances: it is the
+level at which the corpus has near-duplicates, so it is the level at which independence is
+defensible. \textbf{Group loss} is the mean bounded frame loss over the document's triggers
+($1 - $ span-exact micro-F1 per frame); a structurally invalid or ungrounded output scores 1.0.
+\textbf{Group score} is the \textbf{minimum} confidence over the group's instances, and a group is
+eligible only if \textbf{every} instance parsed and grounded. Accepting on the weakest member and
+averaging the loss is what makes acceptance a statement about the whole document --- and
+\S\ref{sec:three} shows it is also consequential.
+
+\paragraph{Target, frozen before any sealed label was read.} Risk $\alpha = 0.20$, confidence
+$\delta = 0.05$, acceptance floor 0.20. A commitment this study made, not a natural constant.
+Nothing below relaxes it and no certificate is issued at any other operating point.
+
+\paragraph{Systems.} Zero-shot (ZS), few-shot (FS), and a QLoRA-adapted (QA)
+Qwen3-4B-Instruct-2507, all served on one frozen 4-bit vLLM stack. Confidence is mean transition
+log-probability over the parsed object; two alternatives were pre-registered and are reported.
+
+\paragraph{Discipline.} The certification split was opened \textbf{exactly once} --- 3,152
+documents forming 1,396 groups --- under a hash-chained access log, with zero reads of the held-out
+\texttt{final} and \texttt{shift} splits, which remain sealed. ``Zero reads'' means no gold from those splits
+entered the access log or scoring; RAMS stores text and labels together, so the archive itself was
+parsed whole. Certification and all analysis ran
+on CPU at no cost; the GPU programme totalled \$18.7--18.9 --- a band rather than a figure because
+there is no single spend ledger, and one job's cost is recovered by differencing running totals
+that admit two readings.
+
+\paragraph{Three population sizes, kept distinct.} 1{,}396 groups form the coverage denominator and
+are what the certificate's sample precondition is checked against; \textbf{1{,}392} can be scored
+and ranked, and that is the population every AUROC here uses; acceptance additionally requires
+every member to parse and ground, leaving 1{,}266 for QA. \textbf{The four-group difference is not
+incidental.} Each of the four contains a document that produced no generation at all, so it carries
+no confidence value, and since a group scores at its weakest member the whole group is unrankable.
+They are the \emph{same four in every system}, which makes them a property of the corpus rather
+than of any model, and they remain rows --- so the precondition still sees 1{,}396 while no score
+can order them.
+
+\section{The null, and three ways to reach it}
+\label{sec:three}
+
+\textbf{No system certifies.} All three are infeasible under the primary construction and under a
+conservative audit. Because both baselines are infeasible, the two pre-registered comparisons
+collapse to \textbf{one} finding, and no numerical difference is computed against an infeasible
+baseline.
+
+That much is a replication. What it does not say is \emph{why}, and answering that needs three
+upper bounds on what any policy could have accepted, in increasing strictness
+(Table~\ref{tab:main}). Confusing them is easy and consequential; an earlier draft of this paper
+did exactly that, and \S\ref{sec:limitations} records it.
+
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Certification split & ZS & FS & \textbf{QA} \\
+\midrule
+base risk $\mu$ (group)            & 0.9923 & 0.9580 & \textbf{0.6071} \\
+ineligible groups                  & 1,020  & 684    & \textbf{130} \\
+\addlinespace
+\multicolumn{4}{@{}l}{\emph{upper bounds on acceptance at $\alpha=0.20$}}\\
+(1) arithmetic bound               & 0.0096 & 0.0525 & 0.4911 \\
+(2) oracle, empirical              & 0.0036 & 0.0244 & 0.2357 \\
+(3) oracle, \textbf{certified}     & 0.0000 & 0.0000 & \textbf{0.1139} \\
+\addlinespace
+delivered, empirical               & 0.0000 & 0.0000 & 0.0201 \\
+delivered, \textbf{certified}      & 0.0000 & 0.0000 & \textbf{0.0000} \\
+\addlinespace
+AUROC (error detection)            & 0.344  & 0.727  & \textbf{0.796} \\
+normalized AURC                    & 0.926  & 0.920  & \textbf{0.531} \\
+Spearman $\rho$ vs.\ loss          & $-$0.027 & $+$0.073 & \textbf{$-$0.403} \\
+\bottomrule
+\end{tabular}
+\caption{All 1,396 certification groups, each system at the confidence candidate its development
+gate selected. (1) is $1-(\mu-\alpha)/(1-\alpha)$; (2) ranks the population by true loss; (3)
+requires that perfect ranking's Hoeffding upper bound to stay within $\alpha$ at the per-system
+$\delta/3$. \textbf{No entry in rows (3) or ``delivered, certified'' reaches the 0.20 floor.}
+Normalized AURC is 0 for a perfect ranking, 1 for chance. AUROC for ZS and FS rests on only 3 and
+18 non-failing groups respectively (failure prevalence 0.998 and 0.987) and is correspondingly
+unstable; QA's rests on 90.}
+\label{tab:main}
+\end{table}
+
+\paragraph{Mechanism 1: base risk.} For ZS and FS this alone settles it. Base risks of 0.992 and
+0.958 permit at most 0.96\% and 5.25\% acceptance against a 20\% floor, so \emph{no score whatever}
+could certify them, and their rows need no further explanation. It does \textbf{not} settle QA,
+which is permitted 49.1\%. Attributing QA's null to $\mu$ is the error of treating a population
+ceiling as a forecast --- the ceiling bounds what an oracle score could do, and nothing more.
+
+\paragraph{Mechanism 2: ranking.} QA's score reaches 2.0\% acceptance where a perfect ranking of
+the identical population reaches 23.6\%. Both figures are empirical and carry no finite-sample
+penalty, so the comparison is like-for-like and the \textbf{21.6-point gap is attributable to the
+ranking alone}. This is the score-discrimination result, and it is the only one of the three
+mechanisms that is the score's fault.
+
+What makes it worth reporting is that the score is not bad. Group AUROC for error detection is
+\textbf{0.796} (95\% bootstrap CI $[0.737, 0.850]$, 10{,}000 resamples; the interval is wide
+because only 90 of 1{,}392 scored groups are error-free); $\rho = -0.403$ at $p \approx 10^{-55}$;
+normalized AURC 0.531 says it closes roughly half the distance between a random ranking and a
+perfect one. On development the figures are 0.834, $-0.313$ and 0.568. Table 5 of
+\citet{kotte2026crc} puts that in the same broad range: log-probability scores there reach AUROC
+0.485--0.604 across NER, QA and classification, and 0.793 on JSON extraction, the one
+structured-generation task in that paper. We do not treat 0.796 against 0.793 as a matched
+comparison --- theirs is instance-level and ours group-level, and our own interval spans
+0.737--0.850. The claim we need is weaker and safe: this is an ordinary log-probability score,
+performing about as its family does, not a straw man built to fail.
+
+\paragraph{Mechanism 3: the finite-sample penalty.} Ranking well is not enough, and this is the
+mechanism we had no vocabulary for. \textbf{Two thresholds must be kept apart, and we name them
+separately because conflating them cost us three published figures.} The
+\emph{20\%-coverage prefix} is the smallest accepted set that is 20\% of the corpus:
+$0.20 \times 1{,}396 = 279.2$, so it is $k = \mathbf{280}$, and every figure in this paragraph uses
+it. The \emph{acceptance floor} is the protocol's own test, applied to a lower confidence bound
+rather than to raw coverage, and it is not met until $k = 332$ (\S\ref{sec:frozen-config}). Take
+the perfect ranking of mechanism 2 --- 23.6\% acceptance, empirical risk 0.175 at the
+20\%-coverage prefix --- and require it to \emph{certify} rather than merely to average below
+$\alpha$. Its Hoeffding upper bound at the per-system $\delta/3$ allocation is 0.267 there, and the
+largest acceptance it can certify is \textbf{11.4\%} (8.4\% family-wide). \textbf{A perfect ranking
+of this population does not reach the acceptance floor either.} The measured score certifies
+\textbf{0.0\%}.
+
+\paragraph{Which bound, and why it matters.} The 11.4\% is the \emph{conservative audit's}
+Hoeffding bound, not the primary certificate, whose risk test is an \textbf{empirical Bernstein}
+bound --- the natural objection here, since a loss-optimal prefix is almost all zero-loss and
+Bernstein is tighter on low variance. It does not rescue the result: run through the certifier
+itself with one pre-chosen oracle candidate and no multiplicity penalty, that ranking certifies
+\textbf{0.0000} at every coverage tested. So 11.4\% is the \emph{most generous} certified reading
+available.
+
+\paragraph{At the frozen configuration, both constraints fail.}\label{sec:frozen-config} A
+certificate must clear the acceptance floor \emph{and} the risk target, and at this corpus size the
+perfect ranking clears neither. The frozen allocation is three candidates per system at $\delta/3$ --- both divisions
+apply --- and there the oracle prefix's acceptance lower bound is \textbf{0.1984}, \emph{below} the
+0.20 floor; the smallest prefix that would clear it is 332 against the oracle's 329. The risk test
+fails independently. We state this because an earlier draft of this paragraph quoted 0.2017, which
+is the same bound computed without the per-system $\delta/3$ division, and concluded that
+acceptance cleared and only risk bound --- a stronger-sounding claim that is false at the
+configuration it named. Every figure in this paragraph is emitted with its allocation in the
+released sensitivity artifact.
+
+QA is the only system in which this mechanism is visible, because ZS and FS are already dead at
+mechanism 1. Figure~\ref{fig:rc} shows all three distances in one panel.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig/risk-coverage-qa.pdf}
+\caption{Three curves over the same 1,396 groups, differing only in ranking and in whether a
+confidence bound is applied. Where each crosses the $\alpha = 0.20$ rule is the acceptance it
+supports: 0.0201 for the measured score, 0.2357 for a perfect ranking, and 0.1139 for that same
+perfect ranking once certified. \textbf{The certified crossing lies to the left of the 0.20
+acceptance floor}, so no curve here represents a system that could have been certified. Ranking
+costs 0.216 of acceptance (0.0201 against 0.2357); the finite-sample penalty costs a further 0.122
+(0.2357 against 0.1139). Curves are distinguished by dash pattern as well as colour, so the
+comparison survives greyscale printing.}
+\label{fig:rc}
+\end{figure}
+
+\paragraph{The finite-sample penalty is a fact about the benchmark.} Mechanism 3 is not a property of this run. Two independent calculations say so, and
+they are separate arguments rather than one restated.
+
+\emph{From the bound.} At $n = 1{,}396$ and this study's $\delta/3$ allocation, the Hoeffding
+radius at the floor is \textbf{0.0925}, spent before any data is seen --- so passing the
+\emph{risk test} at the floor requires an accepted set carrying mean loss $\leq \mathbf{0.1075}$.
+\textbf{Under this bound and allocation the risk test's effective target is halved}, for any
+system; the primary empirical-Bernstein test's requirement depends on the loss distribution. It does
+not follow that such a system certifies: a certificate must also clear the acceptance floor on its
+\emph{lower} bound, which at the floor-meeting prefix it does not, and 332 accepted groups are
+needed for that. Clearing the risk test with \emph{this} loss distribution would take
+\textbf{18{,}740 groups, 13.4$\times$ this split}. Both figures are properties of $n$ and of the
+$\delta/3$ split, not of the corpus alone: a single-system entrant at the full $\delta$ inherits
+neither.
+
+\emph{From the certifier's own precondition, which binds far sooner.} At the frozen $\delta/3$
+allocation the theorem admits a grid of at most \textbf{three} candidates on this corpus: three
+require 1{,}386 groups and the split holds 1{,}396, but a fourth would require 1{,}432. \textbf{The
+frozen grid is the largest this allocation can support}, and it is frozen at exactly that size. We
+state capacity rather than a margin in groups because the row count and the rankable count differ
+--- four groups contain a document that produced no generation at all, and since a group scores at
+its weakest member all four are unscorable, the same four for every system, so a property of the
+corpus rather than any model. They remain rows, so the precondition still sees 1{,}396; they cannot
+be ranked, so 1{,}392 is what any score orders. \textbf{At a three-system $\delta/3$ split this
+corpus sits at the edge of what the certificate can be run on at all} --- a constraint on the
+benchmark under this design, applying to work that has not run yet. A study certifying one system
+at the full $\delta$ would face a laxer capacity, and we do not claim otherwise.
+
+\paragraph{Taken together: overdetermined.} Every system is blocked by at least one mechanism and
+QA by two, so no single repair rescues any of them. The three are \emph{not} all active on every
+system, and saying they \emph{each} forbid the target would be false: base risk permits QA 49.1\%
+and settles only the two baselines.
+
+That distinction decides what a reader may conclude, and either half alone misleads. Shown only
+mechanism 2, a reader infers that a better score would have certified this system --- it would not;
+the perfect ranking of the same population certifies at most 11.4\% under a Hoeffding bound,
+and nothing under the primary certifier. Shown only mechanism 1, a reader
+infers that the model is simply too weak --- false for QA, whose base risk permits nearly half the
+corpus. The honest statement needs both: \textbf{nothing could have certified this system --- not a
+better score, not a perfect one} --- \emph{and} the score is still responsible for a 21.6-point
+share of the shortfall. A null that names only one mechanism is not a weaker version of this
+finding; it is a different and wrong one.
+
+\paragraph{The unit definition is also decisive}, and it is not separable from mechanism 3: the
+unit fixes the group count, which is exactly what the capacity argument above turns on. Stratifying
+QA's groups by triggers per document, mean group loss is essentially flat --- 0.606, 0.608, 0.589,
+0.634, 0.596 from one trigger to six or more --- but the share of groups within $\alpha$ collapses
+from \textbf{17.3\% to 0.7\% to zero}, and 23 of the 28 groups the score's best within-$\alpha$ prefix accepts are single-trigger.
+Groups with three or more triggers contribute \textbf{none}. Averaging frame loss across a document
+and scoring the group by its weakest member makes acceptance vanish with document complexity
+\emph{even where mean loss does not move}. Cross-sentence distance behaves the same way: 25 of 28
+acceptances have no cross-sentence argument. \textbf{A protocol reporting only aggregate loss sees
+neither effect}, and would read this corpus as uniformly hard rather than as hard in a way the
+aggregation choice creates.
+
+\section{What the adapter changed, and what it did not}
+\label{sec:grounding}
+
+QLoRA produced a large, real improvement in \textbf{grounding fidelity}: 95.7\% of QA outputs
+parse and ground to the source document against 39.4\% zero-shot and 68.1\% few-shot, ungrounded
+spans falling from 5,355 to 340. ``Valid'' means parseable and grounded, \textbf{not correct}, and
+\textbf{this did not translate into a certified selective guarantee}; neither half of that sentence
+may be reported without the other. Decomposing loss into four channels says why: the
+${\sim}16\times$ separation lives in the channels forced to loss 1.0 or contentless, while the
+certificate scores the fourth --- well-formed, grounded, content-bearing output, holding
+\textbf{90.3\%} of QA's documents and \textbf{87\%} of its loss at a within-channel mean of 0.579.
+The adapter moved the channels the certificate does not score.
+
+\textbf{This is a dissociation, not an orthogonality result.} One intervention across three systems
+cannot establish independence and we did not test it; at group level the two are weakly associated
+($\rho = -0.206$, $p \approx 8\times10^{-15}$), yet the 1{,}266 fully-grounded QA groups still
+average \textbf{0.589} loss, three times the target. Grounding was necessary and nowhere near
+sufficient. The decomposition locates loss by channel and identifies no error category: an earlier
+version blamed output ``that names the wrong entity'' on two development examples and was withdrawn
+on review, and a measurement points elsewhere --- false positives exceed false negatives by 637
+arguments, which is over-generation.
+
+\section{Relation to prior work}
+
+What we add to \citet{kotte2026crc} (\S\ref{sec:intro-contrib}) is the separation of mechanism 2
+from mechanism 3. One boundary: our base risk (0.6071) is \textbf{not} a reproduction of their
+extraction figure and does not contradict it --- JSON-Extract sits at $\mu = 0.033$, a different
+task under a different metric.
+
+\textbf{This is not a task-wide impossibility.} On their datasets $(\mu-\alpha)/(1-\alpha)$ forbids
+nothing at $\mu = 0.033$ and permits up to 80.5\% acceptance at $\mu = 0.356$, so a 20\% target is
+\emph{not excluded} on structured extraction. Not being forbidden is not achievability --- they
+find certification practical only at $\alpha = 0.30$--$0.40$ --- but it shows the barrier here is
+specific to this model, score and task.
+
+\section{Conclusion}
+
+A score with AUROC 0.796 certified nothing here, and neither would a perfect ranking of the same
+data. Infeasibility was overdetermined --- base risk settles the two baselines, ranking and the
+finite-sample penalty settle the adapted model, and no single repair rescues any of the three ---
+and only ranking is the score's fault. Ranking quality alone distinguishes
+none of them.
+
+\section*{Limitations}
+\label{sec:limitations}
+
+\textbf{Our publication gate cannot see the error this paper is about, and we made that error five
+times in the claims reported here.} That scope is stated rather than implied: five is the count
+within the reported claims, not the count in the project, and an unscoped five would be doing the
+thing this section is about. Start with the gate's design, because the record below follows from
+it. The gate checks
+that a claim's cited evidence exists and is version-controlled. It never opens the file, never
+compares a number against it, and never sees the configuration --- the confidence allocation, the
+candidate count, the sample size --- that produced either. Three things follow immediately. The
+defect it is blind to is \emph{quoting a quantity that resembles a certified one and is not}: the
+citation resolves, so the claim passes, and a figure computed at one configuration and written into
+prose naming another is indistinguishable to it from a correct one. Nothing bounds how often that
+happens, because nothing is looking. And the only filter left is whether a number looks plausible
+to its author --- which is not a neutral filter, because a number that flatters the result looks
+plausible to the author who wants it.
+
+\textbf{The five instances are what that design predicts.} (i) The $\alpha$-frontier point 0.406
+was nearly reported as a threshold; caught by a claim-wording audit. (ii) The empirical oracle
+0.2357 was reported as clearing the floor; caught by independent review, and false --- certified,
+it is 11.4\%. (iii) That 11.4\% was labelled ``certified'' without saying it is the conservative
+audit's bound rather than the primary construction; caught by a pre-submission audit. (iv) A
+claim-narrowing correction was applied to a derived document and not to the claim ledger it derives
+from, so a byte-identity guard propagated the uncorrected text into the generated appendix ---
+caught by review. (v) An acceptance lower bound was quoted at an allocation the paper did not use,
+supporting a sentence that is false at the allocation it named --- caught by review. Every one of
+the five cites evidence that exists and is tracked. The gate returned \emph{ok} for all of them.
+
+\textbf{All five erred in the direction that flattered the result, and the last two were caught by
+reviewers rather than by our own checking.} That is the predicted bias, observed. Instances (iv)
+and (v) occurred inside passages written specifically to state a margin honestly: the intention to
+be careful did not prevent them, because intention is not the variable --- what varies is whether
+anything reads the evidence. We report this as a measurement rather than a confession. Five
+instances of one defect class in the reported claims, all in one direction, under a gate that by
+construction cannot see any of them, is a property of the gate. \textbf{Our gate certifies agreement, not correctness},
+which is the same distinction, one level up, that this paper draws between ranking a population
+well and certifying anything about it.
+
+\textbf{Not production-grade}, and no deployment claim is made. \textbf{The certificate bounds
+average within-group loss, not the absence of error} in any document; certified $\neq$ safe.
+
+\textbf{The system is not competitive on extraction quality.} Group loss 0.6071 corresponds to a
+mean per-document span-exact F1 of about 0.393 --- a mean of per-document F1, \textbf{not}
+comparable to corpus-level micro Arg-C figures such as the 54.4 of \citet{huang2026rose}, but the
+gap is real and we claim no competitiveness.
+
+\textbf{Single seed, no ablations.} One frozen 4-bit vLLM stack, 86.3\% parsed-output agreement
+against the training stack. The abstain/extract decision flips between stacks on \textbf{1.3\%} of
+frames, and those flips \emph{concentrate} rather than thin out under tightening --- \textbf{1.8\%}
+among the most-confident three quarters. These are two measurements, not an interval: the same
+flips over a smaller denominator. Portability is not established.
+
+\textbf{In-domain RAMS only}, span-exact matching; \texttt{final} and \texttt{shift} are descoped
+and remain sealed, so no shift claim is made in either direction. \textbf{The mechanism-2 and
+mechanism-3 quantities are post-hoc on an opened split}; they select no threshold and certify
+nothing. \textbf{The infeasibility was knowable for \$0} before that split was opened, and neither
+implementer nor reviewer ran the check. \textbf{Only one score family was tested}: agreement-based
+scores reach AUROC 0.600--0.816 across the eight datasets of \citet{kotte2026crc} and might behave
+differently, and mechanism 3 would still apply to them.
+
+\section*{Reproducibility}
+
+Protocol, certifier, diagnostics and claim ledger are code. \textbf{Every figure in this paper is
+checked mechanically against a committed artifact carrying both its value and the configuration
+that produced it} --- the $\delta$, its allocation, the candidate count, the $n$ --- with the
+exceptions named in the released manifest. A figure carrying no configuration is how three of the
+errors in Limitations happened. Artifact hashes are pinned over
+git-canonical (LF) bytes and say so: \textbf{a hash without its byte convention is the same defect
+as a bound without its $\delta$ allocation}, and we shipped one --- a CRLF working-copy digest,
+which no reader on a Linux checkout could reproduce, in a line whose only purpose was to let them
+try. Released with publication: source, the frozen group mapping, per-system
+predictions with confidence candidates, and the certification and diagnostic artifacts. Raw corpus
+text and sealed labels are not redistributable.
+
+\bibliography{uncertainlp-2026-short}
+
+\end{document}

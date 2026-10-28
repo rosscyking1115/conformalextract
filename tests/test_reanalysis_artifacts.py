@@ -44,6 +44,11 @@ def decomposition() -> dict:
 
 
 @pytest.fixture(scope="module")
+def calibration() -> dict:
+    return _load("calibration_diagnostics.json")
+
+
+@pytest.fixture(scope="module")
 def diagnostic() -> dict:
     return _load("risk_coverage_diagnostic.json")
 
@@ -236,3 +241,245 @@ def test_artifacts_declare_themselves_diagnostic(name: str) -> None:
     artifact = _load(name)
     assert artifact["diagnostic_only"] is True
     assert artifact["certifies_nothing"] is True
+
+
+# --- the section 11.3 calibration artifact (added 2026-08-02, reviewer ruling R3) ------
+
+#: The candidate the development gate selected per system. The calibration artifact reports all
+#: three candidates; only the selected one is comparable with the committed certification figures.
+SELECTED_CANDIDATE = {"qa": "mean", "fs": "tenth_percentile", "zs": "mean"}
+
+
+def test_calibration_reproduces_the_committed_risk_coverage_diagnostic(
+    calibration: dict, diagnostic: dict
+) -> None:
+    """The two artifacts must agree about acceptance and risk, or one of them is wrong.
+
+    This is the check the packet asserted by hand and nothing enforced. It reads committed
+    evidence only.
+    """
+
+    for system in SYSTEMS:
+        cal = calibration["splits"]["certification"][system][SELECTED_CANDIDATE[system]]
+        ref = diagnostic["splits"]["certification"][system]
+        assert cal["selective_risk"]["max_acceptance_within_alpha"] == pytest.approx(
+            ref["max_acceptance_within_alpha"], abs=1e-12
+        ), system
+        assert cal["selective_risk"]["eligible_groups"] == ref["eligible_groups"], system
+        assert cal["selective_risk"]["total_groups"] == ref["total_groups"], system
+        at_floor = cal["selective_risk"]["risk_at_coverage"][f"{FROZEN_ACCEPTANCE_FLOOR:.2f}"]
+        if ref["risk_at_floor_acceptance"] is not None:
+            assert at_floor == pytest.approx(ref["risk_at_floor_acceptance"], abs=1e-12), system
+
+
+def test_calibration_shares_the_one_certification_access_chain(
+    calibration: dict, frontier: dict, decomposition: dict, certification: dict
+) -> None:
+    """One opening of the sealed split, re-read -- not a second opening.
+
+    ``risk_coverage_diagnostic.json`` carries NO access block and is deliberately absent from this
+    list; an earlier version of the amendment and its routing packet both named it as a
+    hash-carrier, which was wrong. The third carrier is the certification result itself.
+    """
+
+    heads = {
+        name: art["certification_access"]["head_hash"]
+        for name, art in (
+            ("calibration", calibration),
+            ("frontier", frontier),
+            ("decomposition", decomposition),
+            ("certification", certification),
+        )
+    }
+    assert len(set(heads.values())) == 1, heads
+    assert "certification_access" not in diagnostic_has_access_block()
+
+
+def diagnostic_has_access_block() -> dict:
+    """The risk-coverage diagnostic, read fresh, so the assertion above states a fact rather than
+    relying on a fixture that might later gain the field."""
+
+    return _load("risk_coverage_diagnostic.json")
+
+
+def test_calibration_never_reports_a_sealed_read(calibration: dict) -> None:
+    access = calibration["certification_access"]
+    assert access["final_reads"] == 0
+    assert access["shift_reads"] == 0
+    assert access["verified"] is True
+    assert access["documents_read"] == 3152
+
+
+def test_certified_acceptance_never_exceeds_the_empirical_figure(calibration: dict) -> None:
+    """The refuted claim, pinned as an invariant of the committed artifact.
+
+    An independent review found the write-up asserting that a perfect ranking "would clear the
+    20% floor" on the strength of the EMPIRICAL oracle while the certified one sat below it. A
+    confidence bound cannot beat the point estimate it is built from, and no regeneration of this
+    artifact may ever suggest otherwise.
+    """
+
+    for split in ("development", "certification"):
+        for system in SYSTEMS:
+            for candidate, readout in calibration["splits"][split][system].items():
+                risk = readout["selective_risk"]
+                assert (
+                    risk["acceptance_certified_loss_optimal"]
+                    <= risk["acceptance_under_loss_optimal_ranking"] + 1e-12
+                ), (split, system, candidate)
+                assert (
+                    risk["acceptance_certified_score_ranked"]
+                    <= risk["max_acceptance_within_alpha"] + 1e-12
+                ), (split, system, candidate)
+
+
+def test_the_certified_oracle_misses_the_floor_for_every_system(calibration: dict) -> None:
+    """The corrected finding, in the artifact rather than only in prose: infeasibility is
+    overdetermined, and not even a perfect ranking certifies at the frozen floor."""
+
+    for system in SYSTEMS:
+        risk = calibration["splits"]["certification"][system][SELECTED_CANDIDATE[system]][
+            "selective_risk"
+        ]
+        assert risk["acceptance_certified_loss_optimal"] < FROZEN_ACCEPTANCE_FLOOR, system
+        assert risk["acceptance_certified_score_ranked"] == 0.0, system
+
+
+def test_calibration_declares_itself_diagnostic_and_names_its_reversal(calibration: dict) -> None:
+    assert calibration["diagnostic_only"] is True
+    assert calibration["certifies_nothing"] is True
+    assert calibration["alpha"] == FROZEN_ALPHA
+    assert "reverses_disposition" in calibration
+
+
+# --- ruling R3 applied to the sensitivity artifact ------------------------------------------
+# It was cited as evidence by the ledger and quoted by the write-up while nothing re-checked it,
+# which is the state R3 exists to close. An independent reviewer found it registered nowhere and
+# carrying no access attestation, so a verifier of the file had nothing to check.
+
+
+@pytest.fixture(scope="module")
+def sensitivity() -> dict:
+    return _load("certification_sensitivity.json")
+
+
+def test_sensitivity_agrees_with_the_certificate_it_decomposes(
+    sensitivity: dict, certification: dict
+) -> None:
+    """Its n and its frozen configuration must be the certificate's, or it decomposes nothing."""
+
+    frozen = sensitivity["frozen"]
+    assert frozen["alpha"] == certification["alpha"] == FROZEN_ALPHA
+    assert frozen["delta"] == certification["delta"]
+    assert frozen["acceptance_floor"] == certification["acceptance_floor"]
+    assert sensitivity["population"]["rows_passed_to_certifier"] == (
+        certification["n_certification_groups"]
+    )
+
+
+def test_only_the_frozen_allocation_is_marked_frozen(sensitivity: dict) -> None:
+    """The allocation the run actually used must be the one that fails, and it must say so.
+
+    The error this artifact was written for was quoting 0.2017 -- the value at an allocation the
+    project never ran -- while naming the frozen one. So the frozen entry carries both divisions
+    and does NOT clear the floor, and the other entries are recorded as what they are.
+    """
+
+    allocations = sensitivity["acceptance_lower_bound_by_allocation"]
+    frozen = allocations["frozen_run_three_candidates_delta_over_three"]
+    assert frozen["delta"] == pytest.approx(sensitivity["frozen"]["delta"] / 3)
+    assert frozen["candidate_count"] == sensitivity["frozen"]["candidates_per_system"]
+    assert frozen["clears_acceptance_floor"] is False
+    assert frozen["acceptance_lower_bound"] < FROZEN_ACCEPTANCE_FLOOR
+    assert allocations["three_candidates_full_delta"]["delta"] == sensitivity["frozen"]["delta"]
+
+
+def test_sensitivity_discloses_its_label_access(sensitivity: dict, calibration: dict) -> None:
+    """It opens certification gold, so it carries the same chained disclosure as its siblings."""
+
+    access = sensitivity["certification_access"]
+    assert access["certification_gold_read"] is True
+    assert access["verified"] is True
+    assert access["final_reads"] == 0
+    assert access["shift_reads"] == 0
+    assert access["head_hash"] == calibration["certification_access"]["head_hash"]
+
+
+def test_sensitivity_declares_itself_diagnostic(sensitivity: dict) -> None:
+    assert sensitivity["diagnostic_only"] is True
+    assert sensitivity["certifies_nothing"] is True
+
+
+# --- the corpus-size requirement, registered on the same ruling ------------------------------
+# Caught by tests/test_evidence_artifact_registration.py on its first run: this artifact backs
+# the abstract's order-of-magnitude claim and was named by no test at all.
+
+
+@pytest.fixture(scope="module")
+def corpus_size() -> dict:
+    return _load("corpus_size_requirement.json")
+
+
+def test_exactly_floor_coverage_never_clears_the_floor(corpus_size: dict) -> None:
+    """The load-bearing half of the abstract's sentence, and the half that is exact.
+
+    Acceptance is tested on a LOWER confidence bound, so accepting exactly the floor share of a
+    corpus cannot clear the floor at any n. If this ever passes at some size, the abstract is
+    wrong and the sentence has to go.
+    """
+
+    curve = corpus_size["acceptance_lower_bound_at_exactly_the_floor_coverage"]
+    assert len(curve) >= 5, "too few sizes to say anything about convergence"
+    for row in curve:
+        assert row["clears_acceptance_floor"] is False, row
+        assert row["acceptance_lower_bound"] < FROZEN_ACCEPTANCE_FLOOR, row
+    # Monotone approach from below: more data narrows the gap and never closes it.
+    shortfalls = [row["shortfall"] for row in curve]
+    assert shortfalls == sorted(shortfalls, reverse=True), shortfalls
+    assert shortfalls[-1] > 0.0
+
+
+def test_the_corpus_requirement_is_published_as_a_band(corpus_size: dict) -> None:
+    """Both profile treatments are recorded, because the data does not settle the third digit."""
+
+    smallest = corpus_size["smallest_corpus_admitting_a_certificate"]
+    low, high = smallest["band_n"]
+    assert low < high, "a band whose endpoints coincide is a point wearing a band's clothes"
+    assert smallest["profile_rounded_to_whole_group"]["n"] == low
+    assert smallest["profile_interpolated"]["n"] == high
+    for treatment in ("profile_rounded_to_whole_group", "profile_interpolated"):
+        entry = smallest[treatment]
+        # Whatever the treatment, the answer must clear BOTH tests -- that is the whole point.
+        assert entry["risk_upper_bound"] <= FROZEN_ALPHA + 1e-12, treatment
+        assert entry["acceptance_lower_bound"] >= FROZEN_ACCEPTANCE_FLOOR, treatment
+        assert entry["coverage"] > FROZEN_ACCEPTANCE_FLOOR, (
+            f"{treatment}: a certificate at exactly the floor coverage is impossible"
+        )
+
+
+def test_the_witness_at_the_observed_corpus_clears_both_tests(corpus_size: dict) -> None:
+    """The corrected counter-example. The one it replaced cleared only the risk test."""
+
+    witness = corpus_size["witness_at_the_observed_corpus"]
+    assert witness["acceptance_lower_bound"] >= FROZEN_ACCEPTANCE_FLOOR
+    assert witness["mean_loss_a_certifying_prefix_may_carry"] < FROZEN_ALPHA
+    assert witness["exists_a_certifying_model"] is True
+    assert (
+        witness["observed_prefix_mean_loss"]
+        > witness["mean_loss_a_certifying_prefix_may_carry"]
+    ), (
+        "if the observed prefix already carried little enough loss, this system would certify"
+    )
+
+
+def test_corpus_size_agrees_with_the_certificate_it_extrapolates(
+    corpus_size: dict, certification: dict
+) -> None:
+    assert corpus_size["observed_n"] == certification["n_certification_groups"]
+    assert corpus_size["alpha"] == certification["alpha"] == FROZEN_ALPHA
+    assert corpus_size["acceptance_floor"] == certification["acceptance_floor"]
+    assert corpus_size["diagnostic_only"] is True
+    assert corpus_size["certifies_nothing"] is True
+    assert "extrapolation_assumption" in corpus_size, (
+        "the extrapolation must be declared, not implied"
+    )

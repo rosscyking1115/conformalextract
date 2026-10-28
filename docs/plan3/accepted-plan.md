@@ -503,6 +503,13 @@ Assign every non-zero-loss prediction one or more deterministic categories:
 - empty-output collapse;
 - context-window evidence loss.
 
+> **Scope amendment:** The reviewed [2026-07-30 certification-only scope addendum](section-12-1-certification-only-scope-addendum-2026-07-30.md) amends the population scope of the sentence introducing the list above — every non-zero-loss prediction in the already-open `certification` role, across `zs`, `fs` and `qa` — and leaves the eleven categories and their multi-label semantics unchanged. It additionally imposes, among other things, a fail-closed role guard, pinned input identities, a retain-uncertainty rule, required per-system reporting, and seven preconditions on any future execution against this section. It does not authorise execution.
+
+> **Descoped 2026-10-27.** §12.1 was never executed and is descoped from Plan 3 by
+> [Amendment 2 to the §11/§12 disposition](sections-11-and-12-disposition-amendment-2.md), on Ross's choice under
+> close-chain review item S1-B1. It was computable at $0; the ground is that no live claim
+> depends on it. Plan 3 makes no error-category claim. The text above is unchanged.
+
 ### 12.2 Manual audit sample
 
 Create a frozen stratified sample before reading examples:
@@ -515,6 +522,9 @@ Create a frozen stratified sample before reading examples:
 - all categories sampled by source-document group without replacement where possible.
 
 If fewer cases exist, report all. The audit explains failure mechanisms; it does not relabel gold data or alter the main metrics.
+
+> **Disposed 2026-10-27.** Three strata are empty and two are computable but descoped; the
+> sample is not constructed. Stratum by stratum in [Amendment 2](sections-11-and-12-disposition-amendment-2.md).
 
 ### 12.3 Error attribution limits
 
@@ -803,6 +813,10 @@ None of these may be revised after certification or final results merely to impr
 - [ ] Failure taxonomy/manual audit and all result artifacts are generated.
 - [ ] Reproduction command regenerates tables/figures from immutable artifacts.
 - [ ] No post-test configuration change enters the headline evidence.
+
+> **Noted 2026-10-27.** The failure taxonomy/manual audit half of the ninth line is waived:
+> both are descoped by [Amendment 2](sections-11-and-12-disposition-amendment-2.md). The "all result artifacts" half is not
+> waived. The checklist above is unchanged.
 
 Acceptance of this plan authorises drafting Plan 4. It does not mark experiments complete or permit out-of-order label access.
 

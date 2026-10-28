@@ -6,7 +6,7 @@ import typing
 from pathlib import Path
 
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from conformalextract.certification_run import (
@@ -43,6 +43,9 @@ def _rows(losses: list[float], scores: list[float] | None = None) -> list[GroupR
     ]
 
 
+# No deadline: this failed intermittently only under concurrent GPU load and never alone, which
+# is Hypothesis's 200 ms default deadline tripping, not a numerical difference.
+@settings(deadline=None)
 @given(
     losses=st.lists(st.floats(min_value=0.0, max_value=1.0), min_size=2, max_size=40),
     alpha=st.floats(min_value=0.0, max_value=1.0),
@@ -419,7 +422,12 @@ def test_the_role_reading_commands_are_discovered() -> None:
     """Guard the guard: if discovery silently returns nothing, the tests below prove nothing."""
 
     discovered = set(_role_reading_commands())
-    assert discovered == {"risk-coverage-diagnostic", "alpha-frontier", "loss-decomposition"}, (
+    assert discovered == {
+        "risk-coverage-diagnostic",
+        "alpha-frontier",
+        "loss-decomposition",
+        "calibration-diagnostics",
+    }, (
         "a command taking a split-role list appeared or vanished; if it is new it must be "
         "guarded, and if it is a Path-typed --roles it must not be selected here"
     )

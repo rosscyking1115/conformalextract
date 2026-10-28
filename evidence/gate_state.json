@@ -1,0 +1,45 @@
+{
+  "schema_version": "1",
+  "_notice": "Canonical machine-readable gate state. Written because gate state was asserted in prose across at least four documents and checked in none of them, producing three stale assertions in one repository in one week: the README saying 'Plan 1 is active' through Plan 3, docs/plan4/accepted-plan.md opening Plan 4 still saying Plans 1-3 were 'not implemented', and docs/progress.md frozen at 2026-07-17 asserting 'Plans 3-4 remain sequentially blocked'. This file is the single place a document should be reconciled against, and tests/test_gate_state.py fails if it drifts from the reviewer records it summarises. It is a SUMMARY, not an authority: the records are the authority and this file must match them, never the reverse.",
+  "as_of": "2026-10-27",
+  "as_of_commit": "20be8da",
+  "_two_mechanisms_notice": "A plan close is attested two different ways in this repository, and any checker must know both. Plan 1's close lives in evidence/gate0/gate_status.v4.json as independent_plan1_verdict plus a go decision. Plan 2's lives in a reviewer record carrying review_kind 'plan_close'. A third mechanism would escape the test silently, which is the known limit of the derivation below. Updated 2026-10-27: Plan 3's close is attested by a fresh close review and its delta, review kinds 'plan3_close_fresh' (BLOCK) and 'plan3_close_fresh_delta' (PASS-WITH-NITS), filed verbatim; tests/test_gate_state.py names both in CLOSE_REVIEW_KINDS rather than the records being relabelled.",
+  "plans": {
+    "Plan 1": {
+      "state": "closed",
+      "mechanism": "gate_status",
+      "attested_by": "evidence/gate0/gate_status.v4.json",
+      "detail": "Gates 0A-0F pass, decision 'go', independent_plan1_verdict PASS, 2026-07-17."
+    },
+    "Plan 2": {
+      "state": "closed",
+      "mechanism": "plan_close_record",
+      "attested_by": "evidence/plan2/reviewer_record.plan2-close.json",
+      "detail": "Independent reviewer PASS at commit 2d3c6be, 2026-07-21. 'Plan 2 CLOSED. Plan 3 may open.'"
+    },
+    "Plan 3": {
+      "state": "closed",
+      "mechanism": "plan_close_record",
+      "attested_by": "evidence/plan3/reviewer_record.plan3-close-fresh-delta.json",
+      "detail": "Closed 2026-10-27. The fresh close review (evidence/plan3/reviewer_record.plan3-close-fresh.json) found O1-O3 of the 2026-07-29 refusal discharged and blocked on one paper heading; its delta returned PASS-WITH-NITS at d8d2223: 'Plan 3 MAY BE CLOSED'. Certification ran once on 2026-07-22 and returned infeasibility for all three systems; that result is unchanged."
+    },
+    "Plan 4": {
+      "state": "open",
+      "activity": "RESUMED",
+      "mechanism": "prior_plan_close",
+      "attested_by": "evidence/plan3/reviewer_record.plan3-close-fresh-delta.json",
+      "detail": "Opened by the owner on 2026-07-29 while Plan 3 had no close record. Under the gated doctrine Plan N+1 opens only after Plan N's independent reviewer PASS, so this is an override of the sequence rather than a satisfied gate. Recorded as gate G1 in docs/plan4/proposed-visibility-change.md. If Plan 3 is subsequently closed on its merits, this state becomes 'open' and the override lapses. Fulfilled 2026-10-27; see override_lapsed.",
+      "paused_on": "2026-07-29",
+      "paused_reason": "PAUSED, NOT CANCELLED. The override was granted on the hypothesis that only Plan 3's paperwork was missing; the independent close review refuted that hypothesis (evidence/plan3/reviewer_record.plan3-close.json, findings O1-O3). Plan 4 is the release plan and O2 was a live overclaim on README, report and abstract surfaces, so continuing would have built release artifacts on a claim that was about to change. Resumes when O1, O2 and O3 are discharged and Plan 3 closes on its merits.",
+      "work_that_stands": [
+        "evidence/gate_state.json and tests/test_gate_state.py — the gate-state derivation",
+        "docs/plan4/publishable-and-sealed.md — the non-reconstructive privacy review (re-run before any bundle; it is pinned to 128e52c)",
+        "the repo-wide link audit, 69 links across 57 files, zero broken",
+        "docs/plan4/open-release-decisions.md — decisions 1-4 ruled, decision 5 open",
+        "the rejection of the staged-release amendment; the seven-item minimum stands"
+      ],
+      "resumed_on": "2026-10-27",
+      "override_lapsed": "The owner override of 2026-07-29 lapsed on 2026-10-27 when Plan 3 closed on its merits. Recorded on the owner's direct instruction, 2026-10-27: 'Record the Plan 3 close and end Plan 4's override.' The gate is now satisfied by the prior plan's close, not by an override."
+    }
+  }
+}

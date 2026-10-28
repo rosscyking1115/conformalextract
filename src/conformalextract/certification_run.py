@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 
 import numpy as np
@@ -275,10 +275,16 @@ def loss_summaries(rows: Sequence[GroupRow]) -> dict[str, float]:
 class RiskCoverageFrontier:
     """Oracle risk-coverage frontier: what ANY threshold could achieve, before any bound.
 
-    This is the diagnostic that distinguishes a capability gap from a methodological artifact.
-    It applies no finite-sample penalty, no grid, and no multiplicity correction -- it sorts by
-    score and reads the empirical risk of the best-scoring prefix. If the acceptance floor is
-    unreachable *here*, no grid refinement, delta reallocation or tighter bound can rescue it.
+    This is the diagnostic that rules out the GRID AND THE BOUNDS as the cause. It applies no
+    finite-sample penalty, no grid, and no multiplicity correction -- it sorts by score and reads
+    the empirical risk of the best-scoring prefix. If the acceptance floor is unreachable *here*,
+    no grid refinement, delta reallocation or tighter bound can rescue it.
+
+    It does NOT establish that the whole infeasibility is a capability gap, and reading it that way
+    was corrected on 2026-08-03 (``CX-CAPGAP-01``). Being penalty-free is what makes it clean
+    evidence about the score, and it is also what blinds it to the finite-sample penalty -- a
+    second, method-side barrier that can forbid a certificate the empirical curve permits. Here it
+    does: the loss-optimal ranking reaches 0.2357 empirically and certifies 0.1139 at delta/3.
 
     It is a DIAGNOSTIC only: it selects no threshold and certifies nothing (plan §7.2 forbids
     picking the empirically best point and calling it certified).
@@ -515,10 +521,50 @@ def run_certification(
     )
 
 
+def count_gold_reads(
+    gold_used: Iterable[str],
+    roles: Mapping[str, tuple[str, str]],
+    *,
+    expected_documents: int,
+) -> dict[str, int]:
+    """Count, per split role, the distinct documents whose gold was used. Fail closed.
+
+    ``gold_used`` may repeat a document -- ``certify`` reads each document's gold once per
+    system -- so the count is over distinct ids. Any role other than ``certification``, or a
+    document the role map does not know, raises; so does a certification count different from
+    ``expected_documents``, the access record's own count. ``certify`` filters its inputs to the
+    certification role before scoring, so the zero for every other role holds by construction;
+    this is the check that the construction held, not a second source of the zero.
+    """
+
+    counts: dict[str, int] = {}
+    for document_id in set(gold_used):
+        role = roles.get(document_id, ("unknown", ""))[0]
+        counts[role] = counts.get(role, 0) + 1
+    outside = sorted(set(counts) - {CERTIFICATION_ONLY_ROLE})
+    if outside:
+        raise SealedRoleError(f"gold outside the certification role was used: {counts}")
+    if counts.get(CERTIFICATION_ONLY_ROLE, 0) != expected_documents:
+        raise RuntimeError(
+            f"gold was used for {counts.get(CERTIFICATION_ONLY_ROLE, 0)} certification documents "
+            f"but the access record covers {expected_documents}"
+        )
+    return counts
+
+
 def certification_artifact(
-    run: CertificationRun, *, provenance: Mapping[str, object]
+    run: CertificationRun,
+    *,
+    provenance: Mapping[str, object],
+    gold_reads_by_role: Mapping[str, int],
 ) -> dict[str, object]:
-    """Assemble the immutable §7.4 certification artifact (text-free)."""
+    """Assemble the immutable §7.4 certification artifact (text-free).
+
+    ``gold_reads_by_role`` is the count, per split role, of documents whose gold the caller
+    actually used. ``final_reads`` and ``shift_reads`` are taken from it, so a nonzero read is
+    reported rather than masked. The 2026-07-22 artifact predates this and wrote both as the
+    constant 0 (independent review 2026-10-27, finding B2).
+    """
 
     def result_dict(result: CertificationResult) -> dict[str, object]:
         parsed: dict[str, object] = json.loads(result.model_dump_json())
@@ -587,8 +633,9 @@ def certification_artifact(
             "head_hash": run.access_log.head_hash,
             "documents_read": run.access_log.document_count,
             "verified": run.access_log.verify(),
-            "final_reads": 0,
-            "shift_reads": 0,
+            "final_reads": int(gold_reads_by_role.get("final", 0)),
+            "shift_reads": int(gold_reads_by_role.get("shift", 0)),
+            "gold_reads_by_role": dict(sorted(gold_reads_by_role.items())),
         },
         **dict(provenance),
     }

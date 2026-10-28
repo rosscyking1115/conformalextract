@@ -18,8 +18,8 @@ independent reviewer PASSes the one before it.
 |---|---|---|
 | **Plan 1** (Gate 0) | feasibility, licences, evaluator, statistics, paid smoke tests | **complete** — gates 0A–0F pass, Gate 0 decision `go`, consolidated reviewer PASS 2026-07-17 |
 | **Plan 2** | QLoRA training, prediction generation for three systems | **closed** — independent reviewer PASS 2026-07-21 (`evidence/plan2/reviewer_record.plan2-close.json`) |
-| **Plan 3** | certification against the sealed split | **executed and independently reviewed; not formally closed** — no Plan 3 close record exists |
-| **Plan 4** | verification, public release, write-up | **not started** — Plan 3 has no close record, so this gate has not opened |
+| **Plan 3** | certification against the sealed split | **closed** — 2026-10-27, on an independent fresh close review and its delta ([`reviewer_record.plan3-close-fresh-delta.json`](evidence/plan3/reviewer_record.plan3-close-fresh-delta.json), PASS-WITH-NITS at `d8d2223`), after the 2026-07-29 close was refused on findings O1–O3 ([`reviewer_record.plan3-close.json`](evidence/plan3/reviewer_record.plan3-close.json)) |
+| **Plan 4** | verification, public release, write-up | **open** — opened by owner override on 2026-07-29 and paused; the override lapsed on 2026-10-27 when Plan 3 closed, so the gate now stands on its merits ([`evidence/gate_state.json`](evidence/gate_state.json)) |
 
 Plan 3's certification ran once, on 2026-07-22, and returned infeasibility for all three systems.
 `evaluate-final` and `evaluate-shift` are descoped ([ADR 0010](docs/adr/0010-descope-final-and-shift.md))
@@ -28,8 +28,10 @@ re-analysis ([ADR 0011](docs/adr/0011-reanalysis-frontier-and-loss-channels.md))
 four independent passes, opening at BLOCK and closing with the publication condition lifted and no
 blocking items.
 
-The write-up is at first draft ([`docs/writeup/draft-2026-07-28.md`](docs/writeup/draft-2026-07-28.md)),
-independently reviewed. No venue is chosen and nothing is formatted for one. What it may claim is
+The paper is a draft, [`docs/writeup/uncertainlp-2026-short.tex`](docs/writeup/uncertainlp-2026-short.tex),
+in preparation for UncertaiNLP 2026 and not submitted; its status and the review steps that still
+gate it are in [`uncertainlp-2026-short.md`](docs/writeup/uncertainlp-2026-short.md). The first draft
+([`draft-2026-07-28.md`](docs/writeup/draft-2026-07-28.md)) is kept as a record. What the paper may claim is
 fixed by the list in [`docs/plan3/certification-result.md`](docs/plan3/certification-result.md)
 ("What may and may not be claimed"), and that list is narrower than the results might suggest.
 
@@ -49,11 +51,37 @@ certified acceptance between them is possible. H1 and H2 collapse into **one** f
 no numerical difference is computed against an infeasible baseline. Scoped to in-domain RAMS and to
 the frozen vLLM 4-bit serving stack.
 
-**The failure is capability, not method** (`CX-CAPGAP-01`). With an unlimited threshold grid, no
-finite-sample penalty and oracle threshold selection, the adapted system could accept at most 2.0%
-of documents at 20% empirical error, against a required 20%. This is a diagnostic that selects no
-threshold and certifies nothing; the same diagnostic on the development split gives 3.0%, so the
-conclusion reproduces out of sample.
+**Two separable causes, and only one of them is capability** (`CX-CAPGAP-01`).
+
+*The score cannot rank.* With an unlimited threshold grid, no finite-sample penalty and oracle
+threshold selection, the adapted system could accept at most 2.0% of documents at 20% empirical
+error, where a perfect ranking of the same population reaches 23.6%. Both are empirical and
+penalty-free, so the 21.6-point gap is the score's, and it is not caused by the coarse grid, the δ
+split, the bound looseness or a split difference. This is a diagnostic that selects no threshold
+and certifies nothing; on the development split it gives 3.0%, so it reproduces out of sample.
+**It is specific to this model, this score and this task, and is not evidence that structured
+extraction cannot be certified at 20% risk** — the datasets `2606.29054` reports include base risks
+of 0.033 and 0.356, at which the same arithmetic forbids nothing and permits up to 80.5%
+acceptance respectively.
+
+*Under the Hoeffding diagnostic at this δ/3 allocation, the corpus halves the risk test's target, for every system.* At n = 1,396
+groups with δ/3, a Hoeffding bound spends 0.0925 of the 0.20 risk budget on the finite-sample
+penalty before any data is seen. That pairing is a diagnostic belonging to neither certifier: the
+primary risk test is empirical Bernstein, and the conservative audit ran Hoeffding at a single
+candidate on the full δ. Under it, passing the *risk test* at exactly the 20% acceptance floor
+needs mean loss ≤ 0.1075, whoever produced it. That is a property of this benchmark and this
+allocation, not of any model, and it is the risk test's requirement under one bound, not every
+certificate's: what the primary test needs depends on the loss distribution. For *this* model
+the question is settled independently of the score and of the risk bound, at this frozen allocation: acceptance needs at least
+332 groups, and even the loss-optimal ranking's 332 best groups average 0.2012 loss, above the
+target, so **no** score could certify it.
+Separately, δ/3 at this n admits at most a three-candidate grid, which the frozen configuration
+exactly fills. **This is not the claim that no model could be certified here**, but the witness has
+to clear both tests: at the smallest prefix that clears acceptance, k = 332 groups (acceptance lower
+bound 0.2004), a system carrying mean loss ≤ 0.1151 over those groups would pass both tests under
+that Hoeffding diagnostic; under the primary test it depends on how the loss is distributed, and
+a zero-loss set certifies under either. A single-system
+entrant at the full δ inherits neither figure.
 
 **QLoRA produced a large, real gain — in the wrong property** (`CX-GROUNDING-01`). 95.7% of the
 adapted system's outputs parse and ground to the source document, against 39.4% zero-shot and 68.1%
@@ -62,10 +90,20 @@ few-shot, with ungrounded spans falling from 5,355 to 340. "Valid" means parseab
 This improvement did not translate into a certified selective guarantee, and must never be reported
 without that null attached. Scoped to the frozen vLLM 4-bit serving stack.
 
-**Grounding and certifiability are orthogonal here** (`CX-GROUNDING-ORTHOGONAL-01`). The adapter's
-~16× grounding gain moved the certifiable frontier by 0.017 for itself and by 0.000 for both
-baselines, because 87% of its remaining loss is grounded, well-formed, content-bearing output that
-names the wrong entity. The decomposition is descriptive: it selects no threshold and certifies
+**QLoRA improved grounding sharply and certifiability not at all** (`CX-GROUNDING-ORTHOGONAL-01`).
+It sharply improved output validity and span grounding, but did not make low-risk documents
+identifiable using transition-logprobability confidence: the adapter's
+~16× reduction in ungrounded spans moved the certifiable frontier by 0.017 for itself and by 0.000
+for both baselines, because 87% of its remaining loss sits in output that is well-formed, grounded
+and content-bearing, and is scored wrong anyway. **This is a dissociation, not an orthogonality
+result** — one intervention across three systems cannot establish that two properties are
+independent, and the wording was narrowed on 2026-08-02 to stop implying it did. (The claim
+identifier keeps the word for traceability to the reviews that ruled on it.) **The decomposition
+locates that loss; it does not
+identify the error category that produced it**, and no such attribution is claimed here — an earlier
+wording said "names the wrong entity" and was withdrawn on review, because false positives exceed
+false negatives by 637 arguments on those frames, which is over-generation rather than
+entity-naming. The decomposition is descriptive: it selects no threshold and certifies
 nothing, the grounding-oracle counterfactual is *not* uniformly generous, and for the baselines the
 conclusion rests on an arithmetic ceiling rather than on the counterfactual. The QLoRA system sits
 below that ceiling, so for it the ceiling is silent and only the measured curve leaves it short. See
@@ -73,7 +111,12 @@ the claim's `limitations` field before citing it.
 
 **Sealed-label discipline held** (`CX-SEALED-01`). Certification opened the sealed split exactly
 once, over 3,152 documents, with a verified hash-chained access record and zero reads of the `final`
-or `shift` splits, which remain sealed.
+or `shift` splits, which remain sealed. "Zero reads" means no `final` or `shift` gold entered the
+access record or scoring. It does not mean those records went untouched: RAMS keeps text and labels
+in one record, so the archive itself was parsed whole, and the run also parsed the `final` split's
+predictions against their source text, which uses no gold. In the 2026-07-22 artifact those zeros were written as constants
+rather than counted, and the Plan 3 §3.2 preflight did not run before the read; run afterwards on
+the hash-identical inputs, it passes.
 
 **Cost** (`CX-COST-01`). The programme of GPU work — inference benchmarking, QLoRA training,
 prediction generation for three systems over 27,372 frames, and serving-equivalence probes — is
@@ -119,24 +162,32 @@ than described.
   recorded spend), with a run ledger imposing R0→R1→R2 order. No single spend ledger exists and the
   figures are price×duration estimates, not billed amounts
   ([ADR 0012](docs/adr/0012-cost-claim-evidence-correction.md)).
-- **Claims cannot outrun their evidence.** `conformalextract verify-claims` fails closed if a
-  claim's evidence is not git-tracked, and a regression tripwire refuses a claim that holds a public
-  surface while its own verification literally reads as pending. The tripwire is not a verification
-  gate and does not claim to be — what it catches and what it misses is measured and written down in
-  ADR 0011 §6 rather than left implied by the function's name.
+- **Claims cannot outrun their evidence — as far as the paths, and no further.**
+  `conformalextract verify-claims` fails closed if a claim's cited evidence is missing or not
+  git-tracked, and a regression tripwire refuses a claim that holds a public surface while its own
+  verification literally reads as pending. **What it does not do is open the file.** It compares no
+  number and sees no configuration, so `verify-claims ok` means the paths resolve, not that the
+  claims check out — and a claim quoting a figure that appears nowhere in its own evidence passes
+  unchanged. That gap is the mechanism behind five quoting errors this project made and records
+  (`docs/plan4/open-release-decisions.md`, 2026-08-03; `docs/writeup/uncertainlp-2026-short.tex`,
+  Limitations). It is named rather than closed, which is the honest state of it. What *is* enforced
+  by reading files: the generated claims appendix must be byte-identical to what the ledger renders,
+  and every test named in the docs must exist.
 - **Sealed roles are guarded, not merely logged.** Only `development` and `certification` are
   reachable from the analysis commands; every other role raises before a file is opened. A test
   discovers the command list by introspection, so a *new* unguarded command fails rather than
   passing silently.
 
 Typing and tests are strict: **`mypy` runs with `strict = true`** over the package (which ships
-`py.typed`), `ruff` is clean, and the suite is 349 tests, all passing — a measurement taken at this
-commit, not a standing property. The green command below must pass before any hand-off.
+`py.typed`), `ruff` is clean, and **the suite is green — total not asserted.** It previously read
+"the suite is 349 tests, all passing"; that figure was stale and, being a count nothing re-checks,
+it is the same defect class as an unverified claim. Run the commands below and read your own
+number. The green command must pass before any hand-off.
 
 ## Local checks
 
 ```console
-uv sync --extra dev
+uv sync --extra dev --extra data
 uv run pytest -q
 uv run ruff check .
 uv run mypy

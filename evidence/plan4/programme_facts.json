@@ -1,0 +1,80 @@
+{
+  "certifies_nothing": true,
+  "cost_usd_to_produce": 0.0,
+  "diagnostic_only": true,
+  "interpretation": "Figures whose inputs are committed as prose rather than as JSON. Transcription and computation are kept separate: the counts are transcribed with the document and sentence they came from, and the derived values are computed here and stored beside those counts so no guard has to divide. An earlier search of evidence/*.json concluded these figures were untraceable; the search population was the error, and the conclusion was reported before the population was stated.",
+  "programme_cost": {
+    "band_usd": {
+      "authorised_remaining_at_plan2_start_usd": 24.7992,
+      "ceiling_usd": 25.0,
+      "construction": "recorded components plus the differenced job, under each reading",
+      "lower": 18.6798,
+      "upper": 18.8808,
+      "why_a_band": "THERE IS NO SINGLE SPEND LEDGER. The total is assembled by a reader from a per-job artifact plus eight prose records, and one job is recovered by differencing running totals that admit two readings. Picking an endpoint would be choosing the convenient one, and for a claim measured against a fixed ceiling the low endpoint is the convenient one. The absence of a ledger is the reason this is a band; manufacturing a ledger would hide that."
+    },
+    "basis": "price x measured duration, not a billing statement",
+    "recorded_components": {
+      "gate0_per_job_artifact_usd": 0.2008,
+      "note": "Gate 0 has a genuine per-job artifact (evidence/gate0/hf_jobs_submission_attempts.json, summing to 0.2008, the exact figure training.REMAINING_BUDGET_USD subtracts from the cap). Plan 2's eight jobs are recorded as PROSE in launch briefs and result documents.",
+      "plan2_subtotal_usd": 18.33,
+      "source_document": "docs/adr/0012-cost-claim-evidence-correction.md",
+      "sum_usd": 18.5308
+    },
+    "recovered_by_differencing": {
+      "job": "6a5bcee6bee6ee1cf4ecfe08 R0 inference benchmark",
+      "reading_running_totals_exclude_gate0_usd": 0.35,
+      "reading_running_totals_include_gate0_usd": 0.149,
+      "why": "Its cost was never written down per-job. It falls out of four running totals by subtraction, and two independently written documents agree to the tenth of a cent -- but the running totals admit two readings, depending on whether 'of $24.7992' includes Gate 0. Nothing in the repository settles which was meant."
+    }
+  },
+  "reads_only_committed_documents": true,
+  "schema_version": "1",
+  "serving_equivalence_probe": {
+    "abstain_extract_flips": {
+      "of_frames_tested": 300,
+      "source_document": "docs/plan2/serving-equivalence-probe-result.md",
+      "source_quote": "The 4 `empty_vs_nonempty` flips are the sharpest concern",
+      "value": 4
+    },
+    "flip_rate_at_full_acceptance_percent": {
+      "construction": "100 * flips / frames tested, at 100% acceptance",
+      "denominator": 300,
+      "numerator": 4,
+      "value": 1.3333333333333333
+    },
+    "flip_rate_at_top_75_percent_acceptance": {
+      "construction": "100 * flips / top-75% of frames tested",
+      "denominator": 225,
+      "note": "THE SAME FOUR FLIPS, over a smaller denominator. This and the full-acceptance rate are not two draws from one measurement and must not be printed as a dash-joined band: that reads as a confidence interval, which is a claim about sampling uncertainty that neither figure supports. The flips concentrate under tightening because they cluster mid-distribution.",
+      "numerator": 4,
+      "value": 1.7777777777777777
+    },
+    "parsed_output_agreement_percent": {
+      "construction": "100 * agreeing frames / frames tested, greedy decoding, probe v2",
+      "denominator": 300,
+      "numerator": 259,
+      "source_document": "docs/plan2/serving-equivalence-probe-result.md",
+      "source_quote": "| **v2 (authoritative)** | ... | **300** | **86.33% (259/300)** |",
+      "value": 86.33333333333333
+    },
+    "wilson_interval_95_percent": {
+      "agrees_with_document": true,
+      "construction": "Wilson score interval on 259/300, RECOMPUTED as a check",
+      "lower": 81.98445870022493,
+      "stated_in_document": [
+        81.98,
+        89.76
+      ],
+      "upper": 89.76348539079136,
+      "z": 1.959963984540054
+    }
+  },
+  "serving_stack_quantisation": {
+    "bits": 4,
+    "compute_dtype": "bfloat16",
+    "construction": "load_in_4bit implies a 4-bit width; quant_type nf4 names the format",
+    "load_in_4bit": true,
+    "quant_type": "nf4",
+    "source_artifact": "evidence/gate0/qlora_smoke.v1.json"
+  }
+}

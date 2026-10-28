@@ -3,6 +3,29 @@
   "analysis_id": "plan2prep-f3f2f7a938061a92b2cb",
   "claims": [
     {
+      "claim_id": "CX-REPO-DESCRIPTION-01",
+      "wording": "Selective, grounded event-argument extraction on RAMS: QLoRA sharply improved grounding, and no system — QLoRA, few-shot or zero-shot — could be certified at the frozen risk target. An evidence-first negative result.",
+      "status": "negative",
+      "scope": "the GitHub repository description field — one line, no second passage",
+      "evidence": [
+        "evidence/plan3/certification_result.json",
+        "docs/plan3/certification-result.md",
+        "docs/plan4/open-release-decisions.md"
+      ],
+      "method": "Authored for the one-line constraint rather than compressed from an existing claim, because render_surface emits limitations as sub-bullets and a single-string field can carry none. It is the conjunction of CX-GROUNDING-01 (a large improvement in grounding fidelity, stated qualitatively) and CX-H1-PRIMARY plus CX-H2-SECONDARY (no system certified), held in one clause because the claim boundaries require the grounding gain and the null to appear in the same passage. THE DESCRIPTION ITSELF QUOTES NO FIGURE, deliberately - see its wording above, which carries none. The grounding rate is forbidden outside a passage carrying the null, and the ungrounded-span ratio belongs to CX-GROUNDING-ORTHOGONAL-01 and is licensed only with the restricted-population caveat attached, which a one-line surface cannot carry. The first draft of the description quoted that ratio, cited it to the wrong claim, and mis-stated what it measured: it is the reduction in UNGROUNDED SPANS, recorded in CX-GROUNDING-01, not the change in the GROUNDING RATE, which is a smaller multiple. Both figures are stated in CX-GROUNDING-01 and neither is restated here.",
+      "limitations": [
+        "In-domain RAMS only, at the frozen operating point (alpha 0.20, delta 0.05, acceptance floor 0.20), on the frozen vLLM 4-bit serving stack. None of that fits in the field, which is why the field must not be read as the claim's scope.",
+        "The null is ALL THREE systems, not a QLoRA-versus-baseline comparison. H1 and H2 collapse to one finding and no numerical difference is computed against an infeasible baseline.",
+        "\"Improved grounding\" means parseable-and-grounded output, NOT correctness. It must never be read as accuracy.",
+        "\"Could not be certified\" is not a near miss. Under an oracle with no finite-sample penalty the best system accepts 2.0% against a required 20%, and below alpha ~0.406 no certificate at any threshold could clear the floor.",
+        "This field is the whole claim for most of its readers. It is rendered in search results and link previews where nothing else in the repository is present, so it must be judged as though nothing behind it will be read."
+      ],
+      "surfaces": [
+        "repo_description"
+      ],
+      "verified_by": "Composed 2026-07-29 from claims already independently reviewed (CX-GROUNDING-01 reconciled against an independent extraction measurement 2026-07-21; CX-H1-PRIMARY reviewer PASS 2026-07-22). Independent review of this entry: evidence/plan4/reviewer_record.visibility-and-description.json — BLOCK on the first wording (figure cited to the wrong claim, null attributed to QLoRA alone, near-miss reading available); re-worded here on that ruling. The repository is private and the description field is empty, so nothing is published by this entry."
+    },
+    {
       "claim_id": "CX-H1-PRIMARY",
       "wording": "At a target risk of 20% with 95% confidence and a 20% acceptance floor, neither the QLoRA-adapted system nor the zero-shot baseline could be certified on RAMS: both are Infeasible, so no comparison of certified acceptance between them is possible.",
       "status": "infeasible",
@@ -17,7 +40,11 @@
         "No numerical difference is computed against an infeasible baseline.",
         "Scoped to the frozen vLLM 4-bit serving stack and to in-domain RAMS."
       ],
-      "surfaces": ["README", "report", "abstract"],
+      "surfaces": [
+        "README",
+        "report",
+        "abstract"
+      ],
       "verified_by": "conformalextract certify (immutable artifact, git-canonical sha256 71c0de3e); independent reviewer PASS 2026-07-22 (evidence/plan3/reviewer_record.certification.json)"
     },
     {
@@ -34,25 +61,84 @@
         "Reported jointly with CX-H1-PRIMARY as one finding, never as an independent second confirmation.",
         "A known harness defect depressed the few-shot arm's confidence score, but it could not affect this outcome: the comparison failed on the QA side, not the baseline side."
       ],
-      "surfaces": ["report"],
+      "surfaces": [
+        "report"
+      ],
       "verified_by": "conformalextract certify; independent reviewer PASS 2026-07-22"
     },
     {
       "claim_id": "CX-CAPGAP-01",
-      "wording": "The infeasibility reflects a capability gap rather than a limitation of the certification method: with an unlimited threshold grid, no finite-sample penalty and oracle threshold selection, the adapted system could accept at most 2.0% of documents at 20% empirical error, against a required 20%.",
+      "wording": "The infeasibility has two separable causes and only the first is a capability gap. (1) CAPABILITY, specific to this model and score on this task: with an unlimited threshold grid, no finite-sample penalty and oracle threshold selection, the adapted system accepts at most 2.0% of documents at 20% empirical error, where a perfect ranking of the same population reaches 23.6%. Both figures are empirical and penalty-free, so the 21.6-point gap is attributable to the score and not to the coarse grid, the delta split, the bound looseness or a distribution difference between splits. (2) METHOD AND BENCHMARK, independent of capability: at n = 1,396 groups with delta/3, a Hoeffding bound spends 0.0925 of the 0.20 risk budget on the finite-sample penalty before any data is seen - a DIAGNOSTIC pairing belonging to neither certifier construction, since the primary risk test is empirical Bernstein and the conservative audit ran Hoeffding at a single candidate on the full delta. Under that diagnostic, passing the RISK test at exactly the 20% acceptance floor (k = 280) requires mean loss at most 0.1075 - barely half the nominal target - whoever produced it; that is the risk test's requirement under one bound, not what every certificate requires, since the primary test's requirement depends on the loss distribution. For this model the outcome is settled independently of the score and of the risk bound (for any risk bound never below the accepted set's empirical mean): at the frozen allocation acceptance needs at least 332 groups, and the loss-optimal 332-group prefix, which no score can beat, already averages 0.2012 loss, above the target (under the Hoeffding diagnostic the loss-optimal ranking certifies 0.1139 at delta/3, below the floor). Separately, at delta/3 this corpus admits at most a three-candidate grid, which the frozen configuration exactly fills.",
       "status": "verified",
-      "scope": "in-domain RAMS, oracle risk-coverage diagnostic on certification and development splits",
+      "scope": "in-domain RAMS; (1) oracle risk-coverage diagnostic on the certification and development splits, (2) the frozen n = 1,396 corpus at alpha = 0.20, delta/3 and a 20% acceptance floor",
       "evidence": [
+        "docs/frontier-check/findings.md",
+        "docs/plan3/certification-result.md",
+        "evidence/plan3/calibration_diagnostics.json",
+        "evidence/plan3/certification_sensitivity.json",
+        "evidence/plan3/derived_quantities.json",
         "evidence/plan3/risk_coverage_diagnostic.json",
-        "docs/plan3/certification-result.md"
+        "evidence/plan3/corpus_size_requirement.json"
       ],
-      "method": "Oracle risk-coverage frontier over source-document groups via certification_run.risk_coverage_frontier, using the same aggregation, eligibility, loss and score as the certifier; no threshold is selected or certified.",
+      "method": "(1) Oracle risk-coverage frontier over source-document groups via certification_run.risk_coverage_frontier, using the same aggregation, eligibility, loss and score as the certifier; no threshold is selected or certified. (2) A Hoeffding upper bound (certification.hoeffding_upper, a diagnostic pairing rather than either certifier's construction) at certified_delta = delta/3, via calibration.acceptance_certified_loss_optimal (the loss-sorted prefix, which weakly dominates every score-induced ordering at every k) and certification.largest_scorc_grid at n = 1,396. Each figure is stamped with its delta, allocation, candidate count and n in the artifact that carries it - 0.0925, 0.1075 and k = 280 in evidence/plan3/derived_quantities.json, 0.1139 in evidence/plan3/calibration_diagnostics.json, and the acceptance lower bound and grid capacity in evidence/plan3/certification_sensitivity.json. An earlier wording named the sensitivity artifact for all of them and it carried two. NOTE THE CONSTRUCTION: 0.0925 is a Hoeffding radius at the per-system delta/3, a DIAGNOSTIC pairing - the primary certificate's risk test is empirical Bernstein and the conservative audit ran Hoeffding with a single candidate at the full delta, so 0.0925 is neither construction's own number.",
       "limitations": [
         "A diagnostic, not a certificate: it selects no threshold and certifies nothing.",
-        "The same diagnostic on the development split gives 3.0%, so the conclusion reproduces out of sample."
+        "The same oracle diagnostic on the development split gives 3.0%, so cause (1) reproduces out of sample.",
+        "Cause (1) is specific to this model, this confidence score and this task. It is not evidence that event-argument extraction, or structured extraction generally, cannot be certified at 20% risk: 2606.29054's own datasets include base risks of 0.033 and 0.356, at which the arithmetic bound forbids nothing and permits up to 80.5% acceptance respectively (docs/frontier-check/findings.md, re-verified 2026-07-22).",
+        "Cause (2) is NOT the claim that no model could be certified on this corpus. The witness has to clear BOTH tests, and the one first offered here did not: mean loss at most 0.1075 over an accepted 20% clears the risk test at n = 1,396 and delta/3 while its Clopper-Pearson acceptance lower bound is 0.16566, so that system is NOT certified. The corrected witness is stated at the smallest prefix that clears acceptance, k = 332: there the acceptance lower bound is 0.2004 and the Hoeffding radius 0.0849, so a system carrying mean loss at most 0.1151 over its 332 best-ranked groups would pass both tests under that Hoeffding diagnostic. Under the primary empirical-Bernstein test the condition depends on the loss distribution, not the mean alone: an independent review found a constant-loss set of that size at 0.1151 certifies while a 0/1 set at a slightly lower mean does not (evidence/plan3/reviewer_record.c1-2026-08-03-packets.json), and a zero-loss set certifies under either. Clearing one of two constraints is not a counter-example to infeasibility. What cause (2) establishes is that, under the Hoeffding diagnostic at this allocation, the corpus halves the risk test's effective target for every system, and that for THIS model no score whatsoever clears what remains.",
+        "The two causes attach to different mechanisms of the three-way decomposition and must not be merged: cause (1) is ranking (mechanism 2), cause (2) is the finite-sample penalty (mechanism 3) plus grid capacity. Base risk (mechanism 1) belongs to neither - it settles ZS and FS outright and permits QA 49.1%.",
+        "Narrowed 2026-08-03. This claim previously read 'a capability gap rather than a limitation of the certification method' and attributed BOTH causes to capability, which is the same flattering direction as the five quoting errors recorded in the write-up's limitations, expressed in attribution rather than in arithmetic.",
+        "The Hoeffding figures in cause (2) use the conservative TWO-SIDED constant; the tight one-sided radius at k = 280 and delta/3 is about 8% smaller (certification.hoeffding_upper docstring). 'Barely half the nominal target' therefore slightly overstates the penalty, in the direction that strengthens cause (2), and is disclosed here for that reason."
       ],
-      "surfaces": ["README", "report", "abstract"],
+      "surfaces": [
+        "README",
+        "report",
+        "abstract"
+      ],
       "verified_by": "conformalextract risk-coverage-diagnostic; reviewer re-derived 2.01% independently through the implementer's own aggregation, 2026-07-22"
+    },
+    {
+      "claim_id": "CX-RANKING-01",
+      "wording": "The adapted system's confidence score ranks certification groups by error well above chance and still certifies nothing: group AUROC 0.796 for any error (95% bootstrap interval 0.737 to 0.850), Spearman rho -0.403 against loss, normalized AURC 0.531.",
+      "status": "qualified",
+      "scope": "QA system, mean transition-log-probability candidate, certification split, group level (ADR 0009 groups), in-domain RAMS",
+      "evidence": [
+        "evidence/plan3/calibration_diagnostics.json#splits.certification.qa.mean",
+        "evidence/plan3/certification_sensitivity.json#auroc_interval"
+      ],
+      "method": "Plan 3 calibration-diagnostics (group-level) discrimination diagnostics over the 1,392 scored certification groups: AUROC for the any-error target, Spearman correlation of score against loss, and AURC normalized between the loss-optimal ranking (0) and a random one (1); bootstrap interval from 10,000 resamples.",
+      "limitations": [
+        "Descriptive only: it selects no threshold and certifies nothing. At the frozen operating point the same score certifies no acceptance at all (CX-H1-PRIMARY).",
+        "The interval is wide because only 90 of the 1,392 scored groups are error-free. AUROC for the zero-shot and few-shot systems rests on 3 and 18 such groups and is not comparable with it.",
+        "Ranking quality is not certifiability: ranked by true loss, the same population certifies 11.4%, still short of the 20% floor (CX-CAPGAP-01).",
+        "Comparisons with log-probability scores reported elsewhere are not matched: those are instance-level and these are group-level. They support only that this is an ordinary score for its family, not that it equals any published figure.",
+        "On the development split the same three figures are 0.834, -0.313 and 0.568. The certification-split values are the ones quoted.",
+        "The 'any error' indicator is one of three chosen after calibration. The plan's predeclared strict-failure indicator was never defined (Plan 1 section 6.1), so this AUROC is exploratory, not a predeclared test."
+      ],
+      "surfaces": [
+        "report"
+      ],
+      "verified_by": "computed into evidence/plan3/calibration_diagnostics.json; the independent calibration-diagnostics review of 2026-08-02 (v2) reproduced that artifact byte-identically and returned REVISE, its finding F-D being that this claim's bootstrap interval then resolved to no committed artifact; the interval was committed to evidence/plan3/certification_sensitivity.json afterwards; the fresh independent review of that chain, filed as evidence/plan3/reviewer_record.c1-2026-08-03-packets.json, returned PASS-WITH-NITS, and Amendment 1, which executed these rows, is not discharged until the close review verifies its nits"
+    },
+    {
+      "claim_id": "CX-STRATIFICATION-01",
+      "wording": "Stratifying the adapted system's certification groups by triggers per document, mean group loss is essentially flat (0.606, 0.608, 0.589, 0.634 and 0.596 from one trigger to six or more), but the share of groups within the 20% risk target falls from 17.3% to 0.7% to zero; 23 of the 28 oracle-accepted groups are single-trigger, and 25 of the 28 have no cross-sentence argument.",
+      "status": "qualified",
+      "scope": "QA system, mean candidate, certification split, ADR 0009 groups, in-domain RAMS; descriptive",
+      "evidence": [
+        "evidence/plan3/calibration_diagnostics.json#splits.certification.qa.mean.stratified",
+        "evidence/plan3/derived_ratios.json#counts"
+      ],
+      "method": "Group-level stratification from the calibration diagnostics: groups binned by trigger count, with mean loss and the share of groups whose loss is within the risk target per bin. The oracle-accepted groups are the largest best-scoring prefix whose running risk stays within the target, with the cut-off chosen using the labels.",
+      "limitations": [
+        "Descriptive only: it selects no threshold and certifies nothing. The oracle-accepted groups are the measured score's best prefix with a cut-off chosen using the labels, not a ranking by true loss and not a policy any system ran.",
+        "The intermediate bins are omitted from the falling share as written: two triggers 8.3%, three 2.7%.",
+        "It shows that the aggregation unit interacts with document complexity under ADR 0009's weakest-member rule; it does not show that another unit would certify, which was not tested."
+      ],
+      "surfaces": [
+        "report"
+      ],
+      "verified_by": "computed into evidence/plan3/calibration_diagnostics.json; the independent calibration-diagnostics review of 2026-08-02 (v2) reproduced that artifact byte-identically and returned REVISE, its finding F-D being that the CX-RANKING-01 bootstrap interval then resolved to no committed artifact; the interval was committed to evidence/plan3/certification_sensitivity.json afterwards; the fresh independent review of that chain, filed as evidence/plan3/reviewer_record.c1-2026-08-03-packets.json, returned PASS-WITH-NITS, and Amendment 1, which executed these rows, is not discharged until the close review verifies its nits"
     },
     {
       "claim_id": "CX-GROUNDING-01",
@@ -69,7 +155,10 @@
         "This improvement did NOT translate into a certified selective guarantee (see CX-H1-PRIMARY); it must never be reported without that null attached.",
         "Scoped to the frozen vLLM 4-bit serving stack."
       ],
-      "surfaces": ["README", "report"],
+      "surfaces": [
+        "README",
+        "report"
+      ],
       "verified_by": "conformalextract parse-predictions; reviewer reconciled the counts against an independent extraction measurement, 2026-07-21"
     },
     {
@@ -86,7 +175,9 @@
         "Holds for these two frozen demonstrations, this template and this model; a demonstration set without an empty-gold exemplar might not reproduce it.",
         "A missing stop sequence contributed to the continuation behaviour but not to the empty-frame rate."
       ],
-      "surfaces": ["report"],
+      "surfaces": [
+        "report"
+      ],
       "verified_by": "conformalextract parse-predictions; promoted from an aside to a stated result at reviewer request, 2026-07-21"
     },
     {
@@ -102,10 +193,17 @@
       "limitations": [
         "Measured on train-split frames only; the rate may differ on other splits.",
         "Divergence is quality-neutral against gold and concentrates in low-confidence frames.",
-        "No threshold was pre-registered for this probe, so 86.3% is reported, not judged as a pass."
+        "No threshold was pre-registered for this probe, so 86.3% is reported, not judged as a pass.",
+        "The abstain/extract decision itself flips between stacks on 1.33% of frames at full acceptance (4 of 300) and on 1.78% under tightening (the SAME four flips over the top-75% denominator, 4 of 225). These are two measurements of different things, not an interval: an earlier wording printed them as '1.3-1.8%', which reads as a confidence interval and asserts a sampling uncertainty neither figure carries. Both values are correct, so no value check could see the defect - the form was wrong, not the number. Two of the four flips sit just above the median confidence percentile, so at plausible operating points (above about 50% acceptance) they survive into the accepted set rather than being abstained away: the abstention mechanism is stack-dependent at the margin.",
+        "The reassurance in limitation 2 is operating-point-dependent and must not be carried forward alone: at top-90% acceptance divergence is 12.59%, barely below the 13.67% raw rate. The near-zero top-quartile result holds only under aggressive abstention.",
+        "The top-quartile concentration result is 0 of 75, which is not zero: it carries a two-sided Clopper-Pearson 95% upper bound of 4.80%. Quote the bound whenever the concentration is quoted.",
+        "The CAUSE of the divergence is not isolated to a specific kernel, quantisation path or sampler. Nothing about it may be assumed fixed by changing any one of them."
       ],
-      "surfaces": ["report", "model_card"],
-      "verified_by": "job 6a5fab15 (n=300); reviewer recomputed the Wilson intervals and concentration significance, 2026-07-21"
+      "surfaces": [
+        "report",
+        "model_card"
+      ],
+      "verified_by": "job 6a5fab15 (n=300); reviewer recomputed the Wilson intervals and concentration significance, 2026-07-21. Limitations 4 and 5 added 2026-07-29 on independent review (evidence/plan3/reviewer_record.plan3-close.json, finding O3): Plan 2's close directed the abstain/extract flip finding into Plan 4 limitations and any model or report card, and it had been carried into neither. Limitations 6 and 7 added 2026-07-29 on independent review (evidence/plan4/reviewer_record.o2-o3-claims-change.json, finding R4): they are elements 4 and 6 of that same close record's standing_limitation list — a second carried-forward structure that no register had enumerated. Corrected the same day: this field first cited finding R4 to evidence/plan3/reviewer_record.b1-primary-document.json, which has no R4 — an identifier that must resolve, on the ledger, caught by no check."
     },
     {
       "claim_id": "CX-FEASIBILITY-LESSON-01",
@@ -121,7 +219,9 @@
       "limitations": [
         "Recorded as a joint process failure: the ceiling was used as a forecast at three separate gates, by both the implementer and the independent reviewer, and the free check was run by neither until after the sealed split was opened."
       ],
-      "surfaces": ["report"],
+      "surfaces": [
+        "report"
+      ],
       "verified_by": "reviewer computed the development frontier independently and required the lesson be recorded naming both parties, 2026-07-22"
     },
     {
@@ -131,13 +231,20 @@
       "scope": "data governance",
       "evidence": [
         "evidence/plan3/certification_result.json#certification_access",
-        "docs/adr/0010-descope-final-and-shift.md"
+        "docs/adr/0010-descope-final-and-shift.md",
+        "evidence/plan3/certification_preflight_retrospective.json"
       ],
-      "method": "Certification-only access chain that raises on any other role by construction; final and shift are structurally unreachable from the certification path.",
+      "method": "Certification-only access chain that raises on any other role; only certification-role documents entered the access chain or scoring. RAMS stores source text and gold in one record, so the certify command decompressed and parsed the whole archive and discarded every non-certification record unused.",
       "limitations": [
-        "The final and shift splits are descoped because no selected policy exists to audit or transport, not for reasons of cost or effort; both commands are free to run."
+        "The final and shift splits are descoped because no selected policy exists to audit or transport, not for reasons of cost or effort; both commands are free to run.",
+        "'Zero reads' means no final or shift gold entered the access record or scoring. It does not mean those records went untouched: RAMS stores text and gold in one record, the certify command parsed the whole archive, and the 2026-07-22 run also parsed the final split's predictions against their source text, which uses no gold. The role map assigns no shift documents at all.",
+        "The final_reads and shift_reads fields of the 2026-07-22 artifact were written as the constant 0, not counted. The code path made them true, because gold was looked up only for certification-role documents, but the artifact did not measure it. The command now counts the gold it uses, by role. The zero for other roles still holds by construction of the certification filter; the count checks that it held.",
+        "The Plan 3 section 3.2 preflight did not run before the 2026-07-22 read, because certify never called it. Run afterwards on the hash-identical inputs, label-free, it passes (evidence/plan3/certification_preflight_retrospective.json)."
       ],
-      "surfaces": ["README", "report"],
+      "surfaces": [
+        "README",
+        "report"
+      ],
       "verified_by": "artifact field certification_access.verified; reviewer confirmed by execution, 2026-07-22"
     },
     {
@@ -164,52 +271,71 @@
         "18 is a floor, not a count. docs/plan2/r0-launch-plan.md records fixes (the nvcc/flashinfer and vLLM prompt-format ones) that could only have been discovered by a job that reached GPU execution and was therefore billed, with no job id or cost recorded anywhere. The recovered $0.15-$0.35 bounds ALL unrecorded pre-R1 spend rather than isolating a single job. The total is unaffected because the running totals capture money regardless of how many attempts produced it — which is a further reason the figure is published as a band.",
         "Individual figures are themselves rounded as recorded (\"about $0.05\", \"~$11.2\"); the total inherits that and is stated to one decimal place, not to the cent."
       ],
-      "surfaces": ["README", "report", "CV"],
+      "surfaces": [
+        "README",
+        "report",
+        "CV"
+      ],
       "verified_by": "Per-job figures re-read from the eight cited documents and re-summed 2026-07-28; the Gate 0 subtotal independently reconciled against training.REMAINING_BUDGET_USD; the unrecorded R0 figure recovered by differencing two running totals that agree. Independent review: evidence/plan4/reviewer_record.cost-claim.json (BLOCK on the first draft for publishing a total below the supported band; corrected here)."
     },
     {
       "claim_id": "CX-GROUNDING-ORTHOGONAL-01",
-      "wording": "Grounding fidelity and certifiability are orthogonal for grounded event-argument extraction on RAMS: the QLoRA adapter's ~16x grounding gain over the baselines moved the certifiable frontier by 0.017 for itself and by 0.000 for both baselines, because 87% of its remaining loss is grounded, well-formed, content-bearing output that names the wrong entity.",
+      "wording": "QLoRA sharply improved output validity and span grounding for event-argument extraction on RAMS, but did not make low-risk documents identifiable using transition-logprobability confidence: the adapter's ~16x reduction in ungrounded spans over the baselines moved the certifiable frontier by 0.017 for itself and by 0.000 for both baselines, because 87% of its remaining loss sits in output that is well-formed, grounded and content-bearing, and is scored wrong anyway.",
       "status": "qualified",
       "scope": "in-domain RAMS certification split, 1,396 source-document groups, frozen vLLM 4-bit serving stack",
       "evidence": [
-        "evidence/plan3/loss_decomposition.json",
-        "evidence/plan3/certification_result.json#systems",
         "docs/adr/0011-reanalysis-frontier-and-loss-channels.md",
-        "docs/plan3/certification-result.md"
+        "docs/plan3/certification-result.md",
+        "evidence/plan3/argument_error_counts.json",
+        "evidence/plan3/certification_result.json#systems",
+        "evidence/plan3/loss_decomposition.json"
       ],
       "method": "Document loss decomposed into four channels (structural failure, grounding failure, valid-but-contentless, valid content-bearing); group-level channel contributions sum exactly to the unweighted mean of group means the certificate bounds under ADR 0009. Counterfactual: each system re-scored over content-bearing documents only, coverage measured against the restricted population. For the baselines the conclusion rests on an arithmetic ceiling rather than the counterfactual: accepting a fraction c at risk alpha requires population mean loss at most alpha*c + (1-c) = 0.84, and their restricted mean losses are 0.984 and 0.951.",
       "limitations": [
+        "This is a DISSOCIATION, not an orthogonality or independence result, and the wording was narrowed to say so on 2026-08-02. One intervention observed across three systems cannot establish that two properties are independent; what is measured is that a large gain in the first produced almost none in the second. Any reading as statistical independence, or as a general relationship between grounding and certifiability, exceeds this evidence.",
+        "The claim identifier still contains the word ORTHOGONAL. It is retained only so that the reviewer records which ruled on this claim remain traceable to it; the identifier is historical and the claim no longer asserts orthogonality.",
         "Descriptive only: the decomposition and the grounding-oracle counterfactual select no threshold and certify nothing.",
         "Conditional coverage under the grounding oracle is not a deployable acceptance rate and is not comparable across systems; the restricted population differs per system.",
         "The restriction is NOT uniformly generous: it raises the loss of 24 few-shot and 21 QLoRA groups, and a correctness-oracle variant moves the baselines off zero. The baselines' result is carried by the arithmetic ceiling, not by the counterfactual.",
         "The QLoRA system sits below that ceiling, so for it the ceiling is silent and only the measured curve leaves it short of the floor.",
         "Scoped to in-domain RAMS under span-exact matching and to the frozen vLLM 4-bit serving stack (86.3% parsed-output parity); portability is not established.",
-        "The certificate bounds average within-group loss, not the absence of error in any document (ADR 0009)."
+        "The certificate bounds average within-group loss, not the absence of error in any document (ADR 0009).",
+        "The decomposition locates loss by CHANNEL; it does not identify the error category that produced it, and this claim no longer asserts one. Until 2026-07-29 the wording said the residual loss was output 'that names the wrong entity' — an attribution whose only source was ADR 0007's unquantified inspection of two development examples, which plan section 12.3 forbids generalising from. Removed on independent review (evidence/plan3/reviewer_record.plan3-close.json, finding O2).",
+        "A measurement points the other way and is recorded here rather than left in the review. On QA's content-bearing certification frames: tp 2,984, fp 4,434, fn 3,797 — false positives EXCEED false negatives by 637 arguments, i.e. systematic over-generation, which is not an entity-naming error. 2,003 of 2,515 error-bearing documents show both fp and fn, consistent with substitution, so 'mostly missing arguments' is ruled out. Wrong-role, boundary and coreference errors share that signature. Plan section 12.1's machine-coded taxonomy is what would separate them; it was descoped from Plan 3 on 2026-10-27 (disposition Amendment 2, ruled acceptable by the independent delta review in evidence/plan3/reviewer_record.plan3-close-chain-delta.json) rather than run, so no error-category claim is made.",
+        "Directional, and specific to the adapted system: on the same channel and the same frozen scorer, the two baselines run the OTHER way - they under-generate where QA over-generates. Normalised per document in the content-bearing channel, the excess of false positives over false negatives is +0.224 for QA against -1.168 for zero-shot and -1.328 for few-shot. The figures must be read per document and not as raw counts: the content-bearing channel is defined per system and the baselines reach it on far fewer documents (2,847 for QA against 1,238 and 1,130), so the channel filter alone would make raw totals incomparable. What survives normalisation is the SIGN, which is the whole of the claim."
       ],
-      "surfaces": ["README", "report", "abstract"],
+      "surfaces": [
+        "README",
+        "report",
+        "abstract"
+      ],
       "verified_by": "evidence/plan3/reviewer_record.reanalysis.json (independent review, 2026-07-22: numbers CONFIRMED by from-scratch recomputation; BLOCK on six discipline/wording items, all corrected)"
     },
     {
       "claim_id": "CX-ALPHA-FRONTIER-01",
-      "wording": "On the oracle risk-coverage curve, the 20% acceptance floor first becomes reachable at a target risk of about 0.406 for the QLoRA system, 0.930 for few-shot and 0.981 for zero-shot. Across the whole range below those points no selective policy at any threshold could have cleared the floor, so the infeasibility at the frozen 0.20 target is not an artefact of that particular choice; it holds across everything up to twice it.",
+      "wording": "On the oracle risk-coverage curve, the 20% acceptance floor first becomes reachable at a target risk of about 0.406 for the QLoRA system, 0.930 for few-shot and 0.981 for zero-shot. These are EMPIRICAL ORACLE FRONTIER points measured on an already-opened split, not thresholds and not certified operating points. Across the whole range below them no selective policy at any threshold could have cleared the floor, so the infeasibility at the frozen 0.20 target is not an artefact of that particular choice; it holds across everything up to twice it.",
       "status": "negative",
       "scope": "in-domain RAMS certification split, 1,396 source-document groups; oracle upper bound (the development split is reported in the same artifact and agrees, at 0.383 for the QLoRA system)",
       "evidence": [
         "evidence/plan3/alpha_frontier.json",
         "evidence/plan3/risk_coverage_diagnostic.json",
-        "docs/adr/0011-reanalysis-frontier-and-loss-channels.md"
+        "docs/adr/0011-reanalysis-frontier-and-loss-channels.md",
+        "docs/frontier-check/findings.md"
       ],
       "method": "The oracle risk-coverage curve carries no target risk; max acceptance at a given target is that fixed curve read at one height. No certificate is issued at any point on the curve; the frozen target of 0.20 is unchanged (ADR 0007).",
       "limitations": [
+        "0.406 is an empirical oracle frontier point, not a threshold and not a certified operating point. It was computed AFTER the certification split was opened, from the labels of that split, so it describes where this measured population's curve crosses the floor and nothing more. Calling it a threshold would imply a certificate that was never issued at it or at any other point.",
         "An oracle upper bound with no finite-sample penalty, no grid and no multiplicity correction: usable only to rule operating points out, never to indicate that a weaker one would certify.",
         "The crossing is a necessary condition, not a sufficient one. A certificate at 0.406 would not issue: at the ~280 groups a 20% acceptance implies, the Hoeffding radius alone is 0.086 to 0.103 depending on allocation, putting the risk upper bound near 0.49 to 0.51.",
         "Not comparable with the certification rates prior work reports at its own operating points, which are achieved certifications rather than oracle necessary conditions.",
         "The verdict IS operating-point dependent above the crossing: oracle acceptance for the QLoRA system reaches 0.187 at a target risk of 0.40 and 0.316 at 0.45. The claim is that the frozen target is not a specially unlucky choice, not that no operating point behaves differently.",
         "The frozen headline target remains 0.20 and no certificate exists at any other point.",
-        "Scoped to in-domain RAMS and the frozen vLLM 4-bit serving stack."
+        "Scoped to in-domain RAMS and the frozen vLLM 4-bit serving stack.",
+        "Model-, score- and task-specific, not a statement about structured extraction. The bound (mu-alpha)/(1-alpha) forbids nothing at alpha = 0.20 for a task at mu = 0.033, and permits up to 80.5% acceptance at mu = 0.356 - both figures 2606.29054 reports for its own extraction and NER datasets (docs/frontier-check/findings.md, re-verified 2026-07-22). So a 20% target is NOT EXCLUDED on structured extraction at those base risks; not being forbidden by a necessary condition is not achievability, and that paper finds certification practical only at alpha = 0.30-0.40 on its own tasks. What is measured here is that THIS model with THIS score on THIS task could not - and NOT because of mu alone, which at 0.6071 still permits 49.1% acceptance. Infeasibility here is overdetermined by base risk, ranking and the finite-sample penalty together (corrected 2026-08-03, review finding F1: an earlier wording said 'at mu = 0.6071 cannot' and 'demonstrably not out of reach', which are the two halves of that finding in one sentence)."
       ],
-      "surfaces": ["report"],
+      "surfaces": [
+        "report"
+      ],
       "verified_by": "evidence/plan3/reviewer_record.reanalysis.json (independent review, 2026-07-22: curve-vs-committed-diagnostic equality and alpha_star inverse CONFIRMED by from-scratch reimplementation and 20,000 randomised trials)"
     },
     {
@@ -227,7 +353,9 @@
         "A descriptive base-risk arm on WikiEvents remains possible and was not attempted.",
         "RAMS itself cleared the same precondition by only 10 groups, so this is a narrow margin rather than a wide one."
       ],
-      "surfaces": ["report"],
+      "surfaces": [
+        "report"
+      ],
       "verified_by": "evidence/plan3/reviewer_record.reanalysis.json (independent review, 2026-07-22: sample-size arithmetic and corpus counts CONFIRMED)"
     },
     {
@@ -235,7 +363,9 @@
       "wording": "No schema-shift transfer result is claimed.",
       "status": "planned",
       "scope": "shift stress test",
-      "evidence": ["docs/adr/0010-descope-final-and-shift.md"],
+      "evidence": [
+        "docs/adr/0010-descope-final-and-shift.md"
+      ],
       "method": "Not attempted: descoped because there is no in-domain guarantee to transport.",
       "limitations": [
         "Never to be written as achieved or attempted-and-failed; it was not run."
@@ -248,7 +378,9 @@
       "wording": "The certificate, result tables and diagnostics regenerate from released evidence on CPU without retraining.",
       "status": "planned",
       "scope": "software reproducibility",
-      "evidence": ["docs/plan3/certification-result.md"],
+      "evidence": [
+        "docs/plan3/certification-result.md"
+      ],
       "method": "Planned Plan 4 clean-room replay (gates V6, V11).",
       "limitations": [
         "Not yet demonstrated in a clean-room environment; must not be stated as achieved until gate V11 passes."

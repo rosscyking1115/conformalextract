@@ -1,0 +1,81 @@
+{
+  "schema_version": "1",
+  "_notice": "Values this project QUOTES FROM OTHER PEOPLE'S WORK. They are not measurements of ours and must never be stored as if they were: an artifact of ours carrying 0.033 as a computed value would assert provenance we do not have. Each entry therefore records the source, its identifier, the date this project read it FROM SOURCE, and where in the source the value sits. scripts/check_paper_claims.py resolves citation-kind figures here and requires source, identifier and accessed to be present, so a quoted number cannot enter the paper without its provenance.",
+  "_how_to_use": "One entry per quoted value. `value` is the number as the source states it. `located` names the table or section. `accessed` is the date this project read the primary source, not the date it was relayed to us - an earlier draft quoted a band that had been relayed with one cell omitted, and the omission changed what the band supported. Do not add an entry for a value nobody has opened the source to check.",
+  "citations": {
+    "kotte2026crc": {
+      "source": "Kotte et al., Conformal Risk Control for structured generation",
+      "identifier": "arXiv:2606.29054",
+      "accessed": "2026-07-18",
+      "verification": "Read from source and recorded in docs/frontier-check/findings.md; re-verified 2026-07-22. An earlier draft used a relayed summary whose band omitted the JSON-extraction cell, which made a false comparison look supported.",
+      "values": {
+        "base_risk_json_extract": {
+          "value": 0.033,
+          "located": "reported base risks",
+          "note": "A different task under a different metric. Our 0.6071 neither reproduces nor contradicts it."
+        },
+        "base_risk_upper": {
+          "value": 0.356,
+          "located": "reported base risks"
+        },
+        "logprob_auroc_low": {
+          "value": 0.485,
+          "located": "Table 5, NER/QA/classification"
+        },
+        "logprob_auroc_high": {
+          "value": 0.604,
+          "located": "Table 5, NER/QA/classification"
+        },
+        "logprob_auroc_json_extraction": {
+          "value": 0.793,
+          "located": "Table 5, JSON extraction",
+          "note": "The cell the relayed summary omitted. It is the one structured-generation task in that paper, and the only like-for-like comparison available."
+        },
+        "agreement_auroc_low": {
+          "value": 0.6,
+          "located": "self-consistency scores, eight datasets"
+        },
+        "agreement_auroc_high": {
+          "value": 0.816,
+          "located": "self-consistency scores, eight datasets"
+        },
+        "practical_alpha_low": {
+          "value": 0.3,
+          "located": "reported operating range",
+          "note": "They find certification practical only at these targets. Quoted to bound what 'not excluded' means, never to suggest a laxer target would certify here."
+        },
+        "practical_alpha_high": {
+          "value": 0.4,
+          "located": "reported operating range"
+        }
+      }
+    },
+    "huang2026rose": {
+      "source": "Huang, Zhang, Zhou, Zhang Yi and Xu, RoSE: A Role Correlation Structure-Enhanced Model for Multi-Event Argument Extraction, AAAI 40(37):31131-31139",
+      "identifier": "doi:10.1609/aaai.v40i37.40374",
+      "accessed": "2026-07-28",
+      "bibliography_verified": "2026-08-09",
+      "bibliography_source_url": "https://ojs.aaai.org/index.php/AAAI/article/view/40374",
+      "verification": "Value read from source 2026-07-28. The author list was outstanding until 2026-08-09 and is now DISCHARGED: the bibliography read 'Huang, Guang' - a wrong given name and four missing co-authors - and was corrected to the five authors, volume, issue, pages and DOI carried by the publisher's own citation_author/citation_* metadata at the URL above. DBLP and Semantic Scholar were tried first and were unavailable (HTTP 500 and 429); the publisher page is the primary source and is what was used. The 54.4 value itself was NOT re-opened on 2026-08-09 and rests on the 2026-07-28 reading.",
+      "values": {
+        "micro_arg_c_f1": {
+          "value": 54.4,
+          "located": "corpus-level micro Arg-C",
+          "note": "Corpus-level micro. Our 0.393 is a MEAN OF PER-DOCUMENT F1 and the two are not comparable; the write-up says so where it quotes both."
+        }
+      }
+    }
+  },
+  "derived_from_citation": {
+    "_notice": "Our arithmetic applied to someone else's input. Neither purely ours nor purely theirs, so it is modelled explicitly: the construction is ours and is stated, the input is cited and points into the record above.",
+    "acceptance_permitted_at_their_upper_base_risk": {
+      "value": 80.51242236024845,
+      "construction": "100 * (1 - (mu - alpha)/(1 - alpha)), the arithmetic ceiling, at alpha = 0.20",
+      "alpha": 0.2,
+      "input_citation": "kotte2026crc",
+      "input_pointer": "citations.kotte2026crc.values.base_risk_upper.value",
+      "input_value": 0.356,
+      "note": "Used ONLY in the ruling-out direction: it shows a 20% target is not excluded at the base risks prior work reports. Not being forbidden is not achievability."
+    }
+  }
+}

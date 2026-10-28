@@ -1,0 +1,127 @@
+{
+  "acceptance_construction": "clopper_pearson_lower at delta/(16 * candidates)",
+  "acceptance_floor": 0.2,
+  "acceptance_lower_bound_at_exactly_the_floor_coverage": [
+    {
+      "acceptance_lower_bound": 0.16499778904592813,
+      "clears_acceptance_floor": false,
+      "k_at_exactly_the_floor_coverage": 279,
+      "n": 1396,
+      "shortfall": 0.03500221095407188
+    },
+    {
+      "acceptance_lower_bound": 0.17489757189077837,
+      "clears_acceptance_floor": false,
+      "k_at_exactly_the_floor_coverage": 558,
+      "n": 2792,
+      "shortfall": 0.02510242810922164
+    },
+    {
+      "acceptance_lower_bound": 0.18120554544588674,
+      "clears_acceptance_floor": false,
+      "k_at_exactly_the_floor_coverage": 1000,
+      "n": 5000,
+      "shortfall": 0.01879445455411327
+    },
+    {
+      "acceptance_lower_bound": 0.19019249756546114,
+      "clears_acceptance_floor": false,
+      "k_at_exactly_the_floor_coverage": 3748,
+      "n": 18740,
+      "shortfall": 0.009807502434538873
+    },
+    {
+      "acceptance_lower_bound": 0.1922151505539744,
+      "clears_acceptance_floor": false,
+      "k_at_exactly_the_floor_coverage": 5985,
+      "n": 29926,
+      "shortfall": 0.007784849446025616
+    },
+    {
+      "acceptance_lower_bound": 0.19572886688191554,
+      "clears_acceptance_floor": false,
+      "k_at_exactly_the_floor_coverage": 20000,
+      "n": 100000,
+      "shortfall": 0.004271133118084469
+    },
+    {
+      "acceptance_lower_bound": 0.1986451999170223,
+      "clears_acceptance_floor": false,
+      "k_at_exactly_the_floor_coverage": 200000,
+      "n": 1000000,
+      "shortfall": 0.0013548000829776974
+    },
+    {
+      "acceptance_lower_bound": 0.19957116234695393,
+      "clears_acceptance_floor": false,
+      "k_at_exactly_the_floor_coverage": 2000000,
+      "n": 10000000,
+      "shortfall": 0.0004288376530460769
+    }
+  ],
+  "alpha": 0.2,
+  "candidates_per_system": 3,
+  "certification_access": {
+    "certification_gold_read": true,
+    "documents_read": 3152,
+    "final_reads": 0,
+    "head_hash": "ff5562419c7ddd543e06fdf656114a26cf79cdbf12063e906002b1024b423d9f",
+    "shift_reads": 0,
+    "verified": true
+  },
+  "certifies_nothing": true,
+  "clopper_pearson_tail_mass": 0.00034722222222222224,
+  "confidence_candidate": "mean",
+  "cost_usd": 0.0,
+  "delta": 0.05,
+  "delta_allocation": 0.016666666666666666,
+  "diagnostic_only": true,
+  "extrapolation_assumption": "Corpus sizes beyond the observed 1,396 hold the LOSS PROFILE fixed: the mean loss of the best c-fraction is read off the observed distribution and applied at the larger n. This answers 'what if there were more data like this', which is the question the write-up's sentence asks. It is NOT a prediction about any real larger corpus, and a corpus with a different loss profile has a different answer.",
+  "interpretation": "The write-up said the corpus would need to be roughly 13x larger before the gap could close. That closes the RISK test only. The acceptance floor is tested on a Clopper-Pearson LOWER bound, and at exactly the floor coverage that bound approaches the floor from below and never reaches it at any n - so NO corpus of any size certifies at exactly 20% coverage, and a certificate requires coverage strictly above the floor. The smallest corpus admitting one, and the coverage it needs, are computed here over BOTH constraints jointly.",
+  "observed_eligible": 1266,
+  "observed_n": 1396,
+  "risk_construction": "hoeffding_upper at delta/3",
+  "schema_version": "1",
+  "smallest_corpus_admitting_a_certificate": {
+    "_notice": "A BAND, NOT A POINT, and the reason is the reason the cost figure is a band: the endpoints differ only by a modelling choice the data does not settle. Rounding the loss profile to a whole observed group and interpolating a fractional one are both defensible readings of 'the same profile at a larger n' and they disagree by about 1.5%. An independent reviewer's own derivation landed at 29,926 (21.4x), a third point in the same band. Publishing any single endpoint would present a modelling decision as a measurement, which is this project's recorded defect class.",
+    "band_multiple_of_observed_corpus": [
+      21.0121776504298,
+      21.335243553008596
+    ],
+    "band_n": [
+      29333,
+      29784
+    ],
+    "profile_interpolated": {
+      "acceptance_lower_bound": 0.20001717298707955,
+      "coverage": 0.2079304324469514,
+      "k": 6193,
+      "multiple_of_observed_corpus": 21.335243553008596,
+      "n": 29784,
+      "prefix_mean_loss": 0.18033871576588734,
+      "risk_upper_bound": 0.19999894064600185
+    },
+    "profile_rounded_to_whole_group": {
+      "acceptance_lower_bound": 0.2001175378158443,
+      "coverage": 0.20809327378720213,
+      "k": 6104,
+      "multiple_of_observed_corpus": 21.0121776504298,
+      "n": 29333,
+      "prefix_mean_loss": 0.1801958062918654,
+      "risk_upper_bound": 0.19999884145658436
+    },
+    "what_is_robust": "The ORDER of the answer, not its third significant figure: roughly 21x the observed corpus, and - unlike the withdrawn 13x - only at coverage STRICTLY ABOVE the floor. The structural fact needs no extrapolation at all and is exact: at exactly the floor coverage the acceptance lower bound is below the floor at every n."
+  },
+  "system": "qa",
+  "systems_sharing_delta": 3,
+  "witness_at_the_observed_corpus": {
+    "acceptance_lower_bound": 0.20040636611594595,
+    "coverage": 0.23782234957020057,
+    "exists_a_certifying_model": true,
+    "hoeffding_radius": 0.08491217772426152,
+    "k": 332,
+    "mean_loss_a_certifying_prefix_may_carry": 0.1150878222757385,
+    "note": "The smallest prefix at the observed corpus that clears the ACCEPTANCE floor on its Clopper-Pearson lower bound. A witness for 'some model could certify here' must clear BOTH tests, so it must be stated at this k and this ceiling - not at the 20%-coverage prefix, which clears the risk test and fails acceptance at 0.16566.",
+    "observed_prefix_mean_loss": 0.20121364141372752
+  }
+}

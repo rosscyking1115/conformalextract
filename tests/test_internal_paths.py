@@ -55,6 +55,19 @@ INTERNAL_PATH_PATTERNS: dict[str, re.Pattern[str]] = {
     "windows-user-home": re.compile(r"C:\\+Users\\+[A-Za-z0-9._-]+", re.IGNORECASE),
     "operator-dev-root": re.compile(r"C:\\+dev\b", re.IGNORECASE),
     "private-planning-dir": re.compile(r"(?<![A-Za-z0-9])_pmo(?![A-Za-z0-9])"),
+    # The three above enumerate known ROOTS. A 2026-08-02 review found the gap that shape implies:
+    # `C:\tmp\...` is an operator path and matches none of them, so the suite stayed green on a
+    # document carrying one. This alternative matches the *shape* -- drive letter, colon, separator
+    # -- so a new root needs no new entry. Either separator, because `C:/dev/...` is as local as
+    # `C:\dev\...`. The lookbehind is load-bearing: without it `https://` matches, since it contains
+    # `s:/`; measured, 80 of the 89 `[A-Za-z]:/` lines in this repository are URLs and all 80 are
+    # correctly rejected. Recorded honestly and against interest: on today's content this adds ZERO
+    # detections the `_pmo` pattern did not already make -- all 9 forward-slash operator paths here
+    # also contain `_pmo`. It is prospective coverage, not a fix for anything currently hidden.
+    # Known false-positive class admitted by the forward-slash half: a sed expression using `:` as
+    # its delimiter, e.g. `s:/a:/b:`. None exists in this repository; it would fail loudly and
+    # visibly rather than hide anything, so it is recorded here instead of being excluded.
+    "windows-drive-path": re.compile(r"(?<![A-Za-z0-9])[A-Za-z]:[\\/]+(?=[A-Za-z0-9._\-\\/])"),
 }
 
 #: The exceptions, each with the reason it is permitted. Mention, not use -- the same category the
@@ -75,8 +88,37 @@ ALLOWED: dict[str, str] = {
         "The independent review that ruled on the leak. Quoting the strings is how it reports "
         "them, and it discloses this about itself."
     ),
+    "evidence/plan3/reviewer_record.b1-primary-document.json": (
+        "The review that found the release-hygiene record's carried-forward obligation was "
+        "tracked nowhere. Reporting that the string is still in tracked files requires naming "
+        "it — the same mention-not-use ground as the record it reports on."
+    ),
     "tests/test_internal_paths.py": (
         "This file. It defines the patterns above, so it necessarily contains one of them."
+    ),
+    "docs/plan3/section-12-1-certification-only-scope-addendum-2026-07-30.md": (
+        "The frozen 2026-07-30 §12.1 scope addendum, admitted byte-for-byte. Its authority IS its "
+        "hash equality with the independently reviewed artifact, so editing the one operator path "
+        "it cites -- a provenance citation whose five input hashes it already reproduces inline -- "
+        "would destroy the evidentiary value the file exists to carry. The exemption is a "
+        "consequence of the byte-for-byte requirement, not a judgement that the string is "
+        "harmless. Disclosed: this entry was added pre-emptively, before the file was on disk, "
+        "which no other entry here was."
+    ),
+    "evidence/plan3/reviewer_record.s12-1-certification-scope-addendum.json": (
+        "The independent record attesting that addendum. Naming where the review lives is how it "
+        "reports its own provenance -- the same mention-not-use ground already granted to the "
+        "three sibling reviewer records above."
+    ),
+    "evidence/plan4/reviewer_record.certify-hardening-and-claims-delta.json": (
+        "A 2026-10-27 independent record filed verbatim. Its prior_records list names where the "
+        "earlier review's prose copy lives -- the same mention-not-use ground as the sibling "
+        "reviewer records above. Redacting it would make the filed copy differ from the verdict."
+    ),
+    "evidence/plan3/reviewer_record.c1-2026-08-03-packets.json": (
+        "A 2026-10-27 independent record filed verbatim. It reviews routing packets and prior "
+        "reviews that live outside this repository, and naming where they live is how it states "
+        "what it read. Same mention-not-use ground as the sibling reviewer records above."
     ),
 }
 # `REVIEW.md` was on this list on first writing, pre-emptively, and the stale-exception test below

@@ -1,5 +1,8 @@
 # Handoff — ADR 0011 $0 re-analysis (2026-07-22)
 
+> **Superseded wording, 2026-08-02.** This handoff twice writes “grounding ⊥ certifiability”. That shorthand is retired: the claim is a **dissociation**, not an orthogonality result, and independence was never tested. The record is left otherwise unedited because it is a dated account of what was known on 2026-07-22. See [`claim-narrowing-2026-08-02.md`](claim-narrowing-2026-08-02.md).
+
+
 Dated handoff per the project doctrine. Records what was **executed** vs planned, evidence paths,
 gate outcomes, spend, and the next authorised action. Append dated amendments; never rewrite.
 
@@ -24,6 +27,13 @@ Two $0 re-analyses over already-open splits, plus honesty/discipline fixes, all 
    `loss-decomposition`). 87% of QLoRA's loss is grounded, well-formed, wrong-entity; removing
    ZS/FS's entire grounding deficit moves the frontier by 0.0000. Baselines' result carried by an
    arithmetic ceiling (`mean_loss_ceiling` = 0.84), not by the counterfactual.
+
+   > **Amended 2026-07-29.** "wrong-entity" above is withdrawn. The decomposition locates loss by
+   > channel and identifies no error category; the attribution rested on two development examples,
+   > which §12.3 forbids generalising from. Read it as *content-bearing and scored wrong*. False
+   > positives exceed false negatives by 637 arguments on those frames — over-generation, not
+   > entity-naming. Raised as O2 by the review that refused to close Plan 3; the line is amended
+   > rather than rewritten because this is a dated handoff.
 3. **WikiEvents 2nd arm WITHDRAWN** — impossible at any α: SCoRC needs 1,386 groups, corpus has
    246 documents. `largest_scorc_grid`=0 at every scale. Not deferred; withdrawn (ADR 0011 §3).
 4. **Honesty/discipline fixes**: 2606.29054 citation corrected (Table 3: μ band is NER+MMLU, not

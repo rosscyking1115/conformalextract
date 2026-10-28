@@ -30,7 +30,24 @@ FROZEN_CONFIDENCE_CANDIDATES: Final[Mapping[str, str]] = MappingProxyType(
 
 
 def hoeffding_upper(losses: Sequence[float], failure_probability: float) -> float:
-    """One-sided Hoeffding upper confidence bound for bounded losses."""
+    """Hoeffding upper confidence bound for bounded losses, at the TWO-SIDED constant.
+
+    **The radius is ``sqrt(log(2/delta) / 2n)``, not ``sqrt(log(1/delta) / 2n)``.** The docstring
+    said "one-sided" while the implementation used the two-sided constant, and an independent
+    review found the mismatch. The behaviour is left as it is and the description corrected,
+    deliberately: the two-sided constant is **larger**, so every bound this function has ever
+    returned is valid --- conservatively so --- and every conclusion drawn from one holds a
+    fortiori. Recomputing would move published numbers to make a null result *less* stark, which
+    is effort spent weakening our own claim.
+
+    **The size of the conservatism, disclosed because it runs in our favour.** At the prefix
+    length the write-up quotes (k = 280) and the per-system delta/3 allocation, this returns a
+    radius of 0.0925 where the tight one-sided radius is 0.0855 --- about **8% wider**. The
+    published bounds therefore make the benchmark look *more* forbidding than the tight bound
+    would, and that is the direction that flatters this paper's thesis. An undisclosed
+    conservatism pointing the author's way is the defect class this project records; it is
+    stated here rather than left for a reader to find.
+    """
 
     if not losses:
         return 1.0

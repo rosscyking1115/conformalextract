@@ -1,0 +1,142 @@
+{
+  "schema_version": "1",
+  "_record_notice": "Independent Reviewer/QA delta ruling on steps 1, 4 and 5 of the Plan 3 close chain, against evidence/plan3/reviewer_record.plan3-close-chain.json (reviewed at ae1b963). Produced by a reviewer who did not implement Plan 3, did not author Amendment 2 or any remedy under review, and issued no prior verdict in this chain. Drafted outside the repository; nothing under the repository was edited, staged or committed. C1 (unfiled v3/v4 verdicts) and step 2 are reviewed separately and are not ruled here. This record is NOT a plan close.",
+  "review_kind": "plan3_close_chain_delta_steps_1_4_5",
+  "plan": "Plan 3",
+  "reviewed_commit": "39b7350",
+  "reviewed_branch": "release/public-prep-2026-10-27",
+  "reviewed_date": "2026-10-27",
+  "reviewer_identity": "Reviewer/QA (Claude Code, Opus 5.5), independent. Not the Plan 3 implementer; not the author of Amendment 2, of 44ed212/6b3ff7c/39b7350, or of any prior reviewer record in this chain.",
+  "prior_records": [
+    "evidence/plan3/reviewer_record.plan3-close-chain.json (BLOCK at ae1b963 on steps 1, 4, 5; step 3 ruled). The committed copy is byte-identical (LF) to the PMO draft 2026-10-27-reviewer_record.plan3-close-chain.json: sha256 34716cdd8862259d9afdb68e55b6df780110439a2d42e6143db72ee83adccc19 for both.",
+    "evidence/plan3/reviewer_record.plan3-close.json (REFUSED at 4bb9be3 on O1, O2, O3)",
+    "evidence/plan4/reviewer_record.o2-o3-claims-change.json (BLOCK at 20af838)"
+  ],
+  "verdict": "PASS-WITH-NITS on steps 1, 4 and 5: every BLOCKING item (S1-B1, S1-B2, S4-B1, S4-B2, S5-B1) is discharged at 39b7350, and S1-R1 to S1-R4 are discharged. Five new required non-blocking corrections (R1-R5), all $0 text edits, plus the four non-blocking items the prior record carried for steps 4 and 5, which are still open. They must be applied at or before the commit the step 6 reviewer reviews, and that reviewer verifies them. No new blocking defect. Nothing here touches the negative result, the certificate or any committed number.",
+  "external_signal": {
+    "load_rule": "Full suite, ruff and mypy NOT run, per the brief. Single named files only, CUDA_VISIBLE_DEVICES=-1, uv run --frozen.",
+    "tests/test_doc_references.py": "9 passed in 0.93s (the accepted-plan pins hold).",
+    "tests/test_withdrawn_assertions.py": "First run: 1 failed, 21 passed in 122s; the failure was test_a_withdrawn_assertion_survives_only_where_named[grounding-certifiability-orthogonal]. That test alone then passed (8.4s), and a full rerun of the file gave 22 passed in 95s. The working tree was clean (no untracked files) at both later checks. The test walks the filesystem, untracked files included (tests/test_withdrawn_assertions.py:127), so a short-lived file from a concurrent process on this machine is the likely cause. Not attributable to the reviewed commits, and not reproduced. The step 6 reviewer should rerun it at a quiet moment.",
+    "accepted_plan_hashes": "git show HEAD:docs/plan3/accepted-plan.md | sha256sum gives 560eee3d...fa0b; docs/gate0/accepted-plan.md gives 7bf43a6d...4883. Both equal the pins in tests/test_doc_references.py.",
+    "figures_checked": "certification_sensitivity.json empirical_bernstein_probe: candidate_count 1, delta 0.05, construction 'scorc_certificate, one pre-chosen oracle candidate, no multiplicity', k 139/279/329/559 all status infeasible, reason no_jointly_feasible_candidate. The order is an argsort on true loss (scripts/certification_sensitivity.py:114). corpus_size_requirement.json witness: k 332, acceptance LCB 0.20041, Hoeffding radius 0.08491, mean-loss ceiling 0.11509, risk_construction 'hoeffding_upper at delta/3'. calibration_diagnostics.json splits = certification and development; no ECE key.",
+    "not_read": "data/. No secret printed. $0; no network write."
+  },
+  "per_item_rulings": {
+    "step_1": {
+      "S1-B1": {
+        "ruling": "DISCHARGED",
+        "evidence": "Amendment 2 (docs/plan3/sections-11-and-12-disposition-amendment-2.md:15-49) descopes 12.1 on Ross's quoted choice (:9-10), says it is computable at $0 (:23-25), gives a non-cost ground (:27-34), and records the 22 waiver (:46-49). Surfaces that now agree: claim_ledger CX-GROUNDING-ORTHOGONAL-01 limitation 10 and the appendix (claims-appendix.generated.md:72), certification-result.md:186-190, draft-2026-07-28.md:131-142, the accepted-plan note at docs/plan3/accepted-plan.md:508-511, and the base disposition pointer at sections-11-and-12-disposition.md:65-67.",
+        "is_the_ground_true": "YES. A meaning-level search of README.md:95-101, uncertainlp-2026-short.tex:323-326, ledger limitations 9-11, the appendix, certification-result.md:161-190, draft:122-142, ADR 0007:95-116 and withdrawn_assertions.json found no live claim that attributes QA's loss to an error category. The only present-tense attribution left is ADR 0007:88-93. It is the historical record, and its dated note directly below disclaims it ('Do not cite this paragraph as evidence for an error-category claim'). README.md:84 ('can ... still name the wrong entity or role') defines 'valid'; it is not an attribution. No surface still says 12.1 'is scheduled', 'has not been run' as a pending item, or 'to be executed' without the superseded pointer."
+      },
+      "S1-B2": {
+        "ruling": "DISCHARGED against its discharged_when (each axis carries a disposition; trigger count recorded as an addition at :64-66). Two of the five grounds need correcting: R1 and R2 below.",
+        "axis_by_axis": {
+          "event_type": "True ground (:58). §11.2 requires a displayed minimum. With 139 types, picking that minimum after the result decides which types are shown, which is a real §8.5 concern. The 'no claim depends on it' reason also stands.",
+          "role": "Acceptable descope with a stated reason (:59).",
+          "document_length_quartile": "PARTIAL. 'Same ground as event type' (:60) does not carry over. Quartiles of 1,396 groups hold about 349 groups each, so no plausible displayed minimum excludes any of them, and the minimum-choice concern does not arise. The descope stands only on the second reason ('no claim depends on it; it cannot change a whole-split infeasibility'). See R2.",
+          "cross_sentence_distance": "True (:61). Amendment 1:209-210, over all groups, exploratory.",
+          "seen_unseen_schema": "PARTIAL. Checked against the plan text: the 'belongs to shift §10' ground has support in §10.3 (accepted-plan.md:430, 'seen versus unseen schema coverage' is a shift severity descriptor), in §3.4 item 2 (:132) and in Plan 1 §5 (docs/gate0/accepted-plan.md:194). But §11.2 (:464) lists the axis without restricting it to shift. The second sentence (:62), 'The certification split has no unseen-schema stratum to report', is a factual assertion with no cited evidence. It is not true by construction: the RAMS roles are a random grouped split (src/conformalextract/cli.py:98-102, train 0.45 / development 0.10 / certification 0.35 / final 0.10, seed 42), and the shift role is cross-dataset, so event-type or role combinations absent from train can occur in certification. See R1."
+        }
+      },
+      "S1-R1": {
+        "ruling": "DISCHARGED",
+        "evidence": "Amendment 2:68-85 withdraws the unsupported mootness claim, says plainly that the plan text does not define the strata by acceptance, and re-disposes both strata as 'computable, descoped'. It does not present either as impossible, so the honesty bar is met. One reason overstates the plan: §12.3 constrains phrasing ('associated with', 'consistent with'); it does not forbid an audit (:76). See N5."
+      },
+      "S1-R2": {
+        "ruling": "DISCHARGED",
+        "evidence": "Amendment 2:94-100 matches certification_sensitivity.json empirical_bernstein_probe exactly: one candidate, full delta 0.05, no multiplicity, infeasible at k 139, 279, 329 and 559. Reading 'certified acceptance 0.0000' from status infeasible is correct. 'Perfect ranking' is accurate: the order is an argsort on true loss (scripts/certification_sensitivity.py:114). The one-sided-by-construction argument is sound."
+      },
+      "S1-R3": {
+        "ruling": "DISCHARGED",
+        "evidence": "Amendment 2:89-93. The split deviation from §11.3 (accepted-plan.md:470) is stated. The splits key holds certification and development. ECE is absent and said to be absent."
+      },
+      "S1-R4": {
+        "ruling": "DISCHARGED",
+        "evidence": "Amendment 2:102-118 records the step 3 ruling item by item (5.2, 11.1 row 3, 11.3, 9). Amendment 1:114-115 points back to it. CX-RANKING-01 limitation 6 is present in the ledger and in the appendix. The Plan 1 note (docs/gate0/accepted-plan.md:239-244) was recommended and has been made."
+      },
+      "S1-N1": "NOT ADDRESSED (deferred to C1 by its own terms). Amendment 1's status line is unchanged."
+    },
+    "step_4": {
+      "S4-B1": "DISCHARGED. CX-SERVING-01 limitation 4 again carries both clauses: two flips survive into the accepted set above about 50% acceptance, and abstention is stack-dependent at the margin. The appendix renders it ('stack-dependent at the margin' occurs once). The register's 'Now carried as limitation 4' (carried-forward-from-plan2.md:91) is true again.",
+      "S4-B2": "DISCHARGED. draft-2026-07-28.md:126-133 separates the two signatures, says substitutions contribute nothing to the excess, gives 12.1's true status, and carries dated correction notes at :135-142.",
+      "R2_count_element": "DISCHARGED. ADR 0007:113-116 ('an unknown number ... and two are quoted').",
+      "still_open_non_blocking_from_prior_record": [
+        "docs/plan4/open-release-decisions.md:57 still says each walk has one guard and 'none has both' (the 73283cc B1 item).",
+        "Register §B status column: carried-forward-from-plan2.md:104 ('half-arrived') and :106 ('never arrived'), although CX-SERVING-01 limitations 6 and 7 now carry both. Also, :85 and :102 still print the flip rate as the '1.3–1.8%' range that limitation 4 retires as the wrong form."
+      ]
+    },
+    "step_5": {
+      "S5-B1": "DISCHARGED against its discharged_when. README.md:66-79 names the 0.0925 pairing as a diagnostic of neither certifier, uses the two-constraint witness (k 332, LCB 0.2004, at most 0.1151) in the sentence declining the no-model claim, and scopes the heading to the δ/3 allocation, with the full-δ entrant line added. One residual sentence in the same paragraph is wrong; see R4.",
+      "still_open_non_blocking_from_prior_record": [
+        "The Q2 dated line in the packet: claim-narrowing-2026-08-02.md:189 still says 'reachable elsewhere'.",
+        "Scope the packet header 'No number changed anywhere' (claim-narrowing-2026-08-02.md:12) to sections 1-3."
+      ]
+    },
+    "point_2_section_22_waiver": "LEGITIMATE. The ninth checklist line (accepted-plan.md:812) is a conjunction. Its first half cannot be met once 12.1 and 12.2 are descoped. §24 (:863) requires a material change to record its 'acceptance impact', and recording the impact as a waiver is the honest way to do that. Keeping 'all result artifacts' unwaived is right, and so is leaving it to the close. The taxonomy half is covered by Ross's option (a), which as worded in S1-B1 included the waiver. The manual-audit half rests on the 12.2 re-disposition. That re-disposition is the implementer's proposal, ruled acceptable here, and Amendment 2 correctly does not attribute it to Ross (see N5). The 'ninth line' count is correct.",
+    "point_3_accepted_plan_edits": "CONFORMING. git diff 907c107..39b7350 shows insertions only in docs/plan3/accepted-plan.md (three blockquoted notes, dated 2026-10-27, under §12.1, §12.2 and §22, each saying the text above is unchanged) and in docs/gate0/accepted-plan.md (one note under the strict-failure sentence in Plan 1 §6.1). No existing line is altered. The pins moved in the same commit (6b3ff7c) with dated comments naming the previous digests, as the convention at tests/test_doc_references.py:75-96 requires. 39b7350 only rewraps a comment. Sequencing nit: the notes state the descope as done while Amendment 2's status (:11) reads 'proposed, pending independent review'. This record resolves that once filed (N6).",
+    "point_5_chain_table": "NOT ACCURATE. 6b3ff7c updated rows 1-3 of docs/writeup/uncertainlp-2026-short.md and left rows 4-5 as they stood before 2026-10-27 (see R3). Rows 1 and 5 still say 'REVISE twice'; that is C2 and is left alone as instructed."
+  },
+  "new_findings": {
+    "R1": {
+      "blocking": false,
+      "file": "docs/plan3/sections-11-and-12-disposition-amendment-2.md:62",
+      "finding": "The seen/unseen-schema row claims 'The certification split has no unseen-schema stratum to report' without evidence. The RAMS role split is random and grouped (src/conformalextract/cli.py:98-102), so this is not guaranteed. The 'belongs to §10' ground is only partly supported by the plan: it rests on §10.3 and §3.4(2), while §11.2 lists the axis unconditionally.",
+      "discharge": "Re-dispose the row as 'descoped': the plan treats it as a shift descriptor (§10.3, §3.4(2)), shift is sealed (ADR 0010), and the in-domain version is not computed. Delete the factual sentence, or support it with a committed count."
+    },
+    "R2": {
+      "blocking": false,
+      "file": "docs/plan3/sections-11-and-12-disposition-amendment-2.md:60",
+      "finding": "'Same ground as event type' does not apply to document-length quartiles, because every quartile (about 349 groups) clears any plausible displayed minimum.",
+      "discharge": "Rest the row on the reason that does apply: no claim depends on it, and it cannot change a whole-split infeasibility."
+    },
+    "R3": {
+      "blocking": false,
+      "file": "docs/writeup/uncertainlp-2026-short.md:87-88 and :97-98",
+      "finding": "The chain table is stale. Row 4 still reads 'appears to address it; no record discharges it ... verify'. The 2026-10-27 close-chain review did that verification, returned BLOCK on S4-B1/S4-B2, and 44ed212 answers both. Row 5 still reads 'awaiting independent review of its four questions'. The close-chain record ruled all four (Q3 retain, no redirect; Q4 a separate finding, O2-S1) and returned BLOCK on S5-B1. The tally 'four review events ... zero for four' leaves out the close-chain BLOCK. This status page sits directly above 'nothing may be quoted until step 6'.",
+      "discharge": "Bring rows 4 and 5 and the tally up to date, citing the close-chain record and this delta record. The C2 round-count correction can go in the same edit."
+    },
+    "R4": {
+      "blocking": false,
+      "file": "README.md:71-72 (also claim_ledger CX-CAPGAP-01 wording, draft-2026-07-28.md:88, certification-result.md:39)",
+      "finding": "'A certificate at the 20% acceptance floor needs an accepted set carrying mean loss ≤ 0.1075' is false under the pairing it names. At k 279 (20% coverage) no set clears acceptance at all. At the smallest prefix that does clear it (k 332), the same Hoeffding δ/3 pairing allows mean loss up to 0.1151 (corpus_size_requirement.json witness). The README now states both figures in one paragraph, and they contradict each other. The paper already uses the correct form (uncertainlp-2026-short.tex:258: 'the risk test at the floor requires ...'). This was not introduced by these commits, but 44ed212 left it inside the paragraph it repaired.",
+      "discharge": "Adopt the .tex form ('the risk test at exactly 20% acceptance requires ≤ 0.1075') on the README, in the ledger wording (then regenerate the appendix) and in the draft. This is a claims change: the step 6 reviewer, or a delta reviewer, rules on it. No number moves."
+    },
+    "R5": {
+      "blocking": false,
+      "file": "docs/plan3/sections-11-and-12-disposition-amendment-2.md (missing); accepted-plan.md:620 and :709",
+      "finding": "Two items that depend on 12.1 are not disposed: §14.2 figure 4 ('failure-type composition for accepted errors') and §17 Phase E step 1 ('Generate deterministic taxonomy counts and manual-audit sample'). Left that way, the unwaived second half of the 22 line ('all result artifacts') still carries an artifact that depends on the taxonomy.",
+      "discharge": "One line each in Amendment 2. Figure 4 is moot (no accepted set) and descoped with 12.1. Phase E.1 is descoped with 12.1 and 12.2."
+    },
+    "N1": "Amendment 2:37-38 repeats '2,003 of 2,515'. Its only committed source is reviewer recomputation (reviewer_record.plan3-close.json:70, reviewer_record.o2-o3-claims-change.json:43), not argument_error_counts.json. This is not new, and committed evidence does back it, but a citation would close the gap.",
+    "N2": "'Plan 1 §237' (Amendment 2:105, :129; Amendment 1:109; src/conformalextract/calibration.py:75) is a line number. The section is Plan 1 §6.1 (docs/gate0/accepted-plan.md:229-237). The wording came from the prior reviewer record.",
+    "N3": "Amendment 2:80-81. Stratum 3 is called moot because 'nothing is accepted' and stratum 4 because 'nothing is abstained'. Under §4.2's binary accept/abstain action, both cannot be outcomes. The common true ground is that no policy was selected: all systems are marked infeasible under §3.3.",
+    "N4": "The base disposition's §11.2 section (sections-11-and-12-disposition.md:38-43) and §12.2 section (:86-96) have no pointer to Amendment 2; the only pointer is at the §12.1 heading. :91 'three of the six' also miscounts.",
+    "N5": "Amendment 2:76 says the audit's output is 'attribution of the kind §12.3 limits'. §12.3 limits phrasing; it does not limit an audit. Separately: the 12.2 descope and the manual-audit half of the 22 waiver are the implementer's, ruled acceptable here. Because 22 is the plan's acceptance gate, a one-line owner acknowledgement is recommended, not required.",
+    "N6": "Once this record is filed, update Amendment 2's status line (:11) to cite it, so that the accepted-plan notes ('Descoped', 'waived') are not ahead of their source. The §24 'Addenda: None yet.' line (accepted-plan.md:865-867) is stale given the in-place dated notes. This predates these commits and is out of scope."
+  },
+  "cross_cutting": {
+    "C1": "Not ruled (reviewed separately). It remains a step 6 precondition per the prior record.",
+    "C2": "Not ruled. As requested, the table's accuracy is reported under point_5 and R3."
+  },
+  "step_6_may_be_attempted": "YES as far as steps 1, 4 and 5 are concerned. No blocking item remains in them. R1-R5 and the four carried non-blocking items should land at or before the commit step 6 reviews, and the step 6 reviewer checks each one by name. R4 is a claims change and must be ruled on by an independent reviewer. Step 6 also still depends on C1 and on step 2's delta review, which this record does not rule.",
+  "carried_forward": {
+    "items": [
+      {"name": "R1_seen_unseen_ground", "direction": "states a risk", "for": "implementer", "discharged_when": "the row is re-disposed without the unevidenced sentence, or the sentence is backed by a committed count", "blocking": false},
+      {"name": "R2_doc_length_quartile_ground", "direction": "states a risk", "for": "implementer", "discharged_when": "the row rests on the reason that applies", "blocking": false},
+      {"name": "R3_chain_table_rows_4_5", "direction": "states a risk", "for": "implementer", "discharged_when": "rows 4 and 5 and the tally reflect the 2026-10-27 records", "blocking": false},
+      {"name": "R4_0.1075_necessity_wording", "direction": "states a risk", "for": "implementer, then the step 6 reviewer", "discharged_when": "README, ledger CX-CAPGAP-01, draft and certification-result state 0.1075 as the risk-test requirement at 20% coverage, consistent with the k 332 witness", "blocking": false},
+      {"name": "R5_12.1_dependents", "direction": "states a risk", "for": "implementer", "discharged_when": "§14.2 fig. 4 and §17 Phase E.1 are disposed in Amendment 2", "blocking": false},
+      {"name": "prior_step4_open_release_decisions_57", "direction": "states a risk", "for": "implementer", "blocking": false},
+      {"name": "prior_step4_register_B_status_column_and_range_form", "direction": "states a risk", "for": "implementer", "blocking": false},
+      {"name": "prior_step5_Q2_dated_line", "direction": "states a risk", "for": "implementer", "blocking": false},
+      {"name": "prior_step5_packet_header_scope", "direction": "states a risk", "for": "implementer", "blocking": false},
+      {"name": "S1-N1_amendment1_status_line", "direction": "states a risk", "for": "implementer when C1 closes", "blocking": false}
+    ]
+  },
+  "reviewer_disclosures": {
+    "files_written": "None in the repository. The working tree was clean at start and at finish.",
+    "restricted_reads": "None. data/ not opened.",
+    "verified_vs_trusted": "Verified by execution: two single named test files, two accepted-plan hashes, the record's verbatim filing, and the JSON fields cited. Verified by reading at 39b7350: every file:line cited. Not verified: whether certification actually contains unseen schema combinations, which would need data/ (R1 is worded so that it does not depend on the answer)."
+  },
+  "acceptance_rule": "As in the prior record: a remedy is discharged only when, at the reviewed commit, the receiving document states it and every surface it reaches agrees. The implementer of a remedy may not complete this record."
+}

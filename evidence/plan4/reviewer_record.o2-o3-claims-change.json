@@ -1,0 +1,366 @@
+{
+  "schema_version": "1",
+  "_record_notice": "Independent reviewer ruling on the O2/O3 claims change committed as 20af838 ('fix(claims): discharge O2 and O3; rule sections 11-12; PAUSE Plan 4'). Produced by a reviewer who did NOT author that commit, did not implement Plan 3, and did not write evidence/plan3/reviewer_record.plan3-close.json (the refusal that raised O2 and O3). This record is the ONLY file this review wrote; no source, test, doc, ADR, ledger or other evidence artifact was edited, and no defect found here was fixed by me. It rules on a claims change to publication surfaces. It advances no gate, closes no plan, authorises no spend, no visibility change, no repository description or topics, no release bundle and no sealed-label access.",
+  "review_kind": "claims_change_review_o2_o3",
+
+  "reviewed_commit": "20af838",
+  "reviewed_commit_note": "20af8387158656342528c183f828d56ed1456ba8 on branch codex/plan4-release, 8 files changed, 179 insertions, 14 deletions. Every finding below was established at that commit and re-checked against the working tree.",
+  "head_advanced_during_this_review": {
+    "what_happened": "I was asked to rule on 20af838, which was HEAD when this review opened. Partway through, a concurrent session committed 6b1a3aad6b00668ea38939db396c3f70764cc432 ('test: search for withdrawn assertions by phrasing; register carried items in the receiving doc'), which is now HEAD. It is not my work — this record is the only file I wrote.",
+    "scope_of_6b1a3aa": "Four files, all additions: evidence/withdrawn_assertions.json (a register of retired phrasings), tests/test_withdrawn_assertions.py (108 lines), docs/plan3/carried-forward-from-plan2.md (81 lines), REVIEW.md (+14 lines). It changes no claim wording, no number and no ledger entry.",
+    "does_it_change_any_finding": "NO. It narrows two of my findings and moots none. (a) The register's search is a literal phrase match after whitespace normalisation — its own docstring says so — and BOTH surfaces I found still carrying the withdrawn assertion carry it as a PARAPHRASE, so the new test passes over both. Finding B1 stands at HEAD, unmitigated. (b) docs/plan3/carried-forward-from-plan2.md registers the four items under plan2-close.what_this_close_does_and_does_not_authorise.carried_into_plan_3, and explicitly says it does that and nothing more. It does NOT register the SIX elements of plan2-close.ruling_2_serving_equivalence_probe.standing_limitation, which is the list that names Plan 4 limitations and the model/report card as its destination. Finding R4 stands at HEAD.",
+    "reviewed_commit_stays_20af838": "That is what I was asked to rule on. The green command was re-run at HEAD as well and both readings are recorded under external_signal."
+  },
+
+  "reviewer_identity": "Reviewer/QA (Claude Code, Opus 5) — independent. NOT the author of 20af838, NOT the Plan 3 implementer, NOT the author of evidence/plan3/reviewer_record.plan3-close.json or of any prior reviewer record, ADR or evidence artifact in this repository. I re-derived the O2 measurement from the raw predictions and RAMS gold rather than accepting the figures the change carried, and I searched for the ASSERTION rather than the claim ID, as the task required. Adversarial reading; BLOCK was an available outcome and is the outcome.",
+  "reviewed_date": "2026-07-29",
+
+  "verdict": "BLOCK — on one item, narrow and cheap to fix, and against a change that is otherwise good work. The reword is correct, the carried measurement is exact (I reproduced tp 2,984 / fp 4,434 / fn 3,797 and the 2,003-of-2,515 figure to the unit from the raw predictions), the appendix is byte-identical to claims.render_surface(ledger, 'report'), no other claim moved, and the O3 limitation is faithful to both source documents. What blocks is question 3. The commit message asserts 'The withdrawn attribution is removed from every claim-carrying surface'. It is not. docs/plan3/certification-result.md lines 91-93 still attribute the same 87% to a named error category — 'the coreference and entity-selection errors ADR 0007 catalogued' — on the primary Plan 3 result document, which six ledger claims cite as evidence and which will be published with the repository. That passage is neither of the two exemptions the author declared: it is not an illustration that a span CAN be wrong, and it is not ADR 0007's historical record. It is the withdrawn attribution restated, in a form STRONGER than the one withdrawn, because it names two of section 12.1's eleven categories rather than one informal description. It survived because the author's search was for the retired phrasing and this is a paraphrase — which is precisely the mechanism finding O2 exposed, reappearing inside the fix for it. Four further required items and six nits follow. None of them, and not B1 either, casts any doubt on the decomposition, the measurement or the negative result.",
+
+  "external_signal": {
+    "at_reviewed_commit_20af838": "uv run pytest -q -> 362 passed in 20.43s. uv run ruff check . -> All checks passed! uv run mypy -> Success: no issues found in 24 source files. uv run conformalextract verify-claims -> ok true, claims 15, publishable 13, by_status {infeasible 3, negative 2, planned 2, qualified 2, verified 6}, tracking_verifiable true, unresolved_evidence {} and untracked_evidence {} both empty. Matches the expected 15/13 signal exactly.",
+    "at_current_head_6b1a3aa": "uv run pytest -q -> 365 passed in 27.30s. uv run ruff check . -> All checks passed! uv run mypy -> Success: no issues found in 24 source files. uv run conformalextract verify-claims -> ok true, 15 claims, 13 publishable, unchanged. The 3 extra tests are tests/test_withdrawn_assertions.py, which passes with finding B1 live.",
+    "what_green_does_not_mean": "verify-claims validates the ledger and resolves evidence paths. It has no view of prose that copied a claim's words, which is why it was green throughout the eight days the O3 limitation was missing and is green now with finding B1 live. The suite at HEAD adds a phrase search, and B1 passes that too, because B1 is a paraphrase. Stated here so no reader takes the 15/13 signal as bearing on this verdict."
+  },
+
+  "q1_is_the_new_wording_within_its_evidence": {
+    "verdict": "YES — the wording is within its evidence, asserts no error category by implication, and 'scored wrong anyway' is doing honest work. One nit on precision (N3).",
+    "the_new_wording": "'Grounding fidelity and certifiability are orthogonal for grounded event-argument extraction on RAMS: the QLoRA adapter's ~16x reduction in ungrounded spans over the baselines moved the certifiable frontier by 0.017 for itself and by 0.000 for both baselines, because 87% of its remaining loss sits in output that is well-formed, grounded and content-bearing, and is scored wrong anyway.'",
+    "the_87_percent_verified_against_the_artifact": "evidence/plan3/loss_decomposition.json, splits.certification.qa: valid_content_bearing.group_level_contribution 0.5300207397143797 over group_level_total_loss 0.6070897368585918 = 0.87304, i.e. 87%. The three qualifiers each map to a defined property of that channel and to nothing else: 'well-formed' = not structural_failure (22 documents, forced loss 1.0); 'grounded' = not grounding_failure (129 documents, forced loss 1.0); 'content-bearing' = reanalysis.loss_channel's CONTENT_CHANNEL, i.e. status 'valid' AND at least one argument in some frame, which is the same predicate predictions.parse_arm uses, so it reconciles with evidence/plan2/prediction_parse_summary.json by construction. 2,847 of 3,152 documents, 90.3% document share.",
+    "the_0_017_and_0_000_verified": "grounding_oracle.frontier_movement: qa 0.017339851225748104, fs 0.0, zs 0.0. Correct as stated.",
+    "does_it_still_assert_an_error_category_by_implication": "NO. I read the sentence for every reading an unfriendly reader could take. 'Scored wrong anyway' names no mechanism, no linguistic phenomenon and no argument-level error type; it is compatible with every one of section 12.1's eleven categories and privileges none. The frame around it in the ledger, the README and the draft states affirmatively that no attribution is made and that the decomposition cannot support one. Nothing in the sentence recovers the withdrawn claim by implication.",
+    "is_scored_wrong_anyway_smuggling_a_judgement": "NO, and I tested it as though it were. The relative clause qualifies the OUTPUT IN WHICH THE LOSS SITS, and output in which loss sits is by construction output that scored imperfectly — the sentence is tautological where it could have been an assertion, which is the safe direction. This is also almost exactly the form the refusing reviewer named as defensible ('grounded, well-formed, content-bearing output that is simply wrong'). 'Anyway' carries the argumentative weight — it means 'notwithstanding those three properties' — and that contrast is precisely what the decomposition measures: the channel is defined by the three properties and still carries 87% of the loss. It is the honest word for what the artifact shows.",
+    "where_it_is_slightly_imprecise": "See N3. 'Wrong' is binary; the quantity is continuous. mean_loss_within_channel for QA is 0.5792644443329376, i.e. mean grounded-F1 about 0.42, and I measured 332 of the 2,847 channel documents at exactly zero loss — fully correct output that contributes nothing to the 87%. The sentence survives this because it predicates on the loss, not on the channel; a reader who mis-parses it would over-read. Nit, not required.",
+    "a_wording_change_beyond_o2_that_i_checked_separately": "The change also replaced '~16x grounding gain' with '~16x reduction in ungrounded spans'. O2 did not ask for this. It is an improvement and I record it as correct in kind: CX-GROUNDING-01 gives ungrounded spans falling from 5,355 to 340 (15.75x), the grounding RATE moved 39.4% to 95.7% (about 2.4x), and CX-REPO-DESCRIPTION-01.method already recorded that '~16x is the reduction in ungrounded spans, not the grounding rate' — so the old wording was loosely wrong and the ledger now agrees with itself. It remains imprecise on WHICH baseline (N2)."
+  },
+
+  "q2_is_the_carried_measurement_correctly_stated": {
+    "verdict": "YES — every figure reproduces EXACTLY under independent recomputation, and the 2,003-of-2,515 figure is stated with its correct meaning and with section 12.3's required hedging.",
+    "method": "I did not verify the figures for internal consistency; I recomputed them from the raw predictions. Scratch script outside the repository, using the repository's own seams so my loading cannot disagree with the artifact's: cli._reanalysis_inputs(RAMS_1.0c.tar.gz, data/private/splits/rams_roles.jsonl, evidence/plan2/development_gate_summary.json); predictions.read_prediction_jsonl + predictions.parse_arm at each system's FROZEN confidence candidate read from the gate summary (qa 'mean', zs 'mean', fs 'tenth_percentile'); reanalysis.loss_channel to select CONTENT_CHANNEL; evaluation.evaluate_document(gold_frames(instance), prediction.frames) per document; documents restricted to role == 'certification' in the role map. reanalysis.assert_reanalysis_role('certification') was called first. Nothing was written into the repository.",
+    "my_result_qa_certification_content_bearing": {
+      "content_bearing_documents": 2847,
+      "zero_loss_documents": 332,
+      "error_bearing_documents": 2515,
+      "tp": 2984,
+      "fp": 4434,
+      "fn": 3797,
+      "fp_minus_fn": 637,
+      "documents_with_BOTH_fp_and_fn": 2003,
+      "documents_with_fn_only": 178,
+      "documents_with_fp_only": 334,
+      "error_bearing_with_neither": 0
+    },
+    "confirmation": "2,984 / 4,434 / 3,797 CONFIRMED to the unit. The 637-argument excess CONFIRMED (4,434 - 3,797). 2,003 of 2,515 CONFIRMED, = 79.6%. The document count 2,847 CONFIRMED against loss_decomposition.json's valid_content_bearing.documents for qa/certification. 178 + 334 + 2,003 = 2,515 exactly, so the partition is complete and no error-bearing document falls outside the three cases.",
+    "baselines_reproduce_too": "zs content-bearing 1,238 documents, tp 32 / fp 1,319 / fn 2,765; fs 1,130 documents, tp 110 / fp 1,135 / fn 2,636. Identical to the figures in the refusal record, which I did not consult until after my run completed. Both baselines run the OTHER way — fn exceeds fp by 1,446 and 1,501 — so the over-generation finding is specific to the QLoRA arm and is not an artefact of the metric or the loader. The ledger does not claim otherwise, but this is worth having on the record before section 12.1 runs.",
+    "is_the_2003_of_2515_figure_stated_with_its_correct_meaning": "YES. The ledger limitation says: '2,003 of 2,515 error-bearing documents show both fp and fn, consistent with substitution, so mostly missing arguments is ruled out.' That is exactly what the number means and exactly as far as it reaches. A substitution produces one fp and one fn; a missing gold argument produces fn only; an extra argument produces fp only. 80% of error-bearing documents carry both, so a purely-missing-argument account is excluded — which is what is claimed, no more. It uses 'consistent with', which is one of the three phrasings the accepted plan's section 12.3 prescribes, and the same limitation immediately records that wrong-role, boundary and coreference errors share the identical signature and that section 12.1 has not been run. This is a correctly hedged carry, not a substitution claim in hedged clothing.",
+    "is_the_over_generation_reading_sound": "YES, and it is the sharper half. fp exceeds fn by 637 arguments, and 334 documents carry fp with no fn at all against 178 the other way. A pure in-role substitution keeps fp and fn equal; these are not equal. 'Systematic over-generation' is a fair description of a 637-argument excess over 2,515 error-bearing documents. The ledger states it as a measurement that 'points the other way' rather than as a new attribution, which is the correct register for a figure that has not been through section 12.1 either.",
+    "attribution_of_the_measurement": "Correctly attributed. The ledger limitation and the README both trace it to the independent review, and the ledger names evidence/plan3/reviewer_record.plan3-close.json finding O2 as the source. It is carried into the artifact rather than left in the review, which is the right instinct and the direct lesson of O3.",
+    "sealed_label_discipline_of_my_own_run": "I read certification and development gold only — both already open, opened once by certify on 2026-07-22 under the chain whose head_hash is ff5562419c7ddd543e06fdf656114a26cf79cdbf12063e906002b1024b423d9f. I did not touch final or shift; assert_reanalysis_role's allowlist is frozenset({'certification','development'}) and would have refused. Disclosed here as a review action rather than routed through any access chain, following the precedent in evidence/plan3/reviewer_record.certification.json and the refusal record."
+  },
+
+  "q3_did_the_reword_reach_every_surface": {
+    "verdict": "NO — and this is the BLOCK. Two tracked surfaces still carry the assertion, one of them live and load-bearing. Of the author's two declared exemptions, one is CORRECT and one is CORRECT IN PRINCIPLE BUT INCOMPLETE AS LEFT.",
+    "how_i_searched": "For the assertion, not the claim ID, and for paraphrases as well as the retired phrasing. Repo-wide case-insensitive searches over all tracked files for: the retired phrasing itself; 'wrong-entity'; 'entity selection' and 'entity-selection'; 'coreference and entity'; 'substitution'; '87%' and '0.873'; 'content-bearing output'; 'simply wrong' and 'scored wrong'. Then I read every hit in its surrounding paragraph rather than ruling on the line.",
+    "surfaces_correctly_updated": {
+      "evidence/plan4/claim_ledger.json": "CX-GROUNDING-ORTHOGONAL-01 wording replaced; two limitations added, one recording the withdrawal with its reason and its date, one recording the counter-measurement. Correct.",
+      "README.md lines 65-72": "Replaced, and the passage goes further than the ask: it states affirmatively that the decomposition does not identify the error category, that none is claimed, that an earlier wording was withdrawn on review, and why. Correct, and a reader who saw the old text is told what changed.",
+      "docs/writeup/draft-2026-07-28.md lines 107-118": "Replaced, with a correction note carrying the 4,434-against-3,797 figures and naming section 12.1 as the unrun test. Correct.",
+      "docs/writeup/claims-appendix.generated.md line 42 and 49-50": "Regenerated from the ledger. Byte-identical (see q4). Correct."
+    },
+    "BLOCKING_surface_still_carrying_the_assertion": {
+      "file": "docs/plan3/certification-result.md",
+      "lines": "91-93",
+      "text": "'**87% of QA's remaining loss (0.530 of 0.607) is grounded, well-formed, content-bearing output that is simply wrong** — the coreference and entity-selection errors ADR 0007 catalogued (`victim = \"she\"` for `\"Mrs. Clinton\"`).'",
+      "why_this_is_the_withdrawn_assertion": "The bolded clause is the defensible form and is fine. The em-dash appositive that follows is not an aside — it is an APPOSITIVE ON THE 87%, and it identifies that 87% as two named error categories. Both are section 12.1 categories ('wrong role' / 'coreference or alias mismatch under policy' territory, and the 'extra grounded but incorrect argument' family). This is the attribution the ledger just withdrew, restated in a STRONGER form than the one withdrawn, because it names categories rather than describing one informally. Its evidential base is identical and equally thin: ADR 0007's two development examples, one of which is quoted inline.",
+      "why_it_is_not_covered_by_either_declared_exemption": "Exemption (a) is for passages saying a span CAN name the wrong entity, as an illustration that valid is not correct. This says the 87% IS those errors — a universal about a measured quantity, not a possibility about a span. Exemption (b) is for ADR 0007 as the historical record of what was inspected. This is not ADR 0007; it is the current Plan 3 result document, citing ADR 0007 as authority for a live claim.",
+      "why_it_matters_more_than_a_stray_line": [
+        "It is the primary Plan 3 result document. Six ledger claims cite it under `evidence`: CX-REPO-DESCRIPTION-01, CX-H1-PRIMARY, CX-CAPGAP-01, CX-FEASIBILITY-LESSON-01, CX-GROUNDING-ORTHOGONAL-01 and CX-REPRO-CPU-01. A reader who follows CX-GROUNDING-ORTHOGONAL-01's own evidence trail from the reworded claim lands on the withdrawn attribution.",
+        "It is tracked, it is in docs/, and Plan 4 is the plan that makes this repository public. There is no sense in which it stays internal.",
+        "It exceeds the boundary the SAME DOCUMENT sets for itself. Its 'What may and may not be claimed (fixed at review)' section permits, in the ADR 0011 bullet, 'with 87% of QA's residual loss in grounded, content-bearing output' — the attribution-free form. The body at line 92 goes past the permitted form recorded 140 lines below it.",
+        "It is not append-only historical. This document has been amended repeatedly, incorporating corrections C1-C4 from the certification review."
+      ],
+      "why_it_survived": "Two compounding reasons, both worth recording because neither is carelessness. First, the refusal record's O2 pointed at this document as ALREADY holding the defensible form and quoted line 91 only — it did not quote line 92, so an author reading O2 literally would treat this file as clean. Second, the register and test added at HEAD search for the retired phrasing literally; this is a paraphrase and passes. The failure mode that produced O2 — an assertion living wherever it was copied, under different words — is reproduced inside the change that fixes O2. That is the finding, not the line.",
+      "mitigation_recorded_in_fairness": "The author was misled by the prior review on this file. The severity is BLOCK because of what the passage is and where it sits, not because the omission was careless."
+    },
+    "second_surface_required_but_not_blocking": {
+      "file": "docs/plan3/HANDOFF-2026-07-22-reanalysis.md",
+      "line": 24,
+      "text": "'87% of QLoRA's loss is grounded, well-formed, wrong-entity; removing ZS/FS's entire grounding deficit moves the frontier by 0.0000.'",
+      "ruling": "Required, not blocking. The file's own header says 'Dated handoff per the project doctrine... Append dated amendments; never rewrite', so it IS an append-only historical record and rewriting the line would be wrong. But it is tracked, it will publish, it is not covered by either declared exemption, and it carries the assertion unmarked. Its own convention supplies the fix: a dated amendment. See R1."
+    },
+    "ruling_on_exemption_a_the_can_name_illustrations": {
+      "verdict": "CORRECT. Not an overclaim, and removing them would be a mistake.",
+      "instances": "README.md line 61 and docs/writeup/draft-2026-07-28.md line 90 (both are CX-GROUNDING-01's limitation that 'valid' is not 'correct'); evidence/plan4/claim_ledger.json line 89 and docs/writeup/claims-appendix.generated.md line 19 (the same limitation, in the ledger and rendered); docs/plan2/prediction-parse-result.md line 73; and evidence/plan2/reviewer_record.plan2-close.json line 77, which is an immutable record.",
+      "reasoning": "Each is a modal statement about what a single grounded span CAN be, attached to the 95.7% grounding figure, and each exists to stop 95.7% being read as accuracy. None quantifies, none attaches to the 87%, and none names a category as the cause of anything. This is a different statement from the one withdrawn, exactly as the author says. It is also load-bearing honesty in the opposite direction, and evidence/plan4/reviewer_record.writeup-draft.json relies on the draft's instance to clear its accuracy check."
+    },
+    "ruling_on_exemption_b_adr_0007": {
+      "verdict": "CORRECT IN PRINCIPLE, INCOMPLETE AS LEFT. Keeping the passage is right; leaving it unmarked is not. Required item R2.",
+      "what_the_passage_says": "docs/adr/0007-plan3-certification-parameters-frozen.md lines 87-93: 'Manual inspection of high-loss valid QA documents shows the pattern clearly: the model grounds a real, well-formed span, in the right role, but [names an incorrect entity] — e.g. gold victim = \"Mrs. Clinton\" vs predicted victim = \"she\"; gold candidate = \"Trump\" vs predicted candidate = \"dictators\". These are genuine extraction errors (coreference/entity selection), not extraction-policy or grounding failures.'",
+      "why_keeping_it_is_right": "It is a dated decision record, and it is the evidential origin of the overclaim. Deleting it would destroy the only artifact showing HOW the overclaim arose, which is the thing the repository's review culture exists to preserve. The two examples must stay.",
+      "why_leaving_it_unmarked_is_not_enough": "The passage is not written as 'here are two examples I looked at'. It is written as a general finding — 'high-loss valid QA documents' (a population), 'shows the pattern clearly' (a generalisation), 'These ARE genuine extraction errors (coreference/entity selection)' (a categorical assignment). That is the generalisation from a few examples without a designed causal test that the accepted plan's section 12.3 forbids, stated in the present tense, in a tracked and publication-bound document that the ledger cites as evidence for CX-FEASIBILITY-LESSON-01 (a `verified` claim on the `report` surface). A reader arriving via that citation gets the withdrawn generalisation with nothing telling them it was withdrawn. The repository already has the right instrument for this: ADR 0009's status line was flipped on review, ADR 0011 was corrected on review, and docs/plan4/accepted-plan.md carries a dated amendment note with its pin moved in the same commit."
+    },
+    "surfaces_i_checked_and_cleared": {
+      "docs/adr/0011-reanalysis-frontier-and-loss-channels.md": "No hit for the assertion or any paraphrase.",
+      "docs/plan3/sections-11-and-12-disposition.md line 98": "Quotes the retired wording in order to report it withdrawn, inside the section 12.3 ruling. Reporting, correct.",
+      "evidence/plan3/reviewer_record.reanalysis.json line 152": "claim_boundaries carries the attribution-free form ('...output that is simply wrong'). It is also an immutable reviewer record. Clear.",
+      "evidence/plan3/reviewer_record.plan3-close.json and evidence/plan2/reviewer_record.plan2-close.json": "Immutable reviewer records quoting to report. Clear.",
+      "docs/plan3/certification-result.md line 234": "'with 87% of QA's residual loss in grounded, content-bearing output' — the attribution-free permitted form. Clear (but see N5 on the '~16x grounding gain' phrasing in the same bullet).",
+      "docs/plan4/*.md, docs/writeup/*, docs/plan2/*": "No further instance."
+    }
+  },
+
+  "q4_is_the_generated_appendix_byte_consistent": {
+    "verdict": "YES — byte-identical. One nit on the header (N1).",
+    "method": "Rendered the surface from the committed ledger through the repository's own code path — `uv run conformalextract verify-claims --surface report`, which calls claims.render_surface(load_ledger(ledger_path), 'report') at src/conformalextract/cli.py:1163 — captured under PYTHONUTF8=1 to a scratch path outside the repository, then compared the appendix's claim block against it after CRLF normalisation.",
+    "result": "IDENTICAL. Zero differences over the whole block, 54 lines, every claim bullet and every limitation sub-bullet including the two newly added to CX-SERVING-01 and the two newly added to CX-GROUNDING-ORTHOGONAL-01, in the ledger's own order. The only lines in the file outside the rendered block are the two-line GENERATED comment, the H1, and the one-line 'Surface `report`, rendered verbatim from evidence/plan4/claim_ledger.json' — the same frame the file carried before.",
+    "so_the_appendix_was_genuinely_regenerated": "Yes. Hand-editing the four changed bullets could not have produced this: render_surface emits `- [ID] wording` then `  - _Limitation:_ ...` per limitation with no wrapping, and the file's long lines match that emission exactly, character for character, including the em-dashes and the single quotes inside the two new limitations.",
+    "no_test_pins_this": "There is no test asserting docs/writeup/claims-appendix.generated.md equals render_surface(ledger, 'report'). tests/test_claims.py::test_render_surface_emits_approved_wording_with_limitations exercises the function on the README surface but does not compare it against any committed file. The appendix's byte-consistency is therefore verified by a reviewer each time and by nothing else. Recorded as an observation, not a required item — it is outside this change's scope and the neighbouring evidence/plan4/reviewer_record.writeup-draft.json already checked the same property by hand."
+  },
+
+  "q5_is_the_o3_limitation_faithful": {
+    "verdict": "YES — faithful to both sources, on every figure I could check. One nit on which reassurance it points at (N4).",
+    "limitation_4_as_added": "'The abstain/extract decision itself flips between stacks at 1.3-1.8% of frames at plausible operating points. Two of the four empty-versus-nonempty flips sit just above the median confidence percentile, so they survive into the accepted set rather than being abstained away, and the flip rate can therefore EXCEED the 1.3% raw rate. The abstention mechanism is stack-dependent at the margin.'",
+    "the_1_3_to_1_8_figure": "CONFIRMED against docs/plan2/serving-equivalence-probe-result.md Follow-up 3, whose acceptance table gives abstention-flip rates of 1.33% / 1.48% / 1.78% / 1.33% / 0.00% at 100 / 90 / 75 / 50 / 25% acceptance, and states 'At plausible operating points (50-90% acceptance), roughly 1.3-1.8% of accepted frames carry a stack-dependent abstain/extract decision'. Also CONFIRMED against evidence/plan2/reviewer_record.plan2-close.json ruling_2.conditions.2_abstain_flip_location, which fixes the same phrasing: 'The flip rate is now stated as 1.3-1.8% at plausible operating points, i.e. it can exceed the raw 1.3%.'",
+    "the_two_of_four_claim": "CONFIRMED. The probe document's Follow-up 3 table gives four empty_vs_nonempty flips at min-logprob percentiles 0.503, 0.507, 0.370 and 0.347. Two (0.503, 0.507) sit just above the median. The probe says 'None reaches the top quartile, but two sit just above the median — they survive into the accepted set at any acceptance rate above ~50%'. The plan2 close says 'TWO sit just above the median, so they survive into the accepted set at plausible operating points'. The ledger's 'so they survive into the accepted set rather than being abstained away' drops the '~50%' condition, but the sentence it sits in has already scoped itself to 'plausible operating points', which the probe defines as 50-90%. Faithful.",
+    "the_exceed_the_raw_rate_claim": "CONFIRMED and correctly explained. 1.78% at top-75% acceptance exceeds the 1.33% raw rate. The probe's own reasoning — flips cluster mid-distribution while ordinary divergences cluster at the bottom, so tightening concentrates flips proportionally — is preserved in substance by 'survive into the accepted set rather than being abstained away'.",
+    "limitation_5_the_operating_point_dependence": "CONFIRMED verbatim in substance. probe result lines 110-114: 'This reassurance is operating-point-dependent and must not be carried forward unqualified (reviewer condition 1). At top-90% acceptance divergence is 12.59% — barely below the 13.67% raw rate. The near-zero result holds only under aggressive abstention.' plan2 close condition 1 says the same. 12.59% and 13.67% both appear in the probe's acceptance table and headline. Faithful.",
+    "did_it_reach_the_surfaces_plan_2_named": "YES for the two named. Plan 2's close directed the finding to 'Plan 4 limitations and any model/report card'. CX-SERVING-01 holds surfaces ['report','model_card'] — the exact two — and the limitation renders into docs/writeup/claims-appendix.generated.md line 30, which is the report surface. There is no model_card artifact in the repository yet, so the model_card half is satisfied prospectively by the ledger entry, which is the correct place for it.",
+    "the_verified_by_amendment": "'Limitations 4 and 5 added 2026-07-29 on independent review (evidence/plan3/reviewer_record.plan3-close.json, finding O3): Plan 2's close directed the abstain/extract flip finding into Plan 4 limitations and any model or report card, and it had been carried into neither.' Accurate on all three points — the direction, the destination and the failure to arrive. It also does not trip claims.PENDING_VERIFICATION_TRIPWIRE, which is leading-token anchored and sees 'job 6a5fab15'. Correct.",
+    "what_i_could_not_check": "The underlying probe artifacts (plan2/serving_equivalence_probe.v2.json and the private divergence jsonl) live in the private HF evidence repository under ADR 0005 and are not in this working tree. Every figure I verified therefore traces to two committed documents that agree with each other, not to the raw probe output. The plan 2 close reviewer recomputed the Wilson intervals, the Clopper-Pearson bound and the quartile-concentration significance from the artifact at the time; I did not re-derive them and I do not claim to have."
+  },
+
+  "q6_other_carried_forward_items_that_were_dropped": {
+    "verdict": "TWO further items from the SAME source list did not make the journey, and one residue from a different review is untracked by anything. All three are the same mechanism as O3.",
+    "method": "I did not check whether the items that arrived are true. I built the list from the SOURCE records and ticked each item off in the RECEIVING artifact by name — evidence/plan2/reviewer_record.plan2-close.json (both its carried lists), evidence/plan3/reviewer_record.certification.json (next_steps_final_and_shift and C1-C4), evidence/plan3/reviewer_record.reanalysis.json (R1-R7, P1-P6, Q1-Q4), and evidence/plan3/reviewer_record.plan3-close.json (its own non_blocking_residues).",
+    "the_source_list_that_matters_and_why_it_is_not_the_one_that_was_registered": "Plan 2's close carries TWO distinct carried-forward lists, and only one has been registered. (i) what_this_close_does_and_does_not_authorise.carried_into_plan_3 — four items, the list the refusal record quoted and the list docs/plan3/carried-forward-from-plan2.md registers at HEAD. (ii) ruling_2_serving_equivalence_probe.standing_limitation — the list that actually names this change's destination: 'Carry into Plan 4 limitations and any model/report card, scoped to the exact serving stack: 13.67% raw divergence; 1.3-1.8% abstain/extract flip rate at plausible operating points; quality-neutrality; and confidence-concentration with its 4.80% upper bound in the top quartile. Probe frames are train-split only, so the rate may differ on certification/final splits. Cause is not isolated to a specific kernel.' That is six elements. Nobody has ticked them off.",
+    "tick_off_of_the_six": {
+      "13.67% raw divergence": "ARRIVED, and only by this change. The claim wording carries its complement (86.3% agreement); the raw rate itself appears in the repository's publication surfaces for the first time in new limitation 5. Before 20af838 the number was nowhere in the ledger.",
+      "1.3-1.8% abstain/extract flip rate": "ARRIVED — new limitation 4. This is O3 and it is discharged.",
+      "quality-neutrality": "ARRIVED — limitation 2, and it arrived eight days ago. One of the two reassuring halves.",
+      "confidence-concentration with its 4.80% upper bound in the top quartile": "PARTIALLY ARRIVED — and the part that did not is the qualifier. 'Concentrates in low-confidence frames' is in limitation 2. The 4.80% two-sided Clopper-Pearson upper bound on 0/75 is in NO publication surface: `grep -n '4.80|4.8%|Clopper'` over the ledger, README.md, docs/writeup/ and docs/plan4/ returns exactly one hit, and it is CX-H1-PRIMARY's `method` field describing the certification audit, nothing to do with the probe. The probe document is emphatic about why the bound must travel: 'It must not be reported as 0%: 0/75 carries a 95% upper bound of 4.8%'. The reassurance travelled; its statistical qualifier did not. This is O3's mechanism to the letter, on the same claim, from the same source sentence.",
+      "probe frames are train-split only": "ARRIVED — limitation 1.",
+      "cause is not isolated to a specific kernel": "DID NOT ARRIVE. Absent from CX-SERVING-01 and from every publication surface. Neither reassuring nor damning — it is an epistemic caveat on a `qualified` claim about stack-dependence, and its absence lets 'the adapted system's outputs are stack-dependent' read as better-understood than it is."
+    },
+    "why_this_is_the_same_finding_as_o3_and_not_a_new_one": "Of the six, the two that failed to arrive are the two that make the surviving statements less comfortable: the bound that stops '0% in the top quartile' being read as zero, and the admission that the cause is unidentified. The four that arrived unaided were the reassurances and the scope caveats. The refusal record found ONE dropped item because it read only the carried_into_plan_3 list; the standing_limitation list has never been diffed by anyone until now, and it is the list that names Plan 4 limitations as the destination.",
+    "third_item_untracked_by_anything": {
+      "item": "N1 of the refusal record — reanalysis review item Q3's final clause: 'If the 6.3 descriptive-branch argument is kept at all, label it purposive rather than textual and state the residual rhetorical exposure.' The purposive labelling is present; the residual rhetorical exposure (that publishing twenty alpha readings gives a reader twenty places to land, that the curve to alpha = 1.00 shows QA reaching high acceptance at loose targets, and that this is defended by wording discipline rather than by the plan text) is not stated in ADR 0011 section 1.",
+      "status": "Still outstanding at 20af838 and at HEAD. Correctly recorded as non-blocking by the refusal record, and I do not reopen that. But it appears in no register: docs/plan3/carried-forward-from-plan2.md is scoped to Plan 2's four items and says so, and nothing else tracks it. It is a carried item living only in the review that raised it — which is the state REVIEW.md's new rule and docs/plan3/carried-forward-from-plan2.md were written to end."
+    },
+    "items_i_traced_and_found_correctly_carried": {
+      "carried_into_plan_3 items 1, 2, 3": "Probe condition 1 (honoured, vacuously — no operating point was realised, selected_candidate null and n_accepted 0 for all three systems, and it is now carried as limitation 5 instead), C3 (empty frames first-class: valid_empty is its own channel in loss_decomposition.json and its own row in certification-result.md, and ADR 0011 section 2 states the empty-versus-empty convention), C6 (H1/H2 rest on grounding and certified acceptance: both return both_infeasible; structural validity is recorded as the axis that failed to discriminate). All three were traced by the refusal record; I re-checked each against the artifact rather than the record, and all three hold. At HEAD they are registered by name in docs/plan3/carried-forward-from-plan2.md, which is the right response to O3.",
+      "certification review C1-C4 and next_steps_final_and_shift": "C2's broadened lesson is in CX-FEASIBILITY-LESSON-01's limitation naming both parties and three gates. The final/shift descope is ADR 0010 and CX-SEALED-01's limitation. Both arrived.",
+      "reanalysis review Q1, Q2, Q4 and R1-R7, P1-P6": "Traced and discharged by the refusal record, which verified R1's allowlist by execution. I re-verified Q1 (claims.py line 26 documents PENDING_VERIFICATION_TRIPWIRE as a regression tripwire, not a verification gate) and spot-checked Q4 (tests/test_doc_references.py pins all four accepted plans). No further gap found.",
+      "writeup-draft review W1": "Discharged — docs/writeup/draft-2026-07-28.md line 190 now reads 'three in the records, Gate 0F's in docs/progress.md' with the counting rule stated. Checked because it is a recent BLOCK on a publication surface and a plausible place for a quiet drop. Clean."
+    }
+  },
+
+  "q7_does_anything_touch_a_claim_it_should_not": {
+    "verdict": "NO. Scope is exactly right.",
+    "verify_claims_signal": "ok true, 15 claims, 13 publishable, by_status {infeasible 3, negative 2, planned 2, qualified 2, verified 6}, tracking_verifiable true, unresolved_evidence {} and untracked_evidence {} both empty. Matches the expected 15/13.",
+    "ledger_diff_is_confined": "`git diff 19cf95a 20af838 -- evidence/plan4/claim_ledger.json` is 14 changed lines in two hunks. No claim_id line is added or removed, so no claim was created or deleted. CX-SERVING-01: three limitations become five, and verified_by gains a dated sentence. CX-GROUNDING-ORTHOGONAL-01: wording replaced, six limitations become eight. NOTHING ELSE. I read the full ledger at HEAD and confirmed the other thirteen claims' wordings, statuses, scopes, evidence lists, surfaces and limitation sets are unchanged.",
+    "no_surface_list_moved": "CX-SERVING-01 keeps ['report','model_card']. CX-GROUNDING-ORTHOGONAL-01 keeps ['README','report','abstract']. No claim gained or lost a surface, so nothing became publishable or unpublishable.",
+    "prose_changes_outside_the_ledger_are_in_scope_or_declared": "README.md and docs/writeup/draft-2026-07-28.md changed only in the CX-GROUNDING-ORTHOGONAL-01 passages. docs/writeup/claims-appendix.generated.md regenerated. REVIEW.md, docs/plan4/open-release-decisions.md, evidence/gate_state.json and docs/plan3/sections-11-and-12-disposition.md carry the pause and the O1 ruling, none of which touches a claim.",
+    "the_plan_4_pause_is_recorded_consistently": "evidence/gate_state.json keeps Plan 4 at state 'open_by_owner_override' with mechanism 'owner_authorisation' and adds activity 'PAUSED' with a reason and a work_that_stands list; docs/plan4/open-release-decisions.md carries the same in prose. Plan 3 stays 'executed_reviewed_not_closed'. tests/test_gate_state.py passes. Nothing here advances a gate, and the pause is the correct response to O2 having been live on release surfaces. Not a claims matter; recorded because the change bundles it."
+  },
+
+  "q8_are_the_section_11_and_12_dispositions_sound": {
+    "verdict": "The DECISIONS are the owner's and I do not re-litigate them. The REASONING is sound on every item except ONE, which is factually wrong. Required item R3.",
+    "the_factually_wrong_disposition": {
+      "item": "section 11.1, first row: 'mean vs maximum-frame document loss'",
+      "claimed": "**executed** — 'Done and reported. docs/plan3/certification-result.md records unweighted vs size-weighted group loss agreeing to within 0.0002-0.0011 on the certification split (amendment A2), which is the sensitivity this item asks for at the aggregation level that matters.'",
+      "why_it_is_wrong": "These are two different sensitivities on two different axes, and the one the plan asks for was not run. The accepted plan's section 4.1 defines the item precisely: 'If a source document contains multiple target frames, the primary group loss is the mean bounded frame loss declared in Plan 1. The strict sensitivity analysis uses MAXIMUM FRAME LOSS PER DOCUMENT.' That is mean-versus-max WITHIN a group, over the frames it contains. What A2 delivered — docs/plan3/certification-result.md line 182, 'Unweighted vs size-weighted group loss agree to within 0.0002-0.0011' — is how GROUP MEANS ARE COMBINED across groups into the population figure. Neither computation is a substitute for the other: A2 varies the weight on each group, the plan's item varies the statistic inside each group. Max-frame loss is a strictly larger quantity than mean-frame loss wherever a group holds more than one frame, and 3,152 documents across 1,396 groups means most groups hold more than one. The refusal record listed this item explicitly under 'NOT_moot_computable_now_at_zero_dollars_on_already_open_splits', naming it 'the section 4.1 strict sensitivity', and its own search for 'max_frame|maximum_frame' across evidence/, src/ and docs/ returned nothing. I repeated that search and confirm it still returns nothing.",
+      "why_the_clause_at_the_end_gives_it_away": "'...at the aggregation level that matters' concedes that a different aggregation level was measured. That is an argument for descoping the item, and it may well be a good one. It is not a basis for marking it **executed**. The defect O1 named was that mootness was ASSUMED rather than ruled; marking an unrun analysis 'executed' is the same substitution wearing a different label, and it is the only row in the document that does it.",
+      "what_would_fix_it": "See R3. Any of executed / descoped / moot is available to the owner on a correct ground; only 'executed' is unavailable, because it is not true."
+    },
+    "dispositions_whose_reasoning_i_checked_and_found_sound": {
+      "11.1 exact vs normalized span matching — descoped": "Sound. Span matching is frozen by ADR 0006's extraction policy, and re-scoring the certified object after seeing the result is what section 8.5 forbids. Methodological ground, correctly given.",
+      "11.1 binary strict-failure certificate — moot, empty input": "Sound in conclusion, slightly loose in reasoning. 'A certificate requires a feasible candidate; none exists' is stated as though feasibility under the primary loss settled feasibility under the strict loss, which does not follow in general. It does follow here, and by a wider margin: the strict-failure loss dominates the continuous loss pointwise, so a population whose continuous base risk is 0.607 (QA) cannot have a lower strict base risk, and the mean_loss_ceiling of 0.84 excludes it a fortiori. Right answer; the reason would be stronger stated that way. Not a required item.",
+      "11.1 completion-mean-NLL score — descoped": "Sound. The item is descriptive-only by its own terms, and the oracle risk-coverage curve already bounds what ANY threshold rule on ANY score could achieve at 2.0% acceptance, so a second score is measured against the same ceiling. Section 8.5's bar on an alternative score as a rescue is correctly cited.",
+      "11.1 accepted-output quality by distance and argument count — moot": "Sound. The unit is accepted outputs; selected_candidate is null and n_accepted is 0 for all three systems.",
+      "11.1 constrained decoding — moot, precondition unmet": "Sound and checkable. The item is conditional on Plan 1 admitting constrained decoding as a structural-validity ablation; ADR 0002 descoped training ablations to a single seed. The condition never fired.",
+      "11.2 subgroup reporting — moot": "Sound, and better than it had to be: it states what is NOT claimed — that subgroup analysis of LOSS across all predictions is possible and is being descoped rather than being impossible. That distinction is exactly what O1 asked for.",
+      "11.3 Spearman and AUROC/AUPRC — descoped": "Sound as reasoning. The oracle risk-coverage curve bounds what any threshold rule could achieve, so a rank correlation is weaker evidence for the same conclusion, and adding a new statistic to an already-open split after the result is the post-hoc move ADR 0006's C4 guards against. Whether to run them anyway is the owner's call and I do not take it.",
+      "11.3 binned diagrams — descoped; selective-risk curves — executed": "Both sound. The selective-risk curves ARE risk-coverage-diagnostic and alpha-frontier, both committed with immutable artifacts that a prior reviewer regenerated byte-identically.",
+      "11.4 multiplicity — executed": "Sound. H1/H2 are the only confirmatory comparisons and collapse to one finding; threshold adaptivity is inside SCoRC; alpha_frontier.json carries diagnostic_only and certifies_nothing; no subgroup claim exists to carry an uncorrected p-value.",
+      "12.1 — EXECUTE, not yet run": "Sound, and the cost verification is real: all three prediction files and the RAMS archive are local, the taxonomy is deterministic categorisation against gold with no inference and no job, so $0 and the cap is untouched. I confirmed this by running an equivalent computation myself for q2 at $0. The ordering argument — reword first so the taxonomy cannot be read as confirming the wording it was run to test — is correct and is the right instinct.",
+      "12.2 — moot in part, descoped in part": "Sound, and correctly ruled stratum by stratum rather than wholesale. Five of six strata are empty (three need an accepted set, one needs accepted cases, one needs the sealed shift split), and the frozen stratified sample cannot be constructed as specified from the sixth alone. Constructing a different sample after seeing the result is what 'frozen before reading examples' exists to prevent.",
+      "12.3 — executed as a binding constraint": "Sound and correct. Section 12.3 is the authority O2 was raised under and it did bind."
+    },
+    "one_observation_about_the_document_as_a_whole": "It is a good document and it does what O1 asked: every sub-item is ruled individually, every mootness states its reason, and no descope is on cost. Its own header records it as proposed and pending independent review, which is the right posture. R3 is the only correction."
+  },
+
+  "q9_green_command": {
+    "at_20af838": "uv run pytest -q -> 362 passed in 20.43s. uv run ruff check . -> All checks passed! uv run mypy -> Success: no issues found in 24 source files. uv run conformalextract verify-claims -> ok true, 15 claims, 13 publishable, tracking_verifiable true, both evidence maps empty.",
+    "at_head_6b1a3aa": "365 passed in 27.30s; ruff clean; mypy clean on 24 source files; verify-claims ok, 15 claims, 13 publishable.",
+    "assessment": "PASS. The expected 15/13 signal is exact. See external_signal.what_green_does_not_mean."
+  },
+
+  "required_items": {
+    "_note": "B1 is blocking. R1-R5 must be discharged in the same change. None requires new analysis, new evidence, a new gate, a sealed-label read or any spend. Every one is a text edit or a recorded ruling. Each is stated so it can be discharged without interpretation.",
+
+    "B1_the_withdrawn_attribution_is_still_live_on_the_plan_3_result_document": {
+      "blocking": true,
+      "file": "docs/plan3/certification-result.md",
+      "lines": "91-93",
+      "current": "The bolded sentence, followed by '— the coreference and entity-selection errors ADR 0007 catalogued (`victim = \"she\"` for `\"Mrs. Clinton\"`).'",
+      "what_is_wrong": "The em-dash appositive attributes the measured 87% to two named error categories. That is the attribution withdrawn from CX-GROUNDING-ORTHOGONAL-01 on 2026-07-29, restated in a stronger form, on a document six ledger claims cite as evidence and which publishes with the repository. It also exceeds the form the same document permits at its own line 234.",
+      "what_to_do": "Keep the bolded sentence — it is the defensible form and the refusal record named it as such. Delete or replace the appositive so the passage attributes no error category. If ADR 0007's examples are worth keeping in this document, keep them under a clause that states what they are and are not, for instance: the two development examples ADR 0007 inspected suggested one possible mechanism, but the decomposition locates loss by channel and does not identify the category that produced it; the section 12.1 taxonomy is what would, and it has not been run. If any wording is kept that gestures at a category at all, section 12.3's phrasing rule applies ('associated with', 'concentrated in', 'consistent with') and the counter-measurement (fp exceeding fn by 637 arguments) must appear in the same passage, as it does in the ledger, the README and the draft.",
+      "also_do": "Add the new phrasing to evidence/withdrawn_assertions.json's permitted_in or, better, add a SECOND register entry keyed on a phrase that catches this paraphrase, so the check that exists at HEAD would have found it. As written, tests/test_withdrawn_assertions.py passes over both surfaces this review found."
+    },
+
+    "R1_the_handoff_carries_the_assertion_unmarked": {
+      "blocking": false,
+      "file": "docs/plan3/HANDOFF-2026-07-22-reanalysis.md",
+      "line": 24,
+      "what_is_wrong": "'87% of QLoRA's loss is grounded, well-formed, wrong-entity' asserts the withdrawn attribution in a tracked, publication-bound document, and it is covered by neither declared exemption.",
+      "what_to_do": "Do NOT rewrite the line — the file's own header says 'Append dated amendments; never rewrite', and that convention is right. Append a dated amendment recording that the wording on line 24 was withdrawn from CX-GROUNDING-ORTHOGONAL-01 on 2026-07-29, citing evidence/plan3/reviewer_record.plan3-close.json finding O2 and this record, and stating the counter-measurement in one clause."
+    },
+
+    "R2_adr_0007_generalises_from_two_examples_with_no_marker": {
+      "blocking": false,
+      "file": "docs/adr/0007-plan3-certification-parameters-frozen.md",
+      "lines": "87-93",
+      "what_is_wrong": "The passage is written as a general finding about a population ('Manual inspection of high-loss valid QA documents shows the pattern clearly'; 'These ARE genuine extraction errors (coreference/entity selection)'), not as an observation of two examples. That is the generalisation the accepted plan's section 12.3 forbids, in the present tense, in a document the ledger cites as evidence for CX-FEASIBILITY-LESSON-01 — a `verified` claim on the `report` surface. Keeping the examples is right; leaving the generalisation unmarked is not.",
+      "what_to_do": "Keep the passage and both examples verbatim — it is the evidential origin of the overclaim and deleting it would destroy the record of how the overclaim arose. Add a dated note (2026-07-29) immediately after it, in the form ADR 0009's status flip and docs/plan4/accepted-plan.md's amendment already use, stating: that this inspection was unquantified, on the development split, over two instances; that section 12.3 forbids generalising a failure type from it; that the attribution it supported was withdrawn from CX-GROUNDING-ORTHOGONAL-01 on independent review; and that a measurement over the certification split points the other way (fp 4,434 against fn 3,797). The ADR's decisions themselves are untouched by this — only the reading of the inspection.",
+      "explicitly_not_asked": "No frozen parameter, no alpha, no delta, no floor and no decision in ADR 0007 is affected."
+    },
+
+    "R3_a_section_11_disposition_marks_an_unrun_analysis_executed": {
+      "blocking": false,
+      "file": "docs/plan3/sections-11-and-12-disposition.md",
+      "line": "the section 11.1 table, first row",
+      "what_is_wrong": "'mean vs maximum-frame document loss' is marked **executed** on the basis of ADR 0009 amendment A2 (unweighted vs size-weighted group loss, certification-result.md line 182). Those are different sensitivities on different axes: A2 varies the weight on each group; the accepted plan's section 4.1 defines this item as MAXIMUM FRAME LOSS PER DOCUMENT, i.e. varying the statistic taken over the frames INSIDE a group. The maximum-frame reading exists nowhere — a search for 'max_frame|maximum_frame' across evidence/, src/ and docs/ returns nothing.",
+      "what_to_do": "Re-dispose this row on a correct ground and say which. Any of the three is available: (a) EXECUTE it — it is computable at $0 on the already-open certification split through the same seams the loss decomposition uses, and would produce the section 4.1 strict sensitivity the plan predeclared; (b) DESCOPE it with a methodological reason, for instance that a strictly larger loss on a population already excluded by the 0.84 mean-loss ceiling cannot change the verdict, so the sensitivity can only confirm the null; (c) MOOT it, if a stated reason holds. Whichever is chosen, correct the reasoning cell so it no longer offers A2 as this item's execution, and keep A2's genuine contribution recorded where it belongs, as an aggregation-level sensitivity.",
+      "not_a_re_litigation": "I take no view on which of the three the owner should choose. The finding is only that 'executed' is not true."
+    },
+
+    "R4_two_more_elements_of_the_same_carried_list_did_not_arrive": {
+      "blocking": false,
+      "file": "evidence/plan4/claim_ledger.json, CX-SERVING-01",
+      "what_is_wrong": "Plan 2's close directs SIX elements into 'Plan 4 limitations and any model/report card' (evidence/plan2/reviewer_record.plan2-close.json, ruling_2_serving_equivalence_probe.standing_limitation). Four are now present. Two are not: (i) the 4.80% two-sided Clopper-Pearson 95% upper bound on 0/75 in the top confidence quartile — the qualifier the probe document says must travel with the concentration result ('It must not be reported as 0%'); and (ii) 'Cause is not isolated to a specific kernel.' The concentration reassurance travelled without its bound, which is O3's mechanism repeating on the same claim from the same source sentence.",
+      "what_to_do": "Add both to CX-SERVING-01's limitations, or record a ruling that one or both is moot for publication and why. Suggested forms, both traceable to committed documents: 'The top-quartile result is 0 divergences in 75 frames, not zero risk: the two-sided Clopper-Pearson 95% upper bound is 4.80% (the rule of three gives 4.00%). It must never be reported as 0%.' and 'The cause of the divergence is not isolated. The two bitsandbytes kernel paths differ numerically, but the probe does not attribute the divergence to a specific kernel, batching effect or prefix-caching behaviour.' If the first is added, consider folding it into limitation 2 so the reassurance and its bound cannot separate again.",
+      "and_register_the_right_list": "docs/plan3/carried-forward-from-plan2.md registers plan2-close's carried_into_plan_3 list (four items) and says so explicitly. Extend it, or add a companion register, covering the standing_limitation list — that is the list naming Plan 4 limitations and the model/report card as its destination, and it is the list this finding comes from. Under REVIEW.md's new rule a close may not issue while a carried item is untracked; four of those six elements are currently untracked by any register."
+    },
+
+    "R5_the_only_carried_residue_from_the_reanalysis_review_is_tracked_nowhere": {
+      "blocking": false,
+      "file": "a carried-forward register in docs/plan3/",
+      "what_is_wrong": "N1 of the refusal record — reanalysis review item Q3's final clause, the residual rhetorical exposure of the alpha sweep, still not stated in ADR 0011 section 1 — is correctly non-blocking and I do not reopen it. But it is recorded only inside the review that raised it, which is the exact state REVIEW.md's new rule and docs/plan3/carried-forward-from-plan2.md exist to end.",
+      "what_to_do": "Register it by name with its status, alongside the Plan 2 items, so the eventual close can tick it off rather than rediscover it. No text change to ADR 0011 is required by this item; the refusal record's own ruling that it may be folded into whichever change touches ADR 0011 section 1 next still stands."
+    }
+  },
+
+  "nits": {
+    "N1_generated_header_names_a_function_not_a_command": "docs/writeup/claims-appendix.generated.md line 1 now reads 'GENERATED by: claims.render_surface(ledger, \"report\").' The previous header named `uv run conformalextract render-claims --surface report`, and that command does not exist — `uv run conformalextract --help` lists no `render-claims`, so replacing it was right. But a generated artifact's header should name something a reader can run. The runnable form is `uv run conformalextract verify-claims --surface report`, which is the CLI path to the same function at src/conformalextract/cli.py:1163, and on Windows it needs PYTHONUTF8=1 to survive the console encoding.",
+    "N2_16x_over_the_baselines_is_only_true_of_one_baseline": "'~16x reduction in ungrounded spans over the baselines' is 5,355 -> 340 against ZERO-SHOT, i.e. 15.75x. Against few-shot it is 2,875 -> 340, i.e. 8.5x. The plural 'baselines' is inherited from the old wording and is not introduced by this change, so it is a nit rather than a required item; but the change touched this clause and the ratio is now stated more precisely in every respect except which baseline it is measured against. 'over the zero-shot baseline' would close it.",
+    "N3_wrong_is_binary_against_a_continuous_loss": "'is scored wrong anyway' predicates on the loss and is therefore safe, but a reader may attach it to the channel. The channel is not uniformly wrong: mean_loss_within_channel is 0.5793 (mean grounded-F1 about 0.42) and I measured 332 of its 2,847 documents at exactly zero loss. 'loses anyway' or 'is scored imperfectly anyway' would be exact at no cost in force.",
+    "N4_limitation_5_points_at_a_limitation_that_bundles_two_reassurances": "New limitation 5 opens 'The reassurance in limitation 2 is operating-point-dependent'. Limitation 2 is 'Divergence is quality-neutral against gold and concentrates in low-confidence frames' — two findings, Follow-up 1 and Follow-up 2 of the probe. The operating-point dependence attaches to the concentration half only; quality-neutrality was measured on the 41 divergent frames and is not a function of the acceptance rate. The rest of limitation 5 makes the intended referent unambiguous, so nothing is misstated, but naming the half would be cleaner. It is also a positional reference into an ordered list, which breaks silently if a limitation is inserted above it — and R4 proposes inserting one.",
+    "N5_the_permitted_form_in_certification_result_md_still_says_grounding_gain": "docs/plan3/certification-result.md line 234, in 'What may and may not be claimed', licenses 'a ~16x grounding gain'. The ledger now says '~16x reduction in ungrounded spans' because the old phrase named the wrong quantity. The claim-boundaries document and the claim it bounds now differ on the phrasing of the same figure. Worth aligning in whatever change discharges B1, since it edits that file anyway.",
+    "N6_no_test_pins_the_generated_appendix_to_its_generator": "The appendix is byte-identical today and I verified it. Nothing in tests/ asserts that it stays so; a hand-edit or a stale regeneration would pass the suite and be caught only by a reviewer who thinks to render and diff. Outside this change's scope, and stated as an observation because the same class of gap — a check that cannot fail — is this repository's recurring defect."
+  },
+
+  "carried_forward": {
+    "_why_this_key_exists": "O3 exposed that carried items get silently dropped when they live only in prose inside a review. Every item this review hands to someone else is listed here by NAME, with who must action it and what discharges it. If a later reader wants to know whether this review left anything behind, this list is the whole answer — nothing is carried in the prose above that is not repeated here.",
+    "items": [
+      {
+        "name": "CF1_certification_result_md_attribution",
+        "same_as": "required_items.B1",
+        "for": "the author of the discharging change",
+        "discharged_when": "docs/plan3/certification-result.md lines 91-93 attribute no error category, and evidence/withdrawn_assertions.json covers the paraphrase that carried it.",
+        "blocking": true
+      },
+      {
+        "name": "CF2_handoff_dated_amendment",
+        "same_as": "required_items.R1",
+        "for": "the author of the discharging change",
+        "discharged_when": "docs/plan3/HANDOFF-2026-07-22-reanalysis.md carries a dated amendment recording the withdrawal.",
+        "blocking": false
+      },
+      {
+        "name": "CF3_adr_0007_dated_note",
+        "same_as": "required_items.R2",
+        "for": "the author of the discharging change",
+        "discharged_when": "docs/adr/0007-plan3-certification-parameters-frozen.md carries a dated 2026-07-29 note after lines 87-93 marking the generalisation as withdrawn, with both examples kept.",
+        "blocking": false
+      },
+      {
+        "name": "CF4_section_11_1_first_row_redisposition",
+        "same_as": "required_items.R3",
+        "for": "Ross, as the owner who rules O1; the reasoning cell is the implementer's to correct",
+        "discharged_when": "the row is executed, descoped or mooted on a ground that is true, and A2 is no longer offered as this item's execution.",
+        "blocking": false
+      },
+      {
+        "name": "CF5_two_missing_elements_of_plan_2_standing_limitation",
+        "same_as": "required_items.R4",
+        "for": "the author of the discharging change",
+        "discharged_when": "the 4.80% Clopper-Pearson top-quartile bound and the unisolated-cause caveat are in CX-SERVING-01's limitations or ruled moot with a reason, AND a register covers plan2-close's standing_limitation list, not only its carried_into_plan_3 list.",
+        "blocking": false
+      },
+      {
+        "name": "CF6_reanalysis_Q3_residue_untracked",
+        "same_as": "required_items.R5",
+        "for": "whoever writes the next carried-forward register entry in docs/plan3/",
+        "discharged_when": "N1 of evidence/plan3/reviewer_record.plan3-close.json appears by name in a register with a status. The underlying ADR 0011 section 1 edit remains non-blocking and may wait.",
+        "blocking": false
+      },
+      {
+        "name": "CF7_section_12_1_has_not_run",
+        "same_as": "docs/plan3/sections-11-and-12-disposition.md, section 12.1, ruled EXECUTE",
+        "for": "the implementer",
+        "discharged_when": "the taxonomy runs and its output gets its own ledger entry and its own independent review. NOT carried by this record as a required item — the ordering (reword first, measure second) is correct and this review does not gate on it. Listed so it cannot be lost: it is the only thing that could ever substantiate an error-category statement about the 87%, and B1 exists because a document asserted one without it.",
+        "blocking": false
+      },
+      {
+        "name": "CF8_this_record_must_not_be_read_as_a_plan_3_close",
+        "same_as": null,
+        "for": "whoever writes the Plan 3 close",
+        "discharged_when": "n/a — a standing note. O1's disposition document is still 'proposed, pending independent review' by its own header, this record rules only O2 and O3, and the Plan 3 close review is a separate act by a reviewer who authored neither the remedies nor this record. review_kind here is deliberately 'claims_change_review_o2_o3' so tests/test_gate_state.py's derivation does not see a plan_close.",
+        "blocking": false
+      }
+    ]
+  },
+
+  "what_this_record_does_and_does_not_do": {
+    "does": "Rules on the O2/O3 claims change at 20af838. Confirms the reword is within its evidence, the carried measurement is exact under independent recomputation, the appendix is byte-identical to its generator, no other claim moved, and the O3 limitation is faithful to Plan 2's close and to the probe result. Finds one blocking surface the reword did not reach, two further elements of the same Plan 2 carried list that never arrived, one factually wrong disposition in the O1 document, and one untracked review residue.",
+    "does_not": "Does not close Plan 3 and is not a plan_close record. Does not discharge O1 — that document remains proposed and pending its own review, and this record rules only on the soundness of its reasoning as question 8 asked. Does not satisfy gate G1. Does not authorise a visibility change, a repository description, topics, a release bundle, publication of the write-up, Plan 4 resumption, any spend, or the opening of the final or shift splits. Does not withdraw any claim. Does not invalidate any prior reviewer record or ADR.",
+    "explicitly_not_a_finding_against_the_result": "The Plan 3 negative result is untouched by everything above. All three systems are infeasible at alpha = 0.20, delta = 0.05, floor 0.20; the decomposition is exact and I re-derived its 87% from the artifact; the counter-measurement I ran from raw predictions agrees with the change to the unit. B1 is a sentence on a document, not a doubt about a number. The change under review is, on the merits, good work that went further than its ask in three places — the README's affirmative statement that no attribution is made, the decision to carry the counter-measurement into the ledger rather than leave it in a review, and the ordering discipline of rewording before measuring."
+  },
+
+  "reviewer_disclosures": {
+    "files_written": "This file only. I edited no source, test, doc, ADR, ledger or other evidence artifact, and I fixed no defect I found. My recomputation script and the rendered surface were written to a scratch directory outside the repository. `git status --porcelain` was clean when this review opened.",
+    "green_command_at_head": "Re-run at 6b1a3aa after the concurrent commit landed, to confirm the working tree is green under the state a discharging change would start from: uv run pytest -q -> 365 passed in 27.30s (the 362 at 20af838 plus the 3 new withdrawn-assertion tests); uv run ruff check . -> All checks passed!; uv run mypy -> Success: no issues found in 24 source files; uv run conformalextract verify-claims -> ok true, 15 claims, 13 publishable, same by_status, both evidence maps empty. Recorded rather than substituted for the reviewed-commit reading, which is what external_signal.at_reviewed_commit_20af838 holds.",
+    "what_i_read_that_is_restricted": "Certification and development gold, both already open, through reanalysis.assert_reanalysis_role('certification'). The raw prediction files data/private/plan2/predictions/{qa,zs,fs}.v1.jsonl and the RAMS archive, all gitignored and local. I did not touch the final or shift splits, and the seam I used would have raised SealedRoleError if I had asked it to. No access chain was written; disclosed here as a review action, following the precedent in evidence/plan3/reviewer_record.certification.json and evidence/plan3/reviewer_record.plan3-close.json.",
+    "what_i_verified_versus_what_i_took_on_trust": {
+      "verified_by_execution": [
+        "tp/fp/fn and the document partition on QA, ZS and FS content-bearing certification frames, from the raw predictions through the repository's own loaders and evaluator.",
+        "The 87% ratio, the 0.017/0.000 frontier movements, the channel counts and the within-channel mean, read directly from evidence/plan3/loss_decomposition.json.",
+        "Byte-equality of the appendix's claim block against claims.render_surface(ledger, 'report') via the CLI.",
+        "The green command and verify-claims at the reviewed commit and at HEAD.",
+        "Repo-wide searches for the assertion and five paraphrases of it, over tracked files.",
+        "The ledger diff scope (14 lines, two hunks, no claim_id added or removed) and a full read of all fifteen claims."
+      ],
+      "verified_by_reading_the_primary_source": [
+        "docs/plan3/accepted-plan.md sections 4.1, 5.2, 11 and 12, read in the plan rather than through any gloss of it — which is how R3 was found.",
+        "docs/plan2/serving-equivalence-probe-result.md in full, including the Follow-up 3 percentile table and the acceptance-tier flip rates.",
+        "evidence/plan2/reviewer_record.plan2-close.json, both carried lists, element by element.",
+        "docs/adr/0007 lines 80-100 and docs/plan3/certification-result.md lines 70-108 and 215-260."
+      ],
+      "taken_on_trust": [
+        "The probe's underlying artifacts (plan2/serving_equivalence_probe.v2.json and the private divergence jsonl) are in the private HF evidence repository under ADR 0005 and are not in this tree. I verified the O3 figures against two committed documents that agree with each other, not against the raw probe output.",
+        "The discharge of certification C1-C4, reanalysis R1-R7/P1-P6/Q1-Q4 and ADR 0009 A1-A4, which the refusal record traced by execution at 4bb9be3. I spot-checked Q1 and Q4 and re-derived nothing else there.",
+        "That evidence/plan3/certification_result.json is immutable at git-canonical sha256 71c0de3e...; I did not re-hash it, as no part of this change touches it."
+      ]
+    },
+    "spend": "$0. Nothing in this review cost money, requested a job, touched a GPU or moved the $25 aggregate cap. My recomputation ran on CPU against local files.",
+    "conflicts": "None. I did not author 20af838 or 6b1a3aa, did not implement Plan 3, and wrote no prior record in this repository."
+  },
+
+  "scope": {
+    "commit_ruled_on": "20af838",
+    "head_at_time_of_writing": "6b1a3aa",
+    "what_was_in_scope": "The claims change discharging findings O2 and O3: CX-GROUNDING-ORTHOGONAL-01's wording and limitations, CX-SERVING-01's limitations, the three publication surfaces the reword reached, the regenerated appendix, the completeness of every carried-forward list against its receiving artifact, and the factual soundness (not the merits) of the reasoning in docs/plan3/sections-11-and-12-disposition.md.",
+    "what_was_out_of_scope": "The O1 decisions themselves, which are the owner's. The Plan 4 pause, except to confirm it moves no gate and touches no claim. The Plan 3 close, which is a separate act. The science of the certification result, which no finding here disturbs.",
+    "acceptance_rule": "A claims change on a publication surface requires the independent reviewer to re-derive every figure the change carries from primary data or primary artifacts rather than from the change's own statement of them; to search for the ASSERTION across the whole tracked corpus rather than for the claim ID or the retired phrasing, because a copy carries the words and a paraphrase carries neither; to diff every carried-forward list in every source record against what the receiving artifact contains and name what did not travel; and to confirm the change touched no claim outside its ask. The author of the change may not complete this record."
+  }
+}
