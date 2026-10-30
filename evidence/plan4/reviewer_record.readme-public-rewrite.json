@@ -1,0 +1,100 @@
+{
+  "schema_version": "1",
+  "review_kind": "readme_public_rewrite",
+  "reviewed_commit": "ab0b35e",
+  "parent_commit": "70ef610",
+  "reviewed_date": "2026-10-28",
+  "reviewer_identity": "Independent Reviewer/QA agent (Claude, model claude-opus-5-5), dispatched read-only; did not author ab0b35e or its parent. $0 spent; nothing edited, staged or committed; nothing under data/ read.",
+  "verdict": "PASS-WITH-NITS",
+  "findings": [
+    {
+      "id": "N1",
+      "severity": "N",
+      "where": "README.md, Quick start, last paragraph: \"and the `train` extra installs only on Linux\"",
+      "finding": "This is factually imprecise. In pyproject.toml only `bitsandbytes` in the `train` extra has the marker `platform_system == 'Linux'`. accelerate, datasets, peft, trackio, transformers and trl install on any platform, and no [tool.uv] environment restriction exists. What is true is that 4-bit QLoRA training needs bitsandbytes, which installs only on Linux.",
+      "discharge": "Reword, for example: \"the `train` extra's 4-bit dependency (bitsandbytes) installs only on Linux\"."
+    },
+    {
+      "id": "N2",
+      "severity": "N",
+      "where": "README.md, Related work: \"The certification method follows conformal risk control (Angelopoulos et al., 2024).\"",
+      "finding": "This overstates how closely the method follows the cited work. The certifier is a high-probability test: an empirical-Bernstein or Hoeffding upper bound on risk, a Clopper-Pearson lower bound on acceptance, and a Bonferroni-corrected audit (certification.py, method 'hoeffding-clopper-pearson-bonferroni'). It is not CRC's expected-loss conformal adjustment. The paper's own framing (uncertainlp-2026-short.tex l.61-63) is \"Distribution-free risk control \\cite{angelopoulos2024crc} reports certified acceptance\". The README's \"follows\" is stronger than that. The Kotte sentence matches the .bib title, and the \"source document as the unit\" sentence matches tex l.37-38 and l.79-81.",
+      "discharge": "Align the wording with the tex, for example: \"The certification is a form of distribution-free risk control (Angelopoulos et al., 2024)\"."
+    },
+    {
+      "id": "N3",
+      "severity": "N",
+      "where": "docs/governance.md, final paragraph: \"Run the commands below and read your own number.\"",
+      "finding": "This sentence came over verbatim from the old README, as rule 4 requires. In the old README the 'Local checks' commands followed it. governance.md has no commands below it, so the reference now points at nothing.",
+      "discharge": "Re-point the reference with a re-based link: \"Run the commands in the README's Quick start ([`../README.md`](../README.md#quick-start))\". Changing only the pointer is consistent with the 'unchanged apart from re-based links' rule."
+    },
+    {
+      "id": "N4",
+      "severity": "N",
+      "where": "docs/governance.md, preamble: the 'Contributor and agent rules' paragraph",
+      "finding": "Apart from this paragraph, the old Status section and all of 'How the evidence is held to account' are byte-identical after re-basing links (checked by script). This one paragraph from the old Status section was moved into the preamble and lightly reworded: the em-dash parenthetical became round brackets. A new sentence, \"The review standard is [`REVIEW.md`](../REVIEW.md)\", was also added. The content is unchanged and the new sentence is accurate, but strictly it departs from 'unchanged'.",
+      "discharge": "Accept as is, or restore the original dash punctuation. Not blocking."
+    },
+    {
+      "id": "N5",
+      "severity": "N",
+      "where": "README.md, evidence table, row for tests/: \"including the checks that keep prose in line with the ledger\"",
+      "finding": "A reader may take this to mean the README they are reading is mechanically checked against the ledger. It is not. No test compares README.md with claim_ledger.json. What is mechanised is narrower: byte-identity of docs/writeup/claims-appendix.generated.md (test_claims.py), paper figures through scripts/check_paper_claims.py, and a scan of README.md and other prose for withdrawn phrases (test_withdrawn_assertions.py). The sentence is not false, but it leans in the flattering direction.",
+      "discharge": "Scope it, for example: \"including the checks that keep the generated claims appendix and the paper's figures in line with the ledger\"."
+    },
+    {
+      "id": "N6",
+      "severity": "N",
+      "where": "README.md, Quick start: \"`verify-claims` checks that every claim's cited evidence exists and is tracked in git.\"",
+      "finding": "The description is accurate but incomplete. cli.verify_claims_command also fails on a planned or failed claim on a public surface, a public claim without limitations, or forbidden wording. The omission understates the check, which is the conservative direction. The statement that it does not open files or compare numbers is correct, as is the description of check_paper_claims.py, which matches its docstring and its output.",
+      "discharge": "Optional: add \"and that no planned claim, or claim without limitations, sits on a public surface\"."
+    }
+  ],
+  "rulings": [
+    {
+      "rule": 1,
+      "ruling": "SATISFIED",
+      "basis": "A script compared every README blockquote, after joining wrapped lines and stripping the trailing ID, with ledger `wording` by string equality. All six match exactly: CX-H1-PRIMARY, CX-CAPGAP-01, CX-GROUNDING-01, CX-GROUNDING-ORTHOGONAL-01, CX-SEALED-01 and CX-COST-01. Each 'Limitations:' bullet list equals its claim's `limitations` list in order and in full, with zero mismatches (counts 3, 7, 3, 11, 4, 6). Each claim ID appears in its heading or quote."
+    },
+    {
+      "rule": 2,
+      "ruling": "SATISFIED",
+      "basis": "Ledger surfaces checked independently. The claims carrying \"README\" are exactly CX-H1-PRIMARY, CX-CAPGAP-01, CX-GROUNDING-01, CX-SEALED-01, CX-COST-01 and CX-GROUNDING-ORTHOGONAL-01. The set of CX- IDs mentioned anywhere in the README is exactly those six. CX-H2-SECONDARY, CX-RANKING-01 and the other report-only claims are absent."
+    },
+    {
+      "rule": 3,
+      "ruling": "SATISFIED",
+      "basis": "Hand-written prose was read by meaning. The intro defines terms and states the question; it asserts no result. The H1/H2 sentence defines the hypotheses (H2 = QA vs FS, confirmed in docs/plan3/accepted-plan.md §8.3) and says nothing about whether FS can be certified. Two sentences touch results: \"Neither system was certified...\" restates CX-H1-PRIMARY's two systems, and \"What this is not / Not certified. No certified acceptance is claimed for any system\" is a disclaimer that narrows rather than widens. The old README's \"for every system tested\" is gone, and the only \"every system\" left sits inside a verbatim CX-CAPGAP-01 limitation. The README contains no AUROC, ranking figure or rho. The only few-shot figures are inside verbatim ledger strings. Nothing implies certification succeeded or accuracy was measured; 'Not an accuracy claim' mirrors the GROUNDING-01 limitation. No hand-written prose introduces a number. The headings are neutral, and the old assertive heading 'Sealed-label discipline held' was replaced. 'The operating point was fixed before the held-out labels were opened' is a process fact carried over from the old README (ADR 0007 freeze), not a claim. The N5 and N6 descriptions of the tooling are not result claims."
+    },
+    {
+      "rule": 4,
+      "ruling": "SATISFIED (with N3, N4)",
+      "basis": "A script re-based the old README's links (docs/X to X, everything else to ../X) and confirmed that the old Status section, apart from its Contributor paragraph, and the full 'How the evidence is held to account' section, including the strict-typing paragraph, appear verbatim in docs/governance.md. The gate table, owner override and O1-O3 references are all present. All 19 relative links in governance.md and all 19 in the README resolve to tracked paths at ab0b35e. The README keeps a short governance section linking to governance.md and gate_state.json."
+    },
+    {
+      "rule": 5,
+      "ruling": "SATISFIED (with N1, N2, N5, N6)",
+      "basis": "Model: `Qwen/Qwen3-4B-Instruct-2507` matches configs/model.json and training.MODEL_ID. Paper status: 'draft, in preparation for UncertaiNLP 2026, not submitted' matches docs/writeup/uncertainlp-2026-short.md. The RAMS ACL link matches the .bib, and 'news-domain' matches docs/gate0/licences/rams.md. The Kotte (2026) title and arXiv ID match the .bib; the CRC sentence is N2. Gate state matches evidence/gate_state.json: Plans 1-3 closed, Plan 4 open, the 2026-07-29 override lapsed on 2026-10-27. The verify-claims and check_paper_claims.py descriptions are accurate (N6 is an understatement). The quick start needs no dataset and no credentials: the `data` extra is only datasketch and pyarrow, verify-claims and check_paper_claims.py both ran clean here without data/ or a token, and the documented `uv sync --extra dev --extra data` is the right command per CLAUDE.md. Gap: the Linux statement (N1)."
+    },
+    {
+      "rule": 6,
+      "ruling": "LEGITIMATE",
+      "basis": "The phrase 'capability gap rather than a limitation of the certification method' occurs once in README.md. It sits inside the verbatim CX-CAPGAP-01 limitation that begins \"Narrowed 2026-08-03. This claim previously read ...\". That is a mention made to report the withdrawal, the same ground as the ledger and generated-appendix entries. The reason text is scoped and self-retiring (\"Remove this entry if the README stops carrying that limitation\"), and test_every_exemption_still_earns_its_place enforces that removal mechanically. Residual: like every permitted_in entry, the register's mechanism exempts the whole file, so a future non-reporting use in the README would also pass. That limit belongs to the register's design, not to this entry, and the parent already carried a README entry of the same kind for grounding-orthogonal-entity-naming. It is not a blanket in intent."
+    }
+  ],
+  "external_signal": [
+    {"cmd": "git log -1 --format=%cs ab0b35e", "output": "2026-10-28"},
+    {"cmd": "git show --stat ab0b35e", "output": "README.md 383 +/-, docs/governance.md +91 (new), evidence/withdrawn_assertions.json +1"},
+    {"cmd": "git rev-parse HEAD; git status --short", "output": "ab0b35e64a0b58b9075c5e28733b1fefd93f9e93; clean"},
+    {"cmd": "python cmp.py (README blockquotes and limitation bullets vs evidence/plan4/claim_ledger.json at ab0b35e)", "output": "IDs mentioned: CX-CAPGAP-01, CX-COST-01, CX-GROUNDING-01, CX-GROUNDING-ORTHOGONAL-01, CX-H1-PRIMARY, CX-SEALED-01. All 6 quotes exact-match their claim wording. Limitations exact-seq-equal True for all 6 (3/7/3/11/4/6 bullets, 0 mismatches)."},
+    {"cmd": "python -c (ledger surfaces dump)", "output": "README surface: CX-H1-PRIMARY, CX-CAPGAP-01, CX-GROUNDING-01, CX-SEALED-01, CX-COST-01, CX-GROUNDING-ORTHOGONAL-01; CX-H2-SECONDARY and CX-RANKING-01 are ['report'] only"},
+    {"cmd": "python gov_cmp.py (old README Status and Accountability sections, links re-based, vs docs/governance.md; link resolution via git ls-tree ab0b35e)", "output": "status verbatim-after-rebase: True; accountability verbatim-after-rebase: True; contrib paragraph verbatim: False (reworded, N4); all 19 governance links and 19 README links OK"},
+    {"cmd": "python (withdrawn_assertions phrases scanned in README at ab0b35e)", "output": "HIT grounding-orthogonal-entity-naming count 1 (README permitted since 70ef610); HIT capgap-capability-not-method count 1 (README permitted, new entry)"},
+    {"cmd": "CUDA_VISIBLE_DEVICES=-1 uv run --frozen conformalextract verify-claims", "output": "exit 0; \"publishable\": 15, \"tracking_verifiable\": true, \"unresolved_evidence\": {}, \"untracked_evidence\": {}"},
+    {"cmd": "CUDA_VISIBLE_DEVICES=-1 uv run --frozen python scripts/check_paper_claims.py", "output": "ok: all 117 figures resolve to an artifact carrying value and configuration."},
+    {"cmd": "grep train extra in pyproject.toml", "output": "only \"bitsandbytes>=0.45,<1; platform_system == 'Linux'\" carries a platform marker; no [tool.uv] environments restriction"},
+    {"cmd": "grep hygiene scan (C:\\, _pmo, user paths, safe_ops, tokens, 'production') over README.md and docs/governance.md", "output": "no internal paths or secrets; 'production-grade' appears only negated ('not production-grade')"},
+    {"cmd": "pytest / ruff / mypy", "output": "NOT RUN, on the coordinator's mid-task instruction (GPU timing job; the full suite at ab0b35e is being run separately). The pytest-dependent part of this verdict, the withdrawn-assertion test passing, rests on that separate run."}
+  ],
+  "summary_note": "The six README results are word-for-word ledger wording, each with its full limitation list and its claim ID, and only README-surfaced claims appear (rules 1-2 checked by script). No hand-written sentence asserts or widens a result: no FS certifiability, no ranking or AUROC, no 'every system', no implied certification or accuracy. The process text moved to docs/governance.md verbatim after link re-basing, and all links resolve. The new withdrawn-assertions exemption is a legitimate reporting mention and retires itself. Six nits, none blocking: N1, the `train` extra Linux claim is imprecise (only bitsandbytes is Linux-gated). N2, 'follows conformal risk control' is stronger than the paper's 'distribution-free risk control' framing. N3, governance.md's 'Run the commands below' now points at nothing. N4, the contributor paragraph was lightly reworded. N5, the tests/ row implies the README itself is checked against the ledger, which it is not. N6, the verify-claims description understates what it checks. Test suites were not run here, per the coordinator's instruction; the verdict assumes the separate full-suite run at ab0b35e is green, and if it is not, re-open."
+}
